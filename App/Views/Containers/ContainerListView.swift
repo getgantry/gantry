@@ -318,13 +318,22 @@ private struct ContainerRow: View {
                 HealthBadge(health: health)
             }
 
-            if let port = container.ports.first(where: { $0.publicPort != nil }) {
-                Text("\(port.publicPort!)")
+            if let port = container.ports.first(where: { $0.publicPort != nil }),
+               let publicPort = port.publicPort {
+                // Verbatim string: interpolating an Int into Text would apply
+                // locale digit grouping and render port 54333 as "54.333".
+                Text(verbatim: ":\(String(publicPort))")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(.quaternary, in: .capsule)
+                    .help(
+                        container.ports
+                            .filter { $0.publicPort != nil }
+                            .map(\.display)
+                            .joined(separator: "\n")
+                    )
             }
         }
         .padding(.vertical, 2)
