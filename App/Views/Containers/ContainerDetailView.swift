@@ -95,25 +95,12 @@ struct ContainerDetailView: View {
         case .stats:
             StatsView(session: session, container: container)
         case .terminal:
-            placeholder(
-                title: "Terminal",
-                systemImage: "terminal",
-                note: "Interactive exec terminal arrives in M4."
-            )
+            ContainerTerminalView(session: session, container: container)
         case .inspect:
             InspectJSONView {
                 await session.rawInspectContainer(id: container.id)
             }
         }
-    }
-
-    private func placeholder(title: String, systemImage: String, note: String) -> some View {
-        ContentUnavailableView {
-            Label(title, systemImage: systemImage)
-        } description: {
-            Text(note)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

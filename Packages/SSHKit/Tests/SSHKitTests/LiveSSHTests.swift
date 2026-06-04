@@ -78,3 +78,114 @@ func liveSSHDialStdio() async throws {
     await client.shutdown()
     try? FileManager.default.removeItem(atPath: tempStore)
 }
+
+/// Live exec over dial-stdio: connect, find a running container, create + start
+/// a hijacked TTY exec running `echo`, read raw output until EOF (15s budget),
+/// and assert the marker round-trips through the SSH tunnel. Exercises
+/// `SSHDialStdioTransport.hijack` end to end.
+@Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
+func liveSSHExec() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let key = try SSHKeyLoader.load(contentsOf: testKeyPath, passphrase: nil)
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-exec-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .key(key)
+    )
+    let transport = SSHDialStdioTransport(makeClient: {
+        try await SSHConnector.connect(
+            parameters: parameters,
+            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+        )
+    })
+    let client = DockerClient(transport: transport)
+    defer { Task { await client.shutdown() } }
+    _ = try await client.negotiate()
+
+    let containers = try await client.listContainers(all: true)
+    let running = try #require(
+        containers.first(where: { $0.state.isRunning }),
+        "no running container on \(liveHost) to exec into"
+    )
+
+    let marker = "gantry-ssh-exec-\(UUID().uuidString.prefix(8))"
+    let execID = try await client.createExec(
+        containerID: running.id,
+        command: ["/bin/sh", "-c", "echo \(marker); exit 0"],
+        tty: true
+    )
+    let connection = try await client.startExecHijacked(execID: execID, tty: true)
+    #expect(connection.status == 101 || connection.status == 200)
+
+    let text = try await withThrowingTaskGroup(of: String?.self) { group in
+        group.addTask {
+            var acc = Data()
+            for try await chunk in connection.bytes { acc.append(chunk) }
+            return String(data: acc, encoding: .utf8) ?? ""
+        }
+        group.addTask {
+            try? await Task.sleep(for: .seconds(15))
+            return nil
+        }
+        let first = try await group.next() ?? nil
+        group.cancelAll()
+        return first ?? ""
+    }
+    await connection.close()
+
+    #expect(text.contains(marker), "expected SSH exec output to contain \(marker), got \(text.debugDescription)")
+
+    let inspect = try await client.inspectExec(execID: execID)
+    #expect(inspect.running == false)
+    #expect(inspect.exitCode == 0)
+    print("LIVE SSH exec: container=\(running.displayName) marker found=\(text.contains(marker)) exit=\(inspect.exitCode ?? -1)")
+}
+
+/// Stress: abruptly cancel streams mid-flight while big requests run.
+/// Reproduces the window-adjust-after-close race that crashed the app
+/// before the patched swift-nio-ssh fork.
+@Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
+func liveSSHStreamCancellationStress() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let key = try SSHKeyLoader.load(contentsOf: testKeyPath, passphrase: nil)
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-stress-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .key(key)
+    )
+    let transport = SSHDialStdioTransport(makeClient: {
+        try await SSHConnector.connect(
+            parameters: parameters,
+            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+        )
+    })
+    let client = DockerClient(transport: transport)
+    _ = try await client.negotiate()
+
+    for round in 0..<5 {
+        // Big buffered responses racing with a stream that gets cancelled mid-flight.
+        async let containers = client.listContainers(all: true)
+        async let images = client.listImages()
+
+        let events = try await client.events()
+        let consumer = Task {
+            for try await _ in events {}
+        }
+        // Cancel almost immediately — pending reads should not crash the process.
+        try await Task.sleep(for: .milliseconds(50))
+        consumer.cancel()
+
+        let (c, i) = try await (containers, images)
+        #expect(c.count > 0 && i.count > 0)
+        print("LIVE STRESS round \(round): \(c.count) containers, \(i.count) images, stream cancelled")
+    }
+    await client.shutdown()
+}

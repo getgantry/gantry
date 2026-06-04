@@ -54,9 +54,30 @@ public actor SSHDialStdioTransport: DockerTransport {
 
     // MARK: - DockerTransport
 
+    /// Tail of the FIFO chain that serializes `execute` calls.
+    ///
+    /// Actors are reentrant: two concurrent `execute` calls interleave at every
+    /// suspension point, which would pipeline two HTTP requests onto the shared
+    /// persistent tunnel and desynchronize the response parser. Each call chains
+    /// behind the previous one and only starts once it finished.
+    private var executeChainTail: Task<Void, Never>?
+
     public func execute(_ request: DockerRequest) async throws -> DockerResponse {
         let requestData = HTTP1RequestSerializer.serialize(request)
+        let previous = executeChainTail
 
+        let slot = Task<DockerResponse, Error> {
+            // Wait for the predecessor regardless of its outcome; ordering is
+            // all that matters here.
+            await previous?.value
+            return try await self.executeSerialized(requestData)
+        }
+        executeChainTail = Task { _ = try? await slot.value }
+
+        return try await slot.value
+    }
+
+    private func executeSerialized(_ requestData: Data) async throws -> DockerResponse {
         do {
             return try await withThrowingTaskGroup(of: DockerResponse.self) { group in
                 group.addTask {
@@ -74,6 +95,8 @@ public actor SSHDialStdioTransport: DockerTransport {
             await dropPersistentTunnel()
             throw error
         } catch is CancellationError {
+            // The tunnel may hold a half-read response; do not reuse it.
+            await dropPersistentTunnel()
             throw DockerError.cancelled
         } catch {
             await dropPersistentTunnel()
@@ -153,6 +176,124 @@ public actor SSHDialStdioTransport: DockerTransport {
         return DockerByteStream(status: head.status, headers: head.headers, bytes: bytes)
     }
 
+    public func hijack(_ request: DockerRequest) async throws -> DockerHijackedConnection {
+        let requestData = HTTP1RequestSerializer.serialize(request)
+        let tunnel = try await openTunnel()
+        let id = UUID()
+        streamTunnels[id] = tunnel
+
+        do {
+            try await tunnel.write(requestData)
+        } catch {
+            streamTunnels[id] = nil
+            let mapped = await mapTunnelError(error, on: tunnel)
+            await tunnel.close()
+            throw mapped
+        }
+
+        // Parse until the response head arrives. On a 101 the parser flips to
+        // passthrough and any trailing bytes from the same chunk are already
+        // body; capture them so the consumer does not lose the first frames.
+        var parser = HTTP1ResponseParser()
+        var head: (status: Int, headers: [String: String])?
+        var earlyBodies: [Data] = []
+        let inbound = tunnel.inbound
+
+        do {
+            outer: for try await chunk in inbound {
+                let events = try parser.ingest(chunk)
+                for event in events {
+                    switch event {
+                    case .head(let status, let headers):
+                        head = (status, headers)
+                    case .body(let data):
+                        earlyBodies.append(data)
+                    case .end:
+                        break outer
+                    }
+                }
+                if head != nil { break }
+            }
+        } catch {
+            streamTunnels[id] = nil
+            let mapped = await mapTunnelError(error, on: tunnel)
+            await tunnel.close()
+            throw mapped
+        }
+
+        guard let head else {
+            streamTunnels[id] = nil
+            let detail = await tunnel.stderrTail()
+            await tunnel.close()
+            throw DockerError.connectionFailed(
+                "connection closed before response headers" + (detail.isEmpty ? "" : ": \(detail)")
+            )
+        }
+
+        // Anything other than a successful upgrade (101) or a plain 200 that
+        // streams until close is an error: drain the buffered body for a
+        // message and tear the tunnel down.
+        guard head.status == 101 || head.status == 200 else {
+            var message = earlyBodies.reduce(into: Data()) { $0.append($1) }
+            // Best-effort: pull any remaining buffered error body without
+            // blocking forever — the daemon closes the connection on error.
+            do {
+                for try await chunk in inbound {
+                    let events = try parser.ingest(chunk)
+                    for event in events {
+                        if case .body(let data) = event { message.append(data) }
+                    }
+                }
+            } catch {
+                // Ignore: we already have the head and whatever body arrived.
+            }
+            streamTunnels[id] = nil
+            await tunnel.close()
+            let text = String(decoding: message, as: UTF8.self)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            throw DockerError.apiError(status: head.status, message: text)
+        }
+
+        let bytes = AsyncThrowingStream<Data, Error> { continuation in
+            for body in earlyBodies where !body.isEmpty {
+                continuation.yield(body)
+            }
+            let pump = Task {
+                await self.pumpStream(tunnel: tunnel, parser: parser, continuation: continuation)
+                await self.removeStreamTunnel(id)
+            }
+            continuation.onTermination = { _ in
+                pump.cancel()
+                Task { await self.closeStreamTunnel(id) }
+            }
+        }
+
+        return DockerHijackedConnection(
+            status: head.status,
+            headers: head.headers,
+            bytes: bytes,
+            write: { [weak self] data in
+                guard let self else { throw DockerError.streamClosed }
+                try await self.writeHijack(id, data)
+            },
+            close: { [weak self] in
+                await self?.closeStreamTunnel(id)
+            }
+        )
+    }
+
+    /// Routes a hijacked-connection write through the actor to the owning
+    /// tunnel; the `@Sendable` closure handed to the caller never touches the
+    /// non-`Sendable` writer directly.
+    private func writeHijack(_ id: UUID, _ data: Data) async throws {
+        guard let tunnel = streamTunnels[id] else { throw DockerError.streamClosed }
+        do {
+            try await tunnel.write(data)
+        } catch {
+            throw await mapTunnelError(error, on: tunnel)
+        }
+    }
+
     public func shutdown() async {
         keepaliveTask?.cancel()
         keepaliveTask = nil
@@ -169,7 +310,16 @@ public actor SSHDialStdioTransport: DockerTransport {
         }
 
         if let client {
-            await SSHClientBox(client: client).close()
+            // A child channel whose close promise never completes (seen with
+            // keep-alive dial-stdio tunnels torn down mid-read) can wedge
+            // client.close() forever; bound it so shutdown always returns.
+            let box = SSHClientBox(client: client)
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask { await box.close() }
+                group.addTask { try? await Task.sleep(for: .seconds(3)) }
+                await group.next()
+                group.cancelAll()
+            }
         }
         client = nil
     }

@@ -68,6 +68,25 @@ public actor DockerClient {
         return try await transport.stream(request)
     }
 
+    /// Opens a versioned connection-upgrading request (exec/attach) and returns
+    /// a bidirectional raw byte channel. Mirrors `byteStream` but `POST`s and
+    /// carries upgrade headers through to `transport.hijack`.
+    public func hijack(
+        path: String,
+        query: [URLQueryItem] = [],
+        headers: [String: String] = [:],
+        body: Data? = nil
+    ) async throws -> DockerHijackedConnection {
+        let request = DockerRequest(
+            method: .post,
+            path: versionPrefix + path,
+            query: query,
+            headers: headers,
+            body: body
+        )
+        return try await transport.hijack(request)
+    }
+
     // MARK: - Internal helpers
 
     /// Core request primitive. Prefixes the API version (unless `versioned`
@@ -77,12 +96,13 @@ public actor DockerClient {
         method: DockerRequest.Method,
         path: String,
         query: [URLQueryItem] = [],
+        headers: [String: String] = [:],
         body: Data? = nil,
         expecting: [Int],
         versioned: Bool = true
     ) async throws -> DockerResponse {
         let fullPath = versioned ? versionPrefix + path : path
-        let request = DockerRequest(method: method, path: fullPath, query: query, body: body)
+        let request = DockerRequest(method: method, path: fullPath, query: query, headers: headers, body: body)
         let response = try await transport.execute(request)
         guard expecting.contains(response.status) else {
             throw DockerError.apiError(status: response.status, message: errorMessage(from: response.body))

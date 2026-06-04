@@ -597,3 +597,20 @@ public final class HostSession: Identifiable {
         return String(data: data, encoding: .utf8) ?? ""
     }
 }
+
+// MARK: - Interactive exec
+
+extension HostSession {
+    /// Creates and starts a single-command interactive exec, returning a live
+    /// `ExecSession` the UI drives. The command is run with a TTY. Shell
+    /// fallback (e.g. try `bash` then `sh`) is the caller's concern: this method
+    /// runs exactly one command and surfaces the failure if it cannot start.
+    public func openExecSession(containerID: String, command: [String]) async throws -> ExecSession {
+        guard let client else {
+            throw DockerError.connectionFailed("Not connected")
+        }
+        let execID = try await client.createExec(containerID: containerID, command: command, tty: true)
+        let connection = try await client.startExecHijacked(execID: execID, tty: true)
+        return ExecSession(execID: execID, tty: true, connection: connection, client: client)
+    }
+}

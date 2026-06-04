@@ -55,8 +55,40 @@ public protocol DockerTransport: Sendable {
     /// (used for logs, stats, events and other follow-style endpoints).
     func stream(_ request: DockerRequest) async throws -> DockerByteStream
 
+    /// Performs a connection-upgrading request (exec/attach) and returns a
+    /// bidirectional raw byte channel after the 101 (or 200) upgrade.
+    func hijack(_ request: DockerRequest) async throws -> DockerHijackedConnection
+
     /// Shuts the transport down, releasing sockets/channels.
     func shutdown() async
+}
+
+/// A hijacked, bidirectional connection to the daemon after an HTTP upgrade
+/// (used by `exec` and `attach`). Once upgraded, both directions carry raw,
+/// unframed bytes (or Docker's stdcopy frames for non-TTY streams).
+public struct DockerHijackedConnection: Sendable {
+    public var status: Int
+    public var headers: [String: String]
+    /// Raw bytes received from the peer after the upgrade.
+    public var bytes: AsyncThrowingStream<Data, Error>
+    /// Sends raw bytes to the peer.
+    public var write: @Sendable (Data) async throws -> Void
+    /// Tears the connection down.
+    public var close: @Sendable () async -> Void
+
+    public init(
+        status: Int,
+        headers: [String: String],
+        bytes: AsyncThrowingStream<Data, Error>,
+        write: @escaping @Sendable (Data) async throws -> Void,
+        close: @escaping @Sendable () async -> Void
+    ) {
+        self.status = status
+        self.headers = headers
+        self.bytes = bytes
+        self.write = write
+        self.close = close
+    }
 }
 
 /// Status line + headers for a streaming response, followed by raw body bytes.

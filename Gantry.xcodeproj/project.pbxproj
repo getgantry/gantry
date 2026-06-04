@@ -10,6 +10,7 @@
 		GA000000000000000000B001 /* DockerKit in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P001 /* DockerKit */; };
 		GA000000000000000000B002 /* SSHKit in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P002 /* SSHKit */; };
 		GA000000000000000000B003 /* AppCore in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P003 /* AppCore */; };
+		GA000000000000000000B004 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P004 /* SwiftTerm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 				GA000000000000000000B001 /* DockerKit in Frameworks */,
 				GA000000000000000000B002 /* SSHKit in Frameworks */,
 				GA000000000000000000B003 /* AppCore in Frameworks */,
+				GA000000000000000000B004 /* SwiftTerm in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +79,7 @@
 				GA000000000000000000P001 /* DockerKit */,
 				GA000000000000000000P002 /* SSHKit */,
 				GA000000000000000000P003 /* AppCore */,
+				GA000000000000000000P004 /* SwiftTerm */,
 			);
 			productName = Gantry;
 			productReference = GA000000000000000000F001 /* Gantry.app */;
@@ -110,6 +113,7 @@
 				GA000000000000000000K001 /* XCLocalSwiftPackageReference "Packages/DockerKit" */,
 				GA000000000000000000K002 /* XCLocalSwiftPackageReference "Packages/SSHKit" */,
 				GA000000000000000000K003 /* XCLocalSwiftPackageReference "Packages/AppCore" */,
+				GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = GA000000000000000000R001 /* Products */;
@@ -288,6 +292,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		GA000000000000000000P001 /* DockerKit */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -300,6 +315,11 @@
 		GA000000000000000000P003 /* AppCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppCore;
+		};
+		GA000000000000000000P004 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

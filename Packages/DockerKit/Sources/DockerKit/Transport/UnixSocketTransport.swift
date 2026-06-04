@@ -2,6 +2,7 @@ import Foundation
 import AsyncHTTPClient
 import NIOCore
 import NIOHTTP1
+import NIOPosix
 
 /// `DockerTransport` backed by a local unix domain socket, using AsyncHTTPClient.
 ///
@@ -78,6 +79,78 @@ public final class UnixSocketTransport: DockerTransport, Sendable {
             status: Int(response.status.code),
             headers: Self.headerDictionary(response.headers),
             bytes: bytes
+        )
+    }
+
+    public func hijack(_ request: DockerRequest) async throws -> DockerHijackedConnection {
+        // AsyncHTTPClient does not expose raw connection upgrades, so we drive a
+        // bare SwiftNIO channel directly over the unix socket: serialize the
+        // request ourselves, parse the response head, then treat everything
+        // after a 101/200 as raw passthrough bytes in both directions.
+        let requestBytes = HTTP1RequestSerializer.serialize(request)
+        let bootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup.singleton)
+            .channelInitializer { channel in
+                channel.eventLoop.makeCompletedFuture {
+                    let handler = HijackHandler(requestBytes: requestBytes)
+                    try channel.pipeline.syncOperations.addHandler(handler)
+                }
+            }
+
+        let channel: Channel
+        do {
+            channel = try await bootstrap.connect(unixDomainSocketPath: socketPath).get()
+        } catch {
+            throw DockerError.connectionFailed(String(describing: error))
+        }
+
+        let eventLoop = channel.eventLoop
+        // Recover a loop-bound reference to the handler we installed above.
+        let bound: NIOLoopBound<HijackHandler>
+        do {
+            bound = try await channel.pipeline.handler(type: HijackHandler.self)
+                .flatMapThrowing { handler in NIOLoopBound(handler, eventLoop: eventLoop) }
+                .get()
+        } catch {
+            try? await channel.close().get()
+            throw DockerError.connectionFailed(String(describing: error))
+        }
+
+        // Wait for the parsed head (status + headers) before exposing the
+        // connection. A non-upgrade status surfaces here as an apiError.
+        let head: HijackHandler.Head
+        do {
+            head = try await HijackHandler.head(bound: bound, on: eventLoop)
+        } catch let error as DockerError {
+            try? await channel.close().get()
+            throw error
+        } catch {
+            try? await channel.close().get()
+            throw DockerError.connectionFailed(String(describing: error))
+        }
+
+        let bytes = AsyncThrowingStream<Data, Error> { continuation in
+            HijackHandler.attach(continuation, bound: bound, on: eventLoop)
+            continuation.onTermination = { _ in
+                channel.close(promise: nil)
+            }
+        }
+
+        let writeChannel = channel
+        return DockerHijackedConnection(
+            status: head.status,
+            headers: head.headers,
+            bytes: bytes,
+            write: { data in
+                let buffer = writeChannel.allocator.buffer(bytes: data)
+                do {
+                    try await writeChannel.writeAndFlush(buffer).get()
+                } catch {
+                    throw DockerError.connectionFailed(String(describing: error))
+                }
+            },
+            close: {
+                try? await writeChannel.close().get()
+            }
         )
     }
 

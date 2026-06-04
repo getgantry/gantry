@@ -8,7 +8,9 @@ let package = Package(
         .library(name: "SSHKit", targets: ["SSHKit"])
     ],
     dependencies: [
-        .package(url: "https://github.com/orlandos-nl/Citadel.git", from: "0.12.0"),
+        // Fork of orlandos-nl/Citadel pointing at a patched swift-nio-ssh that
+        // does not crash on window adjust after local channel close.
+        .package(url: "https://github.com/andrewkomkov/Citadel.git", branch: "gantry"),
         .package(path: "../DockerKit")
     ],
     targets: [

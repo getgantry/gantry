@@ -134,3 +134,185 @@ func liveContainerEvents() async throws {
     let event = try #require(received, "expected a container event for redis within 10s")
     print("LIVE events: received \(event.type)/\(event.action) for \(event.containerName ?? "?")")
 }
+
+/// (d) Exec: create + hijack-start a short command in redis, read its raw
+/// output, and assert the inspected exit code is zero. Exercises the real
+/// upgrade path through `UnixSocketTransport.hijack`.
+@Test(.enabled(if: liveSocket != nil), .timeLimit(.minutes(1)))
+func liveContainerExec() async throws {
+    let client = try liveClient()
+    defer { Task { await client.shutdown() } }
+    try await client.negotiate()
+
+    let marker = "gantry-exec-\(UUID().uuidString.prefix(8))"
+    let execID = try await client.createExec(
+        containerID: "gantry-test-redis",
+        command: ["echo", marker],
+        tty: false
+    )
+    let connection = try await client.startExecHijacked(execID: execID, tty: false)
+    #expect(connection.status == 101 || connection.status == 200)
+
+    var output = Data()
+    for try await chunk in connection.bytes {
+        output.append(chunk)
+    }
+    await connection.close()
+
+    // Non-TTY exec output is wrapped in 8-byte stdcopy frames; the marker text
+    // still appears verbatim within the payload.
+    let text = String(data: output, encoding: .utf8) ?? ""
+    #expect(text.contains(marker), "expected exec output to contain \(marker), got \(text.debugDescription)")
+
+    let inspect = try await client.inspectExec(execID: execID)
+    #expect(inspect.running == false)
+    #expect(inspect.exitCode == 0)
+    print("LIVE exec: marker found=\(text.contains(marker)) exit=\(inspect.exitCode ?? -1)")
+}
+
+/// (e) Exec TTY raw: create + hijack-start a `/bin/sh -c` command with tty:true
+/// so the daemon emits raw (un-multiplexed) output. Read until EOF (15s budget)
+/// and assert the fixed marker appears, then inspect for clean exit.
+@Test(.enabled(if: liveSocket != nil), .timeLimit(.minutes(1)))
+func liveContainerExecTTYRaw() async throws {
+    let client = try liveClient()
+    defer { Task { await client.shutdown() } }
+    try await client.negotiate()
+
+    let execID = try await client.createExec(
+        containerID: "gantry-test-redis",
+        command: ["/bin/sh", "-c", "echo gantry-exec-ok; exit 0"],
+        tty: true
+    )
+    let connection = try await client.startExecHijacked(execID: execID, tty: true)
+    #expect(connection.status == 101 || connection.status == 200)
+
+    let text = try await readUntilEOF(connection.bytes, timeout: .seconds(15))
+    await connection.close()
+
+    // TTY output is raw — no 8-byte stdcopy frames.
+    #expect(text.contains("gantry-exec-ok"), "expected raw TTY exec output to contain gantry-exec-ok, got \(text.debugDescription)")
+
+    let inspect = try await client.inspectExec(execID: execID)
+    #expect(inspect.running == false)
+    #expect(inspect.exitCode == 0)
+    print("LIVE exec tty: ok=\(text.contains("gantry-exec-ok")) exit=\(inspect.exitCode ?? -1)")
+}
+
+/// (f) Exec bidirectional: open an interactive `/bin/sh` TTY, write a command
+/// over stdin, read until its echoed output appears (10s), then write `exit`
+/// and assert the stream reaches EOF. Proves the write path is wired through.
+@Test(.enabled(if: liveSocket != nil), .timeLimit(.minutes(1)))
+func liveContainerExecRoundtrip() async throws {
+    let client = try liveClient()
+    defer { Task { await client.shutdown() } }
+    try await client.negotiate()
+
+    let execID = try await client.createExec(
+        containerID: "gantry-test-redis",
+        command: ["/bin/sh"],
+        tty: true
+    )
+    let connection = try await client.startExecHijacked(execID: execID, tty: true)
+    #expect(connection.status == 101 || connection.status == 200)
+
+    // Collect output on a background task; signal once "roundtrip" is seen and
+    // again at EOF.
+    let sawRoundtrip = AsyncSignal()
+    let sawEOF = AsyncSignal()
+    let reader = Task {
+        var acc = ""
+        do {
+            for try await chunk in connection.bytes {
+                acc += String(data: chunk, encoding: .utf8) ?? ""
+                if acc.contains("roundtrip-") {
+                    sawRoundtrip.fire()
+                }
+            }
+        } catch {
+            // Channel teardown after exit surfaces as a stream error; treat as EOF.
+        }
+        sawEOF.fire()
+        return acc
+    }
+
+    // Drive stdin.
+    try await connection.write(Data("echo roundtrip-$$\n".utf8))
+    try await sawRoundtrip.wait(timeout: .seconds(10))
+
+    try await connection.write(Data("exit\n".utf8))
+    try await sawEOF.wait(timeout: .seconds(10))
+
+    let acc = await reader.value
+    await connection.close()
+    #expect(acc.contains("roundtrip-"), "expected stdin echo to round-trip, got \(acc.debugDescription)")
+    print("LIVE exec roundtrip: ok=\(acc.contains("roundtrip-"))")
+}
+
+// MARK: - Exec test helpers
+
+/// Reads an byte stream until EOF, bounded by `timeout`, decoding accumulated
+/// bytes as UTF-8. Returns whatever was read if the timeout fires first.
+private func readUntilEOF(
+    _ stream: AsyncThrowingStream<Data, Error>,
+    timeout: Duration
+) async throws -> String {
+    try await withThrowingTaskGroup(of: Data?.self) { group in
+        group.addTask {
+            var acc = Data()
+            for try await chunk in stream { acc.append(chunk) }
+            return acc
+        }
+        group.addTask {
+            try? await Task.sleep(for: timeout)
+            return nil
+        }
+        let first = try await group.next() ?? nil
+        group.cancelAll()
+        return String(data: first ?? Data(), encoding: .utf8) ?? ""
+    }
+}
+
+/// A one-shot async signal usable from multiple tasks: `wait(timeout:)` resumes
+/// when `fire()` is called or throws on timeout.
+private final class AsyncSignal: @unchecked Sendable {
+    private let lock = NSLock()
+    private var fired = false
+    private var continuations: [CheckedContinuation<Void, Never>] = []
+
+    func fire() {
+        let pending: [CheckedContinuation<Void, Never>] = lock.withLock {
+            let p = continuations
+            continuations.removeAll()
+            fired = true
+            return p
+        }
+        for c in pending { c.resume() }
+    }
+
+    func wait(timeout: Duration) async throws {
+        await withTaskGroup(of: Bool.self) { group in
+            group.addTask { [self] in
+                await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
+                    let alreadyFired: Bool = lock.withLock {
+                        if fired { return true }
+                        continuations.append(c)
+                        return false
+                    }
+                    if alreadyFired { c.resume() }
+                }
+                return true
+            }
+            group.addTask {
+                try? await Task.sleep(for: timeout)
+                return false
+            }
+            _ = await group.next()
+            group.cancelAll()
+        }
+        let didFire = lock.withLock { fired }
+        if !didFire {
+            throw DockerError.connectionFailed("AsyncSignal timed out")
+        }
+    }
+}
