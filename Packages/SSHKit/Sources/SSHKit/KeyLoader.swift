@@ -101,6 +101,10 @@ public enum SSHKeyLoader {
         let home = NSHomeDirectory()
         let candidates = [
             home + "/.ssh/id_ed25519",
+            // App-managed identity for setups whose only key is RSA, which
+            // the SSH library signs as legacy ssh-rsa (rejected by modern
+            // servers).
+            home + "/.ssh/gantry_ed25519",
             home + "/.ssh/id_rsa"
         ]
         return candidates.filter { FileManager.default.fileExists(atPath: $0) }

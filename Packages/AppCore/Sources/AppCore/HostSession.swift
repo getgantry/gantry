@@ -135,8 +135,11 @@ public final class HostSession: Identifiable {
         // Resolve ssh_config to fill any gaps the user left blank.
         let resolved = SSHConfig.resolve(host: endpoint.host)
 
-        let hostName = endpoint.host.isEmpty ? resolved.hostName : endpoint.host
-        let port = endpoint.port != 0 ? endpoint.port : resolved.port
+        // The configured host may be an ssh_config alias (Host dedic ->
+        // HostName 92.x.x.x); always connect to the resolved HostName —
+        // resolve() falls back to the input when no config entry matches.
+        let hostName = resolved.hostName
+        let port = endpoint.port != 22 && endpoint.port != 0 ? endpoint.port : resolved.port
         let username: String = {
             if !endpoint.username.isEmpty { return endpoint.username }
             if let user = resolved.user, !user.isEmpty { return user }

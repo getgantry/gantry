@@ -157,7 +157,9 @@ struct ContentView: View {
                             .tag(SidebarSelection(hostID: session.host.id, section: section))
                     }
                 } header: {
-                    HostSectionHeader(session: session)
+                    HostSectionHeader(session: session) {
+                        confirmRemoval = session.host.id
+                    }
                         .contextMenu {
                             Button {
                                 Task {
@@ -354,9 +356,13 @@ struct ContentView: View {
     }
 }
 
-/// Host header with name and a tiny live status dot.
+/// Host header with name, a tiny live status dot, and a hover-revealed
+/// actions menu (the discoverable way to reconnect or remove a host).
 private struct HostSectionHeader: View {
     var session: HostSession
+    var onRemove: () -> Void
+
+    @State private var isHovered = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -370,7 +376,35 @@ private struct HostSectionHeader: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+
+            Menu {
+                Button {
+                    Task {
+                        await session.disconnect()
+                        await session.connect()
+                    }
+                } label: {
+                    Label("Reconnect", systemImage: "arrow.clockwise")
+                }
+
+                if session.host.removable {
+                    Divider()
+                    Button(role: .destructive, action: onRemove) {
+                        Label("Remove Host…", systemImage: "trash")
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .foregroundStyle(.secondary)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .opacity(isHovered ? 1 : 0)
+            .accessibilityLabel("Host actions for \(session.host.name)")
         }
+        .onHover { isHovered = $0 }
+        .animation(.easeInOut(duration: 0.15), value: isHovered)
         .help(session.status.shortDescription)
         .task(id: session.host.id) {
             // Connect once per visible host, guarding against re-entry.
