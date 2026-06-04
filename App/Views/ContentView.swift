@@ -48,6 +48,17 @@ struct SidebarSelection: Hashable {
     var section: HostSection
 }
 
+/// Top-level sidebar item: the cross-host dashboard or a section of a host.
+enum SidebarItem: Hashable {
+    case dashboard
+    case host(SidebarSelection)
+
+    var hostSelection: SidebarSelection? {
+        if case .host(let selection) = self { return selection }
+        return nil
+    }
+}
+
 /// Identifies the item shown in the detail column. The host comes from the
 /// sidebar selection; these cases carry the per-section resource id.
 enum DetailSelection: Hashable {
@@ -61,8 +72,12 @@ struct ContentView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
 
-    @State private var selection: SidebarSelection?
+    /// Land on the fleet dashboard at launch.
+    @State private var selection: SidebarItem? = .dashboard
     @State private var detailSelection: DetailSelection?
+    /// Detail item to restore right after a programmatic sidebar jump (the
+    /// `onChange(of: selection)` handler clears `detailSelection` otherwise).
+    @State private var pendingDetailSelection: DetailSelection?
     @State private var showingAddHost = false
     @State private var confirmRemoval: UUID?
 
@@ -92,12 +107,15 @@ struct ContentView: View {
         }
         .navigationTitle("Gantry")
         .onChange(of: selection) {
-            // Switching host or section clears the stale detail selection.
-            detailSelection = nil
+            // Switching host or section clears the stale detail selection —
+            // unless a programmatic jump staged a target to restore.
+            detailSelection = pendingDetailSelection
+            pendingDetailSelection = nil
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
             // Refresh the host currently in view; fall back to all connected hosts.
-            if let selection, let session = model.session(id: selection.hostID) {
+            if let hostSelection = selection?.hostSelection,
+               let session = model.session(id: hostSelection.hostID) {
                 Task { await session.refreshAll() }
             } else {
                 for session in model.sessions where session.status.isConnected {
@@ -127,7 +145,7 @@ struct ContentView: View {
                 if let session = model.session(id: hostID) {
                     Task { await session.disconnect() }
                 }
-                if selection?.hostID == hostID { selection = nil }
+                if selection?.hostSelection?.hostID == hostID { selection = .dashboard }
                 model.removeHost(id: hostID)
             }
             Button("Cancel", role: .cancel) {}
@@ -167,11 +185,14 @@ struct ContentView: View {
 
     private var sidebar: some View {
         List(selection: $selection) {
+            Label("Dashboard", systemImage: "square.grid.2x2")
+                .tag(SidebarItem.dashboard)
+
             ForEach(model.sessions) { session in
                 Section {
                     ForEach(HostSection.sections(forSSHHost: !session.host.isLocal)) { section in
                         Label(section.title, systemImage: section.systemImage)
-                            .tag(SidebarSelection(hostID: session.host.id, section: section))
+                            .tag(SidebarItem.host(SidebarSelection(hostID: session.host.id, section: section)))
                     }
                 } header: {
                     HostSectionHeader(session: session) {
@@ -228,14 +249,37 @@ struct ContentView: View {
 
     @ViewBuilder
     private var content: some View {
-        if let selection, let session = model.session(id: selection.hostID) {
-            sectionContent(for: selection.section, session: session)
+        switch selection {
+        case .dashboard:
+            FleetIssuesView(navigate: navigate)
+        case .host(let hostSelection):
+            if let session = model.session(id: hostSelection.hostID) {
+                sectionContent(for: hostSelection.section, session: session)
+            } else {
+                noSelectionPlaceholder
+            }
+        case nil:
+            noSelectionPlaceholder
+        }
+    }
+
+    private var noSelectionPlaceholder: some View {
+        ContentUnavailableView(
+            "No Selection",
+            systemImage: "sidebar.left",
+            description: Text("Select a section from a host in the sidebar.")
+        )
+    }
+
+    /// Programmatic jump from the dashboard into a host's section, optionally
+    /// landing on a specific detail item (e.g. an unhealthy container).
+    private func navigate(to hostID: UUID, section: HostSection, detail: DetailSelection?) {
+        let target = SidebarItem.host(SidebarSelection(hostID: hostID, section: section))
+        if selection == target {
+            detailSelection = detail
         } else {
-            ContentUnavailableView(
-                "No Selection",
-                systemImage: "sidebar.left",
-                description: Text("Select a section from a host in the sidebar.")
-            )
+            pendingDetailSelection = detail
+            selection = target
         }
     }
 
@@ -295,9 +339,11 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
-        if let selection,
-           let session = model.session(id: selection.hostID),
-           let detailSelection {
+        if case .dashboard = selection {
+            FleetDashboardView(navigate: navigate)
+        } else if let hostSelection = selection?.hostSelection,
+                  let session = model.session(id: hostSelection.hostID),
+                  let detailSelection {
             detailContent(detailSelection, session: session)
         } else {
             ContentUnavailableView(
