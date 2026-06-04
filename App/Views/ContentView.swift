@@ -36,10 +36,20 @@ struct SidebarSelection: Hashable {
     var section: HostSection
 }
 
+/// Identifies the item shown in the detail column. The host comes from the
+/// sidebar selection; these cases carry the per-section resource id.
+enum DetailSelection: Hashable {
+    case container(String)
+    case image(String)
+    case volume(String)
+    case network(String)
+}
+
 struct ContentView: View {
     @Environment(AppModel.self) private var model
 
     @State private var selection: SidebarSelection?
+    @State private var detailSelection: DetailSelection?
     @State private var showingAddHost = false
     @State private var confirmRemoval: UUID?
 
@@ -64,6 +74,10 @@ struct ContentView: View {
             detail
         }
         .navigationTitle("Gantry")
+        .onChange(of: selection) {
+            // Switching host or section clears the stale detail selection.
+            detailSelection = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
             // Refresh the host currently in view; fall back to all connected hosts.
             if let selection, let session = model.session(id: selection.hostID) {
@@ -202,10 +216,14 @@ struct ContentView: View {
     private func sectionContent(for section: HostSection, session: HostSession) -> some View {
         Group {
             switch section {
-            case .containers: ContainerListView(session: session)
-            case .images: ImageListView(session: session)
-            case .volumes: VolumeListView(session: session)
-            case .networks: NetworkListView(session: session)
+            case .containers:
+                ContainerListView(session: session, selection: containerSelectionBinding)
+            case .images:
+                ImageListView(session: session, selection: imageSelectionBinding)
+            case .volumes:
+                VolumeListView(session: session, selection: volumeSelectionBinding)
+            case .networks:
+                NetworkListView(session: session, selection: networkSelectionBinding)
             }
         }
         // Connection state overlays.
@@ -246,10 +264,92 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
+        if let selection,
+           let session = model.session(id: selection.hostID),
+           let detailSelection {
+            detailContent(detailSelection, session: session)
+        } else {
+            ContentUnavailableView(
+                "Nothing Selected",
+                systemImage: "rectangle.righthalf.inset.filled",
+                description: Text("Pick an item to see its details.")
+            )
+        }
+    }
+
+    /// Resolves the selected id against the session's live arrays and renders
+    /// the matching detail view, degrading gracefully when the object is gone
+    /// (e.g. removed by a refresh while selected).
+    @ViewBuilder
+    private func detailContent(_ selection: DetailSelection, session: HostSession) -> some View {
+        switch selection {
+        case .container(let id):
+            if let container = session.containers.first(where: { $0.id == id }) {
+                ContainerDetailView(container: container, session: session)
+            } else {
+                detailGone("Container")
+            }
+        case .image(let id):
+            if let image = session.images.first(where: { $0.id == id }) {
+                ImageDetailView(image: image, session: session)
+            } else {
+                detailGone("Image")
+            }
+        case .volume(let name):
+            if let volume = session.volumes.first(where: { $0.name == name }) {
+                VolumeDetailView(volume: volume, session: session)
+            } else {
+                detailGone("Volume")
+            }
+        case .network(let id):
+            if let network = session.networks.first(where: { $0.id == id }) {
+                NetworkDetailView(network: network, session: session)
+            } else {
+                detailGone("Network")
+            }
+        }
+    }
+
+    private func detailGone(_ kind: String) -> some View {
         ContentUnavailableView(
-            "Nothing Selected",
-            systemImage: "rectangle.righthalf.inset.filled",
-            description: Text("Pick an item to see its details.")
+            "\(kind) Unavailable",
+            systemImage: "questionmark.square.dashed",
+            description: Text("This \(kind.lowercased()) is no longer available.")
+        )
+    }
+
+    // MARK: - Detail selection bindings
+
+    // Each section binds its `List(selection:)` to a plain id; the wrapper maps
+    // it onto the shared `DetailSelection` so the detail column stays the single
+    // source of truth. Reads project the current case back to an id (or nil when
+    // a different section owns the selection).
+
+    private var containerSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .container(let id) = detailSelection { id } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.container) }
+        )
+    }
+
+    private var imageSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .image(let id) = detailSelection { id } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.image) }
+        )
+    }
+
+    private var volumeSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .volume(let name) = detailSelection { name } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.volume) }
+        )
+    }
+
+    private var networkSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .network(let id) = detailSelection { id } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.network) }
         )
     }
 }

@@ -5,11 +5,15 @@ import DockerKit
 
 struct ContainerListView: View {
     @Bindable var session: HostSession
+    @Binding var selection: String?
 
-    @State private var selectedID: String?
     @State private var searchText = ""
     @State private var filter: StateFilter = .all
     @State private var removeTarget: ContainerSummary?
+
+    /// Compose projects the user has collapsed, persisted per scene as a
+    /// newline-joined string. Absence means expanded (the default).
+    @SceneStorage("collapsedComposeProjects") private var collapsedRaw = ""
 
     // Sheets / alerts driven from row context menus and the toolbar.
     @State private var showCreateSheet = false
@@ -62,28 +66,55 @@ struct ContainerListView: View {
         filtered.contains { $0.composeProject != nil }
     }
 
+    // MARK: - Collapse persistence
+
+    /// The set of collapsed project names decoded from scene storage.
+    private var collapsedProjects: Set<String> {
+        Set(collapsedRaw.split(separator: "\n").map(String.init))
+    }
+
+    /// A binding to one project's expansion state. Default is expanded; toggling
+    /// shut adds the name to the persisted collapsed set.
+    private func expansionBinding(for project: String) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedProjects.contains(project) },
+            set: { expanded in
+                var set = collapsedProjects
+                if expanded { set.remove(project) } else { set.insert(project) }
+                collapsedRaw = set.sorted().joined(separator: "\n")
+            }
+        )
+    }
+
     var body: some View {
-        NavigationStack {
-            List(selection: $selectedID) {
-                if hasProjects {
-                    ForEach(groups) { group in
+        List(selection: $selection) {
+            if hasProjects {
+                ForEach(groups) { group in
+                    if let name = group.name {
+                        Section(isExpanded: expansionBinding(for: name)) {
+                            ForEach(group.containers) { row($0) }
+                        } header: {
+                            groupHeader(group)
+                        }
+                    } else {
+                        // Standalone bucket stays a plain, always-open section.
                         Section {
                             ForEach(group.containers) { row($0) }
                         } header: {
                             groupHeader(group)
                         }
                     }
-                } else {
-                    ForEach(filtered) { row($0) }
                 }
-            }
-            .navigationTitle("Containers")
-            .navigationDestination(item: $selectedID) { id in
-                if let container = session.containers.first(where: { $0.id == id }) {
-                    ContainerDetailView(container: container, session: session)
-                }
+            } else {
+                ForEach(filtered) { row($0) }
             }
         }
+        // The sidebar style is what gives `Section(isExpanded:)` its animated
+        // disclosure chevron in the content column on macOS; the flat list keeps
+        // the plain inset look.
+        .modifier(ComposeListStyle(grouped: hasProjects))
+        .animation(.snappy, value: filtered)
+        .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
         .toolbar { toolbarContent }
         .sheet(isPresented: $showCreateSheet) {
@@ -241,6 +272,20 @@ struct ContainerListView: View {
     }
 }
 
+/// Picks the list style: sidebar (collapsible sections) when compose projects
+/// are present, plain inset otherwise.
+private struct ComposeListStyle: ViewModifier {
+    let grouped: Bool
+
+    func body(content: Content) -> some View {
+        if grouped {
+            content.listStyle(.sidebar)
+        } else {
+            content.listStyle(.inset)
+        }
+    }
+}
+
 /// A compose project (or the standalone bucket) plus its containers.
 private struct ContainerGroup: Identifiable {
     let name: String?
@@ -255,9 +300,7 @@ private struct ContainerRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Circle()
-                .fill(container.state.tint)
-                .frame(width: 8, height: 8)
+            StatusDot(state: container.state)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(container.displayName)
@@ -285,6 +328,33 @@ private struct ContainerRow: View {
             }
         }
         .padding(.vertical, 2)
+    }
+}
+
+/// Lifecycle status dot. Solid for steady states; a restrained soft pulse only
+/// while restarting, so a running list does not flicker constantly. The color
+/// transition itself is animated when the state changes.
+private struct StatusDot: View {
+    let state: ContainerState
+
+    @State private var pulsing = false
+
+    private var isTransient: Bool { state == .restarting }
+
+    var body: some View {
+        Circle()
+            .fill(state.tint)
+            .frame(width: 8, height: 8)
+            .opacity(isTransient && pulsing ? 0.3 : 1)
+            .animation(.easeInOut(duration: 0.3), value: state)
+            .animation(
+                isTransient
+                    ? .easeInOut(duration: 0.7).repeatForever(autoreverses: true)
+                    : .default,
+                value: pulsing
+            )
+            .onAppear { pulsing = isTransient }
+            .onChange(of: isTransient) { _, transient in pulsing = transient }
     }
 }
 

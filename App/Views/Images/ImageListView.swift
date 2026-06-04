@@ -5,8 +5,8 @@ import DockerKit
 
 struct ImageListView: View {
     @Bindable var session: HostSession
+    @Binding var selection: String?
 
-    @State private var selectedID: String?
     @State private var searchText = ""
     @State private var removeTarget: ImageSummary?
     @State private var showingPull = false
@@ -38,35 +38,30 @@ struct ImageListView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List(selection: $selectedID) {
-                ForEach(filtered) { image in
-                    ImageRow(image: image)
-                        .tag(image.id)
-                        .contextMenu {
-                            Button {
-                                copy(image.id)
-                            } label: {
-                                Label("Copy ID", systemImage: "doc.on.doc")
-                            }
-                            Divider()
-                            Button(role: .destructive) {
-                                removeTarget = image
-                            } label: {
-                                Label("Remove…", systemImage: "trash")
-                            }
+        List(selection: $selection) {
+            ForEach(filtered) { image in
+                ImageRow(image: image)
+                    .tag(image.id)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .contextMenu {
+                        Button {
+                            copy(image.id)
+                        } label: {
+                            Label("Copy ID", systemImage: "doc.on.doc")
                         }
-                }
+                        Divider()
+                        Button(role: .destructive) {
+                            removeTarget = image
+                        } label: {
+                            Label("Remove…", systemImage: "trash")
+                        }
+                    }
             }
-            .navigationTitle("Images")
-            .safeAreaInset(edge: .bottom) {
-                DiskUsageFooter(usage: diskUsage)
-            }
-            .navigationDestination(item: $selectedID) { id in
-                if let image = session.images.first(where: { $0.id == id }) {
-                    ImageDetailView(image: image, session: session)
-                }
-            }
+        }
+        .animation(.snappy, value: filtered)
+        .navigationTitle("Images")
+        .safeAreaInset(edge: .bottom) {
+            DiskUsageFooter(usage: diskUsage)
         }
         .searchable(text: $searchText, prompt: "Filter by tag or ID")
         .toolbar {

@@ -5,8 +5,8 @@ import DockerKit
 
 struct NetworkListView: View {
     @Bindable var session: HostSession
+    @Binding var selection: String?
 
-    @State private var selectedID: String?
     @State private var searchText = ""
     @State private var removeTarget: NetworkResource?
     @State private var showingNew = false
@@ -25,34 +25,29 @@ struct NetworkListView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List(selection: $selectedID) {
-                ForEach(filtered) { network in
-                    NetworkRow(network: network)
-                        .tag(network.id)
-                        .contextMenu {
-                            Button {
-                                copy(network.id)
-                            } label: {
-                                Label("Copy ID", systemImage: "doc.on.doc")
-                            }
-                            Divider()
-                            Button(role: .destructive) {
-                                removeTarget = network
-                            } label: {
-                                Label("Remove…", systemImage: "trash")
-                            }
-                            .disabled(Self.builtIns.contains(network.name))
+        List(selection: $selection) {
+            ForEach(filtered) { network in
+                NetworkRow(network: network)
+                    .tag(network.id)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .contextMenu {
+                        Button {
+                            copy(network.id)
+                        } label: {
+                            Label("Copy ID", systemImage: "doc.on.doc")
                         }
-                }
-            }
-            .navigationTitle("Networks")
-            .navigationDestination(item: $selectedID) { id in
-                if let network = session.networks.first(where: { $0.id == id }) {
-                    NetworkDetailView(network: network, session: session)
-                }
+                        Divider()
+                        Button(role: .destructive) {
+                            removeTarget = network
+                        } label: {
+                            Label("Remove…", systemImage: "trash")
+                        }
+                        .disabled(Self.builtIns.contains(network.name))
+                    }
             }
         }
+        .animation(.snappy, value: filtered)
+        .navigationTitle("Networks")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

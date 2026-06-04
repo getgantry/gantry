@@ -23,91 +23,53 @@ let white = NSColor.white
 // MARK: - Drawing
 
 /// Draws the full 1024x1024 artwork into the current graphics context.
+///
+/// NOTE: the bitmap context origin is bottom-left. All layout below is
+/// specified in top-based design coordinates and converted via `yTop`.
 func drawIcon(in size: CGFloat) {
     guard let ctx = NSGraphicsContext.current?.cgContext else { return }
     let rect = CGRect(x: 0, y: 0, width: size, height: size)
+
+    let s = size / 1024.0  // unit scale helper
+    /// Converts a top-based design Y (0 = top of icon) and height to a
+    /// bottom-left CGRect.
+    func r(_ x: CGFloat, _ yTop: CGFloat, _ w: CGFloat, _ h: CGFloat) -> CGRect {
+        CGRect(x: x * s, y: size - (yTop + h) * s, width: w * s, height: h * s)
+    }
 
     // Squircle clip (Big Sur approximation): cornerRadius ~234 at 1024.
     let corner = 234.0 / 1024.0 * size
     let squircle = NSBezierPath(roundedRect: rect, xRadius: corner, yRadius: corner)
     squircle.addClip()
 
-    // Vertical gradient background, deep navy (top) to steel blue (bottom).
+    // Vertical gradient background, deep navy (top) to steel blue (bottom),
+    // with a subtle radial glow behind the crane for depth.
     let gradient = NSGradient(starting: navy, ending: steel)!
     gradient.draw(in: rect, angle: -90)
-
-    let s = size / 1024.0  // unit scale helper
-
-    // MARK: Gantry crane (white geometric paths)
-
-    white.setStroke()
-    white.setFill()
-
-    let beamY = 300.0 * s
-    let beamHeight = 46.0 * s
-    let legWidth = 46.0 * s
-    let legTop = beamY
-    let legBottom = 760.0 * s
-    let leftLegX = 250.0 * s
-    let rightLegX = 728.0 * s
-
-    // Horizontal top beam.
-    let beam = CGRect(x: 210.0 * s, y: beamY, width: 604.0 * s, height: beamHeight)
-    ctx.fill(beam)
-
-    // Two vertical legs.
-    ctx.fill(CGRect(x: leftLegX, y: legTop, width: legWidth, height: legBottom - legTop))
-    ctx.fill(CGRect(x: rightLegX, y: legTop, width: legWidth, height: legBottom - legTop))
-
-    // Hoist cable from the beam centre down to the container.
-    let cableX = 512.0 * s
-    let cableWidth = 12.0 * s
-    let cableTop = beamY + beamHeight
-    let cableBottom = 470.0 * s
-    ctx.fill(CGRect(x: cableX - cableWidth / 2, y: cableTop, width: cableWidth, height: cableBottom - cableTop))
-
-    // Small hook block where the cable meets the container.
-    ctx.fill(CGRect(x: cableX - 34.0 * s, y: cableBottom - 8.0 * s, width: 68.0 * s, height: 22.0 * s))
-
-    // MARK: Shipping container (orange rounded rect with ridge lines)
-
-    let containerRect = CGRect(x: 332.0 * s, y: 470.0 * s, width: 360.0 * s, height: 200.0 * s)
-    let containerCorner = 26.0 * s
-    let containerPath = NSBezierPath(roundedRect: containerRect, xRadius: containerCorner, yRadius: containerCorner)
-    orange.setFill()
-    containerPath.fill()
-
-    // Three vertical ridge lines.
-    navy.withAlphaComponent(0.35).setStroke()
-    let ridgeInset = 70.0 * s
-    let ridgeTop = containerRect.maxY - 30.0 * s
-    let ridgeBottom = containerRect.minY + 30.0 * s
-    for i in 0..<3 {
-        let x = containerRect.minX + ridgeInset + CGFloat(i) * ((containerRect.width - 2 * ridgeInset) / 2)
-        let line = NSBezierPath()
-        line.lineWidth = 10.0 * s
-        line.move(to: CGPoint(x: x, y: ridgeBottom))
-        line.line(to: CGPoint(x: x, y: ridgeTop))
-        line.stroke()
+    if let glow = NSGradient(starting: white.withAlphaComponent(0.10), ending: .clear) {
+        glow.draw(
+            fromCenter: CGPoint(x: size / 2, y: size * 0.62), radius: 0,
+            toCenter: CGPoint(x: size / 2, y: size * 0.62), radius: size * 0.55,
+            options: []
+        )
     }
 
-    // MARK: Bottom waterline arcs
+    // MARK: Waterline (behind the crane)
 
-    white.withAlphaComponent(0.22).setStroke()
-    let waveBaseY = 200.0 * s
-    for row in 0..<2 {
-        let y = waveBaseY - CGFloat(row) * 70.0 * s
+    white.withAlphaComponent(0.18).setStroke()
+    for (row, designY) in [858.0, 920.0].enumerated() {
+        let y = size - designY * s
         let wave = NSBezierPath()
-        wave.lineWidth = 14.0 * s
+        wave.lineWidth = 16.0 * s
         wave.lineCapStyle = .round
-        let amplitude = 26.0 * s
-        let wavelength = 150.0 * s
-        var x = 60.0 * s
+        let amplitude = 22.0 * s
+        let wavelength = 170.0 * s
+        var x = (row == 0 ? 70.0 : 130.0) * s
         wave.move(to: CGPoint(x: x, y: y))
         var up = true
-        while x < size - 60.0 * s {
-            let nextX = x + wavelength
-            let controlX = x + wavelength / 2
+        while x < size - 70.0 * s {
+            let nextX = min(x + wavelength, size - 70.0 * s)
+            let controlX = x + (nextX - x) / 2
             let controlY = y + (up ? amplitude : -amplitude)
             wave.curve(
                 to: CGPoint(x: nextX, y: y),
@@ -118,6 +80,78 @@ func drawIcon(in size: CGFloat) {
             up.toggle()
         }
         wave.stroke()
+    }
+
+    // MARK: Gantry crane (white, soft shadow, beam ON TOP)
+
+    ctx.saveGState()
+    ctx.setShadow(
+        offset: CGSize(width: 0, height: -10 * s),
+        blur: 28 * s,
+        color: NSColor.black.withAlphaComponent(0.35).cgColor
+    )
+    white.setFill()
+
+    let beamTopY = 212.0
+    let beamH = 58.0
+    let legW = 54.0
+    let legTopY = beamTopY + beamH
+    let legBottomY = 812.0
+    let leftLegX = 196.0
+    let rightLegX = 1024.0 - 196.0 - legW
+
+    // Top beam with a slight overhang beyond the legs.
+    ctx.fill(r(140, beamTopY, 1024 - 2 * 140, beamH))
+    // Legs.
+    ctx.fill(r(leftLegX, legTopY, legW, legBottomY - legTopY))
+    ctx.fill(r(rightLegX, legTopY, legW, legBottomY - legTopY))
+    // Foot pads.
+    ctx.fill(r(leftLegX - 34, legBottomY, legW + 68, 26))
+    ctx.fill(r(rightLegX - 34, legBottomY, legW + 68, 26))
+    // Trolley under the beam centre.
+    ctx.fill(r(512 - 56, legTopY, 112, 44))
+    // Hoist cable from the trolley down to the container spreader.
+    let cableTopY = legTopY + 44.0
+    let containerTopY = 442.0
+    ctx.fill(r(512 - 7, cableTopY, 14, containerTopY - 36 - cableTopY))
+    // Spreader bar sitting on the container.
+    ctx.fill(r(512 - 110, containerTopY - 36, 220, 24))
+    ctx.restoreGState()
+
+    // MARK: Shipping container (orange, hanging from the spreader)
+
+    let containerW = 420.0
+    let containerH = 252.0
+    let containerX = 512.0 - containerW / 2
+    let containerRect = r(containerX, containerTopY, containerW, containerH)
+    let containerCorner = 30.0 * s
+
+    ctx.saveGState()
+    ctx.setShadow(
+        offset: CGSize(width: 0, height: -14 * s),
+        blur: 36 * s,
+        color: NSColor.black.withAlphaComponent(0.40).cgColor
+    )
+    let containerPath = NSBezierPath(roundedRect: containerRect, xRadius: containerCorner, yRadius: containerCorner)
+    // Vertical gradient: lighter orange on top for a lit look.
+    let lightOrange = NSColor(red: 0xFF / 255.0, green: 0x9D / 255.0, blue: 0x57 / 255.0, alpha: 1)
+    let deepOrange = NSColor(red: 0xE0 / 255.0, green: 0x6E / 255.0, blue: 0x22 / 255.0, alpha: 1)
+    containerPath.addClip()
+    NSGradient(starting: lightOrange, ending: deepOrange)?.draw(in: containerRect, angle: -90)
+    ctx.restoreGState()
+
+    // Four corrugation ridges, slightly darker, rounded ends.
+    deepOrange.withAlphaComponent(0.55).setStroke()
+    let ridgeCount = 4
+    let ridgeSpan = containerW - 2 * 84.0
+    for i in 0..<ridgeCount {
+        let designX = containerX + 84.0 + CGFloat(i) * (ridgeSpan / CGFloat(ridgeCount - 1))
+        let line = NSBezierPath()
+        line.lineWidth = 16.0 * s
+        line.lineCapStyle = .round
+        line.move(to: CGPoint(x: designX * s, y: size - (containerTopY + 36) * s))
+        line.line(to: CGPoint(x: designX * s, y: size - (containerTopY + containerH - 36) * s))
+        line.stroke()
     }
 }
 

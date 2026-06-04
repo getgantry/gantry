@@ -99,6 +99,8 @@ struct StatsView: View {
         return card("CPU", systemImage: "cpu") {
             Text(cpuValue)
                 .font(.title2.monospacedDigit())
+                .contentTransition(.numericText())
+                .animation(.snappy, value: cpuValue)
         } chart: {
             Chart(samples, id: \.readAt) { sample in
                 AreaMark(
@@ -144,6 +146,8 @@ struct StatsView: View {
         return card("Memory", systemImage: "memorychip") {
             Text(memoryValue)
                 .font(.title2.monospacedDigit())
+                .contentTransition(.numericText())
+                .animation(.snappy, value: memoryValue)
         } chart: {
             Chart(samples, id: \.readAt) { sample in
                 AreaMark(
@@ -274,10 +278,12 @@ struct StatsView: View {
 
     /// A single derived per-second rate point with two series values.
     private struct RatePoint: Identifiable {
-        let id = UUID()
         let at: Date
         let first: Double
         let second: Double
+        /// Stable identity tied to the sample timestamp so chart marks are
+        /// reused across recomputes instead of being torn down and re-added.
+        var id: Date { at }
     }
 
     /// Per-second deltas between consecutive samples for a pair of cumulative counters.
@@ -300,13 +306,16 @@ struct StatsView: View {
     }
 
     private func rateLabel(_ title: String, _ value: Double?, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        let text = value.map(rateString) ?? "—"
+        return VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            Text(value.map(rateString) ?? "—")
+            Text(text)
                 .font(.callout.monospacedDigit())
                 .foregroundStyle(color)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: text)
         }
     }
 

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 import AppCore
 import DockerKit
 
@@ -80,14 +81,33 @@ struct FilesView: View {
                     .buttonStyle(.plain)
                 }
                 ForEach(entries, id: \.name) { entry in
-                    FileRow(entry: entry) {
-                        if entry.isDirectory {
-                            go(to: join(path, entry.name))
-                        }
-                    } onDownload: {
-                        download(entry)
-                    }
+                    FileRow(
+                        entry: entry,
+                        transfer: ContainerFileTransfer(
+                            session: session,
+                            containerID: container.id,
+                            remotePath: join(path, entry.name),
+                            name: entry.name,
+                            isDirectory: entry.isDirectory
+                        ),
+                        onOpen: {
+                            if entry.isDirectory {
+                                go(to: join(path, entry.name))
+                            }
+                        },
+                        onDownload: {
+                            download(entry)
+                        },
+                        onDropURLs: entry.isDirectory ? { urls in
+                            Task { await uploadURLs(urls, into: join(path, entry.name)) }
+                        } : nil
+                    )
                 }
+            }
+            // Dropping onto empty list area uploads into the current directory.
+            .dropDestination(for: URL.self) { urls, _ in
+                Task { await uploadURLs(urls, into: path) }
+                return true
             }
             .overlay(alignment: .bottom) {
                 if let transferStatus {
@@ -178,17 +198,29 @@ struct FilesView: View {
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
-        Task {
-            transferStatus = "Uploading \(url.lastPathComponent)…"
-            defer { transferStatus = nil }
-            do {
-                let data = try Data(contentsOf: url)
-                let tar = TarWriter.singleFile(name: url.lastPathComponent, contents: data)
-                try await session.uploadArchive(containerID: container.id, path: path, tar: tar)
-                await load()
-            } catch {
-                errorText = error.localizedDescription
+        Task { await uploadURLs([url], into: path) }
+    }
+
+    /// Packs each local URL (recursively for folders) and uploads it into
+    /// `destination`. Shows an indeterminate progress overlay and refreshes the
+    /// listing when the destination is the directory currently shown.
+    private func uploadURLs(_ urls: [URL], into destination: String) async {
+        guard !urls.isEmpty else { return }
+        let label = urls.count == 1 ? urls[0].lastPathComponent : "\(urls.count) items"
+        transferStatus = "Uploading \(label)…"
+        defer { transferStatus = nil }
+        do {
+            for url in urls {
+                var isDir: ObjCBool = false
+                FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+                let tar = try TarWriter.archiveFileURL(url, recursive: isDir.boolValue)
+                try await session.uploadArchive(containerID: container.id, path: destination, tar: tar)
             }
+            if destination == path {
+                await load()
+            }
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 }
@@ -197,8 +229,13 @@ struct FilesView: View {
 
 private struct FileRow: View {
     let entry: ContainerFileEntry
+    let transfer: ContainerFileTransfer
     let onOpen: () -> Void
     let onDownload: () -> Void
+    /// Non-nil only for directory rows: handles a Finder drop into this folder.
+    let onDropURLs: (([URL]) -> Void)?
+
+    @State private var isDropTargeted = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -222,7 +259,19 @@ private struct FileRow: View {
             }
         }
         .contentShape(Rectangle())
+        .padding(.vertical, 1)
+        .background(
+            isDropTargeted ? Color.accentColor.opacity(0.18) : Color.clear,
+            in: RoundedRectangle(cornerRadius: 5)
+        )
         .onTapGesture(count: 2) { onOpen() }
+        .draggable(transfer) {
+            Label(entry.name, systemImage: icon)
+        }
+        .help(entry.isDirectory
+              ? "Drag out to save as \(entry.name).tar"
+              : "Drag out to copy to Finder")
+        .modifier(DirectoryDropModifier(isTargeted: $isDropTargeted, onDropURLs: onDropURLs))
     }
 
     private var icon: String {
@@ -232,55 +281,111 @@ private struct FileRow: View {
     }
 }
 
-// MARK: - Minimal tar writer
+/// Adds a Finder-URL drop target to directory rows (and is a no-op for files),
+/// surfacing the targeted state for row highlighting.
+private struct DirectoryDropModifier: ViewModifier {
+    @Binding var isTargeted: Bool
+    let onDropURLs: (([URL]) -> Void)?
 
-/// Builds a single-file ustar archive in memory — the inverse of the tar
-/// parser used when reading archives. Sufficient for `PUT /containers/{id}/archive`.
-enum TarWriter {
-    static func singleFile(name: String, contents: Data) -> Data {
-        var header = [UInt8](repeating: 0, count: 512)
+    func body(content: Content) -> some View {
+        if let onDropURLs {
+            content.dropDestination(for: URL.self) { urls, _ in
+                onDropURLs(urls)
+                return true
+            } isTargeted: { targeted in
+                isTargeted = targeted
+            }
+        } else {
+            content
+        }
+    }
+}
 
-        func write(_ string: String, at offset: Int, length: Int) {
-            let bytes = Array(string.utf8.prefix(length))
-            for (i, byte) in bytes.enumerated() { header[offset + i] = byte }
+// MARK: - Transferable for drag-out
+
+/// Lets a container file/directory be dragged out to Finder. Files unpack the
+/// single-entry tar to a correctly named temp file; directories are exported as
+/// the raw `<name>.tar` archive (v1 — surfaced via the row tooltip).
+struct ContainerFileTransfer: Transferable {
+    let session: HostSession
+    let containerID: String
+    /// Absolute path of the item inside the container.
+    let remotePath: String
+    let name: String
+    let isDirectory: Bool
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .data) { transfer in
+            let url = try await transfer.export()
+            return SentTransferredFile(url)
+        }
+    }
+
+    /// Downloads the item and writes it to a temp file, returning its URL.
+    /// Files are unpacked from their single-entry tar; directories keep the tar.
+    func export() async throws -> URL {
+        let stream = try await session.downloadArchive(containerID: containerID, path: remotePath)
+        var buffer = Data()
+        for try await chunk in stream.bytes {
+            buffer.append(chunk)
         }
 
-        // Name (100), trimmed to fit.
-        write(String(name.prefix(100)), at: 0, length: 100)
-        // Mode, uid, gid as octal strings (NUL-terminated within their fields).
-        write("000644 ", at: 100, length: 8)
-        write("000000 ", at: 108, length: 8)
-        write("000000 ", at: 116, length: 8)
-        // Size: 11 octal digits + space.
-        let octalSize = String(format: "%011o", contents.count)
-        write(octalSize + " ", at: 124, length: 12)
-        // Modification time.
-        let octalTime = String(format: "%011o", Int(Date().timeIntervalSince1970))
-        write(octalTime + " ", at: 136, length: 12)
-        // Type flag '0' = regular file.
-        header[156] = UInt8(ascii: "0")
-        // ustar magic + version.
-        write("ustar", at: 257, length: 6)
-        header[263] = UInt8(ascii: "0")
-        header[264] = UInt8(ascii: "0")
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
-        // Checksum: spaces while computing, then octal value.
-        for i in 148..<156 { header[i] = UInt8(ascii: " ") }
-        let checksum = header.reduce(0) { $0 + Int($1) }
-        write(String(format: "%06o", checksum), at: 148, length: 7)
-        header[154] = 0
-        header[155] = UInt8(ascii: " ")
-
-        var archive = Data(header)
-        archive.append(contents)
-
-        // Pad file data to a 512-byte boundary.
-        let remainder = contents.count % 512
-        if remainder != 0 {
-            archive.append(Data(repeating: 0, count: 512 - remainder))
+        if isDirectory {
+            let url = dir.appendingPathComponent(name + ".tar")
+            try buffer.write(to: url)
+            return url
+        } else {
+            let url = dir.appendingPathComponent(name)
+            let contents = Self.singleFilePayload(fromArchive: buffer) ?? Data()
+            try contents.write(to: url)
+            return url
         }
-        // Two zero blocks mark end of archive.
-        archive.append(Data(repeating: 0, count: 1024))
-        return archive
+    }
+
+    /// Extracts the first regular-file payload from a tar archive.
+    private static func singleFilePayload(fromArchive data: Data) -> Data? {
+        let bytes = [UInt8](data)
+        let block = 512
+        var offset = 0
+        var pendingLong = false
+        while offset + block <= bytes.count {
+            let header = Array(bytes[offset ..< offset + block])
+            offset += block
+            if header.allSatisfy({ $0 == 0 }) { break }
+
+            // size field (octal, 12 bytes at 124).
+            var size = 0
+            for i in 124..<136 {
+                let b = header[i]
+                if b == 0 || b == UInt8(ascii: " ") {
+                    if size != 0 { break } else { continue }
+                }
+                guard b >= UInt8(ascii: "0"), b <= UInt8(ascii: "7") else { break }
+                size = size * 8 + Int(b - UInt8(ascii: "0"))
+            }
+            let padded = ((size + block - 1) / block) * block
+            let typeFlag = header[156]
+
+            // Skip GNU/PAX long-name extension headers; the next header is the file.
+            if typeFlag == UInt8(ascii: "L") || typeFlag == UInt8(ascii: "x") || typeFlag == UInt8(ascii: "g") {
+                pendingLong = true
+                offset += padded
+                continue
+            }
+            pendingLong = false
+            _ = pendingLong
+
+            if typeFlag == UInt8(ascii: "0") || typeFlag == 0 {
+                let end = min(offset + size, bytes.count)
+                guard offset <= end else { return nil }
+                return data.subdata(in: offset ..< end)
+            }
+            offset += padded
+        }
+        return nil
     }
 }

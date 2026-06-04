@@ -30,6 +30,7 @@ private struct GeneralSettings: View {
 
     @AppStorage("refreshInterval") private var refreshInterval = 5.0
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
+    @AppStorage("appearance") private var appearance = "system"
 
     /// Working copy of the local host's socket override, committed on Enter or
     /// via the Reconnect button. Seeded from the live host below.
@@ -44,6 +45,17 @@ private struct GeneralSettings: View {
 
     var body: some View {
         Form {
+            Section {
+                Picker("Appearance", selection: $appearance) {
+                    Text("System").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Appearance")
+            }
+
             Section {
                 TextField(
                     "Socket Path",

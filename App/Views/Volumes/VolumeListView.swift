@@ -5,8 +5,8 @@ import DockerKit
 
 struct VolumeListView: View {
     @Bindable var session: HostSession
+    @Binding var selection: String?
 
-    @State private var selectedName: String?
     @State private var searchText = ""
     @State private var removeTarget: Volume?
     @State private var showingNew = false
@@ -22,33 +22,28 @@ struct VolumeListView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List(selection: $selectedName) {
-                ForEach(filtered) { volume in
-                    VolumeRow(volume: volume)
-                        .tag(volume.name)
-                        .contextMenu {
-                            Button {
-                                copy(volume.name)
-                            } label: {
-                                Label("Copy Name", systemImage: "doc.on.doc")
-                            }
-                            Divider()
-                            Button(role: .destructive) {
-                                removeTarget = volume
-                            } label: {
-                                Label("Remove…", systemImage: "trash")
-                            }
+        List(selection: $selection) {
+            ForEach(filtered) { volume in
+                VolumeRow(volume: volume)
+                    .tag(volume.name)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .contextMenu {
+                        Button {
+                            copy(volume.name)
+                        } label: {
+                            Label("Copy Name", systemImage: "doc.on.doc")
                         }
-                }
-            }
-            .navigationTitle("Volumes")
-            .navigationDestination(item: $selectedName) { name in
-                if let volume = session.volumes.first(where: { $0.name == name }) {
-                    VolumeDetailView(volume: volume, session: session)
-                }
+                        Divider()
+                        Button(role: .destructive) {
+                            removeTarget = volume
+                        } label: {
+                            Label("Remove…", systemImage: "trash")
+                        }
+                    }
             }
         }
+        .animation(.snappy, value: filtered)
+        .navigationTitle("Volumes")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
