@@ -91,17 +91,9 @@ struct ContainerDetailView: View {
         case .overview:
             ContainerOverview(container: container, session: session)
         case .logs:
-            placeholder(
-                title: "Live Logs",
-                systemImage: "text.alignleft",
-                note: "Streaming logs arrive in M2."
-            )
+            LogsView(session: session, container: container)
         case .stats:
-            placeholder(
-                title: "Live Stats",
-                systemImage: "chart.line.uptrend.xyaxis",
-                note: "Live resource charts arrive in M2."
-            )
+            StatsView(session: session, container: container)
         case .terminal:
             placeholder(
                 title: "Terminal",

@@ -20,7 +20,19 @@ public final class HostSession: Identifiable {
     /// Last error surfaced to the UI; settable so a view can dismiss it.
     public var lastError: String?
 
+    /// True while the daemon event stream is delivering live updates; false
+    /// when we have fallen back to polling.
+    public private(set) var liveUpdatesActive = false
+
     private var client: DockerClient?
+
+    /// Background task that consumes the daemon event stream and, when events
+    /// are unavailable, polls for container changes instead.
+    private var eventTask: Task<Void, Never>?
+
+    /// In-flight debounced container refresh; coalesces bursts of container
+    /// events into a single list reload.
+    private var pendingContainerRefresh: Task<Void, Never>?
 
     public init(host: DockerHost) {
         self.host = host
@@ -52,6 +64,7 @@ public final class HostSession: Identifiable {
                 self.client = client
                 status = .connected(version)
                 await refreshAll()
+                startEventMonitoring()
             } catch {
                 await client.shutdown()
                 self.client = nil
@@ -65,6 +78,11 @@ public final class HostSession: Identifiable {
     }
 
     public func disconnect() async {
+        eventTask?.cancel()
+        eventTask = nil
+        pendingContainerRefresh?.cancel()
+        pendingContainerRefresh = nil
+        liveUpdatesActive = false
         if let client {
             await client.shutdown()
         }
@@ -75,6 +93,106 @@ public final class HostSession: Identifiable {
         networks = []
         info = nil
         status = .disconnected
+    }
+
+    // MARK: - Live monitoring
+
+    /// Starts (or restarts) the background monitor: subscribes to the daemon
+    /// event stream and refreshes the affected resource lists as changes
+    /// arrive. If events are unavailable it falls back to periodic polling.
+    /// Safe to call repeatedly — any previous task is cancelled first.
+    public func startEventMonitoring() {
+        guard let client else { return }
+        eventTask?.cancel()
+        eventTask = Task { [weak self] in
+            await self?.monitorLoop(client: client)
+        }
+    }
+
+    /// Long-lived loop driving live updates. Each iteration tries the event
+    /// stream; on stream end or error it falls back to polling, then retries
+    /// the event stream with backoff.
+    private func monitorLoop(client: DockerClient) async {
+        var backoff = 2  // seconds; grows up to 10 between event-stream retries.
+
+        while !Task.isCancelled {
+            do {
+                let events = try await client.events()
+                liveUpdatesActive = true
+                backoff = 2
+                try await consumeEvents(events)
+                // Clean stream end (rare): treat like any other reconnect.
+                liveUpdatesActive = false
+            } catch is CancellationError {
+                break
+            } catch {
+                liveUpdatesActive = false
+            }
+
+            if Task.isCancelled { break }
+
+            // Events unavailable: poll while we wait, so the UI stays fresh, and
+            // sleep the configured interval before retrying the event stream.
+            if status.isConnected {
+                await refreshContainers()
+            }
+
+            let waited = await sleepForPollInterval(retryBackoff: backoff)
+            if !waited { break }
+            backoff = min(backoff * 2, 10)
+        }
+
+        liveUpdatesActive = false
+    }
+
+    /// Sleeps for the polling cadence: the larger of the user's configured
+    /// `refreshInterval` (default 5s) and the current reconnect backoff.
+    /// Returns false if the sleep was cancelled.
+    private func sleepForPollInterval(retryBackoff: Int) async -> Bool {
+        let stored = UserDefaults.standard.integer(forKey: "refreshInterval")
+        let interval = stored > 0 ? stored : 5
+        let seconds = max(interval, retryBackoff)
+        do {
+            try await Task.sleep(for: .seconds(seconds))
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Consumes the event stream, debouncing bursts of container events so a
+    /// rapid sequence (e.g. create → start → health) triggers a single refresh.
+    private func consumeEvents(_ events: AsyncThrowingStream<DockerEvent, Error>) async throws {
+        for try await event in events {
+            if Task.isCancelled { break }
+            switch event.type {
+            case "container":
+                scheduleContainerRefresh()
+            case "image":
+                await refreshImages()
+            case "volume":
+                await refreshVolumes()
+            case "network":
+                await refreshNetworks()
+            default:
+                break
+            }
+        }
+
+        pendingContainerRefresh?.cancel()
+        pendingContainerRefresh = nil
+    }
+
+    /// Schedules a container list refresh ~300ms out, coalescing any further
+    /// container events that arrive within that window into the same reload.
+    private func scheduleContainerRefresh() {
+        guard pendingContainerRefresh == nil else { return }
+        pendingContainerRefresh = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            await self?.refreshContainers()
+            self?.pendingContainerRefresh = nil
+        }
     }
 
     // MARK: - Refresh
@@ -167,6 +285,34 @@ public final class HostSession: Identifiable {
             lastError = error.localizedDescription
             return nil
         }
+    }
+
+    // MARK: - Log / stats streams
+
+    /// Opens a follow log stream for a container. Inspects the container first
+    /// to learn whether it allocated a TTY (which changes the wire framing),
+    /// then tails the last 500 lines and follows new output.
+    public func logStream(for containerID: String) async throws -> AsyncThrowingStream<LogEntry, Error> {
+        guard let client else {
+            throw DockerError.connectionFailed("Not connected")
+        }
+        let details = try await client.inspectContainer(id: containerID)
+        return try await client.containerLogs(
+            id: containerID,
+            tty: details.config.tty,
+            follow: true,
+            tail: 500,
+            timestamps: true,
+            since: nil
+        )
+    }
+
+    /// Opens a streaming stats feed for a container.
+    public func statsStream(for containerID: String) async throws -> AsyncThrowingStream<ContainerStatsSample, Error> {
+        guard let client else {
+            throw DockerError.connectionFailed("Not connected")
+        }
+        return try await client.containerStats(id: containerID)
     }
 
     // MARK: - Raw inspection
