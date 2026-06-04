@@ -9,6 +9,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     case images
     case volumes
     case networks
+    case hostFiles
 
     var id: String { rawValue }
 
@@ -19,6 +20,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .images: "Images"
         case .volumes: "Volumes"
         case .networks: "Networks"
+        case .hostFiles: "Host Files"
         }
     }
 
@@ -29,7 +31,14 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .images: "square.stack.3d.up"
         case .volumes: "externaldrive"
         case .networks: "network"
+        case .hostFiles: "folder"
         }
+    }
+
+    /// Sections shown for a host: SFTP-backed host file browsing exists only
+    /// for SSH hosts.
+    static func sections(forSSHHost isSSH: Bool) -> [HostSection] {
+        isSSH ? allCases : allCases.filter { $0 != .hostFiles }
     }
 }
 
@@ -50,6 +59,7 @@ enum DetailSelection: Hashable {
 
 struct ContentView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openWindow) private var openWindow
 
     @State private var selection: SidebarSelection?
     @State private var detailSelection: DetailSelection?
@@ -159,7 +169,7 @@ struct ContentView: View {
         List(selection: $selection) {
             ForEach(model.sessions) { session in
                 Section {
-                    ForEach(HostSection.allCases) { section in
+                    ForEach(HostSection.sections(forSSHHost: !session.host.isLocal)) { section in
                         Label(section.title, systemImage: section.systemImage)
                             .tag(SidebarSelection(hostID: session.host.id, section: section))
                     }
@@ -175,6 +185,14 @@ struct ContentView: View {
                                 }
                             } label: {
                                 Label("Reconnect", systemImage: "arrow.clockwise")
+                            }
+
+                            if session.supportsHostAccess {
+                                Button {
+                                    openWindow(id: "hostTerminal", value: session.host.id)
+                                } label: {
+                                    Label("Open Host Terminal", systemImage: "terminal")
+                                }
                             }
 
                             if session.host.removable {
@@ -235,6 +253,8 @@ struct ContentView: View {
                 VolumeListView(session: session, selection: volumeSelectionBinding)
             case .networks:
                 NetworkListView(session: session, selection: networkSelectionBinding)
+            case .hostFiles:
+                HostFilesView(session: session)
             }
         }
         // Connection state overlays.
@@ -371,6 +391,7 @@ private struct HostSectionHeader: View {
     var session: HostSession
     var onRemove: () -> Void
 
+    @Environment(\.openWindow) private var openWindow
     @State private var isHovered = false
 
     var body: some View {
@@ -394,6 +415,14 @@ private struct HostSectionHeader: View {
                     }
                 } label: {
                     Label("Reconnect", systemImage: "arrow.clockwise")
+                }
+
+                if session.supportsHostAccess {
+                    Button {
+                        openWindow(id: "hostTerminal", value: session.host.id)
+                    } label: {
+                        Label("Open Host Terminal", systemImage: "terminal")
+                    }
                 }
 
                 if session.host.removable {

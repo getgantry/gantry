@@ -68,6 +68,13 @@ struct GantryApp: App {
             }
         }
 
+        // Standalone host shell windows (one per open request).
+        WindowGroup(id: "hostTerminal", for: UUID.self) { $hostID in
+            HostTerminalWindow(hostID: hostID)
+                .environment(model)
+        }
+        .defaultSize(width: 840, height: 520)
+
         MenuBarExtra("Gantry", systemImage: "shippingbox.fill", isInserted: $showMenuBarExtra) {
             MenuBarView()
                 .environment(model)

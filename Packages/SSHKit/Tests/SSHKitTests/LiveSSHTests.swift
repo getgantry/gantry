@@ -244,6 +244,92 @@ func liveSSHOneShotStatsBurst() async throws {
     await client.shutdown()
 }
 
+/// Interactive host shell: open a PTY, run a command, expect its output to
+/// round-trip, then close cleanly.
+@Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
+func liveHostShellRoundTrip() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let key = try SSHKeyLoader.load(contentsOf: testKeyPath, passphrase: nil)
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-shell-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .key(key)
+    )
+
+    let shell = SSHHostShell(makeClient: {
+        try await SSHConnector.connect(
+            parameters: parameters,
+            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+        )
+    })
+
+    let marker = "gantry-shell-\(UUID().uuidString.prefix(8))"
+    shell.send(Data("echo \(marker)\n".utf8))
+
+    var transcript = ""
+    var sawMarker = false
+    for try await chunk in shell.bytes {
+        transcript += String(decoding: chunk, as: UTF8.self)
+        // The echo command itself is in the transcript too (PTY echo); require
+        // the marker on its own line to prove the shell executed it.
+        if transcript.contains("\n") || transcript.contains("\r") {
+            let lines = transcript.split(whereSeparator: \.isNewline)
+            if lines.contains(where: { $0.trimmingCharacters(in: .whitespaces) == marker }) {
+                sawMarker = true
+                break
+            }
+        }
+    }
+    #expect(sawMarker, "expected marker in shell output, got: \(transcript.suffix(400))")
+    shell.terminate()
+    print("LIVE SHELL: marker round-tripped")
+}
+
+/// SFTP host filesystem: list "/" and download a small file.
+@Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
+func liveHostFileSystem() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let key = try SSHKeyLoader.load(contentsOf: testKeyPath, passphrase: nil)
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-sftp-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .key(key)
+    )
+
+    let fs = SSHHostFileSystem(makeClient: {
+        try await SSHConnector.connect(
+            parameters: parameters,
+            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+        )
+    })
+
+    let root = try await fs.listDirectory("/")
+    #expect(!root.isEmpty)
+    #expect(root.contains { $0.name == "etc" && $0.isDirectory })
+
+    final class DataBox: @unchecked Sendable {
+        private let lock = NSLock()
+        private var storage = Data()
+        func append(_ data: Data) { lock.lock(); storage.append(data); lock.unlock() }
+        var data: Data { lock.lock(); defer { lock.unlock() }; return storage }
+    }
+    let downloaded = DataBox()
+    try await fs.downloadFile("/etc/hostname") { chunk in
+        downloaded.append(chunk)
+    }
+    #expect(!downloaded.data.isEmpty)
+    print("LIVE SFTP: \(root.count) root entries, hostname=\(String(decoding: downloaded.data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))")
+    await fs.close()
+}
+
 /// Stress: abruptly cancel streams mid-flight while big requests run.
 /// Reproduces the window-adjust-after-close race that crashed the app
 /// before the patched swift-nio-ssh fork.

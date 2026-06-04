@@ -7,6 +7,7 @@ import DockerKit
 /// sidebar so a host lands here after connecting.
 struct HostOverviewView: View {
     @Bindable var session: HostSession
+    @Environment(\.openWindow) private var openWindow
 
     @State private var load: ContainerLoad?
     @State private var diskUsage: SystemDiskUsage?
@@ -37,6 +38,16 @@ struct HostOverviewView: View {
         }
         .navigationTitle("Overview")
         .toolbar {
+            if session.supportsHostAccess {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        openWindow(id: "hostTerminal", value: session.host.id)
+                    } label: {
+                        Label("Host Terminal", systemImage: "terminal")
+                    }
+                    .help("Open a shell on this host")
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     Task { await refresh(includeDisk: true) }

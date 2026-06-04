@@ -89,185 +89,33 @@ struct GantryTerminalView: NSViewRepresentable {
 
 // MARK: - Container terminal tab
 
-/// The Terminal tab content: opens a shell exec session into the container and
-/// pumps its bytes into a `GantryTerminalView`.
+/// The Terminal tab content: opens a shell exec session into the container
+/// and drives it through the shared `TerminalPane`.
 struct ContainerTerminalView: View {
     let session: HostSession
     let container: ContainerSummary
 
-    private enum Phase {
-        case idle
-        case connecting
-        case running
-        case ended(String)
-        case failed(String)
-    }
-
-    @State private var phase: Phase = .idle
-    @State private var exec: ExecSession?
-    @State private var generation = 0
-    @State private var feedHandle = TerminalFeedHandle()
-
     /// Single robust command: prefer bash, fall back to sh inside one shell.
     private let shellCommand = ["/bin/sh", "-c", "exec bash || exec sh"]
-    private let shellLabel = "bash"
 
     var body: some View {
-        Group {
-            if !container.state.isRunning {
-                ContentUnavailableView(
-                    "Container is not running",
-                    systemImage: "pause.circle"
-                )
-            } else {
-                terminalContent
-            }
-        }
-        .task(id: taskID) {
-            guard container.state.isRunning else { return }
-            await connect()
-        }
-        .onDisappear {
-            exec?.terminate()
-            exec = nil
-        }
-    }
-
-    private var taskID: String { "\(container.id)#\(generation)" }
-
-    @ViewBuilder
-    private var terminalContent: some View {
-        VStack(spacing: 0) {
-            headerBar
-            Divider()
-            ZStack {
-                Color(nsColor: .textBackgroundColor)
-                GantryTerminalView(
-                    feedHandle: feedHandle,
-                    onInput: { data in exec?.send(data) },
-                    onResize: { cols, rows in exec?.resize(cols: cols, rows: rows) }
-                )
-                .padding(8)
-
-                switch phase {
-                case .connecting:
-                    ProgressView("Connecting…")
-                        .controlSize(.large)
-                        .padding(16)
-                        .background(.regularMaterial, in: .rect(cornerRadius: 10))
-                case .ended(let message), .failed(let message):
-                    overlayBanner(message)
-                case .idle, .running:
-                    EmptyView()
-                }
-            }
-        }
-        .background(Color(nsColor: .textBackgroundColor))
-    }
-
-    private var headerBar: some View {
-        HStack(spacing: 8) {
-            Text(container.displayName)
-                .font(.callout.weight(.semibold))
-                .lineLimit(1)
-            Text("•")
-                .foregroundStyle(.tertiary)
-            Text(shellLabel)
-                .font(.system(.callout, design: .monospaced))
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            statusIndicator
-
-            Button {
-                reconnect()
-            } label: {
-                Label("Reconnect", systemImage: "arrow.clockwise")
-            }
-            .controlSize(.small)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-    }
-
-    @ViewBuilder
-    private var statusIndicator: some View {
-        switch phase {
-        case .running:
-            Label("Connected", systemImage: "circle.fill")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.green)
-                .labelStyle(.titleAndIcon)
-                .imageScale(.small)
-        case .ended:
-            Label("Disconnected", systemImage: "circle.fill")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-                .imageScale(.small)
-        case .failed:
-            Label("Error", systemImage: "exclamationmark.triangle.fill")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.red)
-                .imageScale(.small)
-        case .idle, .connecting:
-            EmptyView()
-        }
-    }
-
-    private func overlayBanner(_ message: String) -> some View {
-        VStack(spacing: 12) {
-            Text(message)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-            Button("Reconnect") { reconnect() }
-                .buttonStyle(.borderedProminent)
-        }
-        .padding(20)
-        .background(.regularMaterial, in: .rect(cornerRadius: 12))
-    }
-
-    // MARK: - Session lifecycle
-
-    private func connect() async {
-        phase = .connecting
-        do {
-            let session = try await session.openExecSession(
-                containerID: container.id,
-                command: shellCommand
+        if !container.state.isRunning {
+            ContentUnavailableView(
+                "Container is not running",
+                systemImage: "pause.circle"
             )
-            session.onError = { message in
-                phase = .failed(message)
-            }
-            exec = session
-            phase = .running
-            await pump(session)
-        } catch {
-            phase = .failed(error.localizedDescription)
+        } else {
+            TerminalPane(
+                title: container.displayName,
+                subtitle: "bash",
+                connectionID: container.id,
+                connect: {
+                    try await session.openExecSession(
+                        containerID: container.id,
+                        command: shellCommand
+                    )
+                }
+            )
         }
-    }
-
-    /// Drains daemon bytes into the terminal until the stream ends or errors.
-    private func pump(_ session: ExecSession) async {
-        do {
-            for try await chunk in session.bytes {
-                feedHandle.feed(chunk)
-            }
-            // Only mark ended if we are still the active session.
-            if exec === session {
-                phase = .ended("Session closed")
-            }
-        } catch {
-            if exec === session {
-                phase = .failed(error.localizedDescription)
-            }
-        }
-    }
-
-    private func reconnect() {
-        exec?.terminate()
-        exec = nil
-        phase = .idle
-        generation += 1
     }
 }

@@ -84,6 +84,13 @@ public final class HostSession: Identifiable {
     /// deltas behind `containerLoad()`.
     private var loadCPUBaseline: [String: (total: Int64, system: Int64)] = [:]
 
+    /// Factory for additional SSH connections to this host (host shell, SFTP
+    /// file browsing). Set while an SSH host is connected; nil for local.
+    private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
+
+    /// Lazy SFTP browser for the host filesystem; one per session.
+    private var hostFileSystemStorage: SSHHostFileSystem?
+
     public init(host: DockerHost) {
         self.host = host
     }
@@ -173,11 +180,15 @@ public final class HostSession: Identifiable {
             auth: auth
         )
 
-        let transport = SSHDialStdioTransport {
+        let makeClient: @Sendable () async throws -> SSHClient = {
             try await SSHConnector.connect(parameters: parameters, policy: policy)
         }
+        let transport = SSHDialStdioTransport(makeClient: makeClient)
 
         await finishConnect(with: transport)
+        if status.isConnected {
+            sshClientFactory = makeClient
+        }
     }
 
     /// Determines the authentication method, consulting the Keychain and, when
@@ -316,6 +327,11 @@ public final class HostSession: Identifiable {
         eventTask = nil
         pendingContainerRefresh?.cancel()
         pendingContainerRefresh = nil
+        sshClientFactory = nil
+        if let fs = hostFileSystemStorage {
+            hostFileSystemStorage = nil
+            Task { await fs.close() }
+        }
         liveUpdatesActive = false
         // Resolve any prompt left hanging by an interrupted connect attempt.
         cancelCredential()
@@ -634,6 +650,37 @@ public final class HostSession: Identifiable {
             return string
         }
         return String(data: data, encoding: .utf8) ?? ""
+    }
+}
+
+// MARK: - Host shell & host filesystem (SSH hosts)
+
+extension HostSession {
+    /// True when this host can open a host shell / browse the host
+    /// filesystem — i.e. it is a connected SSH host.
+    public var supportsHostAccess: Bool {
+        sshClientFactory != nil && status.isConnected
+    }
+
+    /// Opens an interactive PTY shell on the SSH host over a dedicated
+    /// connection (independent of the Docker tunnel).
+    public func openHostShell() throws -> HostShellSession {
+        guard let factory = sshClientFactory else {
+            throw DockerError.connectionFailed("A host shell requires a connected SSH host")
+        }
+        return HostShellSession(shell: SSHHostShell(makeClient: factory))
+    }
+
+    /// The SFTP browser for the host filesystem, created on first use and
+    /// torn down on disconnect.
+    public func hostFileSystem() throws -> SSHHostFileSystem {
+        guard let factory = sshClientFactory else {
+            throw DockerError.connectionFailed("Host file browsing requires a connected SSH host")
+        }
+        if let existing = hostFileSystemStorage { return existing }
+        let fs = SSHHostFileSystem(makeClient: factory)
+        hostFileSystemStorage = fs
+        return fs
     }
 }
 
