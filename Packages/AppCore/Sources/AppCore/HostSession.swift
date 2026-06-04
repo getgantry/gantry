@@ -886,6 +886,32 @@ extension HostSession {
         await mutateValue { try await $0.systemDF() }
     }
 
+    /// Live aggregate load across the host's running containers: total CPU
+    /// percentage (100 = one core) and memory used, sampled in parallel via
+    /// one-shot stats. Containers that vanish mid-sample are skipped.
+    public func containerLoad() async -> ContainerLoad? {
+        guard let client else { return nil }
+        let running = containers.filter { $0.state.isRunning }.map(\.id)
+        guard !running.isEmpty else { return ContainerLoad(cpuPercent: 0, memoryUsedBytes: 0, sampled: 0) }
+
+        let samples = await withTaskGroup(of: ContainerStatsSample?.self) { group in
+            for id in running {
+                group.addTask { try? await client.containerStatsOnce(id: id) }
+            }
+            var collected: [ContainerStatsSample] = []
+            for await sample in group {
+                if let sample { collected.append(sample) }
+            }
+            return collected
+        }
+
+        return ContainerLoad(
+            cpuPercent: samples.reduce(0) { $0 + $1.cpuPercent },
+            memoryUsedBytes: samples.reduce(0) { $0 + $1.memoryUsageBytes },
+            sampled: samples.count
+        )
+    }
+
     /// Prunes the builder cache. Returns the reclaimed space report.
     public func pruneBuildCache() async -> PruneResult? {
         await mutateValue { try await $0.pruneBuildCache() }
@@ -899,6 +925,15 @@ extension HostSession {
         guard let data = json.data(using: .utf8) else { return [] }
         return NetworkAttachedContainer.decode(fromInspect: data)
     }
+}
+
+/// Aggregate live load across a host's running containers, for the Overview
+/// dashboard. CPU is the sum of per-container percentages (100 = one core).
+public struct ContainerLoad: Sendable, Hashable {
+    public let cpuPercent: Double
+    public let memoryUsedBytes: Int64
+    /// How many running containers the sample covers.
+    public let sampled: Int
 }
 
 /// One container attached to a network, decoded from the `Containers` map of a

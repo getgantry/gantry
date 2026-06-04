@@ -2,8 +2,9 @@ import SwiftUI
 import AppCore
 import DockerKit
 
-/// The four resource sections each host exposes.
+/// The sections each host exposes in the sidebar.
 enum HostSection: String, Hashable, CaseIterable, Identifiable {
+    case overview
     case containers
     case images
     case volumes
@@ -13,6 +14,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .overview: "Overview"
         case .containers: "Containers"
         case .images: "Images"
         case .volumes: "Volumes"
@@ -22,6 +24,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
+        case .overview: "gauge.with.dots.needle.50percent"
         case .containers: "shippingbox"
         case .images: "square.stack.3d.up"
         case .volumes: "externaldrive"
@@ -218,6 +221,8 @@ struct ContentView: View {
     private func sectionContent(for section: HostSection, session: HostSession) -> some View {
         Group {
             switch section {
+            case .overview:
+                HostOverviewView(session: session)
             case .containers:
                 ContainerListView(session: session, selection: containerSelectionBinding)
             case .images:

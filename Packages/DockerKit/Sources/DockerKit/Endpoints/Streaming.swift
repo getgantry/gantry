@@ -48,6 +48,20 @@ extension DockerClient {
         return DockerClient.makeJSONLineStream(from: byteStream, type: ContainerStatsSample.self)
     }
 
+    /// `GET /containers/{id}/stats?stream=false` — a single stats sample.
+    ///
+    /// The daemon waits one collection interval (~1s) before answering so the
+    /// `precpu` fields are populated and a CPU percentage can be derived.
+    public func containerStatsOnce(id: String) async throws -> ContainerStatsSample {
+        let response = try await requestData(
+            method: .get,
+            path: "/containers/\(id)/stats",
+            query: [URLQueryItem(name: "stream", value: "false")],
+            expecting: [200]
+        )
+        return try decode(ContainerStatsSample.self, from: response.body, path: "/containers/\(id)/stats")
+    }
+
     /// `GET /events` — streams daemon events.
     public func events() async throws -> AsyncThrowingStream<DockerEvent, Error> {
         let byteStream = try await byteStream(path: "/events", query: [])
