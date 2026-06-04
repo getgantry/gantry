@@ -199,6 +199,51 @@ func rsaSha2Auth() async throws {
     try? FileManager.default.removeItem(atPath: tempStore)
 }
 
+/// One-shot stats must not starve the serialized execute tunnel: fire a
+/// stats burst for every running container concurrently with an inspect and
+/// assert the whole round completes quickly. Guards against the daemon-side
+/// collection wait (~1s/container) that `one-shot=true` exists to avoid.
+@Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
+func liveSSHOneShotStatsBurst() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let key = try SSHKeyLoader.load(contentsOf: testKeyPath, passphrase: nil)
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-oneshot-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .key(key)
+    )
+    let transport = SSHDialStdioTransport(makeClient: {
+        try await SSHConnector.connect(
+            parameters: parameters,
+            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+        )
+    })
+    let client = DockerClient(transport: transport)
+    _ = try await client.negotiate()
+
+    let running = try await client.listContainers(all: false)
+    let start = ContinuousClock.now
+    try await withThrowingTaskGroup(of: Void.self) { group in
+        for container in running {
+            group.addTask { _ = try await client.containerStatsOnce(id: container.id) }
+        }
+        if let first = running.first {
+            group.addTask { _ = try await client.inspectContainer(id: first.id) }
+        }
+        try await group.waitForAll()
+    }
+    let elapsed = ContinuousClock.now - start
+    print("LIVE ONE-SHOT: \(running.count) stats + inspect in \(elapsed)")
+    // Generous bound: with one-shot each request is tens of ms; the old
+    // behavior (1s daemon wait per container, serialized) would blow this.
+    #expect(elapsed < .seconds(Double(max(running.count, 1)) * 0.7 + 3))
+    await client.shutdown()
+}
+
 /// Stress: abruptly cancel streams mid-flight while big requests run.
 /// Reproduces the window-adjust-after-close race that crashed the app
 /// before the patched swift-nio-ssh fork.

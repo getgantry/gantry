@@ -48,15 +48,22 @@ extension DockerClient {
         return DockerClient.makeJSONLineStream(from: byteStream, type: ContainerStatsSample.self)
     }
 
-    /// `GET /containers/{id}/stats?stream=false` — a single stats sample.
+    /// `GET /containers/{id}/stats?stream=false&one-shot=true` — a single,
+    /// immediate stats sample.
     ///
-    /// The daemon waits one collection interval (~1s) before answering so the
-    /// `precpu` fields are populated and a CPU percentage can be derived.
+    /// `one-shot` makes the daemon answer without waiting a collection
+    /// interval, so this is cheap even over serialized transports (SSH).
+    /// The trade-off: `precpu` is zeroed, so the sample's `cpuPercent` is
+    /// meaningless — derive CPU from `cpuTotalUsage`/`systemCPUUsage` deltas
+    /// across your own consecutive samples instead.
     public func containerStatsOnce(id: String) async throws -> ContainerStatsSample {
         let response = try await requestData(
             method: .get,
             path: "/containers/\(id)/stats",
-            query: [URLQueryItem(name: "stream", value: "false")],
+            query: [
+                URLQueryItem(name: "stream", value: "false"),
+                URLQueryItem(name: "one-shot", value: "true")
+            ],
             expecting: [200]
         )
         return try decode(ContainerStatsSample.self, from: response.body, path: "/containers/\(id)/stats")

@@ -80,6 +80,10 @@ public final class HostSession: Identifiable {
     /// events into a single list reload.
     private var pendingContainerRefresh: Task<Void, Never>?
 
+    /// Previous one-shot CPU counters per container, for the inter-tick
+    /// deltas behind `containerLoad()`.
+    private var loadCPUBaseline: [String: (total: Int64, system: Int64)] = [:]
+
     public init(host: DockerHost) {
         self.host = host
     }
@@ -515,7 +519,7 @@ public final class HostSession: Identifiable {
 
     /// Opens a follow log stream for a container. Inspects the container first
     /// to learn whether it allocated a TTY (which changes the wire framing),
-    /// then tails the last 500 lines and follows new output.
+    /// then tails the last 100 lines and follows new output.
     public func logStream(for containerID: String) async throws -> AsyncThrowingStream<LogEntry, Error> {
         guard let client else {
             throw DockerError.connectionFailed("Not connected")
@@ -525,7 +529,7 @@ public final class HostSession: Identifiable {
             id: containerID,
             tty: details.config.tty,
             follow: true,
-            tail: 500,
+            tail: 100,
             timestamps: true,
             since: nil
         )
@@ -887,29 +891,53 @@ extension HostSession {
     }
 
     /// Live aggregate load across the host's running containers: total CPU
-    /// percentage (100 = one core) and memory used, sampled in parallel via
-    /// one-shot stats. Containers that vanish mid-sample are skipped.
+    /// percentage (100 = one core) and memory used.
+    ///
+    /// Uses immediate one-shot stats (cheap even over the serialized SSH
+    /// tunnel) and derives each container's CPU from the counter delta
+    /// against the previous call, the same way `docker stats` does between
+    /// frames. The first call after connect reports CPU as 0 — the baseline
+    /// is established then. Containers that vanish mid-sample are skipped.
     public func containerLoad() async -> ContainerLoad? {
         guard let client else { return nil }
         let running = containers.filter { $0.state.isRunning }.map(\.id)
-        guard !running.isEmpty else { return ContainerLoad(cpuPercent: 0, memoryUsedBytes: 0, sampled: 0) }
+        guard !running.isEmpty else {
+            loadCPUBaseline = [:]
+            return ContainerLoad(cpuPercent: 0, memoryUsedBytes: 0, sampled: 0)
+        }
 
-        let samples = await withTaskGroup(of: ContainerStatsSample?.self) { group in
+        let samples = await withTaskGroup(of: (String, ContainerStatsSample)?.self) { group in
             for id in running {
-                group.addTask { try? await client.containerStatsOnce(id: id) }
+                group.addTask {
+                    guard let sample = try? await client.containerStatsOnce(id: id) else { return nil }
+                    return (id, sample)
+                }
             }
-            var collected: [ContainerStatsSample] = []
-            for await sample in group {
-                if let sample { collected.append(sample) }
+            var collected: [(String, ContainerStatsSample)] = []
+            for await pair in group {
+                if let pair { collected.append(pair) }
             }
             return collected
         }
 
-        return ContainerLoad(
-            cpuPercent: samples.reduce(0) { $0 + $1.cpuPercent },
-            memoryUsedBytes: samples.reduce(0) { $0 + $1.memoryUsageBytes },
-            sampled: samples.count
-        )
+        var cpuPercent = 0.0
+        var memoryUsed: Int64 = 0
+        var baseline: [String: (total: Int64, system: Int64)] = [:]
+        for (id, sample) in samples {
+            memoryUsed += sample.memoryUsageBytes
+            if let previous = loadCPUBaseline[id] {
+                let cpuDelta = sample.cpuTotalUsage - previous.total
+                let systemDelta = sample.systemCPUUsage - previous.system
+                if cpuDelta > 0, systemDelta > 0 {
+                    cpuPercent += Double(cpuDelta) / Double(systemDelta)
+                        * Double(max(sample.onlineCPUs, 1)) * 100.0
+                }
+            }
+            baseline[id] = (sample.cpuTotalUsage, sample.systemCPUUsage)
+        }
+        loadCPUBaseline = baseline
+
+        return ContainerLoad(cpuPercent: cpuPercent, memoryUsedBytes: memoryUsed, sampled: samples.count)
     }
 
     /// Prunes the builder cache. Returns the reclaimed space report.

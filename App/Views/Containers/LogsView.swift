@@ -214,14 +214,33 @@ struct LogsView: View {
 
     /// Renders one log line, highlighting search matches when searching. The
     /// line that holds the currently focused match gets a stronger highlight.
+    ///
+    /// stderr is deliberately NOT colored: many daemons (postgres, nginx)
+    /// route all routine logging to stderr, so painting it red reads as a
+    /// wall of false alarms. Only lines that look like real errors get tinted.
     @ViewBuilder
     private func row(for entry: LogEntry) -> some View {
         let isCurrentLine = currentMatchLineID == entry.id
         Text(highlighted(entry.text, strong: isCurrentLine))
             .font(.system(size: 11.5, design: .monospaced))
-            .foregroundStyle(entry.stream == .stderr ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))
+            .foregroundStyle(Self.looksLikeError(entry.text) ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))
             .textSelection(.enabled)
             .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Heuristic severity check for tinting: explicit error/fatal markers
+    /// only, so routine stderr output stays in the default color.
+    private static func looksLikeError(_ text: String) -> Bool {
+        for marker in ["error", "fatal", "panic", "critical"] {
+            if let range = text.range(of: marker, options: .caseInsensitive) {
+                // Require a word-ish boundary before the marker so e.g.
+                // "stderror_count" or URLs do not light up.
+                if range.lowerBound == text.startIndex { return true }
+                let before = text[text.index(before: range.lowerBound)]
+                if !before.isLetter && !before.isNumber { return true }
+            }
+        }
+        return false
     }
 
     /// The `LogEntry.id` of the line containing the currently focused match,

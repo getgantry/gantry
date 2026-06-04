@@ -290,3 +290,25 @@ private struct Probe: Decodable, Sendable, Equatable {
     #expect(event.containerName == nil)
     #expect(!event.isContainerEvent)
 }
+
+@Suite struct ANSIStrippingTests {
+    @Test func stripsSGRColorCodes() {
+        let input = "\u{1B}[0m\u{1B}[1;31m2026-06-04 error: dial tcp\u{1B}[0m"
+        #expect(LogLineFormatting.strippingANSI(input) == "2026-06-04 error: dial tcp")
+    }
+
+    @Test func stripsOSCTitleSequences() {
+        let input = "\u{1B}]0;title\u{07}hello"
+        #expect(LogLineFormatting.strippingANSI(input) == "hello")
+    }
+
+    @Test func plainTextUntouched() {
+        let input = "plain text [0m not an escape"
+        #expect(LogLineFormatting.strippingANSI(input) == input)
+    }
+
+    @Test func truncatedEscapeAtEndDoesNotCrash() {
+        #expect(LogLineFormatting.strippingANSI("abc\u{1B}[1;3") == "abc")
+        #expect(LogLineFormatting.strippingANSI("abc\u{1B}") == "abc")
+    }
+}

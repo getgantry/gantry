@@ -10,6 +10,11 @@ public struct ContainerStatsSample: Sendable, Hashable, Identifiable, Decodable 
     public let readAt: Date
     public let cpuPercent: Double
     public let onlineCPUs: Int
+    /// Raw cumulative counters, for callers computing CPU deltas across their
+    /// own sampling interval (e.g. one-shot samples, where `precpu` is zeroed
+    /// and `cpuPercent` is meaningless).
+    public let cpuTotalUsage: Int64
+    public let systemCPUUsage: Int64
     public let memoryUsageBytes: Int64
     public let memoryLimitBytes: Int64
     public let memoryPercent: Double
@@ -36,6 +41,9 @@ public struct ContainerStatsSample: Sendable, Hashable, Identifiable, Decodable 
         let preCPUStats = try c.decodeIfPresent(CPUStats.self, forKey: .precpuStats) ?? CPUStats()
         let online = cpuStats.onlineCPUs ?? cpuStats.percpuUsage?.count ?? 0
         onlineCPUs = online
+
+        cpuTotalUsage = cpuStats.cpuUsage.totalUsage
+        systemCPUUsage = cpuStats.systemCPUUsage
 
         let cpuDelta = cpuStats.cpuUsage.totalUsage - preCPUStats.cpuUsage.totalUsage
         let systemDelta = cpuStats.systemCPUUsage - preCPUStats.systemCPUUsage

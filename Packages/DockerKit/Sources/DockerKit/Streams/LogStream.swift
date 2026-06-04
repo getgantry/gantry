@@ -162,7 +162,7 @@ public struct RawLogLineParser: Sendable {
 
 // MARK: - Shared line formatting
 
-private enum LogLineFormatting {
+enum LogLineFormatting {
     /// RFC3339Nano timestamps prefix the line and end at the first space.
     static func makeEntry(
         from lineData: Data,
@@ -176,7 +176,7 @@ private enum LogLineFormatting {
             bytes.removeLast()
         }
 
-        var text = String(decoding: bytes, as: UTF8.self)
+        var text = strippingANSI(String(decoding: bytes, as: UTF8.self))
         var timestamp: Date?
 
         if parseTimestamps, let spaceIndex = text.firstIndex(of: " ") {
@@ -188,6 +188,41 @@ private enum LogLineFormatting {
         }
 
         return LogEntry(id: sequence, stream: stream, text: text, timestamp: timestamp)
+    }
+
+    /// Removes ANSI escape sequences (SGR colors, cursor control, OSC titles)
+    /// so log lines render, search, and copy as plain text.
+    static func strippingANSI(_ text: String) -> String {
+        guard text.utf8.contains(0x1B) else { return text }
+
+        var result = String.UnicodeScalarView()
+        var scalars = text.unicodeScalars[...]
+        while let esc = scalars.firstIndex(of: "\u{1B}") {
+            result.append(contentsOf: scalars[..<esc])
+            var rest = scalars[scalars.index(after: esc)...]
+            switch rest.first {
+            case "[":
+                // CSI: parameter bytes 0x30–0x3F, intermediates 0x20–0x2F,
+                // one final byte 0x40–0x7E.
+                rest = rest.dropFirst()
+                while let c = rest.first, (0x20...0x3F).contains(c.value) {
+                    rest = rest.dropFirst()
+                }
+                rest = rest.dropFirst()
+            case "]":
+                // OSC: runs to BEL or ESC-backslash.
+                while let c = rest.first, c != "\u{07}", c != "\u{1B}" {
+                    rest = rest.dropFirst()
+                }
+                rest = rest.dropFirst(rest.first == "\u{1B}" ? 2 : 1)
+            default:
+                // Lone ESC plus a single command character.
+                rest = rest.dropFirst()
+            }
+            scalars = rest
+        }
+        result.append(contentsOf: scalars)
+        return String(result)
     }
 }
 

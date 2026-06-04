@@ -15,6 +15,7 @@ struct FilesView: View {
     @State private var path = "/"
     @State private var pathField = "/"
     @State private var entries: [ContainerFileEntry] = []
+    @State private var selection: String?
     @State private var isLoading = false
     @State private var errorText: String?
     @State private var transferStatus: String?
@@ -71,14 +72,11 @@ struct FilesView: View {
                 description: Text(errorText)
             )
         } else {
-            List {
+            List(selection: $selection) {
                 if path != "/" {
-                    Button {
+                    ParentRow {
                         go(to: parentPath(of: path))
-                    } label: {
-                        Label("..", systemImage: "arrow.turn.up.left")
                     }
-                    .buttonStyle(.plain)
                 }
                 ForEach(entries, id: \.name) { entry in
                     FileRow(
@@ -90,6 +88,7 @@ struct FilesView: View {
                             name: entry.name,
                             isDirectory: entry.isDirectory
                         ),
+                        fullPath: join(path, entry.name),
                         onOpen: {
                             if entry.isDirectory {
                                 go(to: join(path, entry.name))
@@ -102,7 +101,16 @@ struct FilesView: View {
                             Task { await uploadURLs(urls, into: join(path, entry.name)) }
                         } : nil
                     )
+                    .tag(entry.name)
                 }
+            }
+            // Return descends into the selected directory, like Finder's ⌘O.
+            .onKeyPress(.return) {
+                guard let selection,
+                      let entry = entries.first(where: { $0.name == selection }),
+                      entry.isDirectory else { return .ignored }
+                go(to: join(path, entry.name))
+                return .handled
             }
             // Dropping onto empty list area uploads into the current directory.
             .dropDestination(for: URL.self) { urls, _ in
@@ -227,15 +235,40 @@ struct FilesView: View {
 
 // MARK: - File row
 
+/// The ".." row navigating to the parent directory.
+private struct ParentRow: View {
+    let onOpen: () -> Void
+    @State private var hovered = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.turn.up.left")
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            Text("..")
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .padding(.vertical, 1)
+        .background(hovered ? Color.primary.opacity(0.06) : .clear, in: RoundedRectangle(cornerRadius: 5))
+        .onHover { hovered = $0 }
+        .onTapGesture { onOpen() }
+        .help("Go to the parent directory")
+    }
+}
+
 private struct FileRow: View {
     let entry: ContainerFileEntry
     let transfer: ContainerFileTransfer
+    let fullPath: String
     let onOpen: () -> Void
     let onDownload: () -> Void
     /// Non-nil only for directory rows: handles a Finder drop into this folder.
     let onDropURLs: (([URL]) -> Void)?
 
     @State private var isDropTargeted = false
+    @State private var hovered = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -245,7 +278,13 @@ private struct FileRow: View {
             Text(entry.name)
                 .lineLimit(1)
             Spacer()
-            if !entry.isDirectory {
+            if entry.isDirectory {
+                // Affordance: directories open (double-click / Return).
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .opacity(hovered ? 1 : 0.45)
+            } else {
                 Text(Formatters.bytes(Int64(entry.size)))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
@@ -255,23 +294,36 @@ private struct FileRow: View {
                     Image(systemName: "arrow.down.circle")
                 }
                 .buttonStyle(.borderless)
+                .opacity(hovered ? 1 : 0.55)
                 .help("Download")
             }
         }
         .contentShape(Rectangle())
         .padding(.vertical, 1)
-        .background(
-            isDropTargeted ? Color.accentColor.opacity(0.18) : Color.clear,
-            in: RoundedRectangle(cornerRadius: 5)
-        )
+        .background(backgroundColor, in: RoundedRectangle(cornerRadius: 5))
+        .onHover { hovered = $0 }
         .onTapGesture(count: 2) { onOpen() }
         .draggable(transfer) {
             Label(entry.name, systemImage: icon)
         }
+        .contextMenu {
+            if entry.isDirectory {
+                Button("Open") { onOpen() }
+            }
+            Button(entry.isDirectory ? "Download as \(entry.name).tar" : "Download…") { onDownload() }
+            Divider()
+            Button("Copy Path") { copyToPasteboard(fullPath) }
+        }
         .help(entry.isDirectory
-              ? "Drag out to save as \(entry.name).tar"
+              ? "Double-click to open · drag out to export"
               : "Drag out to copy to Finder")
         .modifier(DirectoryDropModifier(isTargeted: $isDropTargeted, onDropURLs: onDropURLs))
+    }
+
+    private var backgroundColor: Color {
+        if isDropTargeted { return Color.accentColor.opacity(0.18) }
+        if hovered { return Color.primary.opacity(0.06) }
+        return .clear
     }
 
     private var icon: String {
