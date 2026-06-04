@@ -28,6 +28,11 @@ struct GantryApp: App {
     var body: some Scene {
         WindowGroup(id: "main") {
             ContentView()
+                // Keep the window at least as wide as the sum of the split
+                // view's column minimums (220 + 300 + 640). Below that,
+                // NavigationSplitView demotes the sidebar to a floating
+                // overlay that collides with the traffic lights.
+                .frame(minWidth: 1160, minHeight: 520)
                 .environment(model)
                 .onAppear {
                     applyAppearance(appearance)
