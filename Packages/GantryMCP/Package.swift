@@ -22,6 +22,15 @@ let package = Package(
                 "SSHKit",
                 "AppCore"
             ]
+        ),
+        .testTarget(
+            name: "GantryMCPTests",
+            dependencies: [
+                "gantry-mcp",
+                .product(name: "MCP", package: "swift-sdk"),
+                "DockerKit",
+                "AppCore"
+            ]
         )
     ]
 )

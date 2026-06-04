@@ -59,8 +59,18 @@ required resource is available:
 
 - DockerKit live tests run only when a local Docker socket is discovered
   (Docker Desktop, OrbStack, Colima, the system default, or `DOCKER_HOST`).
-- SSHKit live tests run only when a dedicated test SSH key is present and the
-  configured test host is reachable.
+- SSHKit live tests run only when `GANTRY_SSH_TEST_HOST` is set to a reachable
+  SSH host with Docker installed, and the test key exists. Environment:
+  - `GANTRY_SSH_TEST_HOST` — host (or ssh_config alias) to dial.
+  - `GANTRY_SSH_TEST_KEY` — passphrase-free private key authorized on that
+    host (default `~/.ssh/gantry_test_ed25519`).
+  - `GANTRY_SSH_TEST_RSA_KEY` — optional RSA key for the rsa-sha2-256 test
+    (default `~/.ssh/id_rsa`).
+
+  Because the live SSH suite opens many concurrent connections to one host,
+  run it serially: `GANTRY_SSH_TEST_HOST=<host> swift test --no-parallel`.
+- AppCore persistence tests point `hosts.json` at a temp file via
+  `GANTRY_HOSTS_PATH`; they never touch your real app data.
 
 When the resource is absent (as on CI, or a machine without Docker), the gated
 tests are skipped rather than failed. The non-live unit tests always run.

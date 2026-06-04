@@ -14,8 +14,15 @@ public struct ResolvedSSHEndpoint: Sendable {
 
     /// Resolves `endpoint` against ssh_config, filling any gaps the user left
     /// blank.
-    public static func resolve(_ endpoint: SSHEndpoint) -> ResolvedSSHEndpoint {
-        let resolved = SSHConfig.resolve(host: endpoint.host)
+    ///
+    /// `configPath` defaults to the user's `~/.ssh/config`; tests inject a
+    /// temporary config file to exercise alias/port/user resolution without
+    /// touching the machine's real configuration.
+    public static func resolve(
+        _ endpoint: SSHEndpoint,
+        configPath: String = "~/.ssh/config"
+    ) -> ResolvedSSHEndpoint {
+        let resolved = SSHConfig.resolve(host: endpoint.host, configPath: configPath)
 
         // The configured host may be an ssh_config alias (Host mybox ->
         // HostName 203.0.113.7); always connect to the resolved HostName —

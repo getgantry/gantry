@@ -1,15 +1,18 @@
 # Gantry
 
-**Native Docker management for your Mac. Local and over SSH. Free, open source, no limits.**
+**Native Docker management for your Mac. Local and over SSH. Agent-ready with a built-in MCP server. Free, open source, no limits.**
 
 [![CI](https://github.com/andrewkomkov/gantry/actions/workflows/ci.yml/badge.svg)](https://github.com/andrewkomkov/gantry/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/andrewkomkov/gantry)](https://github.com/andrewkomkov/gantry/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 26+](https://img.shields.io/badge/macOS-26%2B-black)](https://github.com/andrewkomkov/gantry/releases/latest)
+[![MCP](https://img.shields.io/badge/MCP-server%20included-8A2BE2)](#agent-friendly)
 
 Gantry is a fully native macOS app (SwiftUI, Swift 6) for managing and monitoring
 Docker — the local daemon and any number of remote hosts over SSH. No Electron,
-no subscription, no artificial limits.
+no subscription, no artificial limits. It is built to be driven by AI agents
+too: a bundled [MCP server](#agent-friendly) and App Intents expose your Docker
+hosts to Claude, Shortcuts, Siri and scripts.
 
 Website: **https://andrewkomkov.github.io/gantry/**
 

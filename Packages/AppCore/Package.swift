@@ -15,6 +15,10 @@ let package = Package(
         .target(
             name: "AppCore",
             dependencies: ["DockerKit", "SSHKit"]
+        ),
+        .testTarget(
+            name: "AppCoreTests",
+            dependencies: ["AppCore", "DockerKit", "SSHKit"]
         )
     ]
 )

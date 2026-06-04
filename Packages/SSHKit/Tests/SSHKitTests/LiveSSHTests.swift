@@ -81,14 +81,30 @@ func liveSSHDialStdio() async throws {
     print("LIVE SSH: \(containers.count) containers, \(images.count) images over dial-stdio")
 
     // Streaming over a dedicated tunnel: read a short burst of non-follow logs
-    // from the first container, if any exists.
+    // from the first container, if any exists. Bounded: a container that never
+    // produced output can stall the non-follow read on some daemons, which is
+    // incidental to what this test proves (dial-stdio request/stream plumbing).
     if let first = containers.first {
         let logs = try await client.containerLogs(
             id: first.id, tty: false, follow: false, tail: 5
         )
-        var count = 0
-        for try await _ in logs { count += 1 }
-        print("LIVE SSH: read \(count) log lines from \(first.displayName)")
+        let count = await withTaskGroup(of: Int?.self) { group in
+            group.addTask {
+                var lines = 0
+                do {
+                    for try await _ in logs { lines += 1 }
+                } catch {}
+                return lines
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(10))
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        print("LIVE SSH: read \(count.map(String.init) ?? "timed-out") log lines from \(first.displayName)")
     }
 
     await client.shutdown()

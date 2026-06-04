@@ -140,6 +140,16 @@ public final class HostSession: Identifiable {
         }
     }
 
+    /// TEST SEAM: injects an already-negotiated `DockerClient` and marks the
+    /// session connected, bypassing the real socket/SSH dial. This exists only
+    /// so the test suite can drive `refresh*`, `perform`, `mutate*`, prune/remove/
+    /// create, inspection and stats paths against a `MockTransport`-backed client
+    /// without a live daemon. Not used by the app at runtime.
+    func _setConnectedClientForTesting(_ client: DockerClient, version: SystemVersion) {
+        self.client = client
+        status = .connected(version)
+    }
+
     // MARK: - SSH connection
 
     private func connectSSH(_ endpoint: SSHEndpoint) async {
@@ -640,7 +650,9 @@ public final class HostSession: Identifiable {
     }
 
     /// Re-encodes JSON data sorted and indented; falls back to the raw string.
-    private static func prettyJSON(from data: Data) -> String {
+    /// `internal` (not `private`) only so the test suite can exercise the
+    /// formatting/fallback branches directly.
+    static func prettyJSON(from data: Data) -> String {
         if let object = try? JSONSerialization.jsonObject(with: data),
            let pretty = try? JSONSerialization.data(
                withJSONObject: object,
