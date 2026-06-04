@@ -141,7 +141,6 @@ struct StatsView: View {
 
     private var memoryCard: some View {
         let peak = samples.map(\.memoryUsageBytes).max() ?? 0
-        let limit = samples.last?.memoryLimitBytes ?? 0
         let upper = max(Double(peak), 1)
         return card("Memory", systemImage: "memorychip") {
             Text(memoryValue)
@@ -181,7 +180,6 @@ struct StatsView: View {
             .modifier(TimeAxis())
         }
         .accessibilityLabel("Memory usage \(memoryValue)")
-        .id(limit)
     }
 
     private var memoryValue: String {

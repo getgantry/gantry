@@ -2,17 +2,18 @@ import SwiftUI
 import AppCore
 import SSHKit
 
+/// SSH auth method selection, shared by the add- and edit-host forms.
+enum AuthChoice: Hashable {
+    case automatic
+    case keyFile
+    case password
+}
+
 /// Sheet for adding a new SSH Docker host. Resolves ssh_config live to show the
 /// user what defaults will apply for the host they typed.
 struct AddHostSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
-
-    private enum AuthChoice: Hashable {
-        case automatic
-        case keyFile
-        case password
-    }
 
     @State private var name = ""
     @State private var host = ""

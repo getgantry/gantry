@@ -132,19 +132,12 @@ public final class HostSession: Identifiable {
     // MARK: - SSH connection
 
     private func connectSSH(_ endpoint: SSHEndpoint) async {
-        // Resolve ssh_config to fill any gaps the user left blank.
-        let resolved = SSHConfig.resolve(host: endpoint.host)
-
-        // The configured host may be an ssh_config alias (Host dedic ->
-        // HostName 92.x.x.x); always connect to the resolved HostName —
-        // resolve() falls back to the input when no config entry matches.
+        // Resolve ssh_config to fill any gaps the user left blank (shared with
+        // the headless paths so the GUI and MCP/Intents dial the same host).
+        let resolved = ResolvedSSHEndpoint.resolve(endpoint)
         let hostName = resolved.hostName
-        let port = endpoint.port != 22 && endpoint.port != 0 ? endpoint.port : resolved.port
-        let username: String = {
-            if !endpoint.username.isEmpty { return endpoint.username }
-            if let user = resolved.user, !user.isEmpty { return user }
-            return NSUserName()
-        }()
+        let port = resolved.port
+        let username = resolved.username
 
         // Build the host-key policy: known hosts pass; unknown hosts prompt the
         // user (trust-on-first-use) by hopping back to the main actor.
@@ -430,8 +423,10 @@ public final class HostSession: Identifiable {
         pendingContainerRefresh = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
-            await self?.refreshContainers()
+            // Clear the marker before the refresh so an event arriving while
+            // the reload is in flight schedules another one (no lost update).
             self?.pendingContainerRefresh = nil
+            await self?.refreshContainers()
         }
     }
 
@@ -454,42 +449,36 @@ public final class HostSession: Identifiable {
     }
 
     public func refreshContainers() async {
-        guard let client else { return }
-        if let value = await fetch({ try await client.listContainers(all: true) }) {
-            containers = value
-        }
+        await refresh(\.containers) { try await $0.listContainers(all: true) }
     }
 
     public func refreshImages() async {
-        guard let client else { return }
-        if let value = await fetch({ try await client.listImages() }) {
-            images = value
-        }
+        await refresh(\.images) { try await $0.listImages() }
     }
 
     public func refreshVolumes() async {
-        guard let client else { return }
-        if let value = await fetch({ try await client.listVolumes() }) {
-            volumes = value
-        }
+        await refresh(\.volumes) { try await $0.listVolumes() }
     }
 
     public func refreshNetworks() async {
+        await refresh(\.networks) { try await $0.listNetworks() }
+    }
+
+    /// Reloads one resource list, storing the result on success.
+    private func refresh<T>(
+        _ keyPath: ReferenceWritableKeyPath<HostSession, [T]>,
+        _ body: (DockerClient) async throws -> [T]
+    ) async {
         guard let client else { return }
-        if let value = await fetch({ try await client.listNetworks() }) {
-            networks = value
+        if let value = await fetch({ try await body(client) }) {
+            self[keyPath: keyPath] = value
         }
     }
 
     // MARK: - Container actions
 
     public func perform(_ action: ContainerAction, on id: String) async -> Bool {
-        guard let client else {
-            lastError = "Not connected"
-            return false
-        }
-
-        do {
+        await mutate(refresh: refreshContainers) { client in
             switch action {
             case .start:
                 try await client.startContainer(id: id)
@@ -506,11 +495,6 @@ public final class HostSession: Identifiable {
             case .remove(let force):
                 try await client.removeContainer(id: id, force: force, removeVolumes: false)
             }
-            await refreshContainers()
-            return true
-        } catch {
-            surface(error)
-            return false
         }
     }
 
@@ -579,6 +563,46 @@ public final class HostSession: Identifiable {
     private func fetch<T>(_ body: () async throws -> T) async -> T? {
         do {
             return try await body()
+        } catch {
+            surface(error)
+            return nil
+        }
+    }
+
+    /// Runs a mutation against the client; on success runs `refresh` and
+    /// returns true. Failures are recorded in `lastError`.
+    private func mutate(
+        refresh: () async -> Void = {},
+        _ body: (DockerClient) async throws -> Void
+    ) async -> Bool {
+        guard let client else {
+            lastError = "Not connected"
+            return false
+        }
+        do {
+            try await body(client)
+            await refresh()
+            return true
+        } catch {
+            surface(error)
+            return false
+        }
+    }
+
+    /// Like `mutate`, but for calls that produce a value: returns it on
+    /// success (after running `refresh`), or nil with `lastError` set.
+    private func mutateValue<T>(
+        refresh: () async -> Void = {},
+        _ body: (DockerClient) async throws -> T
+    ) async -> T? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        do {
+            let value = try await body(client)
+            await refresh()
+            return value
         } catch {
             surface(error)
             return nil
@@ -655,68 +679,34 @@ extension HostSession {
         return id
     }
 
-    /// Pulls an image so a failed create can be retried. Named distinctly from
-    /// any resources-layer `pullImage` to avoid clashing with that addition;
-    /// returns the raw progress stream for inline UI feedback.
-    public func pullImageForCreate(reference: String) async throws -> AsyncThrowingStream<PullProgress, Error> {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
-        return try await client.pullImage(reference: reference)
-    }
-
     /// Renames a container, refreshing the list. Returns false on failure.
     @discardableResult
     public func rename(containerID: String, to name: String) async -> Bool {
-        guard let client else { lastError = "Not connected"; return false }
-        do {
-            try await client.renameContainer(id: containerID, to: name)
-            await refreshContainers()
-            return true
-        } catch {
-            surface(error)
-            return false
+        await mutate(refresh: refreshContainers) {
+            try await $0.renameContainer(id: containerID, to: name)
         }
     }
 
     /// Commits a container to a new image. Returns false on failure.
     @discardableResult
     public func commit(containerID: String, repo: String, tag: String, comment: String) async -> Bool {
-        guard let client else { lastError = "Not connected"; return false }
-        do {
-            _ = try await client.commitContainer(id: containerID, repo: repo, tag: tag, comment: comment)
-            await refreshImages()
-            return true
-        } catch {
-            surface(error)
-            return false
+        await mutate(refresh: refreshImages) {
+            _ = try await $0.commitContainer(id: containerID, repo: repo, tag: tag, comment: comment)
         }
     }
 
     /// Updates a container's restart policy, refreshing the list afterwards.
     @discardableResult
     public func updateRestartPolicy(containerID: String, policy: String, maxRetries: Int) async -> Bool {
-        guard let client else { lastError = "Not connected"; return false }
-        do {
-            try await client.updateRestartPolicy(id: containerID, policy: policy, maxRetries: maxRetries)
-            await refreshContainers()
-            return true
-        } catch {
-            surface(error)
-            return false
+        await mutate(refresh: refreshContainers) {
+            try await $0.updateRestartPolicy(id: containerID, policy: policy, maxRetries: maxRetries)
         }
     }
 
     /// Removes all stopped containers. Returns the prune result, or nil on
     /// failure (recorded in `lastError`).
     public func pruneStoppedContainers() async -> PruneResult? {
-        guard let client else { lastError = "Not connected"; return nil }
-        do {
-            let result = try await client.pruneContainers()
-            await refreshContainers()
-            return result
-        } catch {
-            surface(error)
-            return nil
-        }
+        await mutateValue(refresh: refreshContainers) { try await $0.pruneContainers() }
     }
 
     /// Opens the export byte stream for a container's filesystem (a tar).
@@ -789,40 +779,29 @@ extension HostSession {
 
     /// Returns the layer history for an image (newest first), or nil on failure.
     public func imageHistory(id: String) async -> [ImageHistoryEntry]? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        return await fetch { try await client.imageHistory(id: id) }
+        await mutateValue { try await $0.imageHistory(id: id) }
     }
 
     /// Adds a `repo:tag` to an existing image. Refreshes images on success.
     @discardableResult
     public func tagImage(id: String, repo: String, tag: String) async -> Bool {
-        guard let client else {
-            lastError = "Not connected"
-            return false
+        await mutate(refresh: refreshImages) {
+            try await $0.tagImage(id: id, repo: repo, tag: tag)
         }
-        do {
-            try await client.tagImage(id: id, repo: repo, tag: tag)
-            await refreshImages()
-            return true
-        } catch {
-            surface(error)
-            return false
+    }
+
+    /// Removes an image. Refreshes images on success.
+    @discardableResult
+    public func removeImage(id: String, force: Bool = false) async -> Bool {
+        await mutate(refresh: refreshImages) {
+            try await $0.removeImage(id: id, force: force)
         }
     }
 
     /// Prunes images. When `dangling` is true only untagged layers are removed;
     /// otherwise all unused images are pruned. Refreshes images on success.
     public func pruneImages(dangling: Bool) async -> PruneResult? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        let result = await fetch { try await client.pruneImages(dangling: dangling) }
-        if result != nil { await refreshImages() }
-        return result
+        await mutateValue(refresh: refreshImages) { try await $0.pruneImages(dangling: dangling) }
     }
 
     // MARK: Volumes
@@ -834,29 +813,22 @@ extension HostSession {
         driver: String = "local",
         labels: [String: String] = [:]
     ) async -> Volume? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
+        await mutateValue(refresh: refreshVolumes) {
+            try await $0.createVolume(name: name, driver: driver, labels: labels)
         }
-        do {
-            let volume = try await client.createVolume(name: name, driver: driver, labels: labels)
-            await refreshVolumes()
-            return volume
-        } catch {
-            surface(error)
-            return nil
+    }
+
+    /// Removes a volume. Refreshes the list on success.
+    @discardableResult
+    public func removeVolume(name: String, force: Bool = false) async -> Bool {
+        await mutate(refresh: refreshVolumes) {
+            try await $0.removeVolume(name: name, force: force)
         }
     }
 
     /// Prunes unused volumes. Refreshes the list on success.
     public func pruneVolumes() async -> PruneResult? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        let result = await fetch { try await client.pruneVolumes() }
-        if result != nil { await refreshVolumes() }
-        return result
+        await mutateValue(refresh: refreshVolumes) { try await $0.pruneVolumes() }
     }
 
     // MARK: Networks
@@ -868,45 +840,29 @@ extension HostSession {
         driver: String = "bridge",
         labels: [String: String] = [:]
     ) async -> String? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
+        await mutateValue(refresh: refreshNetworks) {
+            try await $0.createNetwork(name: name, driver: driver, labels: labels)
         }
-        do {
-            let id = try await client.createNetwork(name: name, driver: driver, labels: labels)
-            await refreshNetworks()
-            return id
-        } catch {
-            surface(error)
-            return nil
+    }
+
+    /// Removes a network. Refreshes the list on success.
+    @discardableResult
+    public func removeNetwork(id: String) async -> Bool {
+        await mutate(refresh: refreshNetworks) {
+            try await $0.removeNetwork(id: id)
         }
     }
 
     /// Prunes unused networks. Refreshes the list on success.
     public func pruneNetworks() async -> PruneResult? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        let result = await fetch { try await client.pruneNetworks() }
-        if result != nil { await refreshNetworks() }
-        return result
+        await mutateValue(refresh: refreshNetworks) { try await $0.pruneNetworks() }
     }
 
     /// Attaches a container to a network. Refreshes networks on success.
     @discardableResult
     public func connectContainer(networkID: String, containerID: String) async -> Bool {
-        guard let client else {
-            lastError = "Not connected"
-            return false
-        }
-        do {
-            try await client.connectContainer(networkID: networkID, containerID: containerID)
-            await refreshNetworks()
-            return true
-        } catch {
-            surface(error)
-            return false
+        await mutate(refresh: refreshNetworks) {
+            try await $0.connectContainer(networkID: networkID, containerID: containerID)
         }
     }
 
@@ -917,17 +873,8 @@ extension HostSession {
         containerID: String,
         force: Bool = false
     ) async -> Bool {
-        guard let client else {
-            lastError = "Not connected"
-            return false
-        }
-        do {
-            try await client.disconnectContainer(networkID: networkID, containerID: containerID, force: force)
-            await refreshNetworks()
-            return true
-        } catch {
-            surface(error)
-            return false
+        await mutate(refresh: refreshNetworks) {
+            try await $0.disconnectContainer(networkID: networkID, containerID: containerID, force: force)
         }
     }
 
@@ -936,20 +883,12 @@ extension HostSession {
     /// Returns aggregate disk usage across images, containers and volumes,
     /// or nil on failure (recorded in `lastError`).
     public func systemDF() async -> SystemDiskUsage? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        return await fetch { try await client.systemDF() }
+        await mutateValue { try await $0.systemDF() }
     }
 
     /// Prunes the builder cache. Returns the reclaimed space report.
     public func pruneBuildCache() async -> PruneResult? {
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
-        return await fetch { try await client.pruneBuildCache() }
+        await mutateValue { try await $0.pruneBuildCache() }
     }
 
     /// Raw network inspect decoded into a minimal shape exposing the connected

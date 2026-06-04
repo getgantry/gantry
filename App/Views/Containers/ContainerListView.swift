@@ -117,6 +117,9 @@ struct ContainerListView: View {
         .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
         .toolbar { toolbarContent }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryNewContainer)) { _ in
+            showCreateSheet = true
+        }
         .sheet(isPresented: $showCreateSheet) {
             CreateContainerSheet(session: session)
         }
@@ -506,9 +509,7 @@ struct ContainerActionsMenu: View {
     }
 
     private func copyID() {
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(container.id, forType: .string)
+        copyToPasteboard(container.id)
     }
 }
 

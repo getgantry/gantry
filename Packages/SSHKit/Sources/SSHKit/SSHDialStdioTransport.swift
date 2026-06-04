@@ -42,7 +42,8 @@ public actor SSHDialStdioTransport: DockerTransport {
     /// `execute` request timeout.
     private static let requestTimeout: Duration = .seconds(60)
     /// Idle interval after which the keepalive pings.
-    private static let keepaliveInterval: Duration = .seconds(30)
+    private static let keepaliveSeconds = 30
+    private static let keepaliveInterval: Duration = .seconds(keepaliveSeconds)
 
     public init(
         makeClient: @Sendable @escaping () async throws -> SSHClient,
@@ -497,7 +498,7 @@ public actor SSHDialStdioTransport: DockerTransport {
 
     private func keepalivePulse() async {
         guard persistentTunnel != nil else { return }
-        if Date().timeIntervalSince(lastActivity) < 30 { return }
+        if Date().timeIntervalSince(lastActivity) < TimeInterval(Self.keepaliveSeconds) { return }
         let ping = DockerRequest(method: .get, path: "/_ping")
         _ = try? await execute(ping)
     }
@@ -589,8 +590,10 @@ final class Tunnel: Sendable {
                                 item.done.resume(throwing: error)
                             }
                         }
-                        // Stream finished: fail any items that slipped past the
-                        // yield/terminated check without a resume.
+                        // Stream finished. The outbound stream buffers without
+                        // bound, so every enqueued item was delivered (and
+                        // resumed) above; late writes resume via the
+                        // `.terminated` check in `Tunnel.write`.
                     }
                     defer { writerTask.cancel() }
 

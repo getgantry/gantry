@@ -180,13 +180,6 @@ final class HijackHandler: ChannelInboundHandler {
     }
 
     private func errorMessage() -> String {
-        struct APIMessage: Decodable { let message: String }
-        if let decoded = try? JSONDecoder().decode(APIMessage.self, from: errorBody) {
-            return decoded.message
-        }
-        if let text = String(data: errorBody, encoding: .utf8), !text.isEmpty {
-            return text
-        }
-        return "Upgrade rejected"
+        DockerError.message(fromBody: errorBody, fallback: "Upgrade rejected")
     }
 }

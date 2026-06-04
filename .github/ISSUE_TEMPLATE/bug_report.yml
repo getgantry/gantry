@@ -21,7 +21,7 @@ body:
     attributes:
       label: Gantry version
       description: Shown in About Gantry, or the build/commit you ran from source.
-      placeholder: "1.0.0 (123)"
+      placeholder: "0.1.0 (1)"
     validations:
       required: true
   - type: dropdown

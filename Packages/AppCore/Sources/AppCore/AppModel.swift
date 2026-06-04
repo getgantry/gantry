@@ -1,10 +1,12 @@
 import Foundation
 import Observation
+import os
 
 /// Top-level app state: the set of host sessions, backed by a persisted host list.
 @MainActor
 @Observable
 public final class AppModel {
+    private static let log = Logger(subsystem: "com.andrewkomkov.Gantry", category: "AppModel")
     public private(set) var sessions: [HostSession]
 
     public init() {
@@ -100,7 +102,7 @@ public final class AppModel {
 
     private static func saveHosts(_ hosts: [DockerHost]) {
         guard let url = HostsStore.fileURL() else {
-            print("AppModel: cannot resolve hosts.json location")
+            log.error("cannot resolve hosts.json location")
             return
         }
         do {
@@ -113,7 +115,7 @@ public final class AppModel {
             let data = try encoder.encode(hosts)
             try data.write(to: url, options: .atomic)
         } catch {
-            print("AppModel: failed to persist hosts: \(error.localizedDescription)")
+            log.error("failed to persist hosts: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

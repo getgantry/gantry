@@ -151,10 +151,7 @@ private struct CodeBlock: View {
     }
 
     private func copy() {
-        #if canImport(AppKit)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(code, forType: .string)
-        #endif
+        copyToPasteboard(code)
         withAnimation { copied = true }
         Task {
             try? await Task.sleep(for: .seconds(1.5))

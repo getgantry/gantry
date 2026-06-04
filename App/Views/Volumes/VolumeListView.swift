@@ -29,7 +29,7 @@ struct VolumeListView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .contextMenu {
                         Button {
-                            copy(volume.name)
+                            copyToPasteboard(volume.name)
                         } label: {
                             Label("Copy Name", systemImage: "doc.on.doc")
                         }
@@ -99,21 +99,15 @@ struct VolumeListView: View {
             ),
             titleVisibility: .visible,
             presenting: removeTarget
-        ) { _ in
+        ) { volume in
             Button("Remove", role: .destructive) {
-                Task { await session.refreshVolumes() }
                 removeTarget = nil
+                Task { await session.removeVolume(name: volume.name) }
             }
             Button("Cancel", role: .cancel) { removeTarget = nil }
         } message: { _ in
-            Text("Removing a volume permanently deletes its data.")
+            Text("Removing a volume permanently deletes its data. Volumes in use by a container cannot be removed.")
         }
-    }
-
-    private func copy(_ text: String) {
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(text, forType: .string)
     }
 }
 

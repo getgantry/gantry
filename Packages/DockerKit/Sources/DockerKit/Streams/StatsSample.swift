@@ -25,8 +25,7 @@ public struct ContainerStatsSample: Sendable, Hashable, Identifiable, Decodable 
 
         // read timestamp
         if let readString = try c.decodeIfPresent(String.self, forKey: .read),
-           let date = ContainerStatsSample.readFormatter.date(from: readString)
-            ?? ContainerStatsSample.plainReadFormatter.date(from: readString) {
+           let date = RFC3339Nano.date(from: readString) {
             readAt = date
         } else {
             readAt = Date()
@@ -206,17 +205,4 @@ public struct ContainerStatsSample: Sendable, Hashable, Identifiable, Decodable 
         }
     }
 
-    // MARK: - Date parsing
-
-    nonisolated(unsafe) private static let readFormatter: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
-    }()
-
-    nonisolated(unsafe) private static let plainReadFormatter: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
-    }()
 }

@@ -3,17 +3,26 @@ import Foundation
 import DockerKit
 @testable import SSHKit
 
-/// Live end-to-end test against a real SSH Docker host.
-/// Gated: runs only when ~/.ssh/id_rsa exists and nettop.local:22 is reachable.
-private let liveHost = "nettop.local"
+/// Live end-to-end tests against a real SSH Docker host.
+///
+/// Gated on environment variables so the suite is inert by default:
+///   GANTRY_SSH_TEST_HOST  — SSH host (or ssh_config alias) running Docker.
+///   GANTRY_SSH_TEST_KEY   — path to a passphrase-free private key authorized
+///                           on that host (default: ~/.ssh/gantry_test_ed25519).
+///   GANTRY_SSH_TEST_RSA_KEY — optional RSA key for the rsa-sha2-256 test
+///                           (default: ~/.ssh/id_rsa).
+private let liveHost = ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_HOST"] ?? ""
 
 /// Dedicated ed25519 test key used by the bulk of the live suite.
-private let testKeyPath = NSHomeDirectory() + "/.ssh/gantry_test_ed25519"
+private let testKeyPath = ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_KEY"]
+    ?? NSHomeDirectory() + "/.ssh/gantry_test_ed25519"
 
-/// The user's standard RSA key, used to prove rsa-sha2-256 (RFC 8332) auth.
-private let rsaKeyPath = NSHomeDirectory() + "/.ssh/id_rsa"
+/// An RSA key authorized on the host, used to prove rsa-sha2-256 (RFC 8332) auth.
+private let rsaKeyPath = ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_RSA_KEY"]
+    ?? NSHomeDirectory() + "/.ssh/id_rsa"
 
 private func hostReachable() -> Bool {
+    guard !liveHost.isEmpty else { return false }
     let probe = Process()
     probe.executableURL = URL(fileURLWithPath: "/usr/bin/nc")
     probe.arguments = ["-z", "-G", "3", liveHost, "22"]

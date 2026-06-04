@@ -1,6 +1,15 @@
 import SwiftUI
+import AppKit
 import DockerKit
 import AppCore
+
+/// Replaces the clipboard contents with `text`. Shared by every
+/// "Copy ID / name / command" affordance in the app.
+func copyToPasteboard(_ text: String) {
+    let pb = NSPasteboard.general
+    pb.clearContents()
+    pb.setString(text, forType: .string)
+}
 
 /// Small formatting helpers shared across views.
 enum Formatters {
@@ -26,7 +35,7 @@ enum Formatters {
         return relative(date)
     }
 
-    /// Byte count in file style, e.g. "1.2 GB".
+    /// Byte count in memory (1024-based) style, e.g. "1.2 GB".
     static func bytes(_ value: Int64) -> String {
         value.formatted(.byteCount(style: .memory))
     }

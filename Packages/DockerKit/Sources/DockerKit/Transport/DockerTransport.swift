@@ -128,4 +128,17 @@ public enum DockerError: Error, LocalizedError, Sendable {
             "The operation was cancelled."
         }
     }
+
+    /// Extracts the daemon's `{"message": …}` error body, falling back to the
+    /// raw UTF-8 text, then to `fallback`.
+    static func message(fromBody body: Data, fallback: String) -> String {
+        struct APIMessage: Decodable { let message: String }
+        if let decoded = try? JSONDecoder().decode(APIMessage.self, from: body) {
+            return decoded.message
+        }
+        if let text = String(data: body, encoding: .utf8), !text.isEmpty {
+            return text
+        }
+        return fallback
+    }
 }

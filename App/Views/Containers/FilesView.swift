@@ -351,7 +351,6 @@ struct ContainerFileTransfer: Transferable {
         let bytes = [UInt8](data)
         let block = 512
         var offset = 0
-        var pendingLong = false
         while offset + block <= bytes.count {
             let header = Array(bytes[offset ..< offset + block])
             offset += block
@@ -372,12 +371,9 @@ struct ContainerFileTransfer: Transferable {
 
             // Skip GNU/PAX long-name extension headers; the next header is the file.
             if typeFlag == UInt8(ascii: "L") || typeFlag == UInt8(ascii: "x") || typeFlag == UInt8(ascii: "g") {
-                pendingLong = true
                 offset += padded
                 continue
             }
-            pendingLong = false
-            _ = pendingLong
 
             if typeFlag == UInt8(ascii: "0") || typeFlag == 0 {
                 let end = min(offset + size, bytes.count)

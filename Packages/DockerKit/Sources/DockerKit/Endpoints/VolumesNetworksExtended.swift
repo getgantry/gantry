@@ -1,5 +1,17 @@
 import Foundation
 
+/// Shared body of `POST /volumes/create` and `POST /networks/create`.
+private struct CreateRequest: Encodable {
+    var name: String
+    var driver: String
+    var labels: [String: String]
+    enum CodingKeys: String, CodingKey {
+        case name = "Name"
+        case driver = "Driver"
+        case labels = "Labels"
+    }
+}
+
 extension DockerClient {
     // MARK: - Volumes
 
@@ -9,16 +21,6 @@ extension DockerClient {
         driver: String = "local",
         labels: [String: String] = [:]
     ) async throws -> Volume {
-        struct CreateRequest: Encodable {
-            var name: String
-            var driver: String
-            var labels: [String: String]
-            enum CodingKeys: String, CodingKey {
-                case name = "Name"
-                case driver = "Driver"
-                case labels = "Labels"
-            }
-        }
         let body = try JSONEncoder().encode(CreateRequest(name: name, driver: driver, labels: labels))
         let response = try await requestData(
             method: .post,
@@ -44,16 +46,6 @@ extension DockerClient {
         driver: String = "bridge",
         labels: [String: String] = [:]
     ) async throws -> String {
-        struct CreateRequest: Encodable {
-            var name: String
-            var driver: String
-            var labels: [String: String]
-            enum CodingKeys: String, CodingKey {
-                case name = "Name"
-                case driver = "Driver"
-                case labels = "Labels"
-            }
-        }
         let body = try JSONEncoder().encode(CreateRequest(name: name, driver: driver, labels: labels))
         let response = try await requestData(
             method: .post,

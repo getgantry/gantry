@@ -311,9 +311,6 @@ struct LogsView: View {
     // MARK: - Actions
 
     private func copyAll() {
-        let text = visibleLines.map(\.text).joined(separator: "\n")
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(text, forType: .string)
+        copyToPasteboard(visibleLines.map(\.text).joined(separator: "\n"))
     }
 }

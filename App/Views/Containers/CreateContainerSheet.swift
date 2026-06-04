@@ -27,8 +27,6 @@ struct CreateContainerSheet: View {
     @State private var imageMissing = false
     @State private var pullStatus: String?
 
-    private static let restartPolicies = ["no", "on-failure", "always", "unless-stopped"]
-
     private var canCreate: Bool {
         !image.trimmingCharacters(in: .whitespaces).isEmpty && !isWorking
     }
@@ -110,7 +108,7 @@ struct CreateContainerSheet: View {
 
                 Section("Options") {
                     Picker("Restart Policy", selection: $restartPolicy) {
-                        ForEach(Self.restartPolicies, id: \.self) { Text($0).tag($0) }
+                        ForEach(RestartPolicyOption.allCases) { Text($0.label).tag($0.rawValue) }
                     }
                     Toggle("Allocate a TTY", isOn: $tty)
                     Toggle("Remove on exit (--rm)", isOn: $autoRemove)
@@ -267,7 +265,7 @@ struct CreateContainerSheet: View {
         pullStatus = "Pulling \(image)…"
         defer { isWorking = false; pullStatus = nil }
         do {
-            let stream = try await session.pullImageForCreate(reference: image.trimmingCharacters(in: .whitespaces))
+            let stream = try await session.pullImage(reference: image.trimmingCharacters(in: .whitespaces))
             for try await progress in stream {
                 // PullProgress shape is owned by the resources layer; render a
                 // generic description so this stays decoupled from its fields.

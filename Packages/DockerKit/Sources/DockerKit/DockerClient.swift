@@ -32,11 +32,22 @@ public actor DockerClient {
             versioned: false
         )
         let version = try decode(SystemVersion.self, from: response.body, path: "/version")
-        if let daemonValue = Double(version.apiVersion), daemonValue < 1.47 {
+        // API versions are dotted (major, minor) pairs, not decimals:
+        // "1.9" < "1.47". Downgrade when the daemon is older than our 1.47.
+        if let daemon = Self.parseAPIVersion(version.apiVersion), daemon < (1, 47) {
             versionPrefix = "/v" + version.apiVersion
         }
         negotiatedVersion = version
         return version
+    }
+
+    /// Parses a Docker API version like "1.47" into a comparable pair.
+    static func parseAPIVersion(_ string: String) -> (major: Int, minor: Int)? {
+        let parts = string.split(separator: ".")
+        guard parts.count == 2, let major = Int(parts[0]), let minor = Int(parts[1]) else {
+            return nil
+        }
+        return (major, minor)
     }
 
     /// Pings the daemon. Throws if the daemon does not answer with 200.
@@ -156,14 +167,7 @@ public actor DockerClient {
     }
 
     private func errorMessage(from body: Data) -> String {
-        struct APIMessage: Decodable { let message: String }
-        if let decoded = try? decoder.decode(APIMessage.self, from: body) {
-            return decoded.message
-        }
-        if let text = String(data: body, encoding: .utf8), !text.isEmpty {
-            return text
-        }
-        return "Unknown error"
+        DockerError.message(fromBody: body, fallback: "Unknown error")
     }
 
     private func describe(_ error: DecodingError) -> String {

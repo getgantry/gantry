@@ -45,7 +45,7 @@ struct ImageListView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .contextMenu {
                         Button {
-                            copy(image.id)
+                            copyToPasteboard(image.id)
                         } label: {
                             Label("Copy ID", systemImage: "doc.on.doc")
                         }
@@ -126,14 +126,17 @@ struct ImageListView: View {
             ),
             titleVisibility: .visible,
             presenting: removeTarget
-        ) { _ in
+        ) { image in
             Button("Remove", role: .destructive) {
-                Task { await session.refreshImages() }
                 removeTarget = nil
+                Task {
+                    await session.removeImage(id: image.id)
+                    await loadDiskUsage()
+                }
             }
             Button("Cancel", role: .cancel) { removeTarget = nil }
         } message: { _ in
-            Text("Image removal will be wired through the engine in a later milestone.")
+            Text("This removes the image from the host. Images in use by a container cannot be removed.")
         }
         .task {
             await loadDiskUsage()
@@ -142,12 +145,6 @@ struct ImageListView: View {
 
     private func loadDiskUsage() async {
         diskUsage = await session.systemDF()
-    }
-
-    private func copy(_ text: String) {
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(text, forType: .string)
     }
 }
 

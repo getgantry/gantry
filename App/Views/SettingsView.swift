@@ -347,12 +347,6 @@ private struct EditHostSheet: View {
 
     let host: DockerHost
 
-    private enum AuthChoice: Hashable {
-        case automatic
-        case keyFile
-        case password
-    }
-
     @State private var name: String
     @State private var hostName: String
     @State private var port: String

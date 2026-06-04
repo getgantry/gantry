@@ -104,9 +104,7 @@ struct ContainerDetailView: View {
             }
             Divider()
             Button {
-                let pb = NSPasteboard.general
-                pb.clearContents()
-                pb.setString(container.id, forType: .string)
+                copyToPasteboard(container.id)
             } label: {
                 Label("Copy Container ID", systemImage: "doc.on.doc")
             }

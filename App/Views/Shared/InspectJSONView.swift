@@ -26,7 +26,7 @@ struct InspectJSONView: View {
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            copy(json)
+                            copyToPasteboard(json)
                         } label: {
                             Label("Copy JSON", systemImage: "doc.on.doc")
                         }
@@ -46,11 +46,5 @@ struct InspectJSONView: View {
             json = await provider()
             isLoading = false
         }
-    }
-
-    private func copy(_ text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
     }
 }

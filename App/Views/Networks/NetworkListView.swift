@@ -32,7 +32,7 @@ struct NetworkListView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .contextMenu {
                         Button {
-                            copy(network.id)
+                            copyToPasteboard(network.id)
                         } label: {
                             Label("Copy ID", systemImage: "doc.on.doc")
                         }
@@ -103,21 +103,15 @@ struct NetworkListView: View {
             ),
             titleVisibility: .visible,
             presenting: removeTarget
-        ) { _ in
+        ) { network in
             Button("Remove", role: .destructive) {
-                Task { await session.refreshNetworks() }
                 removeTarget = nil
+                Task { await session.removeNetwork(id: network.id) }
             }
             Button("Cancel", role: .cancel) { removeTarget = nil }
         } message: { _ in
-            Text("Removing a network detaches it from any connected containers.")
+            Text("This removes the network from the host. Networks with connected containers cannot be removed.")
         }
-    }
-
-    private func copy(_ text: String) {
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(text, forType: .string)
     }
 }
 

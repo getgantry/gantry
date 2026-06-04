@@ -26,14 +26,8 @@ actor HeadlessDocker {
     /// Loads the persisted host list (the same `hosts.json` the app writes),
     /// seeding the default local host when no file exists yet.
     nonisolated func loadHosts() -> [DockerHost] {
-        let url = Self.hostsFileURL()
-        if let url, let data = try? Data(contentsOf: url) {
-            let decoder = JSONDecoder()
-            if let hosts = try? decoder.decode([DockerHost].self, from: data), !hosts.isEmpty {
-                return hosts
-            }
-        }
-        return [DockerHost(name: "Local", kind: .local)]
+        let hosts = AppCore.HeadlessDocker.loadHosts()
+        return hosts.isEmpty ? [DockerHost(name: "Local", kind: .local)] : hosts
     }
 
     /// Returns the host with the given id, or nil.
@@ -96,14 +90,7 @@ actor HeadlessDocker {
         endpoint: SSHEndpoint,
         hostID: UUID
     ) throws -> DockerTransport {
-        let resolved = SSHConfig.resolve(host: endpoint.host)
-        let hostName = endpoint.host.isEmpty ? resolved.hostName : endpoint.host
-        let port = endpoint.port != 0 ? endpoint.port : resolved.port
-        let username: String = {
-            if !endpoint.username.isEmpty { return endpoint.username }
-            if let user = resolved.user, !user.isEmpty { return user }
-            return NSUserName()
-        }()
+        let resolved = ResolvedSSHEndpoint.resolve(endpoint)
 
         // Trusted-only: known hosts pass, everything else is rejected. No prompt.
         let knownHosts = KnownHostsStore()
@@ -116,9 +103,9 @@ actor HeadlessDocker {
         )
 
         let parameters = SSHConnectionParameters(
-            host: hostName,
-            port: port,
-            username: username,
+            host: resolved.hostName,
+            port: resolved.port,
+            username: resolved.username,
             auth: auth
         )
 
@@ -178,21 +165,6 @@ actor HeadlessDocker {
         throw lastError ?? HeadlessError.credentialsUnavailable
     }
 
-    // MARK: - Persistence location
-
-    private static func hostsFileURL() -> URL? {
-        guard let appSupport = try? FileManager.default.url(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: false
-        ) else {
-            return nil
-        }
-        return appSupport
-            .appendingPathComponent("Gantry", isDirectory: true)
-            .appendingPathComponent("hosts.json", isDirectory: false)
-    }
 }
 
 enum HeadlessError: Error, LocalizedError {

@@ -70,15 +70,7 @@ public enum HeadlessDocker {
         for host: DockerHost,
         endpoint: SSHEndpoint
     ) async throws -> DockerTransport {
-        let resolved = SSHConfig.resolve(host: endpoint.host)
-
-        let hostName = endpoint.host.isEmpty ? resolved.hostName : endpoint.host
-        let port = endpoint.port != 0 ? endpoint.port : resolved.port
-        let username: String = {
-            if !endpoint.username.isEmpty { return endpoint.username }
-            if let user = resolved.user, !user.isEmpty { return user }
-            return NSUserName()
-        }()
+        let resolved = ResolvedSSHEndpoint.resolve(endpoint)
 
         // TRUSTED-ONLY: unknown host keys are rejected; we never TOFU headless.
         let knownHosts = KnownHostsStore()
@@ -91,9 +83,9 @@ public enum HeadlessDocker {
         )
 
         let parameters = SSHConnectionParameters(
-            host: hostName,
-            port: port,
-            username: username,
+            host: resolved.hostName,
+            port: resolved.port,
+            username: resolved.username,
             auth: auth
         )
 
