@@ -8,14 +8,17 @@ let package = Package(
         .library(name: "SSHKit", targets: ["SSHKit"])
     ],
     dependencies: [
-        .package(url: "https://github.com/orlandos-nl/Citadel.git", from: "0.12.0")
+        .package(url: "https://github.com/orlandos-nl/Citadel.git", from: "0.12.0"),
+        .package(path: "../DockerKit")
     ],
     targets: [
         .target(
             name: "SSHKit",
             dependencies: [
-                .product(name: "Citadel", package: "Citadel")
+                .product(name: "Citadel", package: "Citadel"),
+                "DockerKit"
             ]
-        )
+        ),
+        .testTarget(name: "SSHKitTests", dependencies: ["SSHKit"])
     ]
 )

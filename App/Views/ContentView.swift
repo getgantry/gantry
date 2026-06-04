@@ -41,6 +41,17 @@ struct ContentView: View {
 
     @State private var selection: SidebarSelection?
     @State private var showingAddHost = false
+    @State private var confirmRemoval: UUID?
+
+    /// The first session currently awaiting a host-key trust decision, if any.
+    private var hostKeySession: HostSession? {
+        model.sessions.first { $0.pendingHostKeyPrompt != nil }
+    }
+
+    /// The first session currently awaiting a credential, if any.
+    private var credentialSession: HostSession? {
+        model.sessions.first { $0.pendingCredentialRequest != nil }
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -56,6 +67,59 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddHost) {
             AddHostSheet()
         }
+        .sheet(isPresented: hostKeySheetBinding) {
+            if let session = hostKeySession, let prompt = session.pendingHostKeyPrompt {
+                HostKeySheet(session: session, prompt: prompt)
+            }
+        }
+        .sheet(isPresented: credentialSheetBinding) {
+            if let session = credentialSession, let request = session.pendingCredentialRequest {
+                CredentialSheet(session: session, request: request)
+            }
+        }
+        .confirmationDialog(
+            "Remove this host?",
+            isPresented: removalDialogBinding,
+            presenting: confirmRemoval
+        ) { hostID in
+            Button("Remove Host", role: .destructive) {
+                if let session = model.session(id: hostID) {
+                    Task { await session.disconnect() }
+                }
+                if selection?.hostID == hostID { selection = nil }
+                model.removeHost(id: hostID)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { hostID in
+            let label = model.session(id: hostID)?.host.name ?? "this host"
+            Text("\(label) will be removed from Gantry. Stored credentials are not deleted.")
+        }
+    }
+
+    private var removalDialogBinding: Binding<Bool> {
+        Binding(
+            get: { confirmRemoval != nil },
+            set: { if !$0 { confirmRemoval = nil } }
+        )
+    }
+
+    private var hostKeySheetBinding: Binding<Bool> {
+        Binding(
+            get: { hostKeySession != nil },
+            set: { presented in
+                // Dismissal without a button = reject.
+                if !presented { hostKeySession?.submitHostKeyDecision(trust: false) }
+            }
+        )
+    }
+
+    private var credentialSheetBinding: Binding<Bool> {
+        Binding(
+            get: { credentialSession != nil },
+            set: { presented in
+                if !presented { credentialSession?.cancelCredential() }
+            }
+        )
     }
 
     // MARK: - Sidebar
@@ -70,6 +134,25 @@ struct ContentView: View {
                     }
                 } header: {
                     HostSectionHeader(session: session)
+                        .contextMenu {
+                            Button {
+                                Task {
+                                    await session.disconnect()
+                                    await session.connect()
+                                }
+                            } label: {
+                                Label("Reconnect", systemImage: "arrow.clockwise")
+                            }
+
+                            if session.host.removable {
+                                Divider()
+                                Button(role: .destructive) {
+                                    confirmRemoval = session.host.id
+                                } label: {
+                                    Label("Remove Host…", systemImage: "trash")
+                                }
+                            }
+                        }
                 }
             }
         }
@@ -171,6 +254,11 @@ private struct HostSectionHeader: View {
                 .fill(session.status.dotColor)
                 .frame(width: 7, height: 7)
             Text(session.host.name)
+            if !session.host.isLocal {
+                Image(systemName: "network")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             Spacer()
         }
         .help(session.status.shortDescription)
@@ -183,33 +271,3 @@ private struct HostSectionHeader: View {
     }
 }
 
-/// Minimal add-host sheet. SSH support arrives in M3.
-private struct AddHostSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Add Host")
-                .font(.title2.weight(.semibold))
-
-            Form {
-                TextField("Name", text: $name)
-                Text("SSH hosts arrive in M3. The local Docker daemon is added automatically.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .formStyle(.grouped)
-
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
-                Button("Add") { dismiss() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(true)
-            }
-        }
-        .padding(20)
-        .frame(width: 420)
-    }
-}

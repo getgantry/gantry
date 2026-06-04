@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import DockerKit
+import SSHKit
 
 /// Observable per-host session: owns the DockerClient and mirrors the daemon's
 /// resources into UI-friendly state on the main actor.
@@ -23,6 +24,43 @@ public final class HostSession: Identifiable {
     /// True while the daemon event stream is delivering live updates; false
     /// when we have fallen back to polling.
     public private(set) var liveUpdatesActive = false
+
+    // MARK: - SSH interactive prompts
+
+    /// A request for a secret (SSH password or key passphrase) that the UI must
+    /// satisfy before the in-flight connection can proceed.
+    public struct CredentialRequest: Identifiable, Sendable {
+        public enum Kind: Sendable, Equatable {
+            case password
+            case keyPassphrase(file: String)
+        }
+
+        public let id = UUID()
+        public let kind: Kind
+        public let hostName: String
+    }
+
+    /// First-time host key prompt (trust-on-first-use). Presented when the
+    /// remote presents an unknown host key.
+    public struct HostKeyPromptState: Identifiable, Sendable {
+        public let id = UUID()
+        public let host: String
+        public let fingerprint: String
+        public let keyType: String
+    }
+
+    /// Set while `connect()` is waiting for the UI to supply a secret.
+    public private(set) var pendingCredentialRequest: CredentialRequest?
+
+    /// Set while `connect()` is waiting for a trust-on-first-use decision.
+    public private(set) var pendingHostKeyPrompt: HostKeyPromptState?
+
+    /// Continuation resumed once the UI answers a credential request. Carries
+    /// the secret plus whether to persist it to the Keychain, or nil on cancel.
+    private var credentialContinuation: CheckedContinuation<(secret: String, store: Bool)?, Never>?
+
+    /// Continuation resumed once the UI answers a host-key prompt.
+    private var hostKeyContinuation: CheckedContinuation<Bool, Never>?
 
     private var client: DockerClient?
 
@@ -58,23 +96,211 @@ public final class HostSession: Identifiable {
             }
 
             let transport = UnixSocketTransport(socketPath: socketPath)
-            let client = DockerClient(transport: transport)
-            do {
-                let version = try await client.negotiate()
-                self.client = client
-                status = .connected(version)
-                await refreshAll()
-                startEventMonitoring()
-            } catch {
-                await client.shutdown()
-                self.client = nil
-                status = .failed(error.localizedDescription)
-            }
+            await finishConnect(with: transport)
 
-        case .ssh:
-            // TODO(M3): SSH transport lands in milestone 3.
-            status = .failed("SSH hosts arrive in M3")
+        case .ssh(let endpoint):
+            await connectSSH(endpoint)
         }
+    }
+
+    /// Negotiates and brings the session up over an already-built transport.
+    /// Shared by the local and SSH paths so status transitions stay identical.
+    private func finishConnect(with transport: DockerTransport) async {
+        let client = DockerClient(transport: transport)
+        do {
+            let version = try await client.negotiate()
+            self.client = client
+            status = .connected(version)
+            await refreshAll()
+            startEventMonitoring()
+        } catch {
+            await client.shutdown()
+            self.client = nil
+            // DockerClient.shutdown forwards to the transport; nothing more to release.
+            status = .failed(error.localizedDescription)
+        }
+    }
+
+    // MARK: - SSH connection
+
+    private func connectSSH(_ endpoint: SSHEndpoint) async {
+        // Resolve ssh_config to fill any gaps the user left blank.
+        let resolved = SSHConfig.resolve(host: endpoint.host)
+
+        let hostName = endpoint.host.isEmpty ? resolved.hostName : endpoint.host
+        let port = endpoint.port != 0 ? endpoint.port : resolved.port
+        let username: String = {
+            if !endpoint.username.isEmpty { return endpoint.username }
+            if let user = resolved.user, !user.isEmpty { return user }
+            return NSUserName()
+        }()
+
+        // Build the host-key policy: known hosts pass; unknown hosts prompt the
+        // user (trust-on-first-use) by hopping back to the main actor.
+        let knownHosts = KnownHostsStore()
+        let policy = HostKeyPolicy.acceptKnown(knownHosts) { [weak self] candidate in
+            await self?.promptHostKey(host: hostName, candidate: candidate) ?? .reject
+        }
+
+        // Resolve auth, possibly suspending for a Keychain miss / user prompt.
+        let auth: AuthSource
+        do {
+            auth = try await resolveAuth(
+                endpoint: endpoint,
+                hostName: hostName,
+                resolvedIdentityFiles: resolved.identityFiles
+            )
+        } catch is CancellationError {
+            status = .failed("Connection cancelled")
+            return
+        } catch {
+            status = .failed(error.localizedDescription)
+            return
+        }
+
+        let parameters = SSHConnectionParameters(
+            host: hostName,
+            port: port,
+            username: username,
+            auth: auth
+        )
+
+        let transport = SSHDialStdioTransport {
+            try await SSHConnector.connect(parameters: parameters, policy: policy)
+        }
+
+        await finishConnect(with: transport)
+    }
+
+    /// Determines the authentication method, consulting the Keychain and, when
+    /// necessary, prompting the user for a secret. Throws `CancellationError`
+    /// if the user cancels.
+    private func resolveAuth(
+        endpoint: SSHEndpoint,
+        hostName: String,
+        resolvedIdentityFiles: [String]
+    ) async throws -> AuthSource {
+        switch endpoint.auth {
+        case .automatic:
+            let candidates = resolvedIdentityFiles + SSHKeyLoader.defaultKeyCandidates()
+            return try await loadFirstUsableKey(from: candidates, hostName: hostName)
+
+        case .keyFile(let path):
+            return try await loadFirstUsableKey(from: [path], hostName: hostName)
+
+        case .password:
+            let account = KeychainStore.sshPasswordAccount(hostID: host.id)
+            if let stored = KeychainStore.get(account: account) {
+                return .password(stored)
+            }
+            let answer = try await requestCredential(.init(kind: .password, hostName: hostName))
+            if answer.store {
+                KeychainStore.set(answer.secret, account: account)
+            }
+            return .password(answer.secret)
+        }
+    }
+
+    /// Tries each candidate key path in order, returning the first that loads.
+    /// Passphrase-protected keys are unlocked via the Keychain or a user prompt.
+    private func loadFirstUsableKey(
+        from paths: [String],
+        hostName: String
+    ) async throws -> AuthSource {
+        let passphraseAccount = KeychainStore.keyPassphraseAccount(hostID: host.id)
+        var lastError: Error?
+
+        for path in paths {
+            do {
+                let key = try SSHKeyLoader.load(contentsOf: path, passphrase: nil)
+                return .key(key)
+            } catch SSHKeyError.needsPassphrase {
+                // Try a stored passphrase first.
+                if let stored = KeychainStore.get(account: passphraseAccount) {
+                    if let key = try? SSHKeyLoader.load(contentsOf: path, passphrase: stored) {
+                        return .key(key)
+                    }
+                }
+                // Ask the user.
+                let answer = try await requestCredential(
+                    .init(kind: .keyPassphrase(file: path), hostName: hostName)
+                )
+                do {
+                    let key = try SSHKeyLoader.load(contentsOf: path, passphrase: answer.secret)
+                    if answer.store {
+                        KeychainStore.set(answer.secret, account: passphraseAccount)
+                    }
+                    return .key(key)
+                } catch {
+                    lastError = error
+                    continue
+                }
+            } catch {
+                // Unloadable / missing file: try the next candidate.
+                lastError = error
+                continue
+            }
+        }
+
+        throw lastError ?? DockerError.connectionFailed("No usable SSH key found")
+    }
+
+    // MARK: - Interactive prompt plumbing
+
+    /// Publishes a credential request and suspends until the UI answers.
+    /// Cancellation-safe: a cancelled task resumes the continuation with nil
+    /// and surfaces as `CancellationError`.
+    private func requestCredential(_ request: CredentialRequest) async throws -> (secret: String, store: Bool) {
+        let answer = await withTaskCancellationHandler {
+            await withCheckedContinuation { (continuation: CheckedContinuation<(secret: String, store: Bool)?, Never>) in
+                self.credentialContinuation = continuation
+                self.pendingCredentialRequest = request
+            }
+        } onCancel: {
+            Task { @MainActor [weak self] in
+                self?.cancelCredential()
+            }
+        }
+
+        guard let answer else { throw CancellationError() }
+        return answer
+    }
+
+    /// UI entry point: supply the requested secret, optionally storing it.
+    public func submitCredential(_ secret: String, store: Bool) {
+        pendingCredentialRequest = nil
+        let continuation = credentialContinuation
+        credentialContinuation = nil
+        continuation?.resume(returning: (secret: secret, store: store))
+    }
+
+    /// UI entry point: abandon the credential request.
+    public func cancelCredential() {
+        pendingCredentialRequest = nil
+        let continuation = credentialContinuation
+        credentialContinuation = nil
+        continuation?.resume(returning: nil)
+    }
+
+    /// Publishes a host-key prompt and suspends until the user decides.
+    private func promptHostKey(host: String, candidate: HostKeyCandidate) async -> HostKeyDecision {
+        let trusted = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+            self.hostKeyContinuation = continuation
+            self.pendingHostKeyPrompt = HostKeyPromptState(
+                host: host,
+                fingerprint: candidate.fingerprintSHA256,
+                keyType: candidate.keyType
+            )
+        }
+        return trusted ? .trust : .reject
+    }
+
+    /// UI entry point: accept or reject the pending host key.
+    public func submitHostKeyDecision(trust: Bool) {
+        pendingHostKeyPrompt = nil
+        let continuation = hostKeyContinuation
+        hostKeyContinuation = nil
+        continuation?.resume(returning: trust)
     }
 
     public func disconnect() async {
@@ -83,6 +309,9 @@ public final class HostSession: Identifiable {
         pendingContainerRefresh?.cancel()
         pendingContainerRefresh = nil
         liveUpdatesActive = false
+        // Resolve any prompt left hanging by an interrupted connect attempt.
+        cancelCredential()
+        if pendingHostKeyPrompt != nil { submitHostKeyDecision(trust: false) }
         if let client {
             await client.shutdown()
         }
