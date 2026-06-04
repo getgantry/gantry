@@ -11,6 +11,7 @@
 		GA000000000000000000B002 /* SSHKit in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P002 /* SSHKit */; };
 		GA000000000000000000B003 /* AppCore in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P003 /* AppCore */; };
 		GA000000000000000000B004 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P004 /* SwiftTerm */; };
+		GA000000000000000000B005 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P005 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 				GA000000000000000000B002 /* SSHKit in Frameworks */,
 				GA000000000000000000B003 /* AppCore in Frameworks */,
 				GA000000000000000000B004 /* SwiftTerm in Frameworks */,
+				GA000000000000000000B005 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +82,7 @@
 				GA000000000000000000P002 /* SSHKit */,
 				GA000000000000000000P003 /* AppCore */,
 				GA000000000000000000P004 /* SwiftTerm */,
+				GA000000000000000000P005 /* Sparkle */,
 			);
 			productName = Gantry;
 			productReference = GA000000000000000000F001 /* Gantry.app */;
@@ -114,6 +117,7 @@
 				GA000000000000000000K002 /* XCLocalSwiftPackageReference "Packages/SSHKit" */,
 				GA000000000000000000K003 /* XCLocalSwiftPackageReference "Packages/AppCore" */,
 				GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+				GA000000000000000000K005 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = GA000000000000000000R001 /* Products */;
@@ -216,6 +220,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -241,6 +246,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -301,6 +307,14 @@
 				minimumVersion = 1.13.0;
 			};
 		};
+		GA000000000000000000K005 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -320,6 +334,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
 			productName = SwiftTerm;
+		};
+		GA000000000000000000P005 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = GA000000000000000000K005 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

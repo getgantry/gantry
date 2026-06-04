@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/andrewkomkov/gantry/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>+rH5zy+DZ5DGa+Nk3s66+zJpn9EuLAaRVyWHaLl9TRI=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+</dict>
+</plist>

@@ -45,16 +45,33 @@ extension DockerClient {
         )
     }
 
+    /// Upper bound on bytes buffered while listing a directory via the archive
+    /// path. Beyond this the subtree is assumed too large to tar just to read
+    /// one level, and the download is aborted.
+    static let listArchiveByteCap = 64 * 1024 * 1024
+
     /// Lists the immediate contents of a directory inside a container.
     ///
     /// Downloads the directory archive, buffers it, and parses the tar headers
     /// client-side. Docker emits the directory's own entry as a prefix, which is
     /// dropped so only its children remain.
+    ///
+    /// This is the no-shell fallback for `listDirectoryFast`: it tars the entire
+    /// subtree, so it is bounded at `listArchiveByteCap` and aborts (cancelling
+    /// the stream) once the cap is exceeded without the archive completing,
+    /// surfacing a clear error rather than transferring hundreds of MB.
     public func listDirectory(containerID: String, path: String) async throws -> [ContainerFileEntry] {
         let stream = try await downloadArchive(containerID: containerID, path: path)
         var buffer = Data()
         for try await chunk in stream.bytes {
             buffer.append(chunk)
+            if buffer.count > Self.listArchiveByteCap {
+                // Abort the transfer: dropping the iterator cancels the stream.
+                throw DockerError.apiError(
+                    status: 413,
+                    message: "Directory too large to list without a shell in the container"
+                )
+            }
         }
         return Self.directoryEntries(fromArchive: buffer)
     }

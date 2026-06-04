@@ -249,6 +249,37 @@ func liveContainerExecRoundtrip() async throws {
     print("LIVE exec roundtrip: ok=\(acc.contains("roundtrip-"))")
 }
 
+/// (g) Fast directory listing: list `/` and `/etc` of nginx via the shell-based
+/// `listDirectoryFast`, assert known entries are present, and compare against
+/// the archive-based `listDirectory` for consistency.
+@Test(.enabled(if: liveSocket != nil), .timeLimit(.minutes(1)))
+func liveListDirectoryFast() async throws {
+    let client = try liveClient()
+    defer { Task { await client.shutdown() } }
+    try await client.negotiate()
+
+    let root = try await client.listDirectoryFast(containerID: "gantry-test-nginx", path: "/")
+    #expect(!root.isEmpty, "expected non-empty fast listing of /")
+    let rootNames = Set(root.map(\.name))
+    #expect(rootNames.contains("etc"), "expected /etc in fast listing, got \(rootNames.sorted())")
+    #expect(root.contains { $0.isDirectory }, "expected at least one directory entry")
+    print("LIVE listFast /: \(root.count) entries; dirs=\(root.filter(\.isDirectory).count)")
+
+    let etc = try await client.listDirectoryFast(containerID: "gantry-test-nginx", path: "/etc")
+    #expect(!etc.isEmpty, "expected non-empty fast listing of /etc")
+    let etcNames = Set(etc.map(\.name))
+    #expect(etcNames.contains("nginx"), "expected nginx entry in /etc, got \(etcNames.sorted())")
+
+    // Consistency: the archive-based listing should agree with the fast one for
+    // the bulk of entries (edge cases like odd names may differ).
+    let archive = try await client.listDirectory(containerID: "gantry-test-nginx", path: "/etc")
+    let archiveNames = Set(archive.map(\.name))
+    let intersection = etcNames.intersection(archiveNames)
+    #expect(intersection.count >= min(etcNames.count, archiveNames.count) - 2,
+            "fast/archive listings of /etc diverge: fast=\(etcNames.sorted()) archive=\(archiveNames.sorted())")
+    print("LIVE listFast /etc: fast=\(etcNames.count) archive=\(archiveNames.count) intersection=\(intersection.count)")
+}
+
 // MARK: - Exec test helpers
 
 /// Reads an byte stream until EOF, bounded by `timeout`, decoding accumulated

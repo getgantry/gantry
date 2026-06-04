@@ -725,9 +725,19 @@ extension HostSession {
     // MARK: Files
 
     /// Lists a directory inside a container.
+    ///
+    /// Prefers the shell-based fast path (`listDirectoryFast`), which transfers
+    /// only the listing text. If the container has no usable shell (distroless /
+    /// scratch) the fast path throws `ExecListError` and we fall back to the
+    /// archive-based `listDirectory`, which tars the subtree (bounded at 64 MB).
     public func listDirectory(containerID: String, path: String) async throws -> [ContainerFileEntry] {
         guard let client else { throw DockerError.connectionFailed("Not connected") }
-        return try await client.listDirectory(containerID: containerID, path: path)
+        do {
+            return try await client.listDirectoryFast(containerID: containerID, path: path)
+        } catch is ExecListError {
+            // No shell / command failed — fall back to the archive listing.
+            return try await client.listDirectory(containerID: containerID, path: path)
+        }
     }
 
     /// Downloads a path from a container as a tar byte stream.

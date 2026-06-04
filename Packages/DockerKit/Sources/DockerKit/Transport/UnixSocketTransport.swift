@@ -21,6 +21,13 @@ public final class UnixSocketTransport: DockerTransport, Sendable {
         var configuration = HTTPClient.Configuration()
         configuration.timeout = .init(connect: .seconds(5), read: nil)
         configuration.decompression = .disabled
+        // Long-lived follow streams (logs/stats/events) plus large archive
+        // downloads each hold a pooled connection; the default soft limit of 8
+        // exhausts quickly and surfaces as getConnectionFromPoolTimeout.
+        configuration.connectionPool = .init(
+            idleTimeout: .seconds(60),
+            concurrentHTTP1ConnectionsPerHostSoftLimit: 64
+        )
         self.client = HTTPClient(
             eventLoopGroupProvider: .singleton,
             configuration: configuration
