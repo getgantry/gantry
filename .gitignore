@@ -14,3 +14,4 @@ build/
 dist/
 *.dSYM.zip
 *.dSYM
+screenshots/
