@@ -96,7 +96,13 @@ struct ContainerTerminalView: View {
     let container: ContainerSummary
 
     /// Single robust command: prefer bash, fall back to sh inside one shell.
-    private let shellCommand = ["/bin/sh", "-c", "exec bash || exec sh"]
+    /// Note: a failed `exec` kills a non-interactive POSIX shell, so `exec bash
+    /// || exec sh` dies on bash-less images (Alpine). Probe with `command -v`
+    /// before exec'ing instead.
+    private let shellCommand = [
+        "/bin/sh", "-c",
+        "if command -v bash >/dev/null 2>&1; then exec bash; else exec sh; fi",
+    ]
 
     var body: some View {
         if !container.state.isRunning {
@@ -107,7 +113,7 @@ struct ContainerTerminalView: View {
         } else {
             TerminalPane(
                 title: container.displayName,
-                subtitle: "bash",
+                subtitle: "shell",
                 connectionID: container.id,
                 connect: {
                     try await session.openExecSession(
