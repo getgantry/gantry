@@ -26,6 +26,10 @@ struct AddHostSheet: View {
     @State private var resolvedSummary: String?
     @State private var resolveTask: Task<Void, Never>?
 
+    /// Concrete host aliases from ~/.ssh/config for one-click import.
+    private let configHosts = SSHConfig.listHosts()
+    @State private var selectedConfigHost: String?
+
     private var defaultUser: String { NSUserName() }
 
     private var trimmedHost: String {
@@ -47,6 +51,24 @@ struct AddHostSheet: View {
             }
 
             Form {
+                if !configHosts.isEmpty {
+                    Section {
+                        Picker("Import from SSH config", selection: $selectedConfigHost) {
+                            Text("Choose a host…").tag(String?.none)
+                            ForEach(configHosts, id: \.self) { alias in
+                                Text(alias).tag(String?.some(alias))
+                            }
+                        }
+                        .onChange(of: selectedConfigHost) { _, alias in
+                            if let alias { applyConfigHost(alias) }
+                        }
+                    } footer: {
+                        Text("Hosts from ~/.ssh/config. Picking one fills the fields below.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section {
                     TextField("Name", text: $name)
                     TextField("Host", text: $host, prompt: Text("server.local or 192.168.1.10"))
@@ -152,6 +174,17 @@ struct AddHostSheet: View {
 
         model.addHost(dockerHost)
         dismiss()
+    }
+
+    /// Fills the form from a picked ~/.ssh/config alias.
+    private func applyConfigHost(_ alias: String) {
+        let resolved = SSHConfig.resolve(host: alias)
+        name = alias
+        host = alias
+        port = String(resolved.port)
+        user = resolved.user ?? ""
+        authChoice = .automatic
+        scheduleResolve()
     }
 
     /// Debounced ssh_config resolution for the live footnote.

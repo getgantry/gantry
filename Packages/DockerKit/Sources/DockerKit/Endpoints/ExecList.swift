@@ -212,13 +212,13 @@ extension DockerClient {
 
     /// Date formatters for the two `ls -l` time forms, fixed to en_US_POSIX so
     /// the `LC_ALL=C` month abbreviations always parse.
-    nonisolated(unsafe) private static let lsTimeFormatter: DateFormatter = {
+    private static let lsTimeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "MMM d HH:mm yyyy"
         return f
     }()
-    nonisolated(unsafe) private static let lsYearFormatter: DateFormatter = {
+    private static let lsYearFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "MMM d yyyy"

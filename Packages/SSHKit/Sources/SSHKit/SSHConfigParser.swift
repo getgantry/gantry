@@ -41,6 +41,23 @@ public struct ResolvedSSHConfig: Sendable {
 
 /// Parses ~/.ssh/config with OpenSSH first-obtained-value-wins semantics.
 public enum SSHConfig {
+    /// All concrete host aliases from the config, in file order — wildcard
+    /// patterns (`*`, `?`) and negations are skipped. Used by the add-host UI
+    /// to offer one-click import.
+    public static func listHosts(configPath: String = "~/.ssh/config") -> [String] {
+        var seen = Set<String>()
+        var hosts: [String] = []
+        for entry in parse(configPath: configPath) {
+            for pattern in entry.patterns
+            where !pattern.contains("*") && !pattern.contains("?") && !pattern.hasPrefix("!") {
+                if seen.insert(pattern).inserted {
+                    hosts.append(pattern)
+                }
+            }
+        }
+        return hosts
+    }
+
     /// Resolves a host alias. On a missing or unreadable config file, returns
     /// defaults (hostName == host, port == 22).
     public static func resolve(host: String, configPath: String = "~/.ssh/config") -> ResolvedSSHConfig {

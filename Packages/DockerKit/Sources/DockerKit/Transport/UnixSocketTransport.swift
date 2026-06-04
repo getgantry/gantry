@@ -46,6 +46,9 @@ public final class UnixSocketTransport: DockerTransport, Sendable {
             )
         } catch let error as DockerError {
             throw error
+        } catch is CancellationError {
+            // A cancelled SwiftUI task is normal navigation, not a failure.
+            throw DockerError.cancelled
         } catch {
             throw DockerError.connectionFailed(String(describing: error))
         }
@@ -59,6 +62,8 @@ public final class UnixSocketTransport: DockerTransport, Sendable {
             response = try await client.execute(httpRequest, timeout: .hours(24 * 365))
         } catch let error as DockerError {
             throw error
+        } catch is CancellationError {
+            throw DockerError.cancelled
         } catch {
             throw DockerError.connectionFailed(String(describing: error))
         }

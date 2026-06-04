@@ -21,6 +21,14 @@ public final class HostSession: Identifiable {
     /// Last error surfaced to the UI; settable so a view can dismiss it.
     public var lastError: String?
 
+    /// Routes an error into the user-facing alert, swallowing cancellations:
+    /// a SwiftUI task cancelled by navigation is not a failure.
+    private func surface(_ error: Error) {
+        if error is CancellationError { return }
+        if let docker = error as? DockerError, case .cancelled = docker { return }
+        lastError = error.localizedDescription
+    }
+
     /// True while the daemon event stream is delivering live updates; false
     /// when we have fallen back to polling.
     public private(set) var liveUpdatesActive = false
@@ -498,7 +506,7 @@ public final class HostSession: Identifiable {
             await refreshContainers()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -511,7 +519,7 @@ public final class HostSession: Identifiable {
         do {
             return try await client.inspectContainer(id: containerID)
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return nil
         }
     }
@@ -569,7 +577,7 @@ public final class HostSession: Identifiable {
         do {
             return try await body()
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return nil
         }
     }
@@ -661,7 +669,7 @@ extension HostSession {
             await refreshContainers()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -675,7 +683,7 @@ extension HostSession {
             await refreshImages()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -689,7 +697,7 @@ extension HostSession {
             await refreshContainers()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -703,7 +711,7 @@ extension HostSession {
             await refreshContainers()
             return result
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return nil
         }
     }
@@ -797,7 +805,7 @@ extension HostSession {
             await refreshImages()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -832,7 +840,7 @@ extension HostSession {
             await refreshVolumes()
             return volume
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return nil
         }
     }
@@ -866,7 +874,7 @@ extension HostSession {
             await refreshNetworks()
             return id
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return nil
         }
     }
@@ -894,7 +902,7 @@ extension HostSession {
             await refreshNetworks()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
@@ -915,7 +923,7 @@ extension HostSession {
             await refreshNetworks()
             return true
         } catch {
-            lastError = error.localizedDescription
+            surface(error)
             return false
         }
     }
