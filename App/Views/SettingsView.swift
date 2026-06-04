@@ -30,6 +30,7 @@ private struct GeneralSettings: View {
 
     @AppStorage("refreshInterval") private var refreshInterval = 5.0
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
+    @AppStorage("showDockIcon") private var showDockIcon = true
     @AppStorage("appearance") private var appearance = "system"
 
     /// Working copy of the local host's socket override, committed on Enter or
@@ -121,8 +122,13 @@ private struct GeneralSettings: View {
 
             Section {
                 Toggle("Show menu bar icon", isOn: $showMenuBarExtra)
+                    .disabled(!showDockIcon)
+                Toggle("Show Dock icon", isOn: $showDockIcon)
+                    .disabled(!showMenuBarExtra)
+            } header: {
+                Text("Icons")
             } footer: {
-                Text("Show a Gantry icon in the menu bar for quick access.")
+                Text("Hide the Dock icon to run Gantry as a menu-bar-only app. One of the two icons always stays on so the app remains reachable.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

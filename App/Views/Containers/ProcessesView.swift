@@ -32,7 +32,7 @@ struct ProcessesView: View {
                     systemImage: "exclamationmark.triangle",
                     description: Text(errorText)
                 )
-            } else if let top {
+            } else if let top, !top.processes.isEmpty {
                 processTable(top)
             } else {
                 ContentUnavailableView(
@@ -49,38 +49,26 @@ struct ProcessesView: View {
 
     // MARK: - Table
 
+    /// One `docker top` row paired with its stable position for Table identity.
+    private struct ProcessRow: Identifiable {
+        let id: Int
+        let cells: [String]
+    }
+
     private func processTable(_ top: ContainerTop) -> some View {
-        ScrollView([.horizontal, .vertical]) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Header row.
-                HStack(spacing: 0) {
-                    ForEach(Array(top.titles.enumerated()), id: \.offset) { _, title in
-                        Text(title)
-                            .font(.caption.weight(.semibold))
-                            .frame(minWidth: 80, alignment: .leading)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                    }
+        let rows = top.processes.enumerated().map { ProcessRow(id: $0.offset, cells: $0.element) }
+        return Table(rows) {
+            TableColumnForEach(Array(top.titles.enumerated()), id: \.offset) { index, title in
+                TableColumn(title) { (row: ProcessRow) in
+                    Text(row.cells.indices.contains(index) ? row.cells[index] : "")
+                        .font(.system(.caption, design: .monospaced))
+                        .lineLimit(1)
+                        .truncationMode(index == top.titles.count - 1 ? .tail : .middle)
+                        .textSelection(.enabled)
+                        .help(row.cells.indices.contains(index) ? row.cells[index] : "")
                 }
-                .background(.quaternary)
-
-                Divider()
-
-                ForEach(Array(top.processes.enumerated()), id: \.offset) { index, row in
-                    HStack(spacing: 0) {
-                        ForEach(Array(row.enumerated()), id: \.offset) { _, cell in
-                            Text(cell)
-                                .font(.system(.caption, design: .monospaced))
-                                .frame(minWidth: 80, alignment: .leading)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .textSelection(.enabled)
-                        }
-                    }
-                    .background(index.isMultiple(of: 2) ? Color.clear : Color.secondary.opacity(0.06))
-                }
+                .width(min: 50, ideal: index == top.titles.count - 1 ? 420 : 80)
             }
-            .padding()
         }
     }
 

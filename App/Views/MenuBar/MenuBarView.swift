@@ -57,6 +57,9 @@ struct MenuBarView: View {
             Text("Gantry")
                 .font(.headline)
             Spacer()
+            Text(countsSummary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
@@ -83,14 +86,25 @@ struct MenuBarView: View {
     // MARK: - Footer
 
     private var footer: some View {
-        HStack {
-            Text(countsSummary)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 8) {
+            SettingsLink {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.borderless)
+            .help("Settings…")
+
+            Button {
+                NSApp.terminate(nil)
+            } label: {
+                Image(systemName: "power")
+            }
+            .buttonStyle(.borderless)
+            .help("Quit Gantry")
+
             Spacer()
+
             Button("Open Gantry") {
-                openWindow(id: "main")
-                NSApp.activate(ignoringOtherApps: true)
+                openMainWindow()
             }
             .controlSize(.small)
         }
@@ -98,11 +112,15 @@ struct MenuBarView: View {
         .padding(.vertical, 8)
     }
 
+    private func openMainWindow() {
+        openWindow(id: "main")
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     private var countsSummary: String {
         guard totalHosts > 0 else { return "No hosts connected" }
         let hostWord = totalHosts == 1 ? "host" : "hosts"
-        let runWord = totalRunning == 1 ? "container" : "containers"
-        return "\(totalRunning) running \(runWord) · \(totalHosts) \(hostWord)"
+        return "\(totalRunning) running · \(totalHosts) \(hostWord)"
     }
 }
 
@@ -110,6 +128,7 @@ struct MenuBarView: View {
 
 private struct HostBlock: View {
     var session: HostSession
+    @Environment(\.openWindow) private var openWindow
 
     private static let runningLimit = 8
     private static let exitedLimit = 3
@@ -142,6 +161,10 @@ private struct HostBlock: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+                Text("\(running.count)/\(session.containers.count)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .help("\(running.count) running of \(session.containers.count) containers")
             }
 
             if running.isEmpty {
@@ -177,11 +200,13 @@ private struct HostBlock: View {
 
 // MARK: - Rows
 
-/// One running container: state dot, name, stop + restart buttons.
+/// One running container: state dot, name (opens the app), uptime,
+/// first published port, and stop + restart buttons.
 private struct RunningRow: View {
     let container: ContainerSummary
     var session: HostSession
 
+    @Environment(\.openWindow) private var openWindow
     @State private var busy = false
 
     var body: some View {
@@ -189,10 +214,23 @@ private struct RunningRow: View {
             Circle()
                 .fill(container.state.tint)
                 .frame(width: 7, height: 7)
-            Text(container.displayName)
-                .font(.callout)
-                .lineLimit(1)
-                .truncationMode(.middle)
+            Button {
+                openWindow(id: "main")
+                NSApp.activate(ignoringOtherApps: true)
+            } label: {
+                Text(container.displayName)
+                    .font(.callout)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            .buttonStyle(.plain)
+            .help("Open in Gantry")
+
+            if let port = firstPublicPort {
+                Text(":\(port)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
             Spacer(minLength: 4)
 
             ActionButton(systemImage: "stop.fill", help: "Stop", busy: busy) {
@@ -202,6 +240,17 @@ private struct RunningRow: View {
                 await run(.restart)
             }
         }
+        .contextMenu {
+            Button("Stop") { Task { await run(.stop) } }
+            Button("Restart") { Task { await run(.restart) } }
+            Button("Kill") { Task { await run(.kill) } }
+            Divider()
+            Button("Copy Container ID") { copyToPasteboard(container.id) }
+        }
+    }
+
+    private var firstPublicPort: Int? {
+        container.ports.compactMap(\.publicPort).min()
     }
 
     private func run(_ action: ContainerAction) async {

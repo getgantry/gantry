@@ -131,7 +131,7 @@ struct LogsView: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
             .background(.quaternary, in: .rect(cornerRadius: 6))
-            .frame(width: 230)
+            .frame(minWidth: 110, idealWidth: 230, maxWidth: 230)
 
             Button { advance(by: -1) } label: {
                 Image(systemName: "chevron.up")

@@ -72,9 +72,13 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 220, ideal: 250)
         } content: {
             content
-                .navigationSplitViewColumnWidth(min: 360, ideal: 480)
+                .navigationSplitViewColumnWidth(min: 300, ideal: 440)
         } detail: {
+            // The detail column hosts the container tab strip and the log
+            // toolbar; below this width they overflow and SwiftUI clips them
+            // centered, cutting both edges. Keep the column at least this wide.
             detail
+                .navigationSplitViewColumnWidth(min: 640, ideal: 820)
         }
         .navigationTitle("Gantry")
         .onChange(of: selection) {

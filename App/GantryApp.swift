@@ -18,6 +18,10 @@ struct GantryApp: App {
     /// Whether the menu-bar panel is shown. Bound to the system menu bar item.
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
 
+    /// Whether the app appears in the Dock. Off switches the activation
+    /// policy to `.accessory` (menu-bar-only app).
+    @AppStorage("showDockIcon") private var showDockIcon = true
+
     /// Preferred app appearance: "system", "light", or "dark".
     @AppStorage("appearance") private var appearance = "system"
 
@@ -25,9 +29,21 @@ struct GantryApp: App {
         WindowGroup(id: "main") {
             ContentView()
                 .environment(model)
-                .onAppear { applyAppearance(appearance) }
+                .onAppear {
+                    applyAppearance(appearance)
+                    applyActivationPolicy()
+                }
                 .onChange(of: appearance) { _, newValue in
                     applyAppearance(newValue)
+                }
+                .onChange(of: showDockIcon) {
+                    // The app must stay reachable: no Dock icon requires the
+                    // menu bar icon.
+                    if !showDockIcon { showMenuBarExtra = true }
+                    applyActivationPolicy()
+                }
+                .onChange(of: showMenuBarExtra) {
+                    if !showMenuBarExtra { showDockIcon = true }
                 }
         }
         .defaultSize(width: 1180, height: 740)
@@ -49,11 +65,6 @@ struct GantryApp: App {
                     NotificationCenter.default.post(name: .gantryNewContainer, object: nil)
                 }
                 .keyboardShortcut("n", modifiers: .command)
-
-                Divider()
-
-                Button("Prune System…") {}
-                    .disabled(true)
             }
         }
 
@@ -66,6 +77,17 @@ struct GantryApp: App {
         Settings {
             SettingsView()
                 .environment(model)
+        }
+    }
+
+    /// Applies the Dock-visibility preference. `.accessory` removes the app
+    /// from the Dock and the Cmd-Tab switcher while keeping its windows.
+    private func applyActivationPolicy() {
+        NSApp.setActivationPolicy(showDockIcon ? .regular : .accessory)
+        // Switching to accessory deactivates the app; bring it back so an
+        // open window does not vanish behind other apps.
+        if !showDockIcon {
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
 
