@@ -79,6 +79,18 @@ Website: **https://andrewkomkov.github.io/gantry/**
 
 ## Install
 
+### Homebrew
+
+```sh
+brew install --cask andrewkomkov/tap/gantry
+xattr -dr com.apple.quarantine /Applications/Gantry.app
+```
+
+The `xattr` step clears the quarantine flag — the app is not notarized and
+macOS refuses to open it otherwise.
+
+### Manual
+
 1. Download the latest zip from [Releases](https://github.com/andrewkomkov/gantry/releases/latest)
 2. Unzip and drag **Gantry.app** to Applications
 3. First launch: right-click the app and choose **Open** (the app is not

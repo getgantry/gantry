@@ -206,6 +206,15 @@
         <p class="lead">No App Store, no account. Download and drag.</p>
       </div>
       <div class="install reveal">
+        <div class="code-block">
+          <div class="code-head">
+            <span>Homebrew</span>
+            <button class="copy" data-copy="brew install --cask andrewkomkov/tap/gantry &amp;&amp; xattr -dr com.apple.quarantine /Applications/Gantry.app">Copy</button>
+          </div>
+          <pre><code>brew install --cask andrewkomkov/tap/gantry
+xattr -dr com.apple.quarantine /Applications/Gantry.app</code></pre>
+        </div>
+
         <ol class="steps">
           <li><span class="step-n">1</span><div><strong>Download &amp; unzip</strong><p>Grab the latest <code>.zip</code> from <a href="https://github.com/andrewkomkov/gantry/releases/latest">Releases</a> and unzip it.</p></div></li>
           <li><span class="step-n">2</span><div><strong>Drag to Applications</strong><p>Move <code>Gantry.app</code> into your <code>/Applications</code> folder.</p></div></li>
