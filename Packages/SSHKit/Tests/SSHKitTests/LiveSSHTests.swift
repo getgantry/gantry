@@ -7,14 +7,13 @@ import DockerKit
 /// Gated: runs only when ~/.ssh/id_rsa exists and nettop.local:22 is reachable.
 private let liveHost = "nettop.local"
 
-/// Dedicated test key: Citadel signs RSA as legacy ssh-rsa (SHA-1), which
-/// modern sshd rejects, so the live test uses an ed25519 key.
+/// Dedicated ed25519 test key used by the bulk of the live suite.
 private let testKeyPath = NSHomeDirectory() + "/.ssh/gantry_test_ed25519"
 
-private func liveSSHAvailable() -> Bool {
-    guard FileManager.default.fileExists(atPath: testKeyPath) else { return false }
+/// The user's standard RSA key, used to prove rsa-sha2-256 (RFC 8332) auth.
+private let rsaKeyPath = NSHomeDirectory() + "/.ssh/id_rsa"
 
-    // Cheap TCP reachability probe with a short deadline.
+private func hostReachable() -> Bool {
     let probe = Process()
     probe.executableURL = URL(fileURLWithPath: "/usr/bin/nc")
     probe.arguments = ["-z", "-G", "3", liveHost, "22"]
@@ -27,6 +26,14 @@ private func liveSSHAvailable() -> Bool {
     } catch {
         return false
     }
+}
+
+private func liveSSHAvailable() -> Bool {
+    FileManager.default.fileExists(atPath: testKeyPath) && hostReachable()
+}
+
+private func liveRSAAvailable() -> Bool {
+    FileManager.default.fileExists(atPath: rsaKeyPath) && hostReachable()
 }
 
 @Test(.enabled(if: liveSSHAvailable()), .timeLimit(.minutes(2)))
@@ -143,6 +150,44 @@ func liveSSHExec() async throws {
     #expect(inspect.running == false)
     #expect(inspect.exitCode == 0)
     print("LIVE SSH exec: container=\(running.displayName) marker found=\(text.contains(marker)) exit=\(inspect.exitCode ?? -1)")
+}
+
+/// Live proof that an RSA key authenticates against a modern OpenSSH server via
+/// rsa-sha2-256 (RFC 8332). Uses the user's standard ~/.ssh/id_rsa, which is
+/// already in the server's authorized_keys. Before the Citadel/swift-nio-ssh
+/// fork changes this failed with authenticationFailed (legacy ssh-rsa/SHA-1);
+/// after, it must negotiate a Docker API version over the SSH tunnel.
+@Test(.enabled(if: liveRSAAvailable()), .timeLimit(.minutes(2)))
+func rsaSha2Auth() async throws {
+    let resolved = SSHConfig.resolve(host: liveHost)
+    let username = resolved.user ?? NSUserName()
+    let key = try SSHKeyLoader.load(contentsOf: rsaKeyPath, passphrase: nil)
+
+    let tempStore = NSTemporaryDirectory() + "gantry-rsa-\(UUID().uuidString).json"
+    let store = KnownHostsStore(appStorePath: tempStore)
+
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: username,
+        auth: .key(key)
+    )
+    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { candidate in
+        print("LIVE RSA: trusting \(candidate.keyType) \(candidate.fingerprintSHA256)")
+        return .trust
+    })
+
+    let transport = SSHDialStdioTransport(makeClient: {
+        try await SSHConnector.connect(parameters: parameters, policy: policy)
+    })
+    let client = DockerClient(transport: transport)
+
+    let version = try await client.negotiate()
+    print("LIVE RSA: rsa-sha2-256 auth OK, server \(version.version), api \(version.apiVersion)")
+    #expect(!version.apiVersion.isEmpty)
+
+    await client.shutdown()
+    try? FileManager.default.removeItem(atPath: tempStore)
 }
 
 /// Stress: abruptly cancel streams mid-flight while big requests run.

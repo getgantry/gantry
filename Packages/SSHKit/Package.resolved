@@ -25,7 +25,7 @@
       "location" : "https://github.com/andrewkomkov/Citadel.git",
       "state" : {
         "branch" : "gantry",
-        "revision" : "5069d7f16de3da5410e2239b2e4c354422a51ca3"
+        "revision" : "9354926e87364491123c0031fb72d5b1b1d3625a"
       }
     },
     {
@@ -169,7 +169,7 @@
       "location" : "https://github.com/andrewkomkov/swift-nio-ssh.git",
       "state" : {
         "branch" : "gantry-fixes",
-        "revision" : "8ce464dcd016168e273a373b746bf523eced2356"
+        "revision" : "ca4d82bf480040d8720d2a67a091f23482767c3a"
       }
     },
     {

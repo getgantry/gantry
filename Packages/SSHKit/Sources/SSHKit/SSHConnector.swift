@@ -95,10 +95,8 @@ public final class SSHConnector: Sendable {
         policy: HostKeyPolicy
     ) async throws -> SSHClient {
         let authMethod: SSHAuthenticationMethod
-        var usedRSAKey = false
         switch parameters.auth {
         case .key(let key):
-            if case .rsa = key { usedRSAKey = true }
             authMethod = key.authMethod(username: parameters.username)
         case .password(let password):
             authMethod = .passwordBased(username: parameters.username, password: password)
@@ -125,16 +123,7 @@ public final class SSHConnector: Sendable {
                 reconnect: .never
             )
         } catch {
-            let mapped = mapConnectError(error)
-            // The SSH library signs RSA keys with the legacy ssh-rsa (SHA-1)
-            // algorithm, which modern OpenSSH servers reject. Give users an
-            // actionable hint instead of a bare auth failure.
-            if usedRSAKey, case SSHConnectError.authenticationFailed(let detail) = mapped {
-                throw SSHConnectError.authenticationFailed(
-                    detail + " — note: RSA keys are signed as legacy ssh-rsa, which modern servers reject. Use an ed25519 key instead (ssh-keygen -t ed25519)."
-                )
-            }
-            throw mapped
+            throw mapConnectError(error)
         }
     }
 
