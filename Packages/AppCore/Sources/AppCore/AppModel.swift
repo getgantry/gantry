@@ -26,6 +26,55 @@ public final class AppModel {
         persist()
     }
 
+    /// Applies an edited `DockerHost`, persisting the change and keeping the
+    /// session list as the single source of truth for the sidebar.
+    ///
+    /// `HostSession.host` is a `let`, so a host whose connection-relevant fields
+    /// changed cannot be mutated in place. In that case we replace the session
+    /// instance at the same index (preserving sidebar order) with a fresh,
+    /// disconnected one. Callers are responsible for tearing down the old
+    /// session and reconnecting the new one — `updateHost` does not touch the
+    /// network. When only cosmetic fields changed (currently just `name`) the
+    /// existing session is left in place to avoid dropping a live connection.
+    ///
+    /// Returns the session that now backs `host.id` (either the preserved one
+    /// or the freshly created replacement), or nil if no session had that id.
+    @discardableResult
+    public func updateHost(_ host: DockerHost) -> HostSession? {
+        guard let index = sessions.firstIndex(where: { $0.id == host.id }) else {
+            return nil
+        }
+
+        let existing = sessions[index]
+        let result: HostSession
+        if Self.isConnectionEquivalent(existing.host, host) {
+            // Only display-level fields changed; mutate the persisted copy by
+            // swapping in a new session only if the stored host actually differs.
+            if existing.host == host {
+                result = existing
+            } else {
+                let replacement = HostSession(host: host)
+                sessions[index] = replacement
+                result = replacement
+            }
+        } else {
+            // Connection-relevant change: replace the session so the new host
+            // takes effect on the next connect(). The caller reconnects.
+            let replacement = HostSession(host: host)
+            sessions[index] = replacement
+            result = replacement
+        }
+
+        persist()
+        return result
+    }
+
+    /// Whether two hosts would dial the exact same daemon with the same
+    /// credentials, i.e. nothing connection-relevant changed (only `name`).
+    private static func isConnectionEquivalent(_ lhs: DockerHost, _ rhs: DockerHost) -> Bool {
+        lhs.kind == rhs.kind && lhs.socketPathOverride == rhs.socketPathOverride
+    }
+
     // MARK: - Persistence
 
     private func persist() {
@@ -35,7 +84,7 @@ public final class AppModel {
 
     /// Loads the persisted host list, seeding a default Local host on first run.
     private static func loadHosts() -> [DockerHost] {
-        let url = hostsFileURL()
+        let url = HostsStore.fileURL()
 
         if let url, let data = try? Data(contentsOf: url) {
             let decoder = JSONDecoder()
@@ -50,7 +99,7 @@ public final class AppModel {
     }
 
     private static func saveHosts(_ hosts: [DockerHost]) {
-        guard let url = hostsFileURL() else {
+        guard let url = HostsStore.fileURL() else {
             print("AppModel: cannot resolve hosts.json location")
             return
         }
@@ -66,19 +115,5 @@ public final class AppModel {
         } catch {
             print("AppModel: failed to persist hosts: \(error.localizedDescription)")
         }
-    }
-
-    private static func hostsFileURL() -> URL? {
-        guard let appSupport = try? FileManager.default.url(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: false
-        ) else {
-            return nil
-        }
-        return appSupport
-            .appendingPathComponent("Gantry", isDirectory: true)
-            .appendingPathComponent("hosts.json", isDirectory: false)
     }
 }

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # macos-26 hosted image ships Xcode 26.x; pin to the stable default for
+  # reproducible builds. Update the path if the image default changes.
+  DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+
+jobs:
+  build:
+    name: Build app
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build Gantry (Release)
+        run: |
+          xcodebuild \
+            -project Gantry.xcodeproj \
+            -scheme Gantry \
+            -configuration Release \
+            build \
+            CODE_SIGNING_ALLOWED=NO
+
+  test:
+    name: Unit tests
+    runs-on: macos-26
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [DockerKit, SSHKit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Test ${{ matrix.package }}
+        # Live tests are gated with .enabled(if:) on the presence of a local
+        # Docker socket / SSH test host, neither of which exists on CI, so they
+        # are skipped rather than executed.
+        working-directory: Packages/${{ matrix.package }}
+        run: swift test

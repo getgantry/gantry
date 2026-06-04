@@ -9,6 +9,9 @@ struct NetworkListView: View {
     @State private var selectedID: String?
     @State private var searchText = ""
     @State private var removeTarget: NetworkResource?
+    @State private var showingNew = false
+    @State private var pruneConfirm = false
+    @State private var pruneOutcome: PruneOutcome?
 
     /// Built-in networks that cannot be removed.
     private static let builtIns: Set<String> = ["bridge", "host", "none"]
@@ -54,13 +57,49 @@ struct NetworkListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    showingNew = true
+                } label: {
+                    Label("New Network…", systemImage: "plus")
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
                     Task { await session.refreshNetworks() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .keyboardShortcut("r", modifiers: .command)
             }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button("Prune Unused Networks…") { pruneConfirm = true }
+                } label: {
+                    Label("More", systemImage: "ellipsis.circle")
+                }
+            }
         }
+        .sheet(isPresented: $showingNew) {
+            NewNetworkSheet(session: session)
+        }
+        .confirmationDialog(
+            "Prune Unused Networks?",
+            isPresented: $pruneConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Prune", role: .destructive) {
+                pruneConfirm = false
+                Task {
+                    if let result = await session.pruneNetworks() {
+                        pruneOutcome = PruneOutcome(title: "Networks Pruned", result: result)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) { pruneConfirm = false }
+        } message: {
+            Text("Removes all networks not used by at least one container.")
+        }
+        .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.name ?? "network")?",
             isPresented: Binding(
@@ -116,6 +155,8 @@ struct NetworkDetailView: View {
     let session: HostSession
 
     @State private var tab = 0
+    @State private var attached: [NetworkAttachedContainer] = []
+    @State private var attachedLoaded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -162,6 +203,8 @@ struct NetworkDetailView: View {
                                 }
                             }
                         }
+
+                        connectedContainers
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -173,5 +216,87 @@ struct NetworkDetailView: View {
             }
         }
         .navigationTitle(network.name)
+        .task(id: network.id) { await reloadAttached() }
+    }
+
+    /// Running containers not already attached to this network.
+    private var connectableContainers: [ContainerSummary] {
+        let attachedIDs = Set(attached.map { $0.id })
+        return session.containers.filter { $0.state == .running && !attachedIDs.contains($0.id) }
+    }
+
+    @ViewBuilder
+    private var connectedContainers: some View {
+        HStack {
+            SectionTitle("Connected Containers")
+            Spacer()
+            Menu {
+                if connectableContainers.isEmpty {
+                    Text("No running containers")
+                } else {
+                    ForEach(connectableContainers) { container in
+                        Button(container.displayName) {
+                            Task {
+                                _ = await session.connectContainer(
+                                    networkID: network.id,
+                                    containerID: container.id
+                                )
+                                await reloadAttached()
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Label("Connect Container…", systemImage: "plus")
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+        }
+
+        if !attachedLoaded {
+            ProgressView().controlSize(.small)
+        } else if attached.isEmpty {
+            Text("No containers attached.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else {
+            VStack(spacing: 4) {
+                ForEach(attached) { container in
+                    HStack {
+                        Image(systemName: "shippingbox.fill")
+                            .foregroundStyle(.tint)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(container.displayName)
+                                .font(.callout)
+                            if !container.ipv4Address.isEmpty {
+                                Text(container.ipv4Address)
+                                    .font(.system(.caption2, design: .monospaced))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        Button("Disconnect", role: .destructive) {
+                            Task {
+                                _ = await session.disconnectContainer(
+                                    networkID: network.id,
+                                    containerID: container.id,
+                                    force: false
+                                )
+                                await reloadAttached()
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(.caption)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+        }
+    }
+
+    private func reloadAttached() async {
+        attachedLoaded = false
+        attached = await session.networkContainers(id: network.id)
+        attachedLoaded = true
     }
 }

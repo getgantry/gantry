@@ -64,6 +64,16 @@ struct ContentView: View {
             detail
         }
         .navigationTitle("Gantry")
+        .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
+            // Refresh the host currently in view; fall back to all connected hosts.
+            if let selection, let session = model.session(id: selection.hostID) {
+                Task { await session.refreshAll() }
+            } else {
+                for session in model.sessions where session.status.isConnected {
+                    Task { await session.refreshAll() }
+                }
+            }
+        }
         .sheet(isPresented: $showingAddHost) {
             AddHostSheet()
         }

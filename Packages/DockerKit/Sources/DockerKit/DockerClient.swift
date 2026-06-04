@@ -68,6 +68,25 @@ public actor DockerClient {
         return try await transport.stream(request)
     }
 
+    /// Opens a versioned streaming response for an arbitrary method/headers/body
+    /// (used by `POST /images/create` to follow the pull progress stream).
+    func byteStream(
+        method: DockerRequest.Method,
+        path: String,
+        query: [URLQueryItem] = [],
+        headers: [String: String] = [:],
+        body: Data? = nil
+    ) async throws -> DockerByteStream {
+        let request = DockerRequest(
+            method: method,
+            path: versionPrefix + path,
+            query: query,
+            headers: headers,
+            body: body
+        )
+        return try await transport.stream(request)
+    }
+
     /// Opens a versioned connection-upgrading request (exec/attach) and returns
     /// a bidirectional raw byte channel. Mirrors `byteStream` but `POST`s and
     /// carries upgrade headers through to `transport.hijack`.

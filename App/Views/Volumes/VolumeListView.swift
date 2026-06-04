@@ -9,6 +9,9 @@ struct VolumeListView: View {
     @State private var selectedName: String?
     @State private var searchText = ""
     @State private var removeTarget: Volume?
+    @State private var showingNew = false
+    @State private var pruneConfirm = false
+    @State private var pruneOutcome: PruneOutcome?
 
     private var filtered: [Volume] {
         guard !searchText.isEmpty else { return session.volumes }
@@ -50,13 +53,49 @@ struct VolumeListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    showingNew = true
+                } label: {
+                    Label("New Volume…", systemImage: "plus")
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
                     Task { await session.refreshVolumes() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .keyboardShortcut("r", modifiers: .command)
             }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button("Prune Unused Volumes…") { pruneConfirm = true }
+                } label: {
+                    Label("More", systemImage: "ellipsis.circle")
+                }
+            }
         }
+        .sheet(isPresented: $showingNew) {
+            NewVolumeSheet(session: session)
+        }
+        .confirmationDialog(
+            "Prune Unused Volumes?",
+            isPresented: $pruneConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Prune", role: .destructive) {
+                pruneConfirm = false
+                Task {
+                    if let result = await session.pruneVolumes() {
+                        pruneOutcome = PruneOutcome(title: "Volumes Pruned", result: result)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) { pruneConfirm = false }
+        } message: {
+            Text("Removes all volumes not used by at least one container. This permanently deletes their data.")
+        }
+        .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.name ?? "volume")?",
             isPresented: Binding(
@@ -134,6 +173,9 @@ struct VolumeDetailView: View {
                             Fact("Driver", volume.driver)
                             Fact("Scope", volume.scope)
                             Fact("Mountpoint", volume.mountpoint)
+                            if let usage = volume.usageData, usage.size >= 0 {
+                                Fact("Size", usage.size.formatted(.byteCount(style: .file)))
+                            }
                             if !volume.createdAt.isEmpty {
                                 Fact("Created", Formatters.relative(fromRFC3339: volume.createdAt))
                             }

@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a problem with Gantry
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in as much
+        detail as you can so the issue can be reproduced.
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      description: Output of "sw_vers -productVersion", e.g. 26.0
+      placeholder: "26.0"
+    validations:
+      required: true
+  - type: input
+    id: gantry-version
+    attributes:
+      label: Gantry version
+      description: Shown in About Gantry, or the build/commit you ran from source.
+      placeholder: "1.0.0 (123)"
+    validations:
+      required: true
+  - type: dropdown
+    id: docker-backend
+    attributes:
+      label: Docker backend
+      description: Which Docker engine were you connected to?
+      options:
+        - Docker Desktop
+        - OrbStack
+        - Colima
+        - Remote host over SSH
+        - Other (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: A clear description of the bug, including what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Step-by-step instructions to trigger the bug.
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or crash report
+      description: >
+        Paste any relevant console output, error messages, or crash report.
+        Crash reports are in Console.app under Crash Reports, or in
+        ~/Library/Logs/DiagnosticReports. Redact any hostnames, credentials,
+        or other sensitive data first.
+      render: text
+    validations:
+      required: false

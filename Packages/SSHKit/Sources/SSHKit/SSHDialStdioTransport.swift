@@ -165,7 +165,7 @@ public actor SSHDialStdioTransport: DockerTransport {
             }
             let pump = Task {
                 await self.pumpStream(tunnel: tunnel, parser: parser, continuation: continuation)
-                await self.removeStreamTunnel(id)
+                self.removeStreamTunnel(id)
             }
             continuation.onTermination = { _ in
                 pump.cancel()
@@ -260,7 +260,7 @@ public actor SSHDialStdioTransport: DockerTransport {
             }
             let pump = Task {
                 await self.pumpStream(tunnel: tunnel, parser: parser, continuation: continuation)
-                await self.removeStreamTunnel(id)
+                self.removeStreamTunnel(id)
             }
             continuation.onTermination = { _ in
                 pump.cancel()

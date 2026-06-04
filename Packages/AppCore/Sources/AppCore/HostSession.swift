@@ -614,3 +614,365 @@ extension HostSession {
         return ExecSession(execID: execID, tty: true, connection: connection, client: client)
     }
 }
+
+// MARK: - Container management wrappers
+//
+// Thin pass-throughs over the DockerClient endpoints used by the container
+// views. They follow the existing perform/refresh style: surface failures via
+// `lastError` where a Bool/void result is enough, and rethrow where the view
+// needs the value or wants inline error handling.
+
+extension HostSession {
+    /// Creates a container from `config` and immediately starts it, refreshing
+    /// the list afterwards. Returns the new container ID, or throws so the
+    /// caller can offer a "pull image and retry" path on a 404.
+    @discardableResult
+    public func createAndRun(_ config: ContainerCreateRequest) async throws -> String {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        let id = try await client.createContainer(config: config, name: config.name)
+        try await client.startContainer(id: id)
+        await refreshContainers()
+        return id
+    }
+
+    /// Creates a container from `config` without starting it.
+    @discardableResult
+    public func createContainer(_ config: ContainerCreateRequest) async throws -> String {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        let id = try await client.createContainer(config: config, name: config.name)
+        await refreshContainers()
+        return id
+    }
+
+    /// Pulls an image so a failed create can be retried. Named distinctly from
+    /// any resources-layer `pullImage` to avoid clashing with that addition;
+    /// returns the raw progress stream for inline UI feedback.
+    public func pullImageForCreate(reference: String) async throws -> AsyncThrowingStream<PullProgress, Error> {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        return try await client.pullImage(reference: reference)
+    }
+
+    /// Renames a container, refreshing the list. Returns false on failure.
+    @discardableResult
+    public func rename(containerID: String, to name: String) async -> Bool {
+        guard let client else { lastError = "Not connected"; return false }
+        do {
+            try await client.renameContainer(id: containerID, to: name)
+            await refreshContainers()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Commits a container to a new image. Returns false on failure.
+    @discardableResult
+    public func commit(containerID: String, repo: String, tag: String, comment: String) async -> Bool {
+        guard let client else { lastError = "Not connected"; return false }
+        do {
+            _ = try await client.commitContainer(id: containerID, repo: repo, tag: tag, comment: comment)
+            await refreshImages()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Updates a container's restart policy, refreshing the list afterwards.
+    @discardableResult
+    public func updateRestartPolicy(containerID: String, policy: String, maxRetries: Int) async -> Bool {
+        guard let client else { lastError = "Not connected"; return false }
+        do {
+            try await client.updateRestartPolicy(id: containerID, policy: policy, maxRetries: maxRetries)
+            await refreshContainers()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Removes all stopped containers. Returns the prune result, or nil on
+    /// failure (recorded in `lastError`).
+    public func pruneStoppedContainers() async -> PruneResult? {
+        guard let client else { lastError = "Not connected"; return nil }
+        do {
+            let result = try await client.pruneContainers()
+            await refreshContainers()
+            return result
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
+    }
+
+    /// Opens the export byte stream for a container's filesystem (a tar).
+    public func exportFilesystem(containerID: String) async throws -> DockerByteStream {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        return try await client.exportContainer(id: containerID)
+    }
+
+    // MARK: Processes
+
+    /// Lists the running processes inside a container (`docker top`).
+    public func processes(containerID: String) async throws -> ContainerTop {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        return try await client.containerProcesses(id: containerID)
+    }
+
+    // MARK: Files
+
+    /// Lists a directory inside a container.
+    public func listDirectory(containerID: String, path: String) async throws -> [ContainerFileEntry] {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        return try await client.listDirectory(containerID: containerID, path: path)
+    }
+
+    /// Downloads a path from a container as a tar byte stream.
+    public func downloadArchive(containerID: String, path: String) async throws -> DockerByteStream {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        return try await client.downloadArchive(containerID: containerID, path: path)
+    }
+
+    /// Uploads a tar archive into a container at `path`.
+    public func uploadArchive(containerID: String, path: String, tar: Data) async throws {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        try await client.uploadArchive(containerID: containerID, path: path, tar: tar)
+    }
+}
+
+// MARK: - Resource operations (M7)
+//
+// Wrappers for the image / volume / network / system resource views. Same
+// style as the rest of the file: void/Bool/optional results record failures in
+// `lastError`; streaming + value-returning calls rethrow so the view can drive
+// inline feedback. Each mutation refreshes the affected list on success.
+
+extension HostSession {
+    // MARK: Images
+
+    /// Pulls an image, returning the daemon's live per-layer progress stream.
+    /// Pull errors surface as a thrown `DockerError` from the stream itself.
+    /// Callers should `refreshImages()` once the stream finishes.
+    public func pullImage(
+        reference: String,
+        auth: RegistryAuth? = nil
+    ) async throws -> AsyncThrowingStream<PullProgress, Error> {
+        guard let client else {
+            throw DockerError.connectionFailed("Not connected")
+        }
+        return try await client.pullImage(reference: reference, auth: auth)
+    }
+
+    /// Returns the layer history for an image (newest first), or nil on failure.
+    public func imageHistory(id: String) async -> [ImageHistoryEntry]? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        return await fetch { try await client.imageHistory(id: id) }
+    }
+
+    /// Adds a `repo:tag` to an existing image. Refreshes images on success.
+    @discardableResult
+    public func tagImage(id: String, repo: String, tag: String) async -> Bool {
+        guard let client else {
+            lastError = "Not connected"
+            return false
+        }
+        do {
+            try await client.tagImage(id: id, repo: repo, tag: tag)
+            await refreshImages()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Prunes images. When `dangling` is true only untagged layers are removed;
+    /// otherwise all unused images are pruned. Refreshes images on success.
+    public func pruneImages(dangling: Bool) async -> PruneResult? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        let result = await fetch { try await client.pruneImages(dangling: dangling) }
+        if result != nil { await refreshImages() }
+        return result
+    }
+
+    // MARK: Volumes
+
+    /// Creates a volume and refreshes the list on success.
+    @discardableResult
+    public func createVolume(
+        name: String,
+        driver: String = "local",
+        labels: [String: String] = [:]
+    ) async -> Volume? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        do {
+            let volume = try await client.createVolume(name: name, driver: driver, labels: labels)
+            await refreshVolumes()
+            return volume
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
+    }
+
+    /// Prunes unused volumes. Refreshes the list on success.
+    public func pruneVolumes() async -> PruneResult? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        let result = await fetch { try await client.pruneVolumes() }
+        if result != nil { await refreshVolumes() }
+        return result
+    }
+
+    // MARK: Networks
+
+    /// Creates a network and refreshes the list on success. Returns the new id.
+    @discardableResult
+    public func createNetwork(
+        name: String,
+        driver: String = "bridge",
+        labels: [String: String] = [:]
+    ) async -> String? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        do {
+            let id = try await client.createNetwork(name: name, driver: driver, labels: labels)
+            await refreshNetworks()
+            return id
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
+    }
+
+    /// Prunes unused networks. Refreshes the list on success.
+    public func pruneNetworks() async -> PruneResult? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        let result = await fetch { try await client.pruneNetworks() }
+        if result != nil { await refreshNetworks() }
+        return result
+    }
+
+    /// Attaches a container to a network. Refreshes networks on success.
+    @discardableResult
+    public func connectContainer(networkID: String, containerID: String) async -> Bool {
+        guard let client else {
+            lastError = "Not connected"
+            return false
+        }
+        do {
+            try await client.connectContainer(networkID: networkID, containerID: containerID)
+            await refreshNetworks()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Detaches a container from a network. Refreshes networks on success.
+    @discardableResult
+    public func disconnectContainer(
+        networkID: String,
+        containerID: String,
+        force: Bool = false
+    ) async -> Bool {
+        guard let client else {
+            lastError = "Not connected"
+            return false
+        }
+        do {
+            try await client.disconnectContainer(networkID: networkID, containerID: containerID, force: force)
+            await refreshNetworks()
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    // MARK: System
+
+    /// Returns aggregate disk usage across images, containers and volumes,
+    /// or nil on failure (recorded in `lastError`).
+    public func systemDF() async -> SystemDiskUsage? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        return await fetch { try await client.systemDF() }
+    }
+
+    /// Prunes the builder cache. Returns the reclaimed space report.
+    public func pruneBuildCache() async -> PruneResult? {
+        guard let client else {
+            lastError = "Not connected"
+            return nil
+        }
+        return await fetch { try await client.pruneBuildCache() }
+    }
+
+    /// Raw network inspect decoded into a minimal shape exposing the connected
+    /// containers, used by `NetworkDetailView` to list attachments. Reuses the
+    /// existing `rawInspectNetwork` so no new endpoint is required.
+    public func networkContainers(id: String) async -> [NetworkAttachedContainer] {
+        let json = await rawInspectNetwork(id: id)
+        guard let data = json.data(using: .utf8) else { return [] }
+        return NetworkAttachedContainer.decode(fromInspect: data)
+    }
+}
+
+/// One container attached to a network, decoded from the `Containers` map of a
+/// raw network inspect (`GET /networks/{id}`). Kept local to AppCore so the
+/// resource views can render attachments without a dedicated DockerKit model.
+public struct NetworkAttachedContainer: Identifiable, Hashable, Sendable {
+    public let id: String
+    public let name: String
+    public let ipv4Address: String
+    public let ipv6Address: String
+
+    public var displayName: String {
+        name.isEmpty ? String(id.prefix(12)) : name
+    }
+
+    /// Decodes the `Containers` object of a network inspect body.
+    static func decode(fromInspect data: Data) -> [NetworkAttachedContainer] {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let map = root["Containers"] as? [String: Any]
+        else { return [] }
+
+        var result: [NetworkAttachedContainer] = []
+        for (containerID, value) in map {
+            let entry = value as? [String: Any] ?? [:]
+            result.append(
+                NetworkAttachedContainer(
+                    id: containerID,
+                    name: entry["Name"] as? String ?? "",
+                    ipv4Address: entry["IPv4Address"] as? String ?? "",
+                    ipv6Address: entry["IPv6Address"] as? String ?? ""
+                )
+            )
+        }
+        return result.sorted { $0.displayName.lowercased() < $1.displayName.lowercased() }
+    }
+}

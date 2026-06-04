@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import AppCore
 import DockerKit
 
@@ -8,11 +9,18 @@ struct ContainerDetailView: View {
 
     @State private var tab: DetailTab = .overview
 
+    // Overflow-menu sheets / alerts.
+    @State private var showCommitSheet = false
+    @State private var showRename = false
+    @State private var renameText = ""
+
     enum DetailTab: String, CaseIterable, Identifiable {
         case overview = "Overview"
         case logs = "Logs"
         case stats = "Stats"
         case terminal = "Terminal"
+        case files = "Files"
+        case processes = "Processes"
         case inspect = "Inspect"
         var id: String { rawValue }
     }
@@ -41,7 +49,69 @@ struct ContainerDetailView: View {
                 actionButton(.start, systemImage: "play.fill", enabled: !isRunning)
                 actionButton(.stop, systemImage: "stop.fill", enabled: isRunning)
                 actionButton(.restart, systemImage: "arrow.clockwise", enabled: isRunning)
+                overflowMenu
             }
+        }
+        .sheet(isPresented: $showCommitSheet) {
+            CommitImageSheet(session: session, container: container)
+        }
+        .alert("Rename Container", isPresented: $showRename) {
+            TextField("Name", text: $renameText)
+            Button("Rename") {
+                let newName = renameText
+                Task { _ = await session.rename(containerID: container.id, to: newName) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enter a new name for the container.")
+        }
+    }
+
+    // MARK: - Overflow menu
+
+    private var overflowMenu: some View {
+        Menu {
+            Button {
+                renameText = container.displayName
+                showRename = true
+            } label: {
+                Label("Rename…", systemImage: "pencil")
+            }
+            Button {
+                showCommitSheet = true
+            } label: {
+                Label("Commit to Image…", systemImage: "camera")
+            }
+            Button {
+                ContainerExport.run(session: session, container: container)
+            } label: {
+                Label("Export Filesystem…", systemImage: "square.and.arrow.up")
+            }
+            Menu {
+                ForEach(RestartPolicyOption.allCases) { option in
+                    Button(option.label) {
+                        Task {
+                            _ = await session.updateRestartPolicy(
+                                containerID: container.id,
+                                policy: option.rawValue,
+                                maxRetries: 0
+                            )
+                        }
+                    }
+                }
+            } label: {
+                Label("Restart Policy", systemImage: "arrow.triangle.2.circlepath")
+            }
+            Divider()
+            Button {
+                let pb = NSPasteboard.general
+                pb.clearContents()
+                pb.setString(container.id, forType: .string)
+            } label: {
+                Label("Copy Container ID", systemImage: "doc.on.doc")
+            }
+        } label: {
+            Label("More", systemImage: "ellipsis.circle")
         }
     }
 
@@ -96,6 +166,10 @@ struct ContainerDetailView: View {
             StatsView(session: session, container: container)
         case .terminal:
             ContainerTerminalView(session: session, container: container)
+        case .files:
+            FilesView(session: session, container: container)
+        case .processes:
+            ProcessesView(session: session, container: container)
         case .inspect:
             InspectJSONView {
                 await session.rawInspectContainer(id: container.id)

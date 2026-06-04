@@ -9,6 +9,24 @@ struct ImageListView: View {
     @State private var selectedID: String?
     @State private var searchText = ""
     @State private var removeTarget: ImageSummary?
+    @State private var showingPull = false
+    @State private var pruneConfirm: PruneScope?
+    @State private var pruneOutcome: PruneOutcome?
+    @State private var diskUsage: SystemDiskUsage?
+
+    /// Which prune action the user is confirming.
+    private enum PruneScope: Identifiable {
+        case dangling
+        case allUnused
+        var id: Int { self == .dangling ? 0 : 1 }
+
+        var title: String { self == .dangling ? "Prune Dangling Images?" : "Prune All Unused Images?" }
+        var message: String {
+            self == .dangling
+                ? "Removes untagged (dangling) image layers. This cannot be undone."
+                : "Removes all images not referenced by any container. This cannot be undone."
+        }
+    }
 
     private var filtered: [ImageSummary] {
         guard !searchText.isEmpty else { return session.images }
@@ -41,6 +59,9 @@ struct ImageListView: View {
                 }
             }
             .navigationTitle("Images")
+            .safeAreaInset(edge: .bottom) {
+                DiskUsageFooter(usage: diskUsage)
+            }
             .navigationDestination(item: $selectedID) { id in
                 if let image = session.images.first(where: { $0.id == id }) {
                     ImageDetailView(image: image, session: session)
@@ -51,13 +72,57 @@ struct ImageListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    showingPull = true
+                } label: {
+                    Label("Pull Image…", systemImage: "arrow.down.circle")
+                }
+                .keyboardShortcut("p", modifiers: .command)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
                     Task { await session.refreshImages() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .keyboardShortcut("r", modifiers: .command)
             }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button("Prune Dangling Images…") { pruneConfirm = .dangling }
+                    Button("Prune All Unused…") { pruneConfirm = .allUnused }
+                } label: {
+                    Label("More", systemImage: "ellipsis.circle")
+                }
+            }
         }
+        .sheet(isPresented: $showingPull) {
+            PullImageSheet(session: session)
+        }
+        .confirmationDialog(
+            pruneConfirm?.title ?? "",
+            isPresented: Binding(
+                get: { pruneConfirm != nil },
+                set: { if !$0 { pruneConfirm = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pruneConfirm
+        ) { scope in
+            Button("Prune", role: .destructive) {
+                let dangling = scope == .dangling
+                let title = dangling ? "Dangling Images Pruned" : "Unused Images Pruned"
+                pruneConfirm = nil
+                Task {
+                    if let result = await session.pruneImages(dangling: dangling) {
+                        pruneOutcome = PruneOutcome(title: title, result: result)
+                    }
+                    await loadDiskUsage()
+                }
+            }
+            Button("Cancel", role: .cancel) { pruneConfirm = nil }
+        } message: { scope in
+            Text(scope.message)
+        }
+        .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.displayName ?? "image")?",
             isPresented: Binding(
@@ -66,7 +131,7 @@ struct ImageListView: View {
             ),
             titleVisibility: .visible,
             presenting: removeTarget
-        ) { image in
+        ) { _ in
             Button("Remove", role: .destructive) {
                 Task { await session.refreshImages() }
                 removeTarget = nil
@@ -75,12 +140,46 @@ struct ImageListView: View {
         } message: { _ in
             Text("Image removal will be wired through the engine in a later milestone.")
         }
+        .task {
+            await loadDiskUsage()
+        }
+    }
+
+    private func loadDiskUsage() async {
+        diskUsage = await session.systemDF()
     }
 
     private func copy(_ text: String) {
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(text, forType: .string)
+    }
+}
+
+/// Footer line under the image list summarising daemon disk usage.
+private struct DiskUsageFooter: View {
+    let usage: SystemDiskUsage?
+
+    var body: some View {
+        Group {
+            if let usage {
+                Text(
+                    "Storage: images \(usage.imagesSize.formatted(.byteCount(style: .file))) · "
+                        + "containers \(usage.containersCount) · "
+                        + "volumes \(usage.volumesCount)"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } else {
+                Text("Storage: calculating…")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
+        .padding(.vertical, 6)
+        .background(.bar)
     }
 }
 
@@ -115,6 +214,9 @@ struct ImageDetailView: View {
     let session: HostSession
 
     @State private var tab = 0
+    @State private var history: [ImageHistoryEntry] = []
+    @State private var historyLoaded = false
+    @State private var showingTag = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -127,7 +229,8 @@ struct ImageDetailView: View {
 
             Picker("Section", selection: $tab) {
                 Text("Overview").tag(0)
-                Text("Inspect").tag(1)
+                Text("History").tag(1)
+                Text("Inspect").tag(2)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -135,35 +238,103 @@ struct ImageDetailView: View {
 
             Divider()
 
-            if tab == 0 {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        FactGrid {
-                            Fact("ID", image.shortID)
-                            Fact("Size", image.sizeDisplay)
-                            Fact("Created", image.createdDate.formatted(date: .abbreviated, time: .shortened))
-                            Fact("Containers", image.containers >= 0 ? "\(image.containers)" : "—")
-                        }
-                        if !image.repoTags.isEmpty {
-                            SectionTitle("Tags")
-                            VStack(alignment: .leading, spacing: 2) {
-                                ForEach(image.repoTags, id: \.self) { tag in
-                                    Text(tag)
-                                        .font(.system(.caption, design: .monospaced))
-                                        .textSelection(.enabled)
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            } else {
+            switch tab {
+            case 0:
+                overview
+            case 1:
+                historyTab
+            default:
                 InspectJSONView {
                     await session.rawInspectImage(id: image.id)
                 }
             }
         }
         .navigationTitle(image.displayName)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingTag = true
+                } label: {
+                    Label("Tag…", systemImage: "tag")
+                }
+            }
+        }
+        .sheet(isPresented: $showingTag) {
+            TagImageSheet(image: image, session: session)
+        }
+    }
+
+    private var overview: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                FactGrid {
+                    Fact("ID", image.shortID)
+                    Fact("Size", image.sizeDisplay)
+                    Fact("Created", image.createdDate.formatted(date: .abbreviated, time: .shortened))
+                    Fact("Containers", image.containers >= 0 ? "\(image.containers)" : "—")
+                }
+                if !image.repoTags.isEmpty {
+                    SectionTitle("Tags")
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(image.repoTags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.system(.caption, design: .monospaced))
+                                .textSelection(.enabled)
+                        }
+                    }
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// A history entry paired with its stable list position. Layer entries can
+    /// share an empty id, so the array index provides Table row identity.
+    private struct IndexedHistory: Identifiable {
+        let id: Int
+        let entry: ImageHistoryEntry
+    }
+
+    private var indexedHistory: [IndexedHistory] {
+        history.enumerated().map { IndexedHistory(id: $0.offset, entry: $0.element) }
+    }
+
+    private var historyTab: some View {
+        Group {
+            if !historyLoaded {
+                ProgressView()
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if history.isEmpty {
+                ContentUnavailableView(
+                    "No History",
+                    systemImage: "clock.arrow.circlepath",
+                    description: Text("This image reports no layer history.")
+                )
+            } else {
+                Table(indexedHistory) {
+                    TableColumn("Created By") { (row: IndexedHistory) in
+                        Text(row.entry.createdBy.isEmpty ? "—" : row.entry.createdBy)
+                            .font(.system(.caption, design: .monospaced))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                            .help(row.entry.createdBy)
+                    }
+                    TableColumn("Size") { (row: IndexedHistory) in
+                        Text(row.entry.size.formatted(.byteCount(style: .file)))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(90)
+                }
+            }
+        }
+        .task(id: image.id) {
+            historyLoaded = false
+            history = await session.imageHistory(id: image.id) ?? []
+            historyLoaded = true
+        }
     }
 }
