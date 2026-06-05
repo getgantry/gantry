@@ -40,6 +40,18 @@ Website: **https://getgantry.github.io/**
 
 ![Live stats](assets/stats.png)
 
+### Fleet & hosts
+- **Fleet dashboard** — every connected host on one screen: live CPU/memory
+  sparklines (10-minute rolling window), container state breakdown, host facts;
+  opens at launch
+- **Health column** — failed connections and unhealthy / restarting / dead
+  containers across all hosts, each row jumping straight to the culprit
+- **Host overview** — CPU/memory gauges, Docker disk usage, daemon facts
+- **Host terminal & files (SSH hosts)** — a shell on the host itself and an
+  SFTP file browser, alongside the per-container ones
+- **Auto-reconnect** — dropped tunnels and transient connect failures retry
+  with backoff; stale data stays on screen instead of blanking out
+
 ### Terminal & Files
 - **Exec terminal** — full terminal emulation (SwiftTerm) into any running
   container, local or remote
