@@ -130,13 +130,18 @@ public final class SSHConnector: Sendable {
         parameters: SSHConnectionParameters,
         policy: HostKeyPolicy
     ) async throws -> SSHClient {
-        do {
-            guard let first = parameters.jumps.first else {
+        guard let first = parameters.jumps.first else {
+            do {
                 return try await dialDirect(parameters: parameters, policy: policy)
+            } catch {
+                throw mapConnectError(error)
             }
+        }
 
-            // Outermost hop is a plain TCP dial…
-            var client = try await dialDirect(
+        // Outermost hop is a plain TCP dial…
+        var client: SSHClient
+        do {
+            client = try await dialDirect(
                 parameters: SSHConnectionParameters(
                     host: first.host,
                     port: first.port,
@@ -145,6 +150,10 @@ public final class SSHConnector: Sendable {
                 ),
                 policy: policy
             )
+        } catch {
+            throw mapConnectError(error)
+        }
+        do {
             // …each subsequent hop and the target ride inside the previous one.
             for hop in parameters.jumps.dropFirst() {
                 client = try await client.jump(
@@ -161,6 +170,10 @@ public final class SSHConnector: Sendable {
                 )
             )
         } catch {
+            // A failed hop must not orphan the hops that are already up:
+            // `close()` cascades through `jumpParent` and tears down the
+            // whole partial chain (bastion included).
+            try? await client.close()
             throw mapConnectError(error)
         }
     }
