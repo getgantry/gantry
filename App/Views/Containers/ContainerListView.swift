@@ -489,6 +489,12 @@ struct ContainerActionsMenu: View {
             Label("Copy Container ID", systemImage: "doc.on.doc")
         }
 
+        Button {
+            ContainerPromptCopy.run(session: session, container: container)
+        } label: {
+            Label("Copy as Prompt", systemImage: "text.badge.star")
+        }
+
         Divider()
 
         Button(role: .destructive) {
@@ -522,6 +528,23 @@ enum RestartPolicyOption: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var label: String { rawValue }
+}
+
+/// Shared copy-as-prompt flow: inspects the container for health/exit detail
+/// (best effort — the summary alone still makes a useful prompt), builds a
+/// paste-ready debugging prompt for an AI coding agent and copies it.
+enum ContainerPromptCopy {
+    @MainActor
+    static func run(session: HostSession, container: ContainerSummary) {
+        Task {
+            let details = await session.details(for: container.id)
+            copyToPasteboard(ContainerPrompt.build(
+                host: session.host,
+                container: container,
+                details: details
+            ))
+        }
+    }
 }
 
 /// Shared filesystem-export flow: NSSavePanel then streamed write to disk.

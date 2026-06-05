@@ -246,6 +246,7 @@ private struct RunningRow: View {
             Button("Kill") { Task { await run(.kill) } }
             Divider()
             Button("Copy Container ID") { copyToPasteboard(container.id) }
+            Button("Copy as Prompt") { ContainerPromptCopy.run(session: session, container: container) }
         }
     }
 

@@ -108,6 +108,12 @@ struct ContainerDetailView: View {
             } label: {
                 Label("Copy Container ID", systemImage: "doc.on.doc")
             }
+            Button {
+                ContainerPromptCopy.run(session: session, container: container)
+            } label: {
+                Label("Copy as Prompt", systemImage: "text.badge.star")
+            }
+            .keyboardShortcut("p", modifiers: [.command, .option])
         } label: {
             Label("More", systemImage: "ellipsis.circle")
         }

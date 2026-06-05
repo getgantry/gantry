@@ -113,7 +113,7 @@ struct FleetIssuesView: View {
             ForEach(groups, id: \.session.id) { group in
                 Section {
                     ForEach(group.issues) { issue in
-                        issueRow(issue, hostID: group.session.host.id)
+                        issueRow(issue, session: group.session)
                     }
                 } header: {
                     HStack(spacing: 6) {
@@ -127,9 +127,9 @@ struct FleetIssuesView: View {
         }
     }
 
-    private func issueRow(_ issue: FleetIssue, hostID: UUID) -> some View {
+    private func issueRow(_ issue: FleetIssue, session: HostSession) -> some View {
         Button {
-            navigate(hostID, issue.section, issue.target)
+            navigate(session.host.id, issue.section, issue.target)
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Image(systemName: issue.severity.systemImage)
@@ -151,6 +151,18 @@ struct FleetIssuesView: View {
         .buttonStyle(.plain)
         .padding(.vertical, 2)
         .help("Show in \(issue.section.title)")
+        .contextMenu {
+            // Hand the broken container to an AI agent: copies a paste-ready
+            // debugging prompt with host + container context.
+            if case .container(let containerID) = issue.target,
+               let container = session.containers.first(where: { $0.id == containerID }) {
+                Button {
+                    ContainerPromptCopy.run(session: session, container: container)
+                } label: {
+                    Label("Copy as Prompt", systemImage: "text.badge.star")
+                }
+            }
+        }
     }
 
     private var allClear: some View {
