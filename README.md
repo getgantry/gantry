@@ -194,9 +194,9 @@ auth). On CI they skip cleanly.
 ### Releasing
 
 ```sh
-scripts/release.sh 0.2.0
-gh release create v0.2.0 dist/Gantry-0.2.0.zip --title "Gantry 0.2.0"
-git add appcast.xml && git commit -m "Appcast for 0.2.0" && git push
+scripts/release.sh 0.6.0
+gh release create v0.6.0 dist/Gantry-0.6.0.zip --title "Gantry 0.6.0"
+git add appcast.xml && git commit -m "Appcast for 0.6.0" && git push
 ```
 
 The script builds the app, embeds `gantry-mcp`, zips, and signs the Sparkle

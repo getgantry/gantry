@@ -214,7 +214,8 @@ actor GantryTools {
     private func containerLogs(_ args: Arguments) async throws -> CallTool.Result {
         let host = try requiredHost(args)
         let containerID = try args.requiredString("container_id")
-        let tail = args.int("tail", default: 100)
+        // Clamp: zero/negative tail would produce a malformed query param.
+        let tail = max(1, args.int("tail", default: 100))
         let client = try await docker.connect(to: host)
 
         // Inspect to learn TTY framing, then pull a bounded, non-following tail.
