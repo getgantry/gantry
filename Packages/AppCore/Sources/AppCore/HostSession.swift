@@ -94,6 +94,10 @@ public final class HostSession: Identifiable {
 
     private static let loadHistoryWindow = 120
 
+    /// Pending automatic reconnect after a lost connection; cancelled by
+    /// `disconnect()` and superseded by a user-initiated retry.
+    private var autoReconnectTask: Task<Void, Never>?
+
     /// Factory for additional SSH connections to this host (host shell, SFTP
     /// file browsing). Set while an SSH host is connected; nil for local.
     private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
@@ -378,6 +382,8 @@ public final class HostSession: Identifiable {
     }
 
     public func disconnect() async {
+        autoReconnectTask?.cancel()
+        autoReconnectTask = nil
         eventTask?.cancel()
         eventTask = nil
         loadSamplingTask?.cancel()
@@ -443,6 +449,15 @@ public final class HostSession: Identifiable {
 
             if Task.isCancelled { break }
 
+            // Distinguish an events-endpoint hiccup from a dead transport: if
+            // even a ping fails, the daemon is unreachable (dropped SSH tunnel,
+            // stopped Docker) — hand over to the auto-reconnect path instead
+            // of polling a corpse.
+            if status.isConnected, await connectionLost() {
+                handleConnectionLoss()
+                return
+            }
+
             // Events unavailable: poll while we wait, so the UI stays fresh, and
             // sleep the configured interval before retrying the event stream.
             if status.isConnected {
@@ -455,6 +470,55 @@ public final class HostSession: Identifiable {
         }
 
         liveUpdatesActive = false
+    }
+
+    /// True when the daemon no longer answers even a ping.
+    private func connectionLost() async -> Bool {
+        guard let client else { return true }
+        do {
+            try await client.ping()
+            return false
+        } catch is CancellationError {
+            return false
+        } catch {
+            return true
+        }
+    }
+
+    /// Tears down the dead client (keeping the stale resource lists on screen
+    /// so the UI doesn't blank out) and starts reconnecting with backoff.
+    private func handleConnectionLoss() {
+        guard status.isConnected else { return }
+        eventTask?.cancel()
+        eventTask = nil
+        loadSamplingTask?.cancel()
+        loadSamplingTask = nil
+        sshClientFactory = nil
+        liveUpdatesActive = false
+        if let dead = client {
+            client = nil
+            Task { await dead.shutdown() }
+        }
+        status = .failed("Connection lost. Reconnecting…")
+        scheduleAutoReconnect(after: 3, attemptsLeft: 8)
+    }
+
+    /// Retries `connect()` after a delay, doubling it between attempts (3s,
+    /// 6s, … capped at 60s; ~4.5 minutes in total). Gives up once the
+    /// attempts are spent — the host card then shows the plain failure with
+    /// its manual Retry. A user action that changes the status (retry,
+    /// remove) makes the pending attempt a no-op.
+    private func scheduleAutoReconnect(after seconds: Int, attemptsLeft: Int) {
+        autoReconnectTask?.cancel()
+        autoReconnectTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(seconds))
+            guard let self, !Task.isCancelled else { return }
+            guard case .failed = self.status else { return }
+            await self.connect()
+            if case .failed = self.status, !Task.isCancelled, attemptsLeft > 1 {
+                self.scheduleAutoReconnect(after: min(seconds * 2, 60), attemptsLeft: attemptsLeft - 1)
+            }
+        }
     }
 
     /// Sleeps for the polling cadence: the larger of the user's configured
