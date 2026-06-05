@@ -45,6 +45,27 @@ import Testing
         await session.disconnect()
         #expect(session.status == .disconnected)
     }
+
+    /// disconnect() while a connect is still dialing must win: the in-flight
+    /// attempt is invalidated by the connection generation bump, so its
+    /// completion can neither resurrect the session nor overwrite the
+    /// .disconnected status with .failed.
+    @Test func disconnectDuringInFlightConnectStaysDisconnected() async {
+        let host = DockerHost(
+            name: "Local",
+            kind: .local,
+            socketPathOverride: "/tmp/nope-\(UUID().uuidString).sock"
+        )
+        let session = HostSession(host: host)
+        // The bogus-socket negotiate takes seconds to fail; disconnect mid-dial.
+        let inFlight = Task { await session.connect() }
+        try? await Task.sleep(for: .milliseconds(100))
+        await session.disconnect()
+        #expect(session.status == .disconnected)
+        await inFlight.value
+        // The stale attempt finished after disconnect — status must not move.
+        #expect(session.status == .disconnected)
+    }
 }
 
 // MARK: - HeadlessDocker SSH auth resolution (throws before any dial)

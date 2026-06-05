@@ -102,6 +102,12 @@ public final class HostSession: Identifiable {
     /// so a failure inside it doesn't spawn a second, competing retry chain.
     private var autoReconnectInProgress = false
 
+    /// Monotonic token invalidating in-flight connect attempts. `disconnect()`
+    /// bumps it, so a connect that was already dialing (e.g. inside the
+    /// auto-reconnect loop, where task cancellation can't interrupt the dial)
+    /// notices on completion and bails instead of resurrecting the session.
+    private var connectionGeneration = 0
+
     /// Factory for additional SSH connections to this host (host shell, SFTP
     /// file browsing). Set while an SSH host is connected; nil for local.
     private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
@@ -118,6 +124,7 @@ public final class HostSession: Identifiable {
     public func connect() async {
         status = .connecting
         lastError = nil
+        let generation = connectionGeneration
 
         switch host.kind {
         case .local:
@@ -133,19 +140,26 @@ public final class HostSession: Identifiable {
             }
 
             let transport = UnixSocketTransport(socketPath: socketPath)
-            await finishConnect(with: transport)
+            await finishConnect(with: transport, generation: generation)
 
         case .ssh(let endpoint):
-            await connectSSH(endpoint)
+            await connectSSH(endpoint, generation: generation)
         }
     }
 
     /// Negotiates and brings the session up over an already-built transport.
     /// Shared by the local and SSH paths so status transitions stay identical.
-    private func finishConnect(with transport: DockerTransport) async {
+    /// `generation` is the token captured when this attempt started; if
+    /// `disconnect()` ran in the meantime the result is discarded.
+    private func finishConnect(with transport: DockerTransport, generation: Int) async {
         let client = DockerClient(transport: transport)
         do {
             let version = try await client.negotiate()
+            guard generation == connectionGeneration else {
+                // disconnect() arrived while we were dialing — stay down.
+                await client.shutdown()
+                return
+            }
             self.client = client
             status = .connected(version)
             await refreshAll()
@@ -153,6 +167,7 @@ public final class HostSession: Identifiable {
             startLoadSampling()
         } catch {
             await client.shutdown()
+            guard generation == connectionGeneration else { return }
             self.client = nil
             // DockerClient.shutdown forwards to the transport; nothing more to release.
             status = .failed(error.localizedDescription)
@@ -189,7 +204,7 @@ public final class HostSession: Identifiable {
 
     // MARK: - SSH connection
 
-    private func connectSSH(_ endpoint: SSHEndpoint) async {
+    private func connectSSH(_ endpoint: SSHEndpoint, generation: Int) async {
         // Resolve ssh_config to fill any gaps the user left blank (shared with
         // the headless paths so the GUI and MCP/Intents dial the same host).
         let resolved = ResolvedSSHEndpoint.resolve(endpoint)
@@ -213,10 +228,10 @@ public final class HostSession: Identifiable {
                 resolvedIdentityFiles: resolved.identityFiles
             )
         } catch is CancellationError {
-            status = .failed("Connection cancelled")
+            if generation == connectionGeneration { status = .failed("Connection cancelled") }
             return
         } catch {
-            status = .failed(error.localizedDescription)
+            if generation == connectionGeneration { status = .failed(error.localizedDescription) }
             return
         }
 
@@ -247,7 +262,7 @@ public final class HostSession: Identifiable {
         }
         let transport = SSHDialStdioTransport(makeClient: makeClient)
 
-        await finishConnect(with: transport)
+        await finishConnect(with: transport, generation: generation)
         if status.isConnected {
             sshClientFactory = makeClient
         }
@@ -419,8 +434,13 @@ public final class HostSession: Identifiable {
     }
 
     public func disconnect() async {
+        // Invalidate any connect already in flight (auto-reconnect or manual):
+        // cancelling its task can't interrupt a dial that has started, so the
+        // attempt checks this token on completion and discards itself.
+        connectionGeneration += 1
         autoReconnectTask?.cancel()
         autoReconnectTask = nil
+        autoReconnectInProgress = false
         eventTask?.cancel()
         eventTask = nil
         loadSamplingTask?.cancel()
