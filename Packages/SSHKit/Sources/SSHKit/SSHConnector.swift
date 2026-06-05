@@ -1,11 +1,17 @@
 import Foundation
 import Citadel
 import NIOCore
-import NIOSSH
+// NIOSSHUserAuthenticationOffer promises predate Sendable; same treatment
+// Citadel itself uses.
+@preconcurrency import NIOSSH
 
 /// How to authenticate an SSH connection.
 public enum AuthSource: Sendable {
     case key(LoadedKey)
+    /// Candidate keys tried in order over a single connection, the way
+    /// OpenSSH walks its identity files. Used by "automatic" auth where the
+    /// right key for the server is not known up front.
+    case keys([LoadedKey])
     case password(String)
 }
 
@@ -98,6 +104,12 @@ public final class SSHConnector: Sendable {
         switch parameters.auth {
         case .key(let key):
             authMethod = key.authMethod(username: parameters.username)
+        case .keys(let candidates) where candidates.count == 1:
+            authMethod = candidates[0].authMethod(username: parameters.username)
+        case .keys(let candidates):
+            authMethod = .custom(
+                MultiKeyAuthDelegate(username: parameters.username, keys: candidates)
+            )
         case .password(let password):
             authMethod = .passwordBased(username: parameters.username, password: password)
         }
@@ -162,6 +174,39 @@ public final class SSHConnector: Sendable {
             return SSHConnectError.unreachable(error.localizedDescription)
         }
         return SSHConnectError.other(error.localizedDescription)
+    }
+}
+
+/// Offers each candidate private key in turn over a single connection:
+/// NIOSSH calls `nextAuthenticationType` again after every rejected attempt,
+/// which is exactly how OpenSSH walks its identity files. Internal (not
+/// private) for unit testing.
+final class MultiKeyAuthDelegate: NIOSSHClientUserAuthenticationDelegate, @unchecked Sendable {
+    private let username: String
+    /// Keys not yet offered; consumed front-to-back, one per attempt.
+    private var remaining: [LoadedKey]
+
+    init(username: String, keys: [LoadedKey]) {
+        self.username = username
+        self.remaining = keys
+    }
+
+    func nextAuthenticationType(
+        availableMethods: NIOSSHAvailableUserAuthenticationMethods,
+        nextChallengePromise: EventLoopPromise<NIOSSHUserAuthenticationOffer?>
+    ) {
+        guard availableMethods.contains(.publicKey) else {
+            nextChallengePromise.fail(SSHClientError.unsupportedPrivateKeyAuthentication)
+            return
+        }
+        guard !remaining.isEmpty else {
+            nextChallengePromise.fail(SSHClientError.allAuthenticationOptionsFailed)
+            return
+        }
+        let key = remaining.removeFirst()
+        nextChallengePromise.succeed(
+            NIOSSHUserAuthenticationOffer(username: username, serviceName: "", offer: key.nioOffer())
+        )
     }
 }
 

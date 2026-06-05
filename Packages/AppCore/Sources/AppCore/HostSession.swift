@@ -223,6 +223,16 @@ public final class HostSession: Identifiable {
         switch endpoint.auth {
         case .automatic:
             let candidates = resolvedIdentityFiles + SSHKeyLoader.defaultKeyCandidates()
+            // Offer every loadable key over one connection (OpenSSH-style):
+            // which key the server accepts is unknowable up front, and a
+            // single guess used to fail hosts whose key was further down the
+            // list. Encrypted keys without a stored passphrase are skipped
+            // here; if nothing loads, fall back to the single-key path, which
+            // prompts for a passphrase.
+            let loaded = loadAllUsableKeys(from: candidates, hostID: host.id)
+            if !loaded.isEmpty {
+                return .keys(loaded)
+            }
             return try await loadFirstUsableKey(from: candidates, hostName: hostName)
 
         case .keyFile(let path):
@@ -239,6 +249,30 @@ public final class HostSession: Identifiable {
             }
             return .password(answer.secret)
         }
+    }
+
+    /// Loads every candidate key that is readable without user interaction:
+    /// plain keys plus encrypted ones whose passphrase is in the Keychain.
+    /// Duplicate paths (ssh_config + defaults) are loaded once.
+    private func loadAllUsableKeys(from paths: [String], hostID: UUID) -> [LoadedKey] {
+        let passphraseAccount = KeychainStore.keyPassphraseAccount(hostID: hostID)
+        var seen = Set<String>()
+        var keys: [LoadedKey] = []
+        for path in paths {
+            let expanded = (path as NSString).expandingTildeInPath
+            guard seen.insert(expanded).inserted else { continue }
+            do {
+                keys.append(try SSHKeyLoader.load(contentsOf: expanded, passphrase: nil))
+            } catch SSHKeyError.needsPassphrase {
+                guard let stored = KeychainStore.get(account: passphraseAccount),
+                      let key = try? SSHKeyLoader.load(contentsOf: expanded, passphrase: stored)
+                else { continue }
+                keys.append(key)
+            } catch {
+                continue
+            }
+        }
+        return keys
     }
 
     /// Tries each candidate key path in order, returning the first that loads.

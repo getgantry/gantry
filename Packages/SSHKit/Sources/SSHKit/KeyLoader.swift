@@ -1,6 +1,7 @@
 import Foundation
 import Citadel
 import Crypto
+import NIOSSH
 
 /// Errors surfaced while loading an SSH private key from disk.
 public enum SSHKeyError: Error, LocalizedError, Sendable {
@@ -39,6 +40,17 @@ public enum LoadedKey: @unchecked Sendable {
             .ed25519(username: username, privateKey: key)
         case .rsa(let key):
             .rsa(username: username, privateKey: key)
+        }
+    }
+
+    /// The raw NIOSSH offer for this key, for delegates that present several
+    /// keys over one connection.
+    func nioOffer() -> NIOSSHUserAuthenticationOffer.Offer {
+        switch self {
+        case .ed25519(let key):
+            .privateKey(.init(privateKey: .init(ed25519Key: key)))
+        case .rsa(let key):
+            .privateKey(.init(privateKey: .init(custom: key)))
         }
     }
 }

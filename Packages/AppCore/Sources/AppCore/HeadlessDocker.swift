@@ -105,6 +105,13 @@ public enum HeadlessDocker {
         switch endpoint.auth {
         case .automatic:
             let candidates = resolvedIdentityFiles + SSHKeyLoader.defaultKeyCandidates()
+            // Offer every loadable key over one connection (OpenSSH-style).
+            // Fall back to the single-key path purely for its descriptive
+            // errors when nothing is loadable.
+            let loaded = loadAllUsableKeys(from: candidates, hostID: host.id)
+            if !loaded.isEmpty {
+                return .keys(loaded)
+            }
             return try loadFirstUsableKey(from: candidates, hostID: host.id, hostName: host.name)
 
         case .keyFile(let path):
@@ -155,6 +162,30 @@ public enum HeadlessDocker {
         throw lastError ?? HeadlessDockerError.missingCredential(
             "No usable SSH key found for \(hostName)."
         )
+    }
+
+    /// Loads every candidate key readable without interaction (plain keys
+    /// plus encrypted ones with a stored passphrase), deduplicating paths.
+    /// Mirrors `HostSession.loadAllUsableKeys`.
+    private static func loadAllUsableKeys(from paths: [String], hostID: UUID) -> [LoadedKey] {
+        let passphraseAccount = KeychainStore.keyPassphraseAccount(hostID: hostID)
+        var seen = Set<String>()
+        var keys: [LoadedKey] = []
+        for path in paths {
+            let expanded = (path as NSString).expandingTildeInPath
+            guard seen.insert(expanded).inserted else { continue }
+            do {
+                keys.append(try SSHKeyLoader.load(contentsOf: expanded, passphrase: nil))
+            } catch SSHKeyError.needsPassphrase {
+                guard let stored = KeychainStore.get(account: passphraseAccount),
+                      let key = try? SSHKeyLoader.load(contentsOf: expanded, passphrase: stored)
+                else { continue }
+                keys.append(key)
+            } catch {
+                continue
+            }
+        }
+        return keys
     }
 }
 
