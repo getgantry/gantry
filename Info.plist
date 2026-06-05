@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/andrewkomkov/gantry/main/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/getgantry/gantry/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>+rH5zy+DZ5DGa+Nk3s66+zJpn9EuLAaRVyWHaLl9TRI=</string>
 	<key>SUEnableAutomaticChecks</key>

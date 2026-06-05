@@ -9,7 +9,7 @@ requests, and pull requests are all welcome.
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/andrewkomkov/gantry.git
+   git clone https://github.com/getgantry/gantry.git
    cd gantry
    ```
 
@@ -108,4 +108,4 @@ single change where practical.
 
 Use the issue templates for bug reports and feature requests. For questions and
 open-ended discussion, use
-[GitHub Discussions](https://github.com/andrewkomkov/gantry/discussions).
+[GitHub Discussions](https://github.com/getgantry/gantry/discussions).

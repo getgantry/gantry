@@ -56,7 +56,7 @@ echo "==> Generating Sparkle appcast"
 SPARKLE_BIN="$(ls -d "$BUILD"/SourcePackages/artifacts/sparkle/Sparkle/bin 2>/dev/null \
     || ls -d ~/Library/Developer/Xcode/DerivedData/Gantry-*/SourcePackages/artifacts/sparkle/Sparkle/bin | head -1)"
 "$SPARKLE_BIN/generate_appcast" \
-    --download-url-prefix "https://github.com/andrewkomkov/gantry/releases/download/v$VERSION/" \
+    --download-url-prefix "https://github.com/getgantry/gantry/releases/download/v$VERSION/" \
     "$DIST"
 cp "$DIST/appcast.xml" "$ROOT/appcast.xml"
 

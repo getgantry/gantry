@@ -2,10 +2,10 @@
 
 **Native Docker management for your Mac. Local and over SSH. Agent-ready with a built-in MCP server. Free, open source, no limits.**
 
-[![CI](https://github.com/andrewkomkov/gantry/actions/workflows/ci.yml/badge.svg)](https://github.com/andrewkomkov/gantry/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/andrewkomkov/gantry)](https://github.com/andrewkomkov/gantry/releases/latest)
+[![CI](https://github.com/getgantry/gantry/actions/workflows/ci.yml/badge.svg)](https://github.com/getgantry/gantry/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/getgantry/gantry)](https://github.com/getgantry/gantry/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![macOS 26+](https://img.shields.io/badge/macOS-26%2B-black)](https://github.com/andrewkomkov/gantry/releases/latest)
+[![macOS 26+](https://img.shields.io/badge/macOS-26%2B-black)](https://github.com/getgantry/gantry/releases/latest)
 [![MCP](https://img.shields.io/badge/MCP-server%20included-8A2BE2)](#agent-friendly)
 
 Gantry is a fully native macOS app (SwiftUI, Swift 6) for managing and monitoring
@@ -14,7 +14,7 @@ no subscription, no artificial limits. It is built to be driven by AI agents
 too: a bundled [MCP server](#agent-friendly) and App Intents expose your Docker
 hosts to Claude, Shortcuts, Siri and scripts.
 
-Website: **https://andrewkomkov.github.io/gantry/**
+Website: **https://getgantry.github.io/**
 
 ![Container overview](docs/assets/shot-1.png)
 
@@ -85,7 +85,7 @@ Website: **https://andrewkomkov.github.io/gantry/**
 ### Homebrew
 
 ```sh
-brew install --cask andrewkomkov/tap/gantry
+brew install --cask getgantry/tap/gantry
 xattr -dr com.apple.quarantine /Applications/Gantry.app
 ```
 
@@ -94,7 +94,7 @@ macOS refuses to open it otherwise.
 
 ### Manual
 
-1. Download the latest zip from [Releases](https://github.com/andrewkomkov/gantry/releases/latest)
+1. Download the latest zip from [Releases](https://github.com/getgantry/gantry/releases/latest)
 2. Unzip and drag **Gantry.app** to Applications
 3. First launch: right-click the app and choose **Open** (the app is not
    notarized), or clear quarantine:
@@ -112,7 +112,7 @@ Updates arrive automatically via Sparkle once installed.
 ## Building from source
 
 ```sh
-git clone https://github.com/andrewkomkov/gantry.git
+git clone https://github.com/getgantry/gantry.git
 cd gantry
 open Gantry.xcodeproj   # Xcode 26+, build the "Gantry" scheme
 ```
