@@ -84,6 +84,16 @@ public final class HostSession: Identifiable {
     /// deltas behind `containerLoad()`.
     private var loadCPUBaseline: [String: (total: Int64, system: Int64)] = [:]
 
+    /// Rolling container-load history (~10 minutes at one sample every 5 s),
+    /// collected for the whole lifetime of the connection so dashboards have
+    /// data the moment they appear instead of starting from scratch.
+    public private(set) var loadHistory: [LoadSample] = []
+
+    /// Background sampler feeding `loadHistory`; runs while connected.
+    private var loadSamplingTask: Task<Void, Never>?
+
+    private static let loadHistoryWindow = 120
+
     /// Factory for additional SSH connections to this host (host shell, SFTP
     /// file browsing). Set while an SSH host is connected; nil for local.
     private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
@@ -132,6 +142,7 @@ public final class HostSession: Identifiable {
             status = .connected(version)
             await refreshAll()
             startEventMonitoring()
+            startLoadSampling()
         } catch {
             await client.shutdown()
             self.client = nil
@@ -335,6 +346,10 @@ public final class HostSession: Identifiable {
     public func disconnect() async {
         eventTask?.cancel()
         eventTask = nil
+        loadSamplingTask?.cancel()
+        loadSamplingTask = nil
+        loadHistory = []
+        loadCPUBaseline = [:]
         pendingContainerRefresh?.cancel()
         pendingContainerRefresh = nil
         sshClientFactory = nil
@@ -1021,6 +1036,59 @@ public struct ContainerLoad: Sendable, Hashable {
     public let memoryUsedBytes: Int64
     /// How many running containers the sample covers.
     public let sampled: Int
+}
+
+/// One point of a host's rolling load history (`HostSession.loadHistory`).
+public struct LoadSample: Identifiable, Sendable {
+    public let id = UUID()
+    public let date: Date
+    /// 0…1 of the host's total CPU capacity.
+    public let cpuFraction: Double
+    /// Sum of per-container CPU percentages (100 = one core).
+    public let cpuPercent: Double
+    /// 0…1 of the host's physical memory.
+    public let memFraction: Double
+    public let memBytes: Int64
+    /// How many running containers the sample covers.
+    public let sampled: Int
+}
+
+extension HostSession {
+    /// Starts (or restarts) the background load sampler. One sample every 5 s
+    /// per host, independent of every other host and of what's on screen.
+    private func startLoadSampling() {
+        loadSamplingTask?.cancel()
+        loadSamplingTask = Task { [weak self] in
+            // Establish the CPU delta baseline right away so the first
+            // recorded sample carries a real CPU figure, not zero.
+            _ = await self?.containerLoad()
+            try? await Task.sleep(for: .seconds(2))
+            while !Task.isCancelled {
+                guard let self else { return }
+                await self.recordLoadSample()
+                try? await Task.sleep(for: .seconds(5))
+            }
+        }
+    }
+
+    private func recordLoadSample() async {
+        guard status.isConnected, let info, let load = await containerLoad() else { return }
+        let cpuCapacity = Double(max(info.ncpu, 1)) * 100.0
+        let memTotal = Double(max(info.memTotal, 1))
+        loadHistory.append(
+            LoadSample(
+                date: .now,
+                cpuFraction: min(load.cpuPercent / cpuCapacity, 1.0),
+                cpuPercent: load.cpuPercent,
+                memFraction: min(Double(load.memoryUsedBytes) / memTotal, 1.0),
+                memBytes: load.memoryUsedBytes,
+                sampled: load.sampled
+            )
+        )
+        if loadHistory.count > Self.loadHistoryWindow {
+            loadHistory.removeFirst(loadHistory.count - Self.loadHistoryWindow)
+        }
+    }
 }
 
 /// One container attached to a network, decoded from the `Containers` map of a

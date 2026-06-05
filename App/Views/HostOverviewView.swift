@@ -9,11 +9,11 @@ struct HostOverviewView: View {
     @Bindable var session: HostSession
     @Environment(\.openWindow) private var openWindow
 
-    @State private var load: ContainerLoad?
     @State private var diskUsage: SystemDiskUsage?
-    /// Monotonic tick driving the refresh loop; disk usage refreshes on a
-    /// slower cadence than the gauges because `system df` is expensive.
     @State private var refreshing = false
+
+    /// Live load for the gauges, fed by the session's background sampler.
+    private var load: LoadSample? { session.loadHistory.last }
 
     var body: some View {
         ScrollView {
@@ -50,7 +50,7 @@ struct HostOverviewView: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await refresh(includeDisk: true) }
+                    Task { await refresh() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
@@ -59,29 +59,21 @@ struct HostOverviewView: View {
             }
         }
         .task(id: session.id) {
-            // Live loop: gauges every 5s, disk usage every 30s (df walks the
-            // daemon's whole store, so it gets the slower cadence).
-            var tick = 0
+            // The gauges feed off the session's background load sampler; only
+            // disk usage needs its own loop (df walks the daemon's whole
+            // store, so it refreshes on a slow 30s cadence).
             while !Task.isCancelled {
-                await refresh(includeDisk: tick % 6 == 0)
-                tick += 1
-                try? await Task.sleep(for: .seconds(5))
+                await refresh()
+                try? await Task.sleep(for: .seconds(30))
             }
         }
     }
 
-    private func refresh(includeDisk: Bool) async {
+    private func refresh() async {
         guard session.status.isConnected else { return }
         refreshing = true
         defer { refreshing = false }
-        if includeDisk {
-            async let loadResult = session.containerLoad()
-            async let diskResult = session.systemDF()
-            load = await loadResult
-            diskUsage = await diskResult
-        } else {
-            load = await session.containerLoad()
-        }
+        diskUsage = await session.systemDF()
     }
 
     // MARK: - Gauges
@@ -107,7 +99,7 @@ struct HostOverviewView: View {
     }
 
     private func memoryGauge(info: SystemInfo) -> some View {
-        let used = load?.memoryUsedBytes ?? 0
+        let used = load?.memBytes ?? 0
         let total = max(info.memTotal, 1)
         return gaugeCard(
             title: "Memory",

@@ -3,36 +3,19 @@ import Charts
 import AppCore
 import DockerKit
 
-// MARK: - Load sampling
-
-/// One CPU/memory sample for a host. The dashboard keeps a short rolling
-/// window of these per host to drive the sparklines.
-struct FleetLoadSample: Identifiable, Sendable {
-    let id = UUID()
-    let date: Date
-    /// 0…1 of the host's total CPU capacity.
-    let cpuFraction: Double
-    /// Sum of per-container CPU percentages (100 = one core).
-    let cpuPercent: Double
-    /// 0…1 of the host's physical memory.
-    let memFraction: Double
-    let memBytes: Int64
-}
-
 // MARK: - Fleet dashboard
 
 /// Cross-host dashboard: a fleet status banner plus one live card per host
 /// with CPU/memory sparklines, the container state breakdown, and quick
 /// navigation into the host's sections.
+///
+/// Pure reader: the load history behind the sparklines is sampled by each
+/// `HostSession` for the lifetime of its connection, so the dashboard is
+/// fully populated the moment it appears and survives navigation.
 struct FleetDashboardView: View {
     @Environment(AppModel.self) private var model
     /// Jumps to a sidebar section of a host, optionally selecting a detail item.
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
-
-    /// Rolling per-host load history: ~5 minutes at one sample every 5 s.
-    @State private var history: [UUID: [FleetLoadSample]] = [:]
-
-    private static let sampleWindow = 60
 
     var body: some View {
         ScrollView {
@@ -43,11 +26,7 @@ struct FleetDashboardView: View {
                     spacing: 16
                 ) {
                     ForEach(model.sessions) { session in
-                        HostCard(
-                            session: session,
-                            samples: history[session.id] ?? [],
-                            navigate: navigate
-                        )
+                        HostCard(session: session, navigate: navigate)
                     }
                 }
             }
@@ -55,14 +34,6 @@ struct FleetDashboardView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("Dashboard")
-        .task {
-            // Live loop, scoped to the dashboard being on screen: one load
-            // sample per connected host every 5 s.
-            while !Task.isCancelled {
-                await sampleAll()
-                try? await Task.sleep(for: .seconds(5))
-            }
-        }
     }
 
     // MARK: Fleet banner
@@ -177,39 +148,6 @@ struct FleetDashboardView: View {
         .frame(minWidth: 64)
     }
 
-    // MARK: Sampling
-
-    private func sampleAll() async {
-        // One concurrent task per connected host. Unstructured tasks (not a
-        // task group) because the hosts differ wildly in latency and the
-        // region-isolation checker rejects main-actor task-group children.
-        var tasks: [(id: UUID, task: Task<FleetLoadSample?, Never>)] = []
-        for session in model.sessions where session.status.isConnected {
-            guard let info = session.info else { continue }
-            let task = Task { @MainActor () -> FleetLoadSample? in
-                guard let load = await session.containerLoad() else { return nil }
-                let cpuCapacity = Double(max(info.ncpu, 1)) * 100.0
-                let memTotal = Double(max(info.memTotal, 1))
-                return FleetLoadSample(
-                    date: .now,
-                    cpuFraction: min(load.cpuPercent / cpuCapacity, 1.0),
-                    cpuPercent: load.cpuPercent,
-                    memFraction: min(Double(load.memoryUsedBytes) / memTotal, 1.0),
-                    memBytes: load.memoryUsedBytes
-                )
-            }
-            tasks.append((session.id, task))
-        }
-        for (id, task) in tasks {
-            guard let sample = await task.value else { continue }
-            var window = history[id, default: []]
-            window.append(sample)
-            if window.count > Self.sampleWindow {
-                window.removeFirst(window.count - Self.sampleWindow)
-            }
-            history[id] = window
-        }
-    }
 }
 
 // MARK: - Host card
@@ -219,10 +157,11 @@ struct FleetDashboardView: View {
 /// host's overview.
 private struct HostCard: View {
     var session: HostSession
-    let samples: [FleetLoadSample]
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
 
     @State private var isHovered = false
+
+    private var samples: [LoadSample] { session.loadHistory }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -327,7 +266,7 @@ private struct HostCard: View {
         }
     }
 
-    private var latest: FleetLoadSample? { samples.last }
+    private var latest: LoadSample? { samples.last }
 
     private func metricCell(
         title: String,
