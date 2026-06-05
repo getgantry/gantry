@@ -16,7 +16,7 @@ hosts to Claude, Shortcuts, Siri and scripts.
 
 Website: **https://getgantry.github.io/**
 
-![Container overview](docs/assets/shot-1.png)
+![Container overview](assets/shot-1.png)
 
 ## Features
 
@@ -38,7 +38,7 @@ Website: **https://getgantry.github.io/**
 - **Events-driven UI** — lists update live from the Docker events stream,
   with polling fallback
 
-![Live stats](docs/assets/shot-2.png)
+![Live stats](assets/shot-2.png)
 
 ### Terminal & Files
 - **Exec terminal** — full terminal emulation (SwiftTerm) into any running
@@ -46,7 +46,7 @@ Website: **https://getgantry.github.io/**
 - **File browser** — browse the container filesystem, download and upload files,
   **drag & drop** between Finder and the container (tar-packed transparently)
 
-![Terminal](docs/assets/shot-3.png)
+![Terminal](assets/shot-3.png)
 
 ### Remote hosts over SSH
 - Connects exactly like `docker -H ssh://user@host`: an SSH exec channel runs
@@ -138,7 +138,6 @@ Packages/
   AppCore/            @Observable stores, hosts persistence, Keychain,
                       headless connections for Intents/MCP
   GantryMCP/          stdio MCP server executable (bundled into the app)
-docs/                 GitHub Pages site
 scripts/release.sh    release build + Sparkle appcast
 Tools/                app icon generator
 ```
