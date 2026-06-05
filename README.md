@@ -16,7 +16,7 @@ hosts to Claude, Shortcuts, Siri and scripts.
 
 Website: **https://getgantry.github.io/**
 
-![Container overview](assets/shot-1.png)
+![Fleet dashboard](assets/dashboard.png)
 
 ## Features
 
@@ -38,15 +38,13 @@ Website: **https://getgantry.github.io/**
 - **Events-driven UI** — lists update live from the Docker events stream,
   with polling fallback
 
-![Live stats](assets/shot-2.png)
+![Live stats](assets/stats.png)
 
 ### Terminal & Files
 - **Exec terminal** — full terminal emulation (SwiftTerm) into any running
   container, local or remote
 - **File browser** — browse the container filesystem, download and upload files,
   **drag & drop** between Finder and the container (tar-packed transparently)
-
-![Terminal](assets/shot-3.png)
 
 ### Remote hosts over SSH
 - Connects exactly like `docker -H ssh://user@host`: an SSH exec channel runs
@@ -58,6 +56,8 @@ Website: **https://getgantry.github.io/**
   RSA signs with **rsa-sha2-256** so it works against modern OpenSSH servers
 - Host key verification with trust-on-first-use prompts (SHA256 fingerprints),
   honoring `~/.ssh/known_hosts`; secrets live in the macOS **Keychain**
+
+![Host overview](assets/overview.png)
 
 ### Mac-native
 - Three-column split view, Liquid Glass materials, dark/light/system appearance
