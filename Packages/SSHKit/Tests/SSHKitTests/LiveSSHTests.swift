@@ -23,9 +23,11 @@ private let rsaKeyPath = ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_RS
 
 private func hostReachable() -> Bool {
     guard !liveHost.isEmpty else { return false }
+    // Probe the resolved endpoint so ssh_config aliases and non-22 ports work.
+    let resolved = SSHConfig.resolve(host: liveHost)
     let probe = Process()
     probe.executableURL = URL(fileURLWithPath: "/usr/bin/nc")
-    probe.arguments = ["-z", "-G", "3", liveHost, "22"]
+    probe.arguments = ["-z", "-G", "3", resolved.hostName, String(resolved.port)]
     probe.standardOutput = FileHandle.nullDevice
     probe.standardError = FileHandle.nullDevice
     do {
