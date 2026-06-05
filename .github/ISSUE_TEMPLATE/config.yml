@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Questions and discussions
-    url: https://github.com/andrewkomkov/gantry/discussions
+    url: https://github.com/getgantry/gantry/discussions
     about: Ask questions, share ideas, and discuss usage in GitHub Discussions.

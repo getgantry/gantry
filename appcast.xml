@@ -8,7 +8,7 @@
             <sparkle:version>9</sparkle:version>
             <sparkle:shortVersionString>0.4.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/andrewkomkov/gantry/releases/download/v0.4.5/Gantry-0.4.5.zip" length="43975623" type="application/octet-stream" sparkle:edSignature="RKEMClAmzIKAGhYwjK4xS2n9fNILtOF9eHpv0SsNku7Fc4B2t+EWLPJoYkoNXF+z9qlYNyFwtFgaTJKwZjXQCw=="/>
+            <enclosure url="https://github.com/getgantry/gantry/releases/download/v0.4.5/Gantry-0.4.5.zip" length="43975623" type="application/octet-stream" sparkle:edSignature="RKEMClAmzIKAGhYwjK4xS2n9fNILtOF9eHpv0SsNku7Fc4B2t+EWLPJoYkoNXF+z9qlYNyFwtFgaTJKwZjXQCw=="/>
         </item>
     </channel>
 </rss>

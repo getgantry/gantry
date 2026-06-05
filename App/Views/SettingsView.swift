@@ -547,8 +547,8 @@ private struct AboutSettings: View {
             Text("A native macOS Docker management app.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Link("github.com/andrewkomkov/gantry",
-                 destination: URL(string: "https://github.com/andrewkomkov/gantry")!)
+            Link("github.com/getgantry/gantry",
+                 destination: URL(string: "https://github.com/getgantry/gantry")!)
                 .padding(.top, 4)
             Spacer()
         }
