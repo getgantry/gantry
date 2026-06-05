@@ -238,3 +238,99 @@ private func makeTempFile(_ contents: String, ext: String = "") throws -> String
 @Test func sshKitInfoVersion() {
     #expect(SSHKitInfo.version == "0.1.0")
 }
+
+// MARK: - ProxyJump resolution
+
+@Test func proxyJumpSingleHopResolvesThroughAlias() throws {
+    let config = """
+    Host bastion
+        HostName 198.51.100.1
+        User jumper
+        Port 2200
+        IdentityFile ~/.ssh/id_bastion
+
+    Host inner
+        HostName 10.0.0.5
+        User app
+        ProxyJump bastion
+    """
+    let path = try makeTempFile(config)
+    defer { try? FileManager.default.removeItem(atPath: path) }
+
+    let resolved = SSHConfig.resolve(host: "inner", configPath: path)
+    #expect(resolved.hostName == "10.0.0.5")
+    #expect(resolved.jumps.count == 1)
+    let hop = try #require(resolved.jumps.first)
+    #expect(hop.hostName == "198.51.100.1")
+    #expect(hop.user == "jumper")
+    #expect(hop.port == 2200)
+    #expect(hop.identityFiles.first?.hasSuffix("/.ssh/id_bastion") == true)
+}
+
+@Test func proxyJumpInlineUserPortAndChain() throws {
+    let config = """
+    Host first
+        HostName first.example.com
+
+    Host target
+        HostName 10.1.1.1
+        ProxyJump admin@first:2222,second.example.com
+    """
+    let path = try makeTempFile(config)
+    defer { try? FileManager.default.removeItem(atPath: path) }
+
+    let resolved = SSHConfig.resolve(host: "target", configPath: path)
+    #expect(resolved.jumps.count == 2)
+    // Inline user@ and :port beat the alias's values.
+    #expect(resolved.jumps[0].hostName == "first.example.com")
+    #expect(resolved.jumps[0].user == "admin")
+    #expect(resolved.jumps[0].port == 2222)
+    // Bare hostnames work without a config entry.
+    #expect(resolved.jumps[1].hostName == "second.example.com")
+    #expect(resolved.jumps[1].port == 22)
+}
+
+@Test func proxyJumpRecursiveAndCycleGuarded() throws {
+    let config = """
+    Host outer
+        HostName outer.example.com
+
+    Host middle
+        HostName middle.example.com
+        ProxyJump outer
+
+    Host deep
+        HostName 10.9.9.9
+        ProxyJump middle
+
+    Host loopA
+        HostName a.example.com
+        ProxyJump loopB
+
+    Host loopB
+        HostName b.example.com
+        ProxyJump loopA
+    """
+    let path = try makeTempFile(config)
+    defer { try? FileManager.default.removeItem(atPath: path) }
+
+    // A hop with its own ProxyJump flattens outermost-first.
+    let deep = SSHConfig.resolve(host: "deep", configPath: path)
+    #expect(deep.jumps.map(\.hostName) == ["outer.example.com", "middle.example.com"])
+
+    // Mutual jumps must not recurse forever.
+    let loop = SSHConfig.resolve(host: "loopA", configPath: path)
+    #expect(loop.jumps.map(\.hostName) == ["b.example.com"])
+}
+
+@Test func proxyJumpNoneIsDirect() throws {
+    let config = """
+    Host direct
+        HostName 10.2.2.2
+        ProxyJump none
+    """
+    let path = try makeTempFile(config)
+    defer { try? FileManager.default.removeItem(atPath: path) }
+
+    #expect(SSHConfig.resolve(host: "direct", configPath: path).jumps.isEmpty)
+}

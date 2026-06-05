@@ -81,6 +81,24 @@ struct ContentView: View {
     @State private var showingAddHost = false
     @State private var confirmRemoval: UUID?
 
+    /// Hosts whose sidebar section is collapsed; persisted across launches.
+    @State private var collapsedHosts: Set<UUID> = ContentView.loadCollapsedHosts()
+
+    private static func loadCollapsedHosts() -> Set<UUID> {
+        let raw = UserDefaults.standard.stringArray(forKey: "collapsedHosts") ?? []
+        return Set(raw.compactMap { UUID(uuidString: $0) })
+    }
+
+    private func expansionBinding(for id: UUID) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedHosts.contains(id) },
+            set: { expanded in
+                if expanded { collapsedHosts.remove(id) } else { collapsedHosts.insert(id) }
+                UserDefaults.standard.set(collapsedHosts.map(\.uuidString), forKey: "collapsedHosts")
+            }
+        )
+    }
+
     /// The first session currently awaiting a host-key trust decision, if any.
     private var hostKeySession: HostSession? {
         model.sessions.first { $0.pendingHostKeyPrompt != nil }
@@ -189,7 +207,7 @@ struct ContentView: View {
                 .tag(SidebarItem.dashboard)
 
             ForEach(model.sessions) { session in
-                Section {
+                Section(isExpanded: expansionBinding(for: session.host.id)) {
                     ForEach(HostSection.sections(forSSHHost: !session.host.isLocal)) { section in
                         Label(section.title, systemImage: section.systemImage)
                             .tag(SidebarItem.host(SidebarSelection(hostID: session.host.id, section: section)))
@@ -207,6 +225,20 @@ struct ContentView: View {
                             } label: {
                                 Label("Reconnect", systemImage: "arrow.clockwise")
                             }
+
+                            Divider()
+                            Button {
+                                model.moveHost(id: session.host.id, by: -1)
+                            } label: {
+                                Label("Move Up", systemImage: "arrow.up")
+                            }
+                            .disabled(model.sessions.first?.id == session.id)
+                            Button {
+                                model.moveHost(id: session.host.id, by: 1)
+                            } label: {
+                                Label("Move Down", systemImage: "arrow.down")
+                            }
+                            .disabled(model.sessions.last?.id == session.id)
 
                             if session.supportsHostAccess {
                                 Button {
@@ -437,6 +469,7 @@ private struct HostSectionHeader: View {
     var session: HostSession
     var onRemove: () -> Void
 
+    @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
     @State private var isHovered = false
 
@@ -470,6 +503,20 @@ private struct HostSectionHeader: View {
                         Label("Open Host Terminal", systemImage: "terminal")
                     }
                 }
+
+                Divider()
+                Button {
+                    model.moveHost(id: session.host.id, by: -1)
+                } label: {
+                    Label("Move Up", systemImage: "arrow.up")
+                }
+                .disabled(model.sessions.first?.id == session.id)
+                Button {
+                    model.moveHost(id: session.host.id, by: 1)
+                } label: {
+                    Label("Move Down", systemImage: "arrow.down")
+                }
+                .disabled(model.sessions.last?.id == session.id)
 
                 if session.host.removable {
                     Divider()

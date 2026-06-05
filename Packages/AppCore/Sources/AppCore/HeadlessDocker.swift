@@ -74,7 +74,7 @@ public enum HeadlessDocker {
 
         // TRUSTED-ONLY: unknown host keys are rejected; we never TOFU headless.
         let knownHosts = KnownHostsStore()
-        let policy = HostKeyPolicy.acceptKnown(knownHosts) { _ in .reject }
+        let policy = HostKeyPolicy.acceptKnown(knownHosts) { _, _ in .reject }
 
         let auth = try resolveAuth(
             host: host,
@@ -82,11 +82,24 @@ public enum HeadlessDocker {
             resolvedIdentityFiles: resolved.identityFiles
         )
 
+        let jumps = resolved.jumps.map { hop in
+            SSHJumpHop(
+                host: hop.hostName,
+                port: hop.port,
+                username: hop.username,
+                auth: .keys(loadAllUsableKeys(
+                    from: hop.identityFiles + SSHKeyLoader.defaultKeyCandidates(),
+                    hostID: host.id
+                ))
+            )
+        }
+
         let parameters = SSHConnectionParameters(
             host: resolved.hostName,
             port: resolved.port,
             username: resolved.username,
-            auth: auth
+            auth: auth,
+            jumps: jumps
         )
 
         return SSHDialStdioTransport {

@@ -62,7 +62,8 @@ Website: **https://getgantry.github.io/**
 - Connects exactly like `docker -H ssh://user@host`: an SSH exec channel runs
   `docker system dial-stdio` and Gantry speaks HTTP/1.1 to the remote daemon
   over it — nothing to install on the server beyond Docker itself
-- Reads `~/.ssh/config` (aliases, HostName, User, Port, IdentityFile);
+- Reads `~/.ssh/config` (aliases, HostName, User, Port, IdentityFile,
+  **ProxyJump** — bastion chains with per-hop auth and host key checks);
   the Add Host sheet offers one-click import of your config hosts
 - ed25519 and RSA keys (openssh-key-v1, optional passphrase), password auth;
   RSA signs with **rsa-sha2-256** so it works against modern OpenSSH servers
@@ -73,6 +74,7 @@ Website: **https://getgantry.github.io/**
 
 ### Mac-native
 - Three-column split view, Liquid Glass materials, dark/light/system appearance
+- Collapsible host sections in the sidebar; reorder hosts via Move Up/Down
 - Menu bar extra with running containers and quick actions
 - Keyboard shortcuts (Cmd+R refresh, Cmd+N new container, Cmd+F log search)
 - Auto-updates via **Sparkle** (EdDSA-signed appcast)
@@ -204,7 +206,6 @@ appcast entry (EdDSA key in the login Keychain).
 
 - Not notarized (no Apple Developer ID) — first launch needs right-click Open
 - ECDSA private keys in OpenSSH format are not supported (ed25519/RSA are)
-- `ProxyJump` in ssh_config is not followed yet
 - Remote hosts need `docker` on `PATH` for `dial-stdio` (any recent version)
 
 ## License

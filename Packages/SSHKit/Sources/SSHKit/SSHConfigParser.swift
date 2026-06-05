@@ -8,19 +8,24 @@ public struct SSHConfigEntry: Sendable {
     public var user: String?
     public var port: Int?
     public var identityFiles: [String]
+    /// Raw `ProxyJump` value: comma-separated `[user@]host[:port]` specs or
+    /// aliases, or "none".
+    public var proxyJump: String?
 
     public init(
         patterns: [String],
         hostName: String? = nil,
         user: String? = nil,
         port: Int? = nil,
-        identityFiles: [String] = []
+        identityFiles: [String] = [],
+        proxyJump: String? = nil
     ) {
         self.patterns = patterns
         self.hostName = hostName
         self.user = user
         self.port = port
         self.identityFiles = identityFiles
+        self.proxyJump = proxyJump
     }
 }
 
@@ -30,12 +35,22 @@ public struct ResolvedSSHConfig: Sendable {
     public var user: String?
     public var port: Int
     public var identityFiles: [String]
+    /// The `ProxyJump` chain to reach this host, outermost hop first. Each
+    /// hop is itself fully resolved (alias → HostName/User/Port/keys).
+    public var jumps: [ResolvedSSHConfig]
 
-    public init(hostName: String, user: String?, port: Int, identityFiles: [String]) {
+    public init(
+        hostName: String,
+        user: String?,
+        port: Int,
+        identityFiles: [String],
+        jumps: [ResolvedSSHConfig] = []
+    ) {
         self.hostName = hostName
         self.user = user
         self.port = port
         self.identityFiles = identityFiles
+        self.jumps = jumps
     }
 }
 
@@ -59,14 +74,24 @@ public enum SSHConfig {
     }
 
     /// Resolves a host alias. On a missing or unreadable config file, returns
-    /// defaults (hostName == host, port == 22).
+    /// defaults (hostName == host, port == 22). `ProxyJump` chains are
+    /// resolved recursively into `jumps`, outermost hop first.
     public static func resolve(host: String, configPath: String = "~/.ssh/config") -> ResolvedSSHConfig {
+        resolve(host: host, configPath: configPath, visited: [])
+    }
+
+    private static func resolve(
+        host: String,
+        configPath: String,
+        visited: Set<String>
+    ) -> ResolvedSSHConfig {
         let entries = parse(configPath: configPath)
 
         var hostName: String?
         var user: String?
         var port: Int?
         var identityFiles: [String] = []
+        var proxyJump: String?
 
         // OpenSSH: the first matching value for each keyword wins. Walk entries
         // top to bottom and only fill values we have not seen yet.
@@ -74,6 +99,7 @@ public enum SSHConfig {
             if hostName == nil { hostName = entry.hostName }
             if user == nil { user = entry.user }
             if port == nil { port = entry.port }
+            if proxyJump == nil { proxyJump = entry.proxyJump }
             // IdentityFile is additive in OpenSSH; preserve order, dedupe.
             for file in entry.identityFiles where !identityFiles.contains(file) {
                 identityFiles.append(file)
@@ -86,8 +112,59 @@ public enum SSHConfig {
             hostName: hostName ?? host,
             user: user,
             port: port ?? 22,
-            identityFiles: resolvedIdentityFiles
+            identityFiles: resolvedIdentityFiles,
+            jumps: resolveJumps(
+                proxyJump: proxyJump,
+                configPath: configPath,
+                visited: visited.union([host])
+            )
         )
+    }
+
+    /// Expands a `ProxyJump` value into resolved hops, outermost first.
+    /// Each spec is `[user@]host[:port]`; `host` may itself be a config alias
+    /// whose own `ProxyJump` is prepended recursively (cycle-guarded).
+    private static func resolveJumps(
+        proxyJump: String?,
+        configPath: String,
+        visited: Set<String>
+    ) -> [ResolvedSSHConfig] {
+        guard let proxyJump, proxyJump.lowercased() != "none", visited.count <= 8 else { return [] }
+
+        var hops: [ResolvedSSHConfig] = []
+        for spec in proxyJump.split(separator: ",") {
+            let spec = spec.trimmingCharacters(in: .whitespaces)
+            guard !spec.isEmpty else { continue }
+
+            // [user@]host[:port] — the user/port given inline beat the alias's.
+            var rest = spec
+            var inlineUser: String?
+            if let at = rest.firstIndex(of: "@") {
+                inlineUser = String(rest[..<at])
+                rest = String(rest[rest.index(after: at)...])
+            }
+            var inlinePort: Int?
+            // IPv6 literals come bracketed ([::1]:2222); a bare colon means port.
+            if rest.hasPrefix("["), let close = rest.firstIndex(of: "]") {
+                let hostPart = String(rest[rest.index(after: rest.startIndex)..<close])
+                let after = rest[rest.index(after: close)...]
+                if after.hasPrefix(":") { inlinePort = Int(after.dropFirst()) }
+                rest = hostPart
+            } else if let colon = rest.lastIndex(of: ":"), rest.firstIndex(of: ":") == colon {
+                inlinePort = Int(rest[rest.index(after: colon)...])
+                rest = String(rest[..<colon])
+            }
+
+            guard !visited.contains(rest) else { continue }
+            var hop = resolve(host: rest, configPath: configPath, visited: visited)
+            if let inlineUser { hop.user = inlineUser }
+            if let inlinePort { hop.port = inlinePort }
+            // A hop's own jumps come before the hop itself.
+            hops.append(contentsOf: hop.jumps)
+            hop.jumps = []
+            hops.append(hop)
+        }
+        return hops
     }
 
     /// Parses the config file into ordered host blocks.
@@ -131,6 +208,8 @@ public enum SSHConfig {
                 current?.port = Int(value)
             case "identityfile":
                 current?.identityFiles.append(unquote(value))
+            case "proxyjump":
+                current?.proxyJump = unquote(value)
             default:
                 break
             }

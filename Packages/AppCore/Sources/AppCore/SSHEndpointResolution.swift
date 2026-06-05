@@ -11,6 +11,16 @@ public struct ResolvedSSHEndpoint: Sendable {
     public let port: Int
     public let username: String
     public let identityFiles: [String]
+    /// ProxyJump chain from ssh_config, outermost hop first (empty = direct).
+    public let jumps: [ResolvedJumpHop]
+
+    /// One resolved ProxyJump hop.
+    public struct ResolvedJumpHop: Sendable {
+        public let hostName: String
+        public let port: Int
+        public let username: String
+        public let identityFiles: [String]
+    }
 
     /// Resolves `endpoint` against ssh_config, filling any gaps the user left
     /// blank.
@@ -42,7 +52,17 @@ public struct ResolvedSSHEndpoint: Sendable {
             hostName: hostName,
             port: port,
             username: username,
-            identityFiles: resolved.identityFiles
+            identityFiles: resolved.identityFiles,
+            jumps: resolved.jumps.map { hop in
+                ResolvedJumpHop(
+                    hostName: hop.hostName,
+                    port: hop.port,
+                    // OpenSSH defaults a jump hop's user to the local user,
+                    // not the destination's.
+                    username: hop.user ?? NSUserName(),
+                    identityFiles: hop.identityFiles
+                )
+            }
         )
     }
 }

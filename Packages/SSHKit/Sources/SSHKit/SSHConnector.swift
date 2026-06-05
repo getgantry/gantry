@@ -15,8 +15,8 @@ public enum AuthSource: Sendable {
     case password(String)
 }
 
-/// Everything required to open an SSH connection.
-public struct SSHConnectionParameters: Sendable {
+/// One hop of a ProxyJump chain: where to connect and how to authenticate.
+public struct SSHJumpHop: Sendable {
     public var host: String
     public var port: Int
     public var username: String
@@ -30,14 +30,41 @@ public struct SSHConnectionParameters: Sendable {
     }
 }
 
+/// Everything required to open an SSH connection.
+public struct SSHConnectionParameters: Sendable {
+    public var host: String
+    public var port: Int
+    public var username: String
+    public var auth: AuthSource
+    /// ProxyJump chain to reach `host`, outermost hop first (empty = direct).
+    public var jumps: [SSHJumpHop]
+
+    public init(
+        host: String,
+        port: Int = 22,
+        username: String,
+        auth: AuthSource,
+        jumps: [SSHJumpHop] = []
+    ) {
+        self.host = host
+        self.port = port
+        self.username = username
+        self.auth = auth
+        self.jumps = jumps
+    }
+}
+
 /// The user's decision when presented with an unknown host key.
 public enum HostKeyDecision: Sendable {
     case trust
     case reject
 }
 
-/// Asked to confirm an unknown host key. Returns the user's decision.
-public typealias HostKeyPrompt = @Sendable (HostKeyCandidate) async -> HostKeyDecision
+/// Asked to confirm an unknown host key for the given host ("host" or
+/// "host:port"). Returns the user's decision. The host matters with
+/// ProxyJump: the user must know whether they are trusting the bastion
+/// or the destination.
+public typealias HostKeyPrompt = @Sendable (String, HostKeyCandidate) async -> HostKeyDecision
 
 /// Host key verification policy.
 public enum HostKeyPolicy: Sendable {
@@ -96,46 +123,96 @@ public enum SSHConnectError: Error, LocalizedError, Sendable {
 /// connect entry point.
 public final class SSHConnector: Sendable {
     /// Opens an SSH connection, performing host key verification per `policy`.
+    /// When `parameters.jumps` is non-empty, hops are dialed in order and each
+    /// next connection is tunneled through the previous one (ProxyJump), with
+    /// per-hop authentication and host key verification.
     public static func connect(
         parameters: SSHConnectionParameters,
         policy: HostKeyPolicy
     ) async throws -> SSHClient {
-        let authMethod: SSHAuthenticationMethod
-        switch parameters.auth {
-        case .key(let key):
-            authMethod = key.authMethod(username: parameters.username)
-        case .keys(let candidates) where candidates.count == 1:
-            authMethod = candidates[0].authMethod(username: parameters.username)
-        case .keys(let candidates):
-            authMethod = .custom(
-                MultiKeyAuthDelegate(username: parameters.username, keys: candidates)
-            )
-        case .password(let password):
-            authMethod = .passwordBased(username: parameters.username, password: password)
-        }
-
-        let validator: SSHHostKeyValidator
-        switch policy {
-        case .acceptKnown(let store, let onUnknown):
-            let delegate = HostKeyVerifier(
-                host: parameters.host,
-                port: parameters.port,
-                store: store,
-                onUnknown: onUnknown
-            )
-            validator = .custom(delegate)
-        }
-
         do {
-            return try await SSHClient.connect(
-                host: parameters.host,
-                port: parameters.port,
-                authenticationMethod: authMethod,
-                hostKeyValidator: validator,
-                reconnect: .never
+            guard let first = parameters.jumps.first else {
+                return try await dialDirect(parameters: parameters, policy: policy)
+            }
+
+            // Outermost hop is a plain TCP dial…
+            var client = try await dialDirect(
+                parameters: SSHConnectionParameters(
+                    host: first.host,
+                    port: first.port,
+                    username: first.username,
+                    auth: first.auth
+                ),
+                policy: policy
+            )
+            // …each subsequent hop and the target ride inside the previous one.
+            for hop in parameters.jumps.dropFirst() {
+                client = try await client.jump(
+                    to: settings(host: hop.host, port: hop.port, username: hop.username, auth: hop.auth, policy: policy)
+                )
+            }
+            return try await client.jump(
+                to: settings(
+                    host: parameters.host,
+                    port: parameters.port,
+                    username: parameters.username,
+                    auth: parameters.auth,
+                    policy: policy
+                )
             )
         } catch {
             throw mapConnectError(error)
+        }
+    }
+
+    private static func dialDirect(
+        parameters: SSHConnectionParameters,
+        policy: HostKeyPolicy
+    ) async throws -> SSHClient {
+        try await SSHClient.connect(
+            host: parameters.host,
+            port: parameters.port,
+            authenticationMethod: authMethod(
+                username: parameters.username,
+                auth: parameters.auth
+            ),
+            hostKeyValidator: validator(host: parameters.host, port: parameters.port, policy: policy),
+            reconnect: .never
+        )
+    }
+
+    private static func settings(
+        host: String,
+        port: Int,
+        username: String,
+        auth: AuthSource,
+        policy: HostKeyPolicy
+    ) -> SSHClientSettings {
+        SSHClientSettings(
+            host: host,
+            port: port,
+            authenticationMethod: { authMethod(username: username, auth: auth) },
+            hostKeyValidator: validator(host: host, port: port, policy: policy)
+        )
+    }
+
+    private static func authMethod(username: String, auth: AuthSource) -> SSHAuthenticationMethod {
+        switch auth {
+        case .key(let key):
+            key.authMethod(username: username)
+        case .keys(let candidates) where candidates.count == 1:
+            candidates[0].authMethod(username: username)
+        case .keys(let candidates):
+            .custom(MultiKeyAuthDelegate(username: username, keys: candidates))
+        case .password(let password):
+            .passwordBased(username: username, password: password)
+        }
+    }
+
+    private static func validator(host: String, port: Int, policy: HostKeyPolicy) -> SSHHostKeyValidator {
+        switch policy {
+        case .acceptKnown(let store, let onUnknown):
+            .custom(HostKeyVerifier(host: host, port: port, store: store, onUnknown: onUnknown))
         }
     }
 
@@ -251,7 +328,8 @@ private final class HostKeyVerifier: NIOSSHClientServerAuthenticationDelegate, @
                     presentedFingerprint: presented.fingerprintSHA256
                 )
             case .unknown:
-                if await onUnknown(presented) == .trust {
+                let label = port == 22 ? host : "\(host):\(port)"
+                if await onUnknown(label, presented) == .trust {
                     store.persist(host: host, port: port, candidate: presented)
                     return
                 } else {

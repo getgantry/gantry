@@ -28,6 +28,15 @@ public final class AppModel {
         persist()
     }
 
+    /// Moves a host up or down in the sidebar order, persisting the new order.
+    public func moveHost(id: UUID, by offset: Int) {
+        guard let index = sessions.firstIndex(where: { $0.id == id }) else { return }
+        let target = index + offset
+        guard sessions.indices.contains(target) else { return }
+        sessions.swapAt(index, target)
+        persist()
+    }
+
     /// Applies an edited `DockerHost`, persisting the change and keeping the
     /// session list as the single source of truth for the sidebar.
     ///

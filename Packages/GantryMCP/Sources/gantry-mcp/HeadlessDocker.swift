@@ -94,7 +94,7 @@ actor HeadlessDocker {
 
         // Trusted-only: known hosts pass, everything else is rejected. No prompt.
         let knownHosts = KnownHostsStore()
-        let policy = HostKeyPolicy.acceptKnown(knownHosts) { _ in .reject }
+        let policy = HostKeyPolicy.acceptKnown(knownHosts) { _, _ in .reject }
 
         let auth = try resolveAuth(
             endpoint: endpoint,

@@ -200,8 +200,8 @@ public final class HostSession: Identifiable {
         // Build the host-key policy: known hosts pass; unknown hosts prompt the
         // user (trust-on-first-use) by hopping back to the main actor.
         let knownHosts = KnownHostsStore()
-        let policy = HostKeyPolicy.acceptKnown(knownHosts) { [weak self] candidate in
-            await self?.promptHostKey(host: hostName, candidate: candidate) ?? .reject
+        let policy = HostKeyPolicy.acceptKnown(knownHosts) { [weak self] promptHost, candidate in
+            await self?.promptHostKey(host: promptHost, candidate: candidate) ?? .reject
         }
 
         // Resolve auth, possibly suspending for a Keychain miss / user prompt.
@@ -220,11 +220,26 @@ public final class HostSession: Identifiable {
             return
         }
 
+        // ProxyJump hops authenticate non-interactively: each hop offers
+        // every loadable key from its ssh_config identities plus defaults.
+        let jumps = resolved.jumps.map { hop in
+            SSHJumpHop(
+                host: hop.hostName,
+                port: hop.port,
+                username: hop.username,
+                auth: .keys(loadAllUsableKeys(
+                    from: hop.identityFiles + SSHKeyLoader.defaultKeyCandidates(),
+                    hostID: host.id
+                ))
+            )
+        }
+
         let parameters = SSHConnectionParameters(
             host: hostName,
             port: port,
             username: username,
-            auth: auth
+            auth: auth,
+            jumps: jumps
         )
 
         let makeClient: @Sendable () async throws -> SSHClient = {

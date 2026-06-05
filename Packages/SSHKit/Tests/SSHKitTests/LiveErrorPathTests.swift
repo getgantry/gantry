@@ -85,7 +85,7 @@ func connectUnreachablePortMapsToUnreachable() async throws {
     do {
         _ = try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
         Issue.record("expected connect to a dead port to fail")
     } catch let error as SSHConnectError {
@@ -111,7 +111,7 @@ func connectUnresolvableHostMapsToUnreachable() async throws {
     do {
         _ = try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
         Issue.record("expected connect to an unresolvable host to fail")
     } catch let error as SSHConnectError {
@@ -155,7 +155,7 @@ func connectBadKeyMapsToAuthenticationFailed() async throws {
     do {
         _ = try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
         Issue.record("expected unauthorized key to fail authentication")
     } catch let error as SSHConnectError {
@@ -180,7 +180,7 @@ func connectUserRejectsHostKeyMapsToHostKeyRejected() async throws {
     do {
         _ = try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .reject })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .reject })
         )
         Issue.record("expected host-key rejection to fail the connect")
     } catch let error as SSHConnectError {
@@ -222,7 +222,7 @@ func connectHostKeyMismatchSurfacesMismatchError() async throws {
     await #expect(throws: HostKeyMismatchError.self) {
         _ = try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     }
 }
@@ -241,7 +241,7 @@ func transportBadDialCommandSurfacesRemoteError() async throws {
         makeClient: {
             try await SSHConnector.connect(
                 parameters: parameters,
-                policy: .acceptKnown(store, onUnknown: { _ in .trust })
+                policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
             )
         },
         dialCommand: "this-command-does-not-exist-gantry 1>&2; exit 127"
@@ -289,7 +289,7 @@ func transportExecuteUnknownEndpointReturns404() async throws {
     let transport = SSHDialStdioTransport(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
 
@@ -344,7 +344,7 @@ func hostFileSystemErrorPathsOverLiveSFTP() async throws {
     let fs = SSHHostFileSystem(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
 
@@ -369,7 +369,7 @@ func hostShellResizeOverLivePTY() async throws {
     let shell = SSHHostShell(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
 

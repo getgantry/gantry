@@ -64,7 +64,7 @@ func liveSSHDialStdio() async throws {
         username: username,
         auth: .key(key)
     )
-    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { candidate in
+    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { _, candidate in
         print("LIVE SSH: trusting \(candidate.keyType) \(candidate.fingerprintSHA256)")
         return .trust
     })
@@ -133,7 +133,7 @@ func liveSSHExec() async throws {
     let transport = SSHDialStdioTransport(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
     let client = DockerClient(transport: transport)
@@ -199,7 +199,7 @@ func rsaSha2Auth() async throws {
         username: username,
         auth: .key(key)
     )
-    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { candidate in
+    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { _, candidate in
         print("LIVE RSA: trusting \(candidate.keyType) \(candidate.fingerprintSHA256)")
         return .trust
     })
@@ -237,7 +237,7 @@ func liveSSHOneShotStatsBurst() async throws {
     let transport = SSHDialStdioTransport(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
     let client = DockerClient(transport: transport)
@@ -281,7 +281,7 @@ func liveHostShellRoundTrip() async throws {
     let shell = SSHHostShell(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
 
@@ -325,7 +325,7 @@ func liveHostFileSystem() async throws {
     let fs = SSHHostFileSystem(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
 
@@ -367,7 +367,7 @@ func liveSSHStreamCancellationStress() async throws {
     let transport = SSHDialStdioTransport(makeClient: {
         try await SSHConnector.connect(
             parameters: parameters,
-            policy: .acceptKnown(store, onUnknown: { _ in .trust })
+            policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
         )
     })
     let client = DockerClient(transport: transport)
@@ -391,4 +391,98 @@ func liveSSHStreamCancellationStress() async throws {
         print("LIVE STRESS round \(round): \(c.count) containers, \(i.count) images, stream cancelled")
     }
     await client.shutdown()
+}
+
+// MARK: - ProxyJump
+
+/// An ssh_config alias whose entry carries `ProxyJump` and whose target runs
+/// Docker — proves the bastion-tunneled dial end to end.
+private let jumpAlias = ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_JUMP_HOST"] ?? ""
+
+/// Loads every readable key from the given paths plus the ~/.ssh defaults.
+/// GANTRY_SSH_TEST_JUMP_SINGLE_KEY=1 narrows to ~/.ssh/id_rsa to isolate
+/// multi-key offer issues from jump-path issues.
+private func loadableKeys(_ identityFiles: [String]) -> [LoadedKey] {
+    if ProcessInfo.processInfo.environment["GANTRY_SSH_TEST_JUMP_SINGLE_KEY"] == "1",
+       let key = try? SSHKeyLoader.load(contentsOf: rsaKeyPath, passphrase: nil) {
+        return [key]
+    }
+    var keys: [LoadedKey] = []
+    for path in identityFiles + SSHKeyLoader.defaultKeyCandidates() {
+        if let key = try? SSHKeyLoader.load(contentsOf: path, passphrase: nil) {
+            keys.append(key)
+        }
+    }
+    return keys
+}
+
+@Test(.enabled(if: !jumpAlias.isEmpty), .timeLimit(.minutes(2)))
+func proxyJumpDockerNegotiate() async throws {
+    let resolved = SSHConfig.resolve(host: jumpAlias)
+    try #require(!resolved.jumps.isEmpty, "\(jumpAlias) has no ProxyJump in ssh_config")
+
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-jump-\(UUID().uuidString).json"
+    )
+    let parameters = SSHConnectionParameters(
+        host: resolved.hostName,
+        port: resolved.port,
+        username: resolved.user ?? NSUserName(),
+        auth: .keys(loadableKeys(resolved.identityFiles)),
+        jumps: resolved.jumps.map { hop in
+            SSHJumpHop(
+                host: hop.hostName,
+                port: hop.port,
+                username: hop.user ?? NSUserName(),
+                auth: .keys(loadableKeys(hop.identityFiles))
+            )
+        }
+    )
+    let policy = HostKeyPolicy.acceptKnown(store, onUnknown: { host, candidate in
+        print("LIVE JUMP: trusting \(host) \(candidate.keyType) \(candidate.fingerprintSHA256)")
+        return .trust
+    })
+
+    let transport = SSHDialStdioTransport(makeClient: {
+        try await SSHConnector.connect(parameters: parameters, policy: policy)
+    })
+    let client = DockerClient(transport: transport)
+
+    let version = try await client.negotiate()
+    print("LIVE JUMP: through \(resolved.jumps.map(\.hostName).joined(separator: " → ")) to \(resolved.hostName): Docker \(version.version), api \(version.apiVersion)")
+    #expect(!version.apiVersion.isEmpty)
+
+    let containers = try await client.listContainers(all: true)
+    print("LIVE JUMP: \(containers.count) containers visible")
+
+    await client.shutdown()
+}
+
+/// Direct (no jump) multi-key probe: offers a key the server rejects, then
+/// one it accepts, over a single connection. Proves the second offer of
+/// MultiKeyAuthDelegate against a real sshd.
+@Test(.enabled(if: !jumpAlias.isEmpty), .timeLimit(.minutes(2)))
+func multiKeySecondOfferLive() async throws {
+    let resolved = SSHConfig.resolve(host: jumpAlias)
+    let bastion = try #require(resolved.jumps.first)
+
+    let rejected = try SSHKeyLoader.load(
+        contentsOf: NSHomeDirectory() + "/.ssh/gantry_ed25519", passphrase: nil
+    )
+    let accepted = try SSHKeyLoader.load(contentsOf: rsaKeyPath, passphrase: nil)
+
+    let store = KnownHostsStore(
+        appStorePath: NSTemporaryDirectory() + "gantry-mk-\(UUID().uuidString).json"
+    )
+    let client = try await SSHConnector.connect(
+        parameters: SSHConnectionParameters(
+            host: bastion.hostName,
+            port: bastion.port,
+            username: bastion.user ?? NSUserName(),
+            auth: .keys([rejected, accepted])
+        ),
+        policy: .acceptKnown(store, onUnknown: { _, _ in .trust })
+    )
+    print("LIVE MULTIKEY: second offer accepted by \(bastion.hostName)")
+    try await client.close()
 }
