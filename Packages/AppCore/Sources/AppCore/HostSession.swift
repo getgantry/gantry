@@ -98,6 +98,10 @@ public final class HostSession: Identifiable {
     /// `disconnect()` and superseded by a user-initiated retry.
     private var autoReconnectTask: Task<Void, Never>?
 
+    /// True while a `connect()` runs on behalf of the auto-reconnect loop,
+    /// so a failure inside it doesn't spawn a second, competing retry chain.
+    private var autoReconnectInProgress = false
+
     /// Factory for additional SSH connections to this host (host shell, SFTP
     /// file browsing). Set while an SSH host is connected; nil for local.
     private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
@@ -152,7 +156,25 @@ public final class HostSession: Identifiable {
             self.client = nil
             // DockerClient.shutdown forwards to the transport; nothing more to release.
             status = .failed(error.localizedDescription)
+            // Transient failures (handshake drops, flaky networks) retry on
+            // their own — unless this attempt already came from the
+            // auto-reconnect loop, which manages its own schedule.
+            if !autoReconnectInProgress {
+                scheduleRetryIfTransient(error)
+            }
         }
+    }
+
+    /// Auto-retries an initial connect failure that looks transient (network
+    /// or handshake trouble). Auth, host-key and credential failures need the
+    /// user, not a retry loop that would only aggravate server-side limits.
+    private func scheduleRetryIfTransient(_ error: Error) {
+        let text = (String(describing: error) + " " + error.localizedDescription).lowercased()
+        guard !text.contains("authentication"),
+              !text.contains("host key"),
+              !text.contains("credential"),
+              !text.contains("cancel") else { return }
+        scheduleAutoReconnect(after: 5, attemptsLeft: 6)
     }
 
     /// TEST SEAM: injects an already-negotiated `DockerClient` and marks the
@@ -514,7 +536,9 @@ public final class HostSession: Identifiable {
             try? await Task.sleep(for: .seconds(seconds))
             guard let self, !Task.isCancelled else { return }
             guard case .failed = self.status else { return }
+            self.autoReconnectInProgress = true
             await self.connect()
+            self.autoReconnectInProgress = false
             if case .failed = self.status, !Task.isCancelled, attemptsLeft > 1 {
                 self.scheduleAutoReconnect(after: min(seconds * 2, 60), attemptsLeft: attemptsLeft - 1)
             }
