@@ -93,6 +93,14 @@ Website: **https://getgantry.github.io/**
   ```
 
   Headless SSH connections only use hosts whose keys you already trusted in the app.
+- **Copy as Prompt** — every container (list, detail view with ⌥⌘P, menu bar,
+  dashboard issues) can be copied as a paste-ready debugging prompt for an AI
+  coding agent. The prompt carries the host and how to reach it (the exact
+  `ssh` command or the local socket), the Gantry MCP `host_id` and tool names,
+  the container's identity and state — image, health, exit code, restarts,
+  ports, compose project — and a task matched to the symptom: unhealthy asks
+  to debug the failing health check, crash-looping to find the crash, healthy
+  leaves room for your own question. Paste into Claude Code and let it dig in.
 
 ## Install
 
