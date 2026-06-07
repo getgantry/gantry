@@ -107,8 +107,10 @@ struct CreateContainerSheet: View {
                 }
 
                 Section("Options") {
-                    Picker("Restart Policy", selection: $restartPolicy) {
-                        ForEach(RestartPolicyOption.allCases) { Text($0.label).tag($0.rawValue) }
+                    if session.host.capabilities.restartPolicy {
+                        Picker("Restart Policy", selection: $restartPolicy) {
+                            ForEach(RestartPolicyOption.allCases) { Text($0.label).tag($0.rawValue) }
+                        }
                     }
                     Toggle("Allocate a TTY", isOn: $tty)
                     Toggle("Remove on exit (--rm)", isOn: $autoRemove)

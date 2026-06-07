@@ -208,7 +208,7 @@ struct ContentView: View {
 
             ForEach(model.sessions) { session in
                 Section(isExpanded: expansionBinding(for: session.host.id)) {
-                    ForEach(HostSection.sections(forSSHHost: !session.host.isLocal)) { section in
+                    ForEach(HostSection.sections(forSSHHost: session.host.isSSH)) { section in
                         Label(section.title, systemImage: section.systemImage)
                             .tag(SidebarItem.host(SidebarSelection(hostID: session.host.id, section: section)))
                     }
@@ -479,8 +479,8 @@ private struct HostSectionHeader: View {
                 .fill(session.status.dotColor)
                 .frame(width: 7, height: 7)
             Text(session.host.name)
-            if !session.host.isLocal {
-                Image(systemName: "network")
+            if let badge = session.host.badgeSystemImage {
+                Image(systemName: badge)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

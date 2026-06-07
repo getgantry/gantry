@@ -70,37 +70,44 @@ struct ContainerDetailView: View {
     // MARK: - Overflow menu
 
     private var overflowMenu: some View {
-        Menu {
-            Button {
-                renameText = container.displayName
-                showRename = true
-            } label: {
-                Label("Rename…", systemImage: "pencil")
+        let caps = session.host.capabilities
+        return Menu {
+            if caps.renameContainer {
+                Button {
+                    renameText = container.displayName
+                    showRename = true
+                } label: {
+                    Label("Rename…", systemImage: "pencil")
+                }
             }
-            Button {
-                showCommitSheet = true
-            } label: {
-                Label("Commit to Image…", systemImage: "camera")
+            if caps.commitContainer {
+                Button {
+                    showCommitSheet = true
+                } label: {
+                    Label("Commit to Image…", systemImage: "camera")
+                }
             }
             Button {
                 ContainerExport.run(session: session, container: container)
             } label: {
                 Label("Export Filesystem…", systemImage: "square.and.arrow.up")
             }
-            Menu {
-                ForEach(RestartPolicyOption.allCases) { option in
-                    Button(option.label) {
-                        Task {
-                            _ = await session.updateRestartPolicy(
-                                containerID: container.id,
-                                policy: option.rawValue,
-                                maxRetries: 0
-                            )
+            if caps.restartPolicy {
+                Menu {
+                    ForEach(RestartPolicyOption.allCases) { option in
+                        Button(option.label) {
+                            Task {
+                                _ = await session.updateRestartPolicy(
+                                    containerID: container.id,
+                                    policy: option.rawValue,
+                                    maxRetries: 0
+                                )
+                            }
                         }
                     }
+                } label: {
+                    Label("Restart Policy", systemImage: "arrow.triangle.2.circlepath")
                 }
-            } label: {
-                Label("Restart Policy", systemImage: "arrow.triangle.2.circlepath")
             }
             Divider()
             Button {

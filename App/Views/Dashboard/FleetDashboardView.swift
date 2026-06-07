@@ -222,8 +222,8 @@ private struct HostCard: View {
             Text(session.host.name)
                 .font(.headline)
                 .lineLimit(1)
-            if !session.host.isLocal {
-                Image(systemName: "network")
+            if let badge = session.host.badgeSystemImage {
+                Image(systemName: badge)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

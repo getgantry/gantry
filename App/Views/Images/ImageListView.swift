@@ -221,7 +221,9 @@ struct ImageDetailView: View {
 
             Picker("Section", selection: $tab) {
                 Text("Overview").tag(0)
-                Text("History").tag(1)
+                if session.host.capabilities.imageHistory {
+                    Text("History").tag(1)
+                }
                 Text("Inspect").tag(2)
             }
             .pickerStyle(.segmented)

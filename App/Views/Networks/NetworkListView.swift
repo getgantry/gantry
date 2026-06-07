@@ -219,27 +219,29 @@ struct NetworkDetailView: View {
         HStack {
             SectionTitle("Connected Containers")
             Spacer()
-            Menu {
-                if connectableContainers.isEmpty {
-                    Text("No running containers")
-                } else {
-                    ForEach(connectableContainers) { container in
-                        Button(container.displayName) {
-                            Task {
-                                _ = await session.connectContainer(
-                                    networkID: network.id,
-                                    containerID: container.id
-                                )
-                                await reloadAttached()
+            if session.host.capabilities.networkAttach {
+                Menu {
+                    if connectableContainers.isEmpty {
+                        Text("No running containers")
+                    } else {
+                        ForEach(connectableContainers) { container in
+                            Button(container.displayName) {
+                                Task {
+                                    _ = await session.connectContainer(
+                                        networkID: network.id,
+                                        containerID: container.id
+                                    )
+                                    await reloadAttached()
+                                }
                             }
                         }
                     }
+                } label: {
+                    Label("Connect Container…", systemImage: "plus")
                 }
-            } label: {
-                Label("Connect Container…", systemImage: "plus")
+                .menuStyle(.borderlessButton)
+                .fixedSize()
             }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
         }
 
         if !attachedLoaded {
@@ -264,18 +266,20 @@ struct NetworkDetailView: View {
                             }
                         }
                         Spacer()
-                        Button("Disconnect", role: .destructive) {
-                            Task {
-                                _ = await session.disconnectContainer(
-                                    networkID: network.id,
-                                    containerID: container.id,
-                                    force: false
-                                )
-                                await reloadAttached()
+                        if session.host.capabilities.networkAttach {
+                            Button("Disconnect", role: .destructive) {
+                                Task {
+                                    _ = await session.disconnectContainer(
+                                        networkID: network.id,
+                                        containerID: container.id,
+                                        force: false
+                                    )
+                                    await reloadAttached()
+                                }
                             }
+                            .buttonStyle(.borderless)
+                            .font(.caption)
                         }
-                        .buttonStyle(.borderless)
-                        .font(.caption)
                     }
                     .padding(.vertical, 2)
                 }

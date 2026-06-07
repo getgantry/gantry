@@ -37,6 +37,13 @@ public enum HeadlessDocker {
             transport = try makeLocalTransport(for: host)
         case .ssh(let endpoint):
             transport = try await makeSSHTransport(for: host, endpoint: endpoint)
+        case .appleContainer:
+            guard let appleTransport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
+                throw HeadlessDockerError.connectionFailed(
+                    "The apple/container CLI was not found for \(host.name). Install it with `brew install container`."
+                )
+            }
+            transport = appleTransport
         }
 
         let client = DockerClient(transport: transport)

@@ -144,6 +144,15 @@ public final class HostSession: Identifiable {
 
         case .ssh(let endpoint):
             await connectSSH(endpoint, generation: generation)
+
+        case .appleContainer:
+            guard let transport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
+                status = .failed(
+                    "The apple/container CLI was not found. Install it with `brew install container`."
+                )
+                return
+            }
+            await finishConnect(with: transport, generation: generation)
         }
     }
 

@@ -432,31 +432,38 @@ struct ContainerActionsMenu: View {
 
     private var isRunning: Bool { container.state.isRunning }
     private var isPaused: Bool { container.state == .paused }
+    private var caps: HostCapabilities { session.host.capabilities }
 
     var body: some View {
         button(.start, enabled: !isRunning)
         button(.stop, enabled: isRunning)
         button(.restart, enabled: isRunning)
-        if isPaused {
-            button(.unpause, enabled: true)
-        } else {
-            button(.pause, enabled: isRunning)
+        if caps.pauseResume {
+            if isPaused {
+                button(.unpause, enabled: true)
+            } else {
+                button(.pause, enabled: isRunning)
+            }
         }
         button(.kill, enabled: isRunning)
 
         Divider()
 
-        Button {
-            renameText = container.displayName
-            renameTarget = container
-        } label: {
-            Label("Rename…", systemImage: "pencil")
+        if caps.renameContainer {
+            Button {
+                renameText = container.displayName
+                renameTarget = container
+            } label: {
+                Label("Rename…", systemImage: "pencil")
+            }
         }
 
-        Button {
-            commitTarget = container
-        } label: {
-            Label("Commit to Image…", systemImage: "camera")
+        if caps.commitContainer {
+            Button {
+                commitTarget = container
+            } label: {
+                Label("Commit to Image…", systemImage: "camera")
+            }
         }
 
         Button {
@@ -465,20 +472,22 @@ struct ContainerActionsMenu: View {
             Label("Export Filesystem…", systemImage: "square.and.arrow.up")
         }
 
-        Menu {
-            ForEach(RestartPolicyOption.allCases) { option in
-                Button(option.label) {
-                    Task {
-                        _ = await session.updateRestartPolicy(
-                            containerID: container.id,
-                            policy: option.rawValue,
-                            maxRetries: 0
-                        )
+        if caps.restartPolicy {
+            Menu {
+                ForEach(RestartPolicyOption.allCases) { option in
+                    Button(option.label) {
+                        Task {
+                            _ = await session.updateRestartPolicy(
+                                containerID: container.id,
+                                policy: option.rawValue,
+                                maxRetries: 0
+                            )
+                        }
                     }
                 }
+            } label: {
+                Label("Restart Policy", systemImage: "arrow.triangle.2.circlepath")
             }
-        } label: {
-            Label("Restart Policy", systemImage: "arrow.triangle.2.circlepath")
         }
 
         Divider()

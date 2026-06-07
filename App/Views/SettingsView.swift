@@ -259,12 +259,14 @@ private struct HostRow: View {
         case .ssh(let endpoint):
             let user = endpoint.username.isEmpty ? "" : "\(endpoint.username)@"
             return "SSH \(user)\(endpoint.host):\(endpoint.port)"
+        case .appleContainer:
+            return "Apple Container (local)"
         }
     }
 
     /// Keychain hint: which secrets, if any, are stored for this SSH host.
     private var storedCredentialHint: String? {
-        guard !host.isLocal else { return nil }
+        guard host.isSSH else { return nil }
         let hasPassword = KeychainStore.get(
             account: KeychainStore.sshPasswordAccount(hostID: host.id)
         ) != nil
@@ -302,7 +304,7 @@ private struct HostRow: View {
                 Button("Reconnect", action: onReconnect)
                     .controlSize(.small)
 
-                if !host.isLocal {
+                if host.isSSH {
                     Button("Edit…", action: onEdit)
                         .controlSize(.small)
                 }

@@ -55,6 +55,12 @@ actor HeadlessDocker {
 
         case .ssh(let endpoint):
             transport = try makeSSHTransport(endpoint: endpoint, hostID: host.id)
+
+        case .appleContainer:
+            guard let appleTransport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
+                throw HeadlessError.appleContainerCLIMissing
+            }
+            transport = appleTransport
         }
 
         let client = DockerClient(transport: transport)
@@ -171,6 +177,7 @@ enum HeadlessError: Error, LocalizedError {
     case noSocket
     case unknownHost(UUID)
     case credentialsUnavailable
+    case appleContainerCLIMissing
 
     var errorDescription: String? {
         switch self {
@@ -180,6 +187,8 @@ enum HeadlessError: Error, LocalizedError {
             return "No host with id \(id.uuidString)."
         case .credentialsUnavailable:
             return "SSH credentials are unavailable headlessly. Connect to this host once in the Gantry app to trust its key and store any secret in the Keychain."
+        case .appleContainerCLIMissing:
+            return "The apple/container CLI was not found. Install it with `brew install container`."
         }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppCore
+import DockerKit
 import SSHKit
 
 /// SSH auth method selection, shared by the add- and edit-host forms.
@@ -9,12 +10,20 @@ enum AuthChoice: Hashable {
     case password
 }
 
-/// Sheet for adding a new SSH Docker host. Resolves ssh_config live to show the
-/// user what defaults will apply for the host they typed.
+/// Which engine the new host runs: Docker over SSH, or the local
+/// apple/container services.
+private enum HostTypeChoice: Hashable {
+    case ssh
+    case appleContainer
+}
+
+/// Sheet for adding a new host: an SSH Docker host (resolving ssh_config live
+/// to show the defaults that will apply) or a local apple/container host.
 struct AddHostSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
 
+    @State private var hostType: HostTypeChoice = .ssh
     @State private var name = ""
     @State private var host = ""
     @State private var port = "22"
@@ -31,6 +40,9 @@ struct AddHostSheet: View {
     private let configHosts = SSHConfig.listHosts()
     @State private var selectedConfigHost: String?
 
+    /// Where the apple/container CLI was found, if anywhere.
+    private let appleCLIPath = AppleContainerCLIDiscovery.discover()
+
     private var defaultUser: String { NSUserName() }
 
     private var trimmedHost: String {
@@ -38,20 +50,88 @@ struct AddHostSheet: View {
     }
 
     private var canAdd: Bool {
-        !trimmedHost.isEmpty
+        switch hostType {
+        case .ssh: !trimmedHost.isEmpty
+        case .appleContainer: true
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 10) {
-                Image(systemName: "network")
+                Image(systemName: hostType == .ssh ? "network" : "apple.logo")
                     .font(.title2)
                     .foregroundStyle(.tint)
-                Text("Add SSH Host")
+                Text("Add Host")
                     .font(.title2.weight(.semibold))
             }
 
-            Form {
+            Picker("Type", selection: $hostType) {
+                Text("SSH Docker Host").tag(HostTypeChoice.ssh)
+                Text("Apple Container").tag(HostTypeChoice.appleContainer)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            switch hostType {
+            case .ssh:
+                sshForm
+            case .appleContainer:
+                appleContainerForm
+            }
+
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) { dismiss() }
+                Button("Add") { add() }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!canAdd)
+            }
+        }
+        .padding(20)
+        .frame(width: 460)
+        .fileImporter(
+            isPresented: $showingKeyImporter,
+            allowedContentTypes: [.data, .item],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                keyFilePath = url.path
+            }
+        }
+        .onDisappear { resolveTask?.cancel() }
+    }
+
+    // MARK: - Apple Container form
+
+    private var appleContainerForm: some View {
+        Form {
+            Section {
+                TextField("Name", text: $name, prompt: Text("Apple Container"))
+            } footer: {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Manages Linux containers run by apple/container on this Mac, driven through the `container` CLI. Lifecycle, logs, terminal, stats, images, volumes and networks are supported.")
+                    if let appleCLIPath {
+                        Label("CLI found at \(appleCLIPath)", systemImage: "checkmark.circle")
+                            .foregroundStyle(.green)
+                    } else {
+                        Label(
+                            "The `container` CLI was not found. Install it with `brew install container`.",
+                            systemImage: "exclamationmark.triangle"
+                        )
+                        .foregroundStyle(.orange)
+                    }
+                }
+                .font(.footnote)
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    // MARK: - SSH form
+
+    private var sshForm: some View {
+        Form {
                 if !configHosts.isEmpty {
                     Section {
                         Picker("Import from SSH config", selection: $selectedConfigHost) {
@@ -112,32 +192,19 @@ struct AddHostSheet: View {
                 }
             }
             .formStyle(.grouped)
-
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
-                Button("Add") { add() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canAdd)
-            }
-        }
-        .padding(20)
-        .frame(width: 460)
-        .fileImporter(
-            isPresented: $showingKeyImporter,
-            allowedContentTypes: [.data, .item],
-            allowsMultipleSelection: false
-        ) { result in
-            if case .success(let urls) = result, let url = urls.first {
-                keyFilePath = url.path
-            }
-        }
-        .onDisappear { resolveTask?.cancel() }
     }
 
     // MARK: - Actions
 
     private func add() {
+        if hostType == .appleContainer {
+            let displayName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let resolvedName = displayName.isEmpty ? "Apple Container" : displayName
+            model.addHost(DockerHost(name: resolvedName, kind: .appleContainer))
+            dismiss()
+            return
+        }
+
         let portValue = Int(port.trimmingCharacters(in: .whitespaces)) ?? 22
         let trimmedUser = user.trimmingCharacters(in: .whitespacesAndNewlines)
 

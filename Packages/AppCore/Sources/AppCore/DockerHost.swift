@@ -1,16 +1,20 @@
 import Foundation
 
-/// A Docker endpoint the app can connect to: the local daemon or a remote one over SSH.
+/// A container engine the app can connect to: the local Docker daemon, a
+/// remote one over SSH, or the local apple/container services (driven through
+/// the `container` CLI).
 public struct DockerHost: Identifiable, Hashable, Codable, Sendable {
     public enum Kind: Hashable, Codable, Sendable {
         case local
         case ssh(SSHEndpoint)
+        case appleContainer
     }
 
     public var id: UUID
     public var name: String
     public var kind: Kind
-    /// Optional explicit socket path override for local hosts.
+    /// Optional explicit socket path override for local hosts. For
+    /// apple/container hosts this overrides the `container` CLI path instead.
     public var socketPathOverride: String?
 
     public init(id: UUID = UUID(), name: String, kind: Kind, socketPathOverride: String? = nil) {
@@ -25,11 +29,85 @@ public struct DockerHost: Identifiable, Hashable, Codable, Sendable {
         return false
     }
 
+    public var isSSH: Bool {
+        if case .ssh = kind { return true }
+        return false
+    }
+
+    public var isAppleContainer: Bool {
+        if case .appleContainer = kind { return true }
+        return false
+    }
+
     /// Whether the user is allowed to remove this host. The local daemon host
-    /// is permanent; SSH hosts can be removed.
+    /// is permanent; SSH and apple/container hosts can be removed.
     public var removable: Bool {
         !isLocal
     }
+
+    /// What the host's engine supports. Docker-backed hosts (local and SSH)
+    /// support everything; apple/container lacks several daemon features, and
+    /// the UI hides those controls instead of surfacing 501 errors.
+    public var capabilities: HostCapabilities {
+        isAppleContainer ? .appleContainer : .docker
+    }
+
+    /// Small SF Symbol badge shown next to the host name in lists and cards;
+    /// nil for the plain local daemon.
+    public var badgeSystemImage: String? {
+        switch kind {
+        case .local: nil
+        case .ssh: "network"
+        case .appleContainer: "apple.logo"
+        }
+    }
+}
+
+/// Feature switches per engine, consulted by the UI to hide controls a host's
+/// engine cannot honor.
+public struct HostCapabilities: Hashable, Sendable {
+    /// Pausing/unpausing containers.
+    public var pauseResume: Bool
+    /// Renaming an existing container.
+    public var renameContainer: Bool
+    /// Committing a container to a new image.
+    public var commitContainer: Bool
+    /// Changing a container's restart policy (incl. setting one at creation).
+    public var restartPolicy: Bool
+    /// Attaching/detaching running containers to networks.
+    public var networkAttach: Bool
+    /// Pruning the builder cache.
+    public var buildCachePrune: Bool
+    /// Image layer history.
+    public var imageHistory: Bool
+    /// Downloading/uploading files via the archive endpoints (the shell-based
+    /// directory listing works either way).
+    public var containerFileTransfer: Bool
+
+    /// Docker engine: everything on.
+    public static let docker = HostCapabilities(
+        pauseResume: true,
+        renameContainer: true,
+        commitContainer: true,
+        restartPolicy: true,
+        networkAttach: true,
+        buildCachePrune: true,
+        imageHistory: true,
+        containerFileTransfer: true
+    )
+
+    /// apple/container: lifecycle, logs, exec, stats, images, volumes and
+    /// networks work; the rest has no CLI equivalent.
+    public static let appleContainer = HostCapabilities(
+        pauseResume: false,
+        renameContainer: false,
+        commitContainer: false,
+        restartPolicy: false,
+        networkAttach: false,
+        buildCachePrune: false,
+        imageHistory: false,
+        containerFileTransfer: false
+    )
 }
 
 /// How Gantry authenticates an SSH connection to a remote Docker host.

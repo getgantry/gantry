@@ -155,8 +155,8 @@ private struct HostBlock: View {
                     .frame(width: 7, height: 7)
                 Text(session.host.name)
                     .font(.subheadline.weight(.semibold))
-                if !session.host.isLocal {
-                    Image(systemName: "network")
+                if let badge = session.host.badgeSystemImage {
+                    Image(systemName: badge)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

@@ -48,12 +48,14 @@ struct FilesView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help("Refresh")
-            Button {
-                upload()
-            } label: {
-                Label("Upload", systemImage: "square.and.arrow.up")
+            if session.host.capabilities.containerFileTransfer {
+                Button {
+                    upload()
+                } label: {
+                    Label("Upload", systemImage: "square.and.arrow.up")
+                }
+                .help("Upload a file into this directory")
             }
-            .help("Upload a file into this directory")
         }
         .padding(8)
     }
@@ -89,6 +91,7 @@ struct FilesView: View {
                             isDirectory: entry.isDirectory
                         ),
                         fullPath: join(path, entry.name),
+                        canTransfer: session.host.capabilities.containerFileTransfer,
                         onOpen: {
                             if entry.isDirectory {
                                 go(to: join(path, entry.name))
@@ -97,7 +100,7 @@ struct FilesView: View {
                         onDownload: {
                             download(entry)
                         },
-                        onDropURLs: entry.isDirectory ? { urls in
+                        onDropURLs: entry.isDirectory && session.host.capabilities.containerFileTransfer ? { urls in
                             Task { await uploadURLs(urls, into: join(path, entry.name)) }
                         } : nil
                     )
@@ -262,6 +265,9 @@ private struct FileRow: View {
     let entry: ContainerFileEntry
     let transfer: ContainerFileTransfer
     let fullPath: String
+    /// False when the host's engine has no archive endpoints (apple/container):
+    /// the download/upload affordances are hidden.
+    let canTransfer: Bool
     let onOpen: () -> Void
     let onDownload: () -> Void
     /// Non-nil only for directory rows: handles a Finder drop into this folder.
@@ -288,14 +294,16 @@ private struct FileRow: View {
                 Text(Formatters.bytes(Int64(entry.size)))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
-                Button {
-                    onDownload()
-                } label: {
-                    Image(systemName: "arrow.down.circle")
+                if canTransfer {
+                    Button {
+                        onDownload()
+                    } label: {
+                        Image(systemName: "arrow.down.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .opacity(hovered ? 1 : 0.55)
+                    .help("Download")
                 }
-                .buttonStyle(.borderless)
-                .opacity(hovered ? 1 : 0.55)
-                .help("Download")
             }
         }
         .contentShape(Rectangle())
@@ -303,21 +311,32 @@ private struct FileRow: View {
         .background(backgroundColor, in: RoundedRectangle(cornerRadius: 5))
         .onHover { hovered = $0 }
         .onTapGesture(count: 2) { onOpen() }
-        .draggable(transfer) {
-            Label(entry.name, systemImage: icon)
-        }
+        .modifier(DraggableTransferModifier(
+            transfer: canTransfer ? transfer : nil,
+            label: entry.name,
+            icon: icon
+        ))
         .contextMenu {
             if entry.isDirectory {
                 Button("Open") { onOpen() }
             }
-            Button(entry.isDirectory ? "Download as \(entry.name).tar" : "Download…") { onDownload() }
+            if canTransfer {
+                Button(entry.isDirectory ? "Download as \(entry.name).tar" : "Download…") { onDownload() }
+            }
             Divider()
             Button("Copy Path") { copyToPasteboard(fullPath) }
         }
-        .help(entry.isDirectory
-              ? "Double-click to open · drag out to export"
-              : "Drag out to copy to Finder")
+        .help(helpText)
         .modifier(DirectoryDropModifier(isTargeted: $isDropTargeted, onDropURLs: onDropURLs))
+    }
+
+    private var helpText: String {
+        if entry.isDirectory {
+            return canTransfer
+                ? "Double-click to open · drag out to export"
+                : "Double-click to open"
+        }
+        return canTransfer ? "Drag out to copy to Finder" : entry.name
     }
 
     private var backgroundColor: Color {
@@ -330,6 +349,24 @@ private struct FileRow: View {
         if entry.isSymlink { return "arrow.triangle.turn.up.right.circle" }
         if entry.isDirectory { return "folder.fill" }
         return "doc"
+    }
+}
+
+/// Makes the row draggable when the host's engine supports file transfer;
+/// otherwise leaves the row untouched.
+private struct DraggableTransferModifier: ViewModifier {
+    let transfer: ContainerFileTransfer?
+    let label: String
+    let icon: String
+
+    func body(content: Content) -> some View {
+        if let transfer {
+            content.draggable(transfer) {
+                Label(label, systemImage: icon)
+            }
+        } else {
+            content
+        }
     }
 }
 

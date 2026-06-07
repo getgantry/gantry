@@ -9,8 +9,9 @@
 [![MCP](https://img.shields.io/badge/MCP-server%20included-8A2BE2)](#agent-friendly)
 
 Gantry is a fully native macOS app (SwiftUI, Swift 6) for managing and monitoring
-Docker — the local daemon and any number of remote hosts over SSH. No Electron,
-no subscription, no artificial limits. It is built to be driven by AI agents
+Docker — the local daemon and any number of remote hosts over SSH — plus
+[apple/container](https://github.com/apple/container) hosts on your Mac. No
+Electron, no subscription, no artificial limits. It is built to be driven by AI agents
 too: a bundled [MCP server](#agent-friendly) and App Intents expose your Docker
 hosts to Claude, Shortcuts, Siri and scripts.
 
@@ -69,6 +70,19 @@ Website: **https://getgantry.github.io/**
   RSA signs with **rsa-sha2-256** so it works against modern OpenSSH servers
 - Host key verification with trust-on-first-use prompts (SHA256 fingerprints),
   honoring `~/.ssh/known_hosts`; secrets live in the macOS **Keychain**
+
+### apple/container hosts
+- Add an **Apple Container** host to manage Linux containers run by
+  [apple/container](https://github.com/apple/container) (`brew install
+  container`) side by side with your Docker hosts
+- Driven through the `container` CLI and translated to the same engine
+  interface, so lifecycle, live logs, exec terminal, stats, create-container,
+  images (pull/tag/delete/prune), volumes, networks and disk usage all work
+  from the same UI — and through the MCP server and App Intents
+- Connecting the host starts the `container` services if they are down
+- Features the platform does not offer (pause, rename, commit, restart
+  policies, network attach, image history, file download/upload) are hidden
+  for these hosts instead of erroring
 
 ![Host overview](assets/overview.png)
 

@@ -31,6 +31,8 @@ public enum ContainerPrompt {
             let user = endpoint.username.isEmpty ? "" : "\(endpoint.username)@"
             let port = endpoint.port == 22 ? "" : " -p \(endpoint.port)"
             lines.append("- Host \"\(host.name)\": remote Docker over SSH — `ssh\(port) \(user)\(endpoint.host)`, then use `docker` there.")
+        case .appleContainer:
+            lines.append("- Host \"\(host.name)\": apple/container on this Mac — use the `container` CLI (`container list`, `container logs`, `container exec`), not `docker`.")
         }
         lines.append("- If the \"gantry\" MCP server is connected, prefer it: call `list_hosts`, then pass `host_id` `\(host.id.uuidString)` to `list_containers`, `container_logs`, `container_stats`, `container_exec` and `container_action`.")
         lines.append("")

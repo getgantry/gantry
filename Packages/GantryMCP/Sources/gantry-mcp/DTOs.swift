@@ -22,6 +22,9 @@ struct HostDTO: Encodable {
             kind = "ssh"
             let user = endpoint.username.isEmpty ? "" : "\(endpoint.username)@"
             connectivity = "Remote Docker over SSH (\(user)\(endpoint.host):\(endpoint.port)). Headless access requires the host key to be already trusted."
+        case .appleContainer:
+            kind = "apple-container"
+            connectivity = "apple/container on this Mac, driven through the `container` CLI."
         }
     }
 }
