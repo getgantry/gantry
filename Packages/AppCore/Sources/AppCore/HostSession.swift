@@ -123,6 +123,11 @@ public final class HostSession: Identifiable {
     /// The running SSH forward services, keyed by `PortForward.id`.
     var portForwardServices: [UUID: SSHPortForward] = [:]
 
+    /// Session cache of container inspect results, so reselecting a container
+    /// renders its Overview instantly while a fresh copy loads in the
+    /// background. Keyed by container id; cleared on disconnect.
+    private var detailsCache: [String: ContainerDetails] = [:]
+
     public init(host: DockerHost) {
         self.host = host
     }
@@ -472,6 +477,7 @@ public final class HostSession: Identifiable {
             Task { await fs.close() }
         }
         stopAllPortForwards()
+        detailsCache.removeAll()
         liveUpdatesActive = false
         // Resolve any prompt left hanging by an interrupted connect attempt.
         cancelCredential()
@@ -718,13 +724,22 @@ public final class HostSession: Identifiable {
         }
     }
 
+    /// The last inspected details for a container, if still cached this session.
+    /// The Overview shows this immediately (no spinner) while `details(for:)`
+    /// refreshes in the background.
+    public func cachedDetails(for containerID: String) -> ContainerDetails? {
+        detailsCache[containerID]
+    }
+
     public func details(for containerID: String) async -> ContainerDetails? {
         guard let client else {
             lastError = "Not connected"
             return nil
         }
         do {
-            return try await client.inspectContainer(id: containerID)
+            let details = try await client.inspectContainer(id: containerID)
+            detailsCache[containerID] = details
+            return details
         } catch {
             surface(error)
             return nil

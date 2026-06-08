@@ -225,8 +225,17 @@ private struct ContainerOverview: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .task(id: container.id) {
-            isLoading = true
-            details = await session.details(for: container.id)
+            // Show the cached inspect immediately (no spinner) and refresh in
+            // the background; only spin when there is nothing cached yet.
+            if let cached = session.cachedDetails(for: container.id) {
+                details = cached
+                isLoading = false
+            } else {
+                details = nil
+                isLoading = true
+            }
+            let fresh = await session.details(for: container.id)
+            if fresh != nil { details = fresh }
             isLoading = false
         }
     }
