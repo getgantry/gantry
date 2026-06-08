@@ -1,6 +1,7 @@
 import AppIntents
 import AppCore
 import DockerKit
+import UniformTypeIdentifiers
 
 // MARK: - List containers
 
@@ -215,5 +216,82 @@ enum ContainerActionRunner {
         let client = try await HeadlessDocker.connect(to: resolved.host)
         defer { Task { await client.shutdown() } }
         try await action(client, resolved.containerID)
+    }
+}
+
+// MARK: - Compose Up
+
+struct ComposeUpIntent: AppIntent {
+    static let title: LocalizedStringResource = "Compose Up"
+    static let description = IntentDescription(
+        "Brings a docker-compose file up on an Apple Container host — building images, creating networks and volumes, and starting every service."
+    )
+    static let openAppWhenRun = false
+
+    @Parameter(title: "Compose file", supportedContentTypes: [.yaml, .data])
+    var composeFile: IntentFile
+
+    @Parameter(title: "Host")
+    var host: HostEntity?
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Compose up \(\.$composeFile) on \(\.$host)")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let dockerHost = try resolvedAppleHost()
+        let fileURL = try composeFileURL()
+        let project = try ComposeParser().parse(fileURL: fileURL)
+
+        let session = HostSession(host: dockerHost)
+        await session.connect()
+        guard session.status.isConnected else {
+            throw HeadlessDockerError.connectionFailed(
+                session.lastError ?? "Could not connect to \(dockerHost.name)."
+            )
+        }
+        defer { Task { await session.disconnect() } }
+        await session.refreshAll()
+
+        let started = try await ComposeRunner(session: session, project: project)
+            .up { _ in }
+
+        return .result(
+            dialog: IntentDialog("\(project.name) is up — \(started) service(s) running on \(dockerHost.name).")
+        )
+    }
+
+    /// Resolves the target host, requiring it to be an Apple Container host
+    /// (the only kind that can run Compose). Auto-picks the sole Apple host
+    /// when the parameter is left blank.
+    private func resolvedAppleHost() throws -> DockerHost {
+        if let host {
+            let resolved = try IntentSupport.host(for: host)
+            guard resolved.isAppleContainer else {
+                throw HeadlessDockerError.connectionFailed(
+                    "\(resolved.name) isn't an Apple Container host. Compose Up runs on apple/container."
+                )
+            }
+            return resolved
+        }
+        let apple = HeadlessDocker.loadHosts().filter(\.isAppleContainer)
+        guard let only = apple.first, apple.count == 1 else {
+            throw HeadlessDockerError.hostNotFound(
+                apple.isEmpty ? "no Apple Container host is configured" : "pick which Apple Container host to use"
+            )
+        }
+        return only
+    }
+
+    /// The compose file's on-disk URL. Shortcuts usually pass a file-backed
+    /// IntentFile; otherwise its data is staged to a temp file (build contexts
+    /// and relative bind mounts then won't resolve).
+    private func composeFileURL() throws -> URL {
+        if let url = composeFile.fileURL { return url }
+        let tmp = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("docker-compose.yml")
+        try composeFile.data.write(to: tmp)
+        return tmp
     }
 }

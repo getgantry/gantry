@@ -50,5 +50,15 @@ struct GantryShortcuts: AppShortcutsProvider {
             shortTitle: "Container Logs",
             systemImageName: "shippingbox"
         )
+        AppShortcut(
+            intent: ComposeUpIntent(),
+            phrases: [
+                "Compose up with \(.applicationName)",
+                "Run a compose file in \(.applicationName)",
+                "\(.applicationName) compose up"
+            ],
+            shortTitle: "Compose Up",
+            systemImageName: "square.stack.3d.up"
+        )
     }
 }
