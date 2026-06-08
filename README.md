@@ -73,8 +73,11 @@ Website: **https://getgantry.github.io/**
 
 ### apple/container hosts
 - Add an **Apple Container** host to manage Linux containers run by
-  [apple/container](https://github.com/apple/container) (`brew install
-  container`) side by side with your Docker hosts
+  [apple/container](https://github.com/apple/container) side by side with your
+  Docker hosts
+- **Zero-setup onboarding** — on first launch (and after Gantry updates) it
+  checks for the `container` CLI and offers to install or upgrade a supported
+  version through Homebrew for you, so the runtime is ready before you add a host
 - Driven through the `container` CLI and translated to the same engine
   interface, so lifecycle, live logs, exec terminal, stats, create-container,
   images (pull/tag/delete/prune), volumes, networks and disk usage all work

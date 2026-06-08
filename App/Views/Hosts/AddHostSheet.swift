@@ -116,10 +116,17 @@ struct AddHostSheet: View {
                             .foregroundStyle(.green)
                     } else {
                         Label(
-                            "The `container` CLI was not found. Install it with `brew install container`.",
+                            "The `container` CLI was not found.",
                             systemImage: "exclamationmark.triangle"
                         )
                         .foregroundStyle(.orange)
+                        Button("Install apple/container…") {
+                            // Close this sheet first so the setup sheet can take
+                            // its place (one sheet per presenter at a time).
+                            dismiss()
+                            NotificationCenter.default.post(name: .gantryShowContainerSetup, object: nil)
+                        }
+                        .controlSize(.small)
                     }
                 }
                 .font(.footnote)

@@ -1,0 +1,179 @@
+import Foundation
+import DockerKit
+
+/// Detects whether a supported `apple/container` CLI is installed and, when it
+/// isn't, drives a Homebrew install/upgrade.
+///
+/// Gantry tracks a minimum CLI version it has been tested against; older or
+/// missing installs surface a setup prompt at launch (and after Gantry itself
+/// updates). The install path shells out to Homebrew — never silently — so the
+/// user always confirms a system change.
+public enum ContainerTooling {
+    /// The oldest CLI Gantry supports. Installs below this are flagged.
+    public static let minimumVersion = "0.12.0"
+    /// The version Gantry is tested against; offered on a fresh install.
+    public static let recommendedVersion = "0.12.3"
+    /// The Homebrew formula name (`brew install container`).
+    public static let formula = "container"
+
+    /// The outcome of a tooling check.
+    public enum State: Sendable, Equatable {
+        /// A supported CLI is installed (carrying its version).
+        case ok(version: String)
+        /// A CLI is installed but older than `minimumVersion`.
+        case outdated(current: String)
+        /// No `container` CLI was found.
+        case notInstalled
+    }
+
+    public struct Status: Sendable, Equatable {
+        public var state: State
+        /// Whether Homebrew is available to run the install/upgrade.
+        public var brewAvailable: Bool
+
+        public var needsAttention: Bool {
+            if case .ok = state { return false }
+            return true
+        }
+    }
+
+    // MARK: - Detection
+
+    /// Inspects the installed CLI and Homebrew availability.
+    public static func check() async -> Status {
+        let brew = brewPath() != nil
+        guard let cli = AppleContainerCLIDiscovery.discover() else {
+            return Status(state: .notInstalled, brewAvailable: brew)
+        }
+        guard let raw = try? await runCapture(cli, ["--version"]),
+              let version = parseVersion(raw) else {
+            // The binary exists but didn't report a version — treat it as
+            // present-and-usable rather than nagging on a parse miss.
+            return Status(state: .ok(version: "unknown"), brewAvailable: brew)
+        }
+        if isVersion(version, atLeast: minimumVersion) {
+            return Status(state: .ok(version: version), brewAvailable: brew)
+        }
+        return Status(state: .outdated(current: version), brewAvailable: brew)
+    }
+
+    /// Extracts an `x.y[.z]` version from `container --version` output.
+    public static func parseVersion(_ text: String) -> String? {
+        guard let match = text.firstMatch(of: /(\d+\.\d+(?:\.\d+)?)/) else { return nil }
+        return String(match.1)
+    }
+
+    /// Whether `a` is greater than or equal to `b` (dotted numeric versions).
+    public static func isVersion(_ a: String, atLeast b: String) -> Bool {
+        let lhs = a.split(separator: ".").map { Int($0) ?? 0 }
+        let rhs = b.split(separator: ".").map { Int($0) ?? 0 }
+        for i in 0..<max(lhs.count, rhs.count) {
+            let x = i < lhs.count ? lhs[i] : 0
+            let y = i < rhs.count ? rhs[i] : 0
+            if x != y { return x > y }
+        }
+        return true
+    }
+
+    // MARK: - Install / upgrade
+
+    /// Installs the `container` formula via Homebrew, streaming each output
+    /// line. Throws if Homebrew is missing or the command fails.
+    public static func install(progress: @escaping @Sendable (String) -> Void) async throws {
+        try await brew(["install", formula], progress: progress)
+    }
+
+    /// Upgrades the `container` formula via Homebrew.
+    public static func upgrade(progress: @escaping @Sendable (String) -> Void) async throws {
+        try await brew(["upgrade", formula], progress: progress)
+    }
+
+    /// Locates the Homebrew binary.
+    public static func brewPath() -> String? {
+        ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
+    }
+
+    // MARK: - Process plumbing
+
+    private static func brew(
+        _ arguments: [String],
+        progress: @escaping @Sendable (String) -> Void
+    ) async throws {
+        guard let brew = brewPath() else {
+            throw ContainerToolingError.homebrewMissing
+        }
+        try await runStreaming(brew, arguments, progress: progress)
+    }
+
+    /// Runs an executable to completion, returning combined stdout (used for
+    /// `--version`).
+    private static func runCapture(_ executable: String, _ arguments: [String]) async throws -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        try process.run()
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    /// Runs an executable, delivering each output line to `progress`, and
+    /// throws on a non-zero exit. Homebrew needs `/opt/homebrew/bin` on PATH.
+    private static func runStreaming(
+        _ executable: String,
+        _ arguments: [String],
+        progress: @escaping @Sendable (String) -> Void
+    ) async throws {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
+        var env = ProcessInfo.processInfo.environment
+        let extraPath = "/opt/homebrew/bin:/usr/local/bin"
+        env["PATH"] = env["PATH"].map { "\(extraPath):\($0)" } ?? extraPath
+        process.environment = env
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+
+        let handle = pipe.fileHandleForReading
+        try process.run()
+
+        // Read line-buffered on a background queue while the process runs.
+        var buffer = Data()
+        while true {
+            let chunk = handle.availableData
+            if chunk.isEmpty { break }
+            buffer.append(chunk)
+            while let newline = buffer.firstIndex(of: 0x0A) {
+                let lineData = buffer[..<newline]
+                buffer.removeSubrange(...newline)
+                progress(String(decoding: lineData, as: UTF8.self))
+            }
+        }
+        if !buffer.isEmpty { progress(String(decoding: buffer, as: UTF8.self)) }
+
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else {
+            throw ContainerToolingError.commandFailed(Int(process.terminationStatus))
+        }
+    }
+}
+
+public enum ContainerToolingError: Error, LocalizedError, Equatable {
+    case homebrewMissing
+    case commandFailed(Int)
+
+    public var errorDescription: String? {
+        switch self {
+        case .homebrewMissing:
+            "Homebrew isn't installed. Install it from https://brew.sh, then try again."
+        case .commandFailed(let code):
+            "The install command exited with code \(code)."
+        }
+    }
+}

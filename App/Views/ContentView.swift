@@ -89,6 +89,9 @@ struct ContentView: View {
     @State private var confirmRemoval: UUID?
     /// A Compose file opened from Finder/menu, awaiting the Compose Up sheet.
     @State private var composeRequest: ComposeFileRequest?
+    /// apple/container tooling status, when it needs the user's attention.
+    @State private var containerStatus: ContainerTooling.Status?
+    @State private var showContainerSetup = false
 
     /// Hosts whose sidebar section is collapsed; persisted across launches.
     @State private var collapsedHosts: Set<UUID> = ContentView.loadCollapsedHosts()
@@ -170,6 +173,18 @@ struct ContentView: View {
             // launch via Finder).
             for url in PendingComposeOpens.drain() { composeRequest = ComposeFileRequest(url: url) }
         }
+        .sheet(isPresented: $showContainerSetup) {
+            if let containerStatus {
+                ContainerSetupSheet(status: containerStatus) { snoozeContainerCheck() }
+            }
+        }
+        .task { await checkContainerToolingAtLaunch() }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryShowContainerSetup)) { _ in
+            Task {
+                containerStatus = await ContainerTooling.check()
+                showContainerSetup = true
+            }
+        }
         .sheet(isPresented: hostKeySheetBinding) {
             if let session = hostKeySession, let prompt = session.pendingHostKeyPrompt {
                 HostKeySheet(session: session, prompt: prompt)
@@ -223,6 +238,34 @@ struct ContentView: View {
                 if !presented { credentialSession?.cancelCredential() }
             }
         )
+    }
+
+    // MARK: - apple/container tooling
+
+    /// The current app version, used to re-prompt once per Gantry update.
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+    }
+
+    /// Checks the apple/container CLI at launch. Prompts when it is missing or
+    /// outdated, but only once per Gantry version (so it re-surfaces after an
+    /// update and stays quiet otherwise).
+    private func checkContainerToolingAtLaunch() async {
+        let key = "containerCheckDismissedVersion"
+        if UserDefaults.standard.string(forKey: key) == appVersion { return }
+        let status = await ContainerTooling.check()
+        if status.needsAttention {
+            containerStatus = status
+            showContainerSetup = true
+        } else {
+            // Up to date — record so we don't re-check until the next update.
+            UserDefaults.standard.set(appVersion, forKey: key)
+        }
+    }
+
+    /// Records that the prompt was handled for this Gantry version.
+    private func snoozeContainerCheck() {
+        UserDefaults.standard.set(appVersion, forKey: "containerCheckDismissedVersion")
     }
 
     // MARK: - Sidebar

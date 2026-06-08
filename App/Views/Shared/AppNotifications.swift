@@ -19,4 +19,8 @@ extension Notification.Name {
     /// Posted to jump the sidebar to a host's Containers section (e.g. after a
     /// Compose project comes up). The `object` is the host `UUID`.
     static let gantrySelectHostContainers = Notification.Name("gantrySelectHostContainers")
+
+    /// Posted to open the apple/container install/upgrade sheet on demand (e.g.
+    /// from the Add Host form when the CLI is missing).
+    static let gantryShowContainerSetup = Notification.Name("gantryShowContainerSetup")
 }
