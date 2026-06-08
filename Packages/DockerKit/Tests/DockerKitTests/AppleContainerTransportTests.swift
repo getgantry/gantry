@@ -273,6 +273,32 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     #expect(Array(create[(imageIndex + 1)...]) == ["nginx", "-g", "daemon off;"])
 }
 
+@Test func appleTransportBuildImageArgv() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["build"], stdout: "step 1/3\n", stderr: "")
+
+    let spec = ImageBuildSpec(
+        contextPath: "/tmp/myproj/api",
+        dockerfile: "Dockerfile.prod",
+        tag: "myproj-api:latest",
+        buildArgs: ["VERSION": "1.2"],
+        target: "runtime",
+        labels: ["com.docker.compose.project": "myproj"],
+        noCache: true
+    )
+    _ = try await client.buildImage(spec)
+
+    let build = try #require(runner.recordedCalls().first { $0.first == "build" })
+    #expect(build.contains("--tag") && build.contains("myproj-api:latest"))
+    #expect(build.contains("--file") && build.contains("Dockerfile.prod"))
+    #expect(build.contains("--build-arg") && build.contains("VERSION=1.2"))
+    #expect(build.contains("--target") && build.contains("runtime"))
+    #expect(build.contains("--label") && build.contains("com.docker.compose.project=myproj"))
+    #expect(build.contains("--no-cache"))
+    // The context directory is the trailing positional argument.
+    #expect(build.last == "/tmp/myproj/api")
+}
+
 @Test func appleTransportCreateContainerRejectsRestartPolicy() async throws {
     let (client, _) = try await makeConnectedClient()
     let config = ContainerCreateRequest(image: "alpine", restartPolicy: "always")

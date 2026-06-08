@@ -42,6 +42,13 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     }
 }
 
+/// An opened Compose file awaiting the Compose Up sheet. Identifiable so it can
+/// drive a `.sheet(item:)`.
+struct ComposeFileRequest: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 /// A sidebar selection identifies both the host and the section within it.
 struct SidebarSelection: Hashable {
     var hostID: UUID
@@ -80,6 +87,8 @@ struct ContentView: View {
     @State private var pendingDetailSelection: DetailSelection?
     @State private var showingAddHost = false
     @State private var confirmRemoval: UUID?
+    /// A Compose file opened from Finder/menu, awaiting the Compose Up sheet.
+    @State private var composeRequest: ComposeFileRequest?
 
     /// Hosts whose sidebar section is collapsed; persisted across launches.
     @State private var collapsedHosts: Set<UUID> = ContentView.loadCollapsedHosts()
@@ -143,6 +152,23 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingAddHost) {
             AddHostSheet()
+        }
+        .sheet(item: $composeRequest) { request in
+            ComposeUpSheet(fileURL: request.url)
+                .environment(model)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryOpenComposeFile)) { note in
+            if let url = note.object as? URL { composeRequest = ComposeFileRequest(url: url) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gantrySelectHostContainers)) { note in
+            if let hostID = note.object as? UUID {
+                selection = .host(SidebarSelection(hostID: hostID, section: .containers))
+            }
+        }
+        .onAppear {
+            // Drain any Compose files opened before the window was ready (cold
+            // launch via Finder).
+            for url in PendingComposeOpens.drain() { composeRequest = ComposeFileRequest(url: url) }
         }
         .sheet(isPresented: hostKeySheetBinding) {
             if let session = hostKeySession, let prompt = session.pendingHostKeyPrompt {

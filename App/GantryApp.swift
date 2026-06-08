@@ -2,10 +2,12 @@ import SwiftUI
 import AppKit
 import AppCore
 import Sparkle
+import UniformTypeIdentifiers
 
 @main
 struct GantryApp: App {
     @State private var model = AppModel()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     /// Sparkle auto-updater; starts checking per Info.plist (SUFeedURL,
     /// SUEnableAutomaticChecks) as soon as the app launches.
@@ -70,6 +72,13 @@ struct GantryApp: App {
                     NotificationCenter.default.post(name: .gantryNewContainer, object: nil)
                 }
                 .keyboardShortcut("n", modifiers: .command)
+
+                Divider()
+
+                Button("Open Compose File…") {
+                    openComposeFile()
+                }
+                .keyboardShortcut("o", modifiers: .command)
             }
         }
 
@@ -89,6 +98,19 @@ struct GantryApp: App {
         Settings {
             SettingsView()
                 .environment(model)
+        }
+    }
+
+    /// Shows an open panel for a compose file, routing the choice through the
+    /// same flow as a Finder open.
+    private func openComposeFile() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.yaml]
+        panel.message = "Choose a docker-compose file to run on an Apple Container host"
+        if panel.runModal() == .OK, let url = panel.url {
+            AppDelegate.openCompose(url)
         }
     }
 

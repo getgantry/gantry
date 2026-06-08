@@ -9,12 +9,13 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../DockerKit"),
-        .package(path: "../SSHKit")
+        .package(path: "../SSHKit"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0")
     ],
     targets: [
         .target(
             name: "AppCore",
-            dependencies: ["DockerKit", "SSHKit"]
+            dependencies: ["DockerKit", "SSHKit", "Yams"]
         ),
         .testTarget(
             name: "AppCoreTests",

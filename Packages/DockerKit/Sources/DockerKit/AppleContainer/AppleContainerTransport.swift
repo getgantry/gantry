@@ -294,6 +294,11 @@ public actor AppleContainerTransport: DockerTransport {
         case (.post, 2, "build", "prune"):
             throw Self.unsupported("Build cache pruning")
 
+        // Build from a local context (Gantry-internal; used by Compose). The
+        // body is an `ImageBuildSpec`, not Docker's multipart tar upload.
+        case (.post, 1, "build", _):
+            return try await buildImage(request)
+
         default:
             throw DockerError.apiError(
                 status: 501,
@@ -481,6 +486,38 @@ public actor AppleContainerTransport: DockerTransport {
             .last { !$0.isEmpty } ?? Self.query(request, "name") ?? ""
         let responseBody = try AppleContainerJSON.encode(["Id": id, "Warnings": []])
         return Self.ok(responseBody, status: 201)
+    }
+
+    /// Builds an image from a local directory via `container build`. Returns
+    /// the build log in the response body so the caller can surface it.
+    private func buildImage(_ request: DockerRequest) async throws -> DockerResponse {
+        guard let body = request.body else {
+            throw DockerError.apiError(status: 400, message: "invalid build request body")
+        }
+        let spec: ImageBuildSpec
+        do {
+            spec = try JSONDecoder().decode(ImageBuildSpec.self, from: body)
+        } catch {
+            throw DockerError.apiError(status: 400, message: "invalid build request body")
+        }
+        var arguments = ["build", "--tag", spec.tag]
+        if let dockerfile = spec.dockerfile, !dockerfile.isEmpty {
+            arguments += ["--file", dockerfile]
+        }
+        for (key, value) in spec.buildArgs.sorted(by: { $0.key < $1.key }) {
+            arguments += ["--build-arg", "\(key)=\(value)"]
+        }
+        if let target = spec.target, !target.isEmpty {
+            arguments += ["--target", target]
+        }
+        for (key, value) in spec.labels.sorted(by: { $0.key < $1.key }) {
+            arguments += ["--label", "\(key)=\(value)"]
+        }
+        if spec.noCache { arguments.append("--no-cache") }
+        arguments += ["--progress", "plain", spec.contextPath]
+
+        let result = try await cli(arguments)
+        return Self.ok(Data((result.stdoutText + result.stderrText).utf8))
     }
 
     private func waitContainer(id: String) async throws -> DockerResponse {

@@ -80,6 +80,14 @@ Website: **https://getgantry.github.io/**
   images (pull/tag/delete/prune), volumes, networks and disk usage all work
   from the same UI — and through the MCP server and App Intents
 - Connecting the host starts the `container` services if they are down
+- **Run docker-compose files from Finder** — right-click a `docker-compose.yml`
+  and choose *Open With ▸ Gantry* or *Quick Actions ▸ Compose Up in
+  apple/container* (or File ▸ Open Compose File…). Gantry parses the file,
+  builds any `build:` services, creates the project's network and named
+  volumes, and starts every service in `depends_on` order with the standard
+  `com.docker.compose.*` labels — so the project groups in the sidebar just
+  like Compose on Docker. apple/container has no native `compose`; Gantry does
+  the orchestration itself over the `container` CLI
 - Features the platform does not offer (pause, rename, commit, restart
   policies, network attach, image history, file download/upload) are hidden
   for these hosts instead of erroring

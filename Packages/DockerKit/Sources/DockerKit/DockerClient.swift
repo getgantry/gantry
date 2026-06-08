@@ -117,6 +117,24 @@ public actor DockerClient {
         return try await transport.hijack(request)
     }
 
+    // MARK: - Build
+
+    /// Builds an image from a local context directory and returns the build
+    /// log. Backed by CLI transports (apple/container); the real Docker daemon
+    /// does not serve this Gantry-internal `/build` shape.
+    @discardableResult
+    public func buildImage(_ spec: ImageBuildSpec) async throws -> String {
+        let body = try JSONEncoder().encode(spec)
+        let response = try await requestData(
+            method: .post,
+            path: "/build",
+            headers: ["Content-Type": "application/json"],
+            body: body,
+            expecting: [200]
+        )
+        return String(decoding: response.body, as: UTF8.self)
+    }
+
     // MARK: - Internal helpers
 
     /// Core request primitive. Prefixes the API version (unless `versioned`
