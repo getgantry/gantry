@@ -31,6 +31,9 @@ public protocol AppleCLIInteractiveProcess: Sendable {
     var output: AsyncStream<AppleCLIOutputChunk> { get }
     /// Writes bytes to the process's stdin.
     func write(_ data: Data) async throws
+    /// Closes the process's stdin (signalling EOF) without terminating it, so a
+    /// reader like `tar -xf -` can finish and exit on its own.
+    func closeStdin() async
     /// Resizes the PTY, when one backs the process. No-op otherwise.
     func resize(columns: Int, rows: Int)
     /// Waits for the process to finish and returns its exit code.
@@ -328,6 +331,10 @@ final class PipeProcess: AppleCLIInteractiveProcess, @unchecked Sendable {
         try stdinPipe.fileHandleForWriting.write(contentsOf: data)
     }
 
+    func closeStdin() async {
+        try? stdinPipe.fileHandleForWriting.close()
+    }
+
     func resize(columns: Int, rows: Int) {
         // No PTY to resize.
     }
@@ -417,6 +424,11 @@ final class PTYProcess: AppleCLIInteractiveProcess, @unchecked Sendable {
 
     func write(_ data: Data) async throws {
         try masterHandle.write(contentsOf: data)
+    }
+
+    func closeStdin() async {
+        // A PTY multiplexes stdin/stdout on one descriptor; there is no separate
+        // stdin to close. Upload uses the pipe-backed process, not this one.
     }
 
     func resize(columns: Int, rows: Int) {

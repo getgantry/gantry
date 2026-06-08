@@ -21,9 +21,26 @@ struct MenuBarView: View {
 
     private var totalHosts: Int { connectedSessions.count }
 
+    /// CLI path override from a configured apple host, if any.
+    private var appleCLIOverride: String? {
+        model.sessions.first { $0.host.isAppleContainer }?.host.socketPathOverride
+    }
+
+    /// Show the apple/container services strip when an apple host is configured
+    /// or the CLI is installed locally.
+    private var showsAppleServices: Bool {
+        model.sessions.contains { $0.host.isAppleContainer }
+            || AppleContainerControl.cliPath() != nil
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
+
+            if showsAppleServices {
+                Divider()
+                AppleServicesMenuSection(cliOverride: appleCLIOverride)
+            }
 
             Divider()
 

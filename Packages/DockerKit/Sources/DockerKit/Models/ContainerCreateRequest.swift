@@ -9,6 +9,10 @@ public struct ContainerCreateRequest: Encodable, Sendable {
     public var image: String
     public var cmd: [String]?
     public var entrypoint: [String]?
+    /// The container's DNS domain. On apple/container this maps to
+    /// `--dns-domain`, so a container named `web` on domain `test` resolves as
+    /// `web.test` once that local domain exists.
+    public var domainname: String?
     public var env: [String]
     /// Exposed ports as Docker's `{"80/tcp": {}}` set.
     public var exposedPorts: [String: EmptyObject]?
@@ -27,6 +31,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         case image = "Image"
         case cmd = "Cmd"
         case entrypoint = "Entrypoint"
+        case domainname = "Domainname"
         case env = "Env"
         case exposedPorts = "ExposedPorts"
         case labels = "Labels"
@@ -40,6 +45,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         image: String,
         cmd: [String]? = nil,
         entrypoint: [String]? = nil,
+        domainname: String? = nil,
         env: [String] = [],
         exposedPorts: [String]? = nil,
         labels: [String: String] = [:],
@@ -52,6 +58,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         self.image = image
         self.cmd = cmd
         self.entrypoint = entrypoint
+        self.domainname = domainname
         self.env = env
         if let exposedPorts {
             self.exposedPorts = Dictionary(uniqueKeysWithValues: exposedPorts.map { ($0, EmptyObject()) })
@@ -80,6 +87,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         tty: Bool = false,
         labels: [String: String] = [:],
         autoRemove: Bool = false,
+        domainname: String? = nil,
         name: String? = nil
     ) {
         let exposed: [String]? = ports.isEmpty ? nil : Array(ports.keys)
@@ -99,6 +107,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         self.init(
             image: image,
             cmd: cmd,
+            domainname: domainname,
             env: env,
             exposedPorts: exposed,
             labels: labels,

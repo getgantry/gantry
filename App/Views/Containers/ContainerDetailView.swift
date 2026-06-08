@@ -207,6 +207,7 @@ private struct ContainerOverview: View {
                         .padding(.top, 40)
                 } else if let details {
                     stateSection(details)
+                    AppleAddressSection(session: session, container: container, details: details)
                     portsSection(details)
                     mountsSection(details)
                     networksSection(details)
@@ -255,17 +256,7 @@ private struct ContainerOverview: View {
 
     @ViewBuilder
     private func portsSection(_ d: ContainerDetails) -> some View {
-        if !container.ports.isEmpty {
-            DetailSection("Ports") {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(container.ports, id: \.self) { port in
-                        Text(port.display)
-                            .font(.system(.callout, design: .monospaced))
-                            .textSelection(.enabled)
-                    }
-                }
-            }
-        }
+        PortsSection(session: session, container: container)
     }
 
     @ViewBuilder

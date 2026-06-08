@@ -202,8 +202,10 @@ public actor AppleContainerTransport: DockerTransport {
             throw Self.unsupported("Restart policies")
         case (.post, 1, "commit", _):
             throw Self.unsupported("Committing containers to images")
+        case (.put, 3, "containers", "archive"):
+            return try await uploadArchive(containerID: id, request: request)
         case (_, 3, "containers", "archive"):
-            throw Self.unsupported("Direct file transfer")
+            throw Self.unsupported("Reading files from this container")
 
         // Images
         case (.get, 2, "images", "json"):
@@ -418,6 +420,11 @@ public actor AppleContainerTransport: DockerTransport {
         if let workingDir = json["WorkingDir"] as? String, !workingDir.isEmpty {
             arguments += ["--workdir", workingDir]
         }
+        // A DNS domain makes the container resolvable as `<name>.<domain>` once
+        // that local domain exists (`container system dns create`).
+        if let domain = json["Domainname"] as? String, !domain.isEmpty {
+            arguments += ["--dns-domain", domain]
+        }
 
         let hostConfig = AppleContainerJSON.object(json["HostConfig"])
         for bind in (hostConfig["Binds"] as? [String]) ?? [] {
@@ -566,6 +573,49 @@ public actor AppleContainerTransport: DockerTransport {
             system: Int64(clamping: now).multipliedReportingOverflow(by: Int64(cpus)).partialValue
         )
         return body
+    }
+
+    // MARK: - Archive upload
+
+    /// Emulates `PUT /containers/{id}/archive` (which apple/container has no
+    /// daemon endpoint for) by streaming the tar into `tar -xpf -` running in
+    /// the container via `container exec --interactive`. The full lifecycle is
+    /// owned here — write the body, send EOF on stdin, then await the child's
+    /// exit — so the extraction is never cut short. Requires `tar` in the
+    /// container's PATH; a missing tar surfaces as the child's non-zero exit.
+    private func uploadArchive(containerID: String, request: DockerRequest) async throws -> DockerResponse {
+        guard let path = Self.query(request, "path"), !path.isEmpty else {
+            throw DockerError.apiError(status: 400, message: "archive upload requires a path")
+        }
+        let tar = request.body ?? Data()
+        let process = try runner.interactive(
+            ["exec", "--interactive", containerID, "tar", "-xpf", "-", "-C", path],
+            tty: false
+        )
+        // Drain output so a chatty tar (e.g. warnings) cannot wedge on a full
+        // pipe while we feed it stdin.
+        let drain = Task { for await _ in process.output {} }
+        defer { drain.cancel() }
+
+        do {
+            try await process.write(tar)
+        } catch {
+            await process.closeStdin()
+            _ = await process.waitForExit()
+            throw DockerError.apiError(
+                status: 500,
+                message: "Failed to stream archive into \(path): \(error.localizedDescription)"
+            )
+        }
+        await process.closeStdin()
+        let exitCode = await process.waitForExit()
+        guard exitCode == 0 else {
+            throw DockerError.apiError(
+                status: 500,
+                message: "Extracting into \(path) failed (tar exit \(exitCode)); the container needs a working `tar`."
+            )
+        }
+        return Self.ok(status: 200)
     }
 
     // MARK: - Exec

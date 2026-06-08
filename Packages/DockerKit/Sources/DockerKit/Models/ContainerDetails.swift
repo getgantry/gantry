@@ -156,6 +156,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
 
     public struct ContainerConfig: Hashable, Codable, Sendable {
         public var hostname: String?
+        public var domainname: String?
         public var env: [String]?
         public var cmd: [String]?
         public var entrypoint: [String]?
@@ -167,6 +168,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
 
         enum CodingKeys: String, CodingKey {
             case hostname = "Hostname"
+            case domainname = "Domainname"
             case env = "Env"
             case cmd = "Cmd"
             case entrypoint = "Entrypoint"
@@ -180,6 +182,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
         public init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             hostname = try c.decodeIfPresent(String.self, forKey: .hostname)
+            domainname = try c.decodeIfPresent(String.self, forKey: .domainname)
             env = try c.decodeIfPresent([String].self, forKey: .env)
             cmd = try c.decodeIfPresent([String].self, forKey: .cmd)
             entrypoint = try c.decodeIfPresent([String].self, forKey: .entrypoint)

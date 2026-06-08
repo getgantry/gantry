@@ -294,6 +294,7 @@ enum AppleContainerJSON {
             ],
             "Config": [
                 "Hostname": string(array(element["networks"]).first?["hostname"]),
+                "Domainname": string(object(config["dns"])["domain"]),
                 "Env": (initProcess["environment"] as? [String]) ?? [],
                 "Cmd": ([executable] + arguments).filter { !$0.isEmpty },
                 "Image": string(image["reference"]),

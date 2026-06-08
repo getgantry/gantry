@@ -17,6 +17,7 @@ struct ContainerListView: View {
 
     // Sheets / alerts driven from row context menus and the toolbar.
     @State private var showCreateSheet = false
+    @State private var showQuickRun = false
     @State private var renameTarget: ContainerSummary?
     @State private var renameText = ""
     @State private var commitTarget: ContainerSummary?
@@ -122,6 +123,9 @@ struct ContainerListView: View {
         }
         .sheet(isPresented: $showCreateSheet) {
             CreateContainerSheet(session: session)
+        }
+        .sheet(isPresented: $showQuickRun) {
+            QuickRunSheet(session: session)
         }
         .sheet(item: $commitTarget) { target in
             CommitImageSheet(session: session, container: target)
@@ -246,12 +250,34 @@ struct ContainerListView: View {
             }
         }
         ToolbarItem(placement: .primaryAction) {
-            Button {
-                showCreateSheet = true
-            } label: {
-                Label("New Container…", systemImage: "plus.square")
+            if session.host.isAppleContainer {
+                // apple/container gets the OrbStack-style Quick Run as the
+                // primary action, with the full create sheet a click away.
+                Menu {
+                    Button {
+                        showQuickRun = true
+                    } label: {
+                        Label("Quick Run…", systemImage: "bolt.fill")
+                    }
+                    Button {
+                        showCreateSheet = true
+                    } label: {
+                        Label("New Container…", systemImage: "plus.square")
+                    }
+                } label: {
+                    Label("New Container", systemImage: "plus.square")
+                } primaryAction: {
+                    showQuickRun = true
+                }
+                .help("Quick Run a container")
+            } else {
+                Button {
+                    showCreateSheet = true
+                } label: {
+                    Label("New Container…", systemImage: "plus.square")
+                }
+                .help("Create a new container")
             }
-            .help("Create a new container")
         }
         ToolbarItem(placement: .primaryAction) {
             Button {

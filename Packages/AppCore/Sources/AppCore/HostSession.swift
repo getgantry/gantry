@@ -110,10 +110,18 @@ public final class HostSession: Identifiable {
 
     /// Factory for additional SSH connections to this host (host shell, SFTP
     /// file browsing). Set while an SSH host is connected; nil for local.
-    private var sshClientFactory: (@Sendable () async throws -> SSHClient)?
+    var sshClientFactory: (@Sendable () async throws -> SSHClient)?
 
     /// Lazy SFTP browser for the host filesystem; one per session.
     private var hostFileSystemStorage: SSHHostFileSystem?
+
+    /// Active local port forwards for this host, mirrored for the UI. Only SSH
+    /// hosts populate this; local and apple/container ports are reachable
+    /// directly without a tunnel.
+    public internal(set) var portForwards: [PortForward] = []
+
+    /// The running SSH forward services, keyed by `PortForward.id`.
+    var portForwardServices: [UUID: SSHPortForward] = [:]
 
     public init(host: DockerHost) {
         self.host = host
@@ -463,6 +471,7 @@ public final class HostSession: Identifiable {
             hostFileSystemStorage = nil
             Task { await fs.close() }
         }
+        stopAllPortForwards()
         liveUpdatesActive = false
         // Resolve any prompt left hanging by an interrupted connect attempt.
         cancelCredential()

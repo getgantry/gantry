@@ -81,8 +81,13 @@ public struct HostCapabilities: Hashable, Sendable {
     /// Image layer history.
     public var imageHistory: Bool
     /// Downloading/uploading files via the archive endpoints (the shell-based
-    /// directory listing works either way).
+    /// directory listing works either way). Covers drag-out / download and the
+    /// native archive upload.
     public var containerFileTransfer: Bool
+    /// Uploading files and folders into a container. True for Docker (native
+    /// archive endpoint) and apple/container (emulated with `tar` over exec),
+    /// even though the latter has no download/drag-out support.
+    public var containerUpload: Bool
 
     /// Docker engine: everything on.
     public static let docker = HostCapabilities(
@@ -93,7 +98,8 @@ public struct HostCapabilities: Hashable, Sendable {
         networkAttach: true,
         buildCachePrune: true,
         imageHistory: true,
-        containerFileTransfer: true
+        containerFileTransfer: true,
+        containerUpload: true
     )
 
     /// apple/container: lifecycle, logs, exec, stats, images, volumes and
@@ -106,7 +112,8 @@ public struct HostCapabilities: Hashable, Sendable {
         networkAttach: false,
         buildCachePrune: false,
         imageHistory: false,
-        containerFileTransfer: false
+        containerFileTransfer: false,
+        containerUpload: true
     )
 }
 

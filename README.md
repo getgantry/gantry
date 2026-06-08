@@ -58,6 +58,19 @@ Website: **https://getgantry.github.io/**
   container, local or remote
 - **File browser** — browse the container filesystem, download and upload files,
   **drag & drop** between Finder and the container (tar-packed transparently)
+- **Drop any folder into a container** — upload whole folder trees from the
+  picker or by dropping them from Finder. Works on every engine, including
+  apple/container (where there is no archive endpoint, it streams a tar through
+  `tar -x` over exec)
+
+### Ports & networking
+- **Open in browser** — one click on a published port opens it in your browser:
+  directly for local Docker and apple/container, through an automatic forward
+  for SSH hosts
+- **Local port forwarding (SSH)** — forward a remote container port to
+  `localhost` (an `ssh -L`-style tunnel over a dedicated connection). If the
+  local port is taken, Gantry picks a free one — and you can edit it. Active
+  forwards are listed with open/copy-URL/stop controls
 
 ### Remote hosts over SSH
 - Connects exactly like `docker -H ssh://user@host`: an SSH exec channel runs
@@ -83,6 +96,18 @@ Website: **https://getgantry.github.io/**
   images (pull/tag/delete/prune), volumes, networks and disk usage all work
   from the same UI — and through the MCP server and App Intents
 - Connecting the host starts the `container` services if they are down
+- **Service control** — start/stop the `container` background services from the
+  menu bar and Settings ▸ Apple, with live running/stopped status
+- **Open by IP & hostname** — every apple/container gets a routable IP on your
+  Mac; the container's Overview surfaces that address (and, when it was launched
+  on a local domain, its `name.domain` hostname) with one-click open-in-browser
+  per port
+- **Local DNS domains** — create/list/delete apple/container DNS domains from
+  Settings ▸ Apple (admin-approved). A container launched on a domain resolves
+  as `name.domain` across your Mac, OrbStack-style
+- **Quick Run** — an OrbStack-style quick-launch sheet: pick a local image, name
+  it, share a macOS folder, map ports and pick a DNS domain, then run — and the
+  container's address opens straight in the browser
 - **Run docker-compose files from Finder** — right-click a `docker-compose.yml`
   and choose *Open With ▸ Gantry* or *Quick Actions ▸ Compose Up in
   apple/container* (or File ▸ Open Compose File…). Gantry parses the file,
@@ -92,7 +117,7 @@ Website: **https://getgantry.github.io/**
   like Compose on Docker. apple/container has no native `compose`; Gantry does
   the orchestration itself over the `container` CLI
 - Features the platform does not offer (pause, rename, commit, restart
-  policies, network attach, image history, file download/upload) are hidden
+  policies, network attach, image history, file *download*) are hidden
   for these hosts instead of erroring
 
 ![Host overview](assets/overview.png)
@@ -190,7 +215,8 @@ Packages/
                         stats model with the docker CLI CPU/memory formulas,
                         tar reader/writer
   SSHKit/             SSH layer on Citadel: key loading, ssh_config parser,
-                      known_hosts + TOFU, SSHDialStdioTransport
+                      known_hosts + TOFU, SSHDialStdioTransport, local port
+                      forwarding (SSHPortForward)
   AppCore/            @Observable stores, hosts persistence, Keychain,
                       headless connections for Intents/MCP
   GantryMCP/          stdio MCP server executable (bundled into the app)

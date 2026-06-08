@@ -78,6 +78,25 @@ func liveAppleEndToEnd() async throws {
         let entries = try await client.listDirectoryFast(containerID: id, path: "/")
         #expect(entries.contains { $0.name == "etc" && $0.isDirectory })
 
+        // Upload a folder via the emulated archive endpoint (tar over exec),
+        // then read it back through exec to confirm the extraction completed.
+        let tar = TarWriter.archive(entries: [
+            TarEntry(name: "gantry-upload", isDirectory: true),
+            TarEntry(name: "gantry-upload/hello.txt", data: Data("uploaded-ok".utf8)),
+            TarEntry(name: "gantry-upload/sub", isDirectory: true),
+            TarEntry(name: "gantry-upload/sub/nested.txt", data: Data("nested-ok".utf8))
+        ])
+        try await client.uploadArchive(containerID: id, path: "/root", tar: tar)
+        let readBack = try await client.createExec(
+            containerID: id,
+            command: ["/bin/sh", "-c", "cat /root/gantry-upload/hello.txt /root/gantry-upload/sub/nested.txt"],
+            tty: false
+        )
+        let readConn = try await client.startExecHijacked(execID: readBack, tty: false)
+        let readOut = try await DockerClient.collectExecLines(from: readConn.bytes)
+        #expect(readOut.stdout.contains("uploaded-ok"))
+        #expect(readOut.stdout.contains("nested-ok"))
+
         // Logs (no follow; the sleep container logs nothing, the call must
         // still succeed and end)
         let logs = try await client.containerLogs(id: id, tty: false, follow: false, tail: 10)

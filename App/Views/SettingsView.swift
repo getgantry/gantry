@@ -12,6 +12,9 @@ struct SettingsView: View {
             Tab("Hosts", systemImage: "server.rack") {
                 HostsSettings()
             }
+            Tab("Apple", systemImage: "apple.logo") {
+                AppleSettingsView()
+            }
             Tab("Agents", systemImage: "sparkles") {
                 AgentSettingsView()
             }

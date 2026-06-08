@@ -105,6 +105,11 @@ private final class ScriptedInteractiveProcess: AppleCLIInteractiveProcess, @unc
         lock.withLock { written.append(data) }
     }
 
+    private(set) var stdinClosed = false
+    func closeStdin() async {
+        lock.withLock { stdinClosed = true }
+    }
+
     func resize(columns: Int, rows: Int) {
         lock.withLock { resizes.append((columns, rows)) }
     }
@@ -216,8 +221,7 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
         { try await $0.updateRestartPolicy(id: "c", policy: "always") },
         { _ = try await $0.imageHistory(id: "i") },
         { try await $0.connectContainer(networkID: "n", containerID: "c") },
-        { _ = try await $0.pruneBuildCache() },
-        { try await $0.uploadArchive(containerID: "c", path: "/", tar: Data()) }
+        { _ = try await $0.pruneBuildCache() }
     ] {
         do {
             try await operation(client)
@@ -226,6 +230,35 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
             #expect(status == 501)
             #expect(message.contains(AppleContainerTransport.unsupportedMessage))
         }
+    }
+}
+
+@Test func appleTransportUploadArchiveStreamsTarOverExec() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    let process = ScriptedInteractiveProcess(chunks: [], exitCode: 0)
+    runner.interactiveFactory = { _, _ in process }
+
+    let tar = TarWriter.singleFile(name: "hello.txt", contents: Data("hi".utf8))
+    try await client.uploadArchive(containerID: "c", path: "/root", tar: tar)
+
+    // The CLI was invoked as a stdin-fed tar extraction into the target path.
+    let execCall = runner.recordedCalls().first { $0.contains("tar") }
+    #expect(execCall == ["exec", "--interactive", "c", "tar", "-xpf", "-", "-C", "/root"])
+    // The whole archive was written to the child's stdin, then EOF sent.
+    #expect(process.written.reduce(Data(), +) == tar)
+    #expect(process.stdinClosed)
+}
+
+@Test func appleTransportUploadArchiveSurfacesTarFailure() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.interactiveFactory = { _, _ in ScriptedInteractiveProcess(chunks: [], exitCode: 2) }
+
+    do {
+        try await client.uploadArchive(containerID: "c", path: "/root", tar: Data())
+        Issue.record("expected a failure when tar exits non-zero")
+    } catch let DockerError.apiError(status, message) {
+        #expect(status == 500)
+        #expect(message.contains("tar"))
     }
 }
 
@@ -271,6 +304,22 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     // image followed by the command
     let imageIndex = try #require(create.firstIndex(of: "nginx:latest"))
     #expect(Array(create[(imageIndex + 1)...]) == ["nginx", "-g", "daemon off;"])
+}
+
+@Test func appleTransportCreateContainerMapsDomainToDNSDomain() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "web-1\n")
+
+    let config = ContainerCreateRequest(
+        image: "nginx:latest",
+        domainname: "test",
+        name: "web-1"
+    )
+    _ = try await client.createContainer(config: config, name: "web-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let idx = try #require(create.firstIndex(of: "--dns-domain"))
+    #expect(create[idx + 1] == "test")
 }
 
 @Test func appleTransportBuildImageArgv() async throws {

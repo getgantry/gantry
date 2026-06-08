@@ -48,13 +48,13 @@ struct FilesView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help("Refresh")
-            if session.host.capabilities.containerFileTransfer {
+            if session.host.capabilities.containerUpload {
                 Button {
                     upload()
                 } label: {
                     Label("Upload", systemImage: "square.and.arrow.up")
                 }
-                .help("Upload a file into this directory")
+                .help("Upload files or folders into this directory")
             }
         }
         .padding(8)
@@ -100,7 +100,7 @@ struct FilesView: View {
                         onDownload: {
                             download(entry)
                         },
-                        onDropURLs: entry.isDirectory && session.host.capabilities.containerFileTransfer ? { urls in
+                        onDropURLs: entry.isDirectory && session.host.capabilities.containerUpload ? { urls in
                             Task { await uploadURLs(urls, into: join(path, entry.name)) }
                         } : nil
                     )
@@ -205,11 +205,15 @@ struct FilesView: View {
     private func upload() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        // Folders are packed recursively (same path as a Finder folder drop),
+        // so let the picker select them too.
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = true
+        panel.prompt = "Upload"
+        guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
 
-        Task { await uploadURLs([url], into: path) }
+        let urls = panel.urls
+        Task { await uploadURLs(urls, into: path) }
     }
 
     /// Packs each local URL (recursively for folders) and uploads it into
