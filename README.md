@@ -139,6 +139,15 @@ xattr -dr com.apple.quarantine /Applications/Gantry.app
 The `xattr` step clears the quarantine flag — the app is not notarized and
 macOS refuses to open it otherwise.
 
+**Updating:** because the app is ad-hoc signed (not notarized), in-app
+Sparkle auto-updates can't launch their installer under Gatekeeper, so updates
+go through Homebrew:
+
+```sh
+brew upgrade --cask gantry        # or: brew reinstall --cask gantry
+xattr -dr com.apple.quarantine /Applications/Gantry.app
+```
+
 ### Manual
 
 1. Download the latest zip from [Releases](https://github.com/getgantry/gantry/releases/latest)
