@@ -27,9 +27,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSUpdateDynamicServices()
     }
 
-    /// "Open With → Gantry" / double-click on a registered compose file.
+    /// "Open With → Gantry" / double-click on a registered file: a Dockerfile
+    /// goes to the Build Image flow, anything else to Compose Up.
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls { Self.openCompose(url) }
+        for url in urls {
+            if DockerfileDetector.isDockerfile(url) {
+                Self.openDockerfile(url)
+            } else {
+                Self.openCompose(url)
+            }
+        }
     }
 
     /// Routes a file to the Compose Up flow, buffering it for cold launch.
@@ -37,6 +44,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     static func openCompose(_ url: URL) {
         PendingComposeOpens.add(url)
         NotificationCenter.default.post(name: .gantryOpenComposeFile, object: url)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    /// Routes a Dockerfile to the Build Image flow, buffering it for cold launch.
+    @MainActor
+    static func openDockerfile(_ url: URL) {
+        PendingDockerfileOpens.add(url)
+        NotificationCenter.default.post(name: .gantryOpenDockerfile, object: url)
         NSApp.activate(ignoringOtherApps: true)
     }
 }

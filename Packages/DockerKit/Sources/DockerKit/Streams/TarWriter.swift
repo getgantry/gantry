@@ -88,6 +88,65 @@ public enum TarWriter {
         return archive(entries: entries)
     }
 
+    /// Packs the *contents* of a directory at the archive root (no enclosing
+    /// directory component), the shape Docker's `/build` endpoint expects for a
+    /// build context. Paths matched by `ignore` are skipped; an ignored
+    /// directory is pruned without descending into it.
+    ///
+    /// - Parameters:
+    ///   - directory: The build context directory on disk.
+    ///   - ignore: A `.dockerignore` matcher, or nil to include everything.
+    public static func archiveDirectoryContents(
+        _ directory: URL,
+        ignore: DockerIgnore? = nil
+    ) throws -> Data {
+        let fm = FileManager.default
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: directory.path, isDirectory: &isDir), isDir.boolValue else {
+            throw CocoaError(.fileNoSuchFile)
+        }
+        var entries: [TarEntry] = []
+        try appendContextTree(at: directory, archivePrefix: "", into: &entries, fm: fm, ignore: ignore)
+        return archive(entries: entries)
+    }
+
+    /// Like ``appendTree`` but rooted at the archive top (no enclosing
+    /// directory) and honouring a `.dockerignore` matcher.
+    private static func appendContextTree(
+        at directory: URL,
+        archivePrefix: String,
+        into entries: inout [TarEntry],
+        fm: FileManager,
+        ignore: DockerIgnore?
+    ) throws {
+        // Include hidden files: a build context legitimately needs .git-ignored
+        // dotfiles like .env or .npmrc; exclusion is `.dockerignore`'s job.
+        let children = try fm.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: []
+        ).sorted { $0.lastPathComponent < $1.lastPathComponent }
+
+        for child in children {
+            let name = child.lastPathComponent
+            let archivePath = archivePrefix.isEmpty ? name : archivePrefix + "/" + name
+            if ignore?.excludes(archivePath) == true { continue }
+            let values = try child.resourceValues(forKeys: [.isDirectoryKey])
+            if values.isDirectory == true {
+                entries.append(directoryEntry(named: archivePath, url: child, fm: fm))
+                try appendContextTree(
+                    at: child,
+                    archivePrefix: archivePath,
+                    into: &entries,
+                    fm: fm,
+                    ignore: ignore
+                )
+            } else {
+                entries.append(try fileEntry(named: archivePath, url: child, fm: fm))
+            }
+        }
+    }
+
     // MARK: - Disk traversal
 
     private static func appendTree(

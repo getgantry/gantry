@@ -7,6 +7,9 @@ import Testing
 @Suite struct ComposeRunnerTests {
     private func connectedSession(configure: (MockTransport) -> Void) async -> (HostSession, MockTransport) {
         let transport = MockTransport()
+        // The runner targets an apple/container host, whose builds post the
+        // ImageBuildSpec JSON to /build rather than uploading a tar.
+        transport.usesCLIBuild = true
         transport.on(.get, "/version", json: Fixtures.version)
         configure(transport)
         let client = DockerClient(transport: transport)

@@ -37,6 +37,10 @@ public actor AppleContainerTransport: DockerTransport {
         self.runner = runner
     }
 
+    /// apple/container builds run through the `container build` CLI, not the
+    /// Docker `/build` tar-upload route.
+    public nonisolated var usesCLIBuild: Bool { true }
+
     /// Convenience: discovers the CLI on disk. Returns nil when not installed.
     public init?(cliPathOverride: String? = nil) {
         guard let path = AppleContainerCLIDiscovery.discover(override: cliPathOverride) else {

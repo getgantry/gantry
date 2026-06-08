@@ -20,6 +20,11 @@ extension Notification.Name {
     /// Compose project comes up). The `object` is the host `UUID`.
     static let gantrySelectHostContainers = Notification.Name("gantrySelectHostContainers")
 
+    /// Posted when a Dockerfile is dropped on the window, opened from Finder, or
+    /// chosen from the Docker menu. ContentView observes it and presents the
+    /// Build Image sheet. The `object` is the Dockerfile `URL`.
+    static let gantryOpenDockerfile = Notification.Name("gantryOpenDockerfile")
+
     /// Posted to open the apple/container install/upgrade sheet on demand (e.g.
     /// from the Add Host form when the CLI is missing).
     static let gantryShowContainerSetup = Notification.Name("gantryShowContainerSetup")

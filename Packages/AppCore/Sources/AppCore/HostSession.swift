@@ -1046,13 +1046,38 @@ extension HostSession {
     }
 
     /// Builds an image from a local context directory, returning the build log.
-    /// Backed by CLI hosts (apple/container); refreshes images on success.
+    /// Works on every engine: apple/container via its CLI, Docker (local and
+    /// over SSH) via the daemon `/build` tar upload. Refreshes images on success.
     @discardableResult
     public func buildImage(_ spec: ImageBuildSpec) async throws -> String {
         guard let client else { throw DockerError.connectionFailed("Not connected") }
         let log = try await client.buildImage(spec)
         await refreshImages()
         return log
+    }
+
+    /// Builds an image, streaming the build log line by line. Refreshes the
+    /// image list once the stream completes (the caller awaits the final yield).
+    public func buildImageStream(
+        _ spec: ImageBuildSpec
+    ) throws -> AsyncThrowingStream<BuildLogLine, Error> {
+        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        let upstream = client.buildImageStream(spec)
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    for try await line in upstream {
+                        continuation.yield(line)
+                    }
+                    await self.refreshImages()
+                    continuation.finish()
+                } catch {
+                    await self.refreshImages()
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
     }
 
     /// Returns the layer history for an image (newest first), or nil on failure.

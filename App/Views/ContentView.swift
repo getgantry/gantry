@@ -49,6 +49,13 @@ struct ComposeFileRequest: Identifiable {
     let url: URL
 }
 
+/// A dropped/opened Dockerfile awaiting the Build Image sheet. Identifiable so
+/// it can drive a `.sheet(item:)`.
+struct DockerfileBuildRequest: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 /// A sidebar selection identifies both the host and the section within it.
 struct SidebarSelection: Hashable {
     var hostID: UUID
@@ -89,6 +96,10 @@ struct ContentView: View {
     @State private var confirmRemoval: UUID?
     /// A Compose file opened from Finder/menu, awaiting the Compose Up sheet.
     @State private var composeRequest: ComposeFileRequest?
+    /// A Dockerfile dropped/opened, awaiting the Build Image sheet.
+    @State private var buildRequest: DockerfileBuildRequest?
+    /// Whether a drag is currently hovering a valid drop over the window.
+    @State private var isDropTargeted = false
     /// apple/container tooling status, when it needs the user's attention.
     @State private var containerStatus: ContainerTooling.Status?
     @State private var showContainerSetup = false
@@ -160,8 +171,21 @@ struct ContentView: View {
             ComposeUpSheet(fileURL: request.url)
                 .environment(model)
         }
+        .sheet(item: $buildRequest) { request in
+            BuildImageSheet(dockerfileURL: request.url)
+                .environment(model)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .gantryOpenComposeFile)) { note in
             if let url = note.object as? URL { composeRequest = ComposeFileRequest(url: url) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryOpenDockerfile)) { note in
+            if let url = note.object as? URL { buildRequest = DockerfileBuildRequest(url: url) }
+        }
+        .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
+            handleDrop(providers)
+        }
+        .overlay {
+            if isDropTargeted { dropOverlay }
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectHostContainers)) { note in
             if let hostID = note.object as? UUID {
@@ -169,9 +193,10 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Drain any Compose files opened before the window was ready (cold
-            // launch via Finder).
+            // Drain any files opened before the window was ready (cold launch
+            // via Finder).
             for url in PendingComposeOpens.drain() { composeRequest = ComposeFileRequest(url: url) }
+            for url in PendingDockerfileOpens.drain() { buildRequest = DockerfileBuildRequest(url: url) }
         }
         .sheet(isPresented: $showContainerSetup) {
             if let containerStatus {
@@ -382,6 +407,44 @@ struct ContentView: View {
             pendingDetailSelection = detail
             selection = target
         }
+    }
+
+    // MARK: - Drag & drop
+
+    /// A subtle full-window hint shown while a Dockerfile (or any file) hovers.
+    private var dropOverlay: some View {
+        ZStack {
+            Color.accentColor.opacity(0.08)
+            VStack(spacing: 10) {
+                Image(systemName: "hammer.circle.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(.tint)
+                Text("Drop a Dockerfile to build an image")
+                    .font(.headline)
+            }
+            .padding(28)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        }
+        .allowsHitTesting(false)
+        .ignoresSafeArea()
+    }
+
+    /// Resolves the first dropped item to a Dockerfile (file or a directory
+    /// containing one) and opens the Build Image sheet. Returns true when an
+    /// item was accepted for loading.
+    private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
+        guard let provider = providers.first(where: { $0.canLoadObject(ofClass: URL.self) }) else {
+            return false
+        }
+        _ = provider.loadObject(ofClass: URL.self) { url, _ in
+            guard let url, let dockerfile = DockerfileDetector.resolveDockerfile(at: url) else {
+                return
+            }
+            Task { @MainActor in
+                buildRequest = DockerfileBuildRequest(url: dockerfile)
+            }
+        }
+        return true
     }
 
     @ViewBuilder

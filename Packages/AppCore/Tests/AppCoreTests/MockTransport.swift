@@ -20,6 +20,11 @@ final class MockTransport: DockerTransport, @unchecked Sendable {
     private var hijackHandler: (@Sendable (DockerRequest) -> DockerHijackedConnection)?
     var shutdownCount = 0
 
+    /// Mirrors the transport's build mode. `true` makes `DockerClient` post the
+    /// `ImageBuildSpec` JSON to `/build` (apple/container); `false` (default)
+    /// takes the daemon tar-upload path.
+    var usesCLIBuild: Bool = false
+
     /// Registers a buffered JSON response for a method/path-suffix.
     func on(_ method: DockerRequest.Method, _ path: String, status: Int = 200, json: String) {
         routes["\(method.rawValue) \(path)"] = Route(status: status, body: Data(json.utf8))

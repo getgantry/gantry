@@ -79,6 +79,11 @@ struct GantryApp: App {
                     openComposeFile()
                 }
                 .keyboardShortcut("o", modifiers: .command)
+
+                Button("Build Image from Dockerfile…") {
+                    openDockerfile()
+                }
+                .keyboardShortcut("b", modifiers: [.command, .shift])
             }
         }
 
@@ -111,6 +116,19 @@ struct GantryApp: App {
         panel.message = "Choose a docker-compose file to run on an Apple Container host"
         if panel.runModal() == .OK, let url = panel.url {
             AppDelegate.openCompose(url)
+        }
+    }
+
+    /// Shows an open panel for a Dockerfile, routing the choice through the same
+    /// flow as a Finder open / drag-and-drop.
+    private func openDockerfile() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.message = "Choose a Dockerfile to build into an image"
+        if panel.runModal() == .OK, let url = panel.url {
+            AppDelegate.openDockerfile(url)
         }
     }
 

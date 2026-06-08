@@ -61,6 +61,16 @@ public protocol DockerTransport: Sendable {
 
     /// Shuts the transport down, releasing sockets/channels.
     func shutdown() async
+
+    /// Whether image builds are driven through a CLI (apple/container) rather
+    /// than the Docker `/build` tar-upload endpoint. CLI transports receive an
+    /// `ImageBuildSpec` JSON body on `POST /build`; daemon transports receive a
+    /// tar of the build context. Defaults to `false` (daemon).
+    var usesCLIBuild: Bool { get }
+}
+
+public extension DockerTransport {
+    var usesCLIBuild: Bool { false }
 }
 
 /// A hijacked, bidirectional connection to the daemon after an HTTP upgrade
