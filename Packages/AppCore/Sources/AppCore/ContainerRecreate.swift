@@ -56,7 +56,10 @@ extension HostSession {
 
         // Force-remove the old container first so its name is free to reuse.
         _ = await perform(.remove(force: true), on: container.id)
-        return try await createAndRun(request)
+        let newID = try await createAndRun(request)
+        // Clear any stale negative DNS cache so the new name.domain resolves now.
+        if hasDomain { await AppleContainerControl.flushDNSCache() }
+        return newID
     }
 
     /// A friendly, unique container name derived from an image reference — e.g.

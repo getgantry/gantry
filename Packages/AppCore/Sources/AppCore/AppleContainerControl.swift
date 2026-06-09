@@ -140,6 +140,16 @@ public enum AppleContainerControl {
     public static func restartServices(cliOverride: String? = nil) async throws {
         try? await stopServices(cliOverride: cliOverride)
         try await startServices(cliOverride: cliOverride)
+        await flushDNSCache()
+    }
+
+    /// Flushes the macOS resolver cache so a freshly-registered `name.domain`
+    /// resolves immediately, rather than returning a stale negative result the
+    /// system cached before the container existed. Best-effort and unprivileged
+    /// (`dscacheutil -flushcache`); the deeper `mDNSResponder` HUP needs admin and
+    /// is not required for the local resolver to pick the record up.
+    public static func flushDNSCache() async {
+        _ = await run("/usr/bin/dscacheutil", ["-flushcache"])
     }
 
     static func configFileURL() -> URL {
