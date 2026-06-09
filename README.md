@@ -103,8 +103,19 @@ Website: **https://getgantry.github.io/**
   on a local domain, its `name.domain` hostname) with one-click open-in-browser
   per port
 - **Local DNS domains** — create/list/delete apple/container DNS domains from
-  Settings ▸ Apple (admin-approved). A container launched on a domain resolves
-  as `name.domain` across your Mac, OrbStack-style
+  Settings ▸ Apple (admin-approved), and **star a default**: Gantry writes it
+  into apple/container's `config.toml` and restarts the services for you, so the
+  whole flow works without touching the CLI
+- **Automatic DNS names** (OrbStack-style) — new containers are assigned the
+  default domain automatically with a unique, image-derived name, so each one
+  resolves as `name.domain` across your Mac; the resolver cache is flushed so it
+  works immediately. A DNS domain can also be chosen in **New Container** and
+  **Quick Run**
+- **Assign / Change DNS Name** — set or change a container's domain after
+  creation from its Address section. apple/container fixes the domain at create
+  time, so Gantry recreates the container, preserving its image, command,
+  environment, published ports, volume binds, restart policy and labels (named
+  volumes are kept)
 - **Quick Run** — an OrbStack-style quick-launch sheet: pick a local image, name
   it, share a macOS folder, map ports and pick a DNS domain, then run — and the
   container's address opens straight in the browser
@@ -125,7 +136,8 @@ Website: **https://getgantry.github.io/**
 ### Mac-native
 - Three-column split view, Liquid Glass materials, dark/light/system appearance
 - Collapsible host sections in the sidebar; reorder hosts via Move Up/Down
-- Menu bar extra with running containers and quick actions
+- Menu bar panel listing running containers per host — open one in your browser,
+  copy its `dns`/`ip:port`, stop/restart inline, or click through to its details
 - Keyboard shortcuts (Cmd+R refresh, Cmd+N new container, Cmd+F log search)
 - Auto-updates via **Sparkle** (EdDSA-signed appcast)
 
