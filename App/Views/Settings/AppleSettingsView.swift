@@ -13,6 +13,8 @@ struct AppleSettingsView: View {
     @State private var newDomain = ""
     @State private var busy = false
     @State private var errorText: String?
+    /// The domain new containers are assigned automatically (OrbStack-style).
+    @AppStorage(DefaultDNSDomain.key) private var defaultDomain = ""
 
     private var cliOverride: String? {
         model.sessions.first { $0.host.isAppleContainer }?.host.socketPathOverride
@@ -89,12 +91,30 @@ struct AppleSettingsView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(domains, id: \.self) { domain in
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "globe").foregroundStyle(.secondary)
                         Text(domain).font(.system(.body, design: .monospaced))
+                        if domain == defaultDomain {
+                            Text("Default")
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color.accentColor.opacity(0.15), in: .capsule)
+                                .foregroundStyle(Color.accentColor)
+                        }
                         Spacer()
+                        Button {
+                            defaultDomain = (defaultDomain == domain) ? "" : domain
+                        } label: {
+                            Image(systemName: defaultDomain == domain ? "star.fill" : "star")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Use as the default domain for new containers")
                         Button(role: .destructive) {
-                            act { try await AppleContainerControl.deleteDomain(domain, cliOverride: cliOverride) }
+                            act {
+                                try await AppleContainerControl.deleteDomain(domain, cliOverride: cliOverride)
+                            } onSuccess: {
+                                if defaultDomain == domain { defaultDomain = "" }
+                            }
                         } label: {
                             Image(systemName: "trash")
                         }
@@ -115,7 +135,7 @@ struct AppleSettingsView: View {
         } header: {
             Text("Local DNS Domains")
         } footer: {
-            Text("Launch a container on a domain (Run sheet → DNS domain, or `--dns-domain`) and it resolves as name.domain across your Mac. Creating or removing a domain requires administrator approval.")
+            Text("New containers are assigned the default domain (star) automatically and resolve as name.domain across your Mac. Creating or removing a domain requires administrator approval.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -148,6 +168,8 @@ struct AppleSettingsView: View {
             try await AppleContainerControl.createDomain(name, cliOverride: cliOverride)
         } onSuccess: {
             newDomain = ""
+            // The first domain becomes the automatic default for new containers.
+            if defaultDomain.isEmpty { defaultDomain = name }
         }
     }
 

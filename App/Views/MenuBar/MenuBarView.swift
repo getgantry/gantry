@@ -57,7 +57,11 @@ struct MenuBarView: View {
                 }
                 .padding(12)
             }
-            .frame(maxHeight: 420)
+            // A ScrollView has no intrinsic height, so in a self-sizing
+            // MenuBarExtra window it collapses to zero and hides the whole
+            // container list. Give it a concrete, content-estimated height
+            // (capped, then scrollable) so the rows actually render.
+            .frame(height: listHeight)
 
             Divider()
 
@@ -139,6 +143,31 @@ struct MenuBarView: View {
         guard totalHosts > 0 else { return "No hosts connected" }
         let hostWord = totalHosts == 1 ? "host" : "hosts"
         return "\(totalRunning) running · \(totalHosts) \(hostWord)"
+    }
+
+    /// Estimated height for the host/container list, so the ScrollView never
+    /// collapses to zero in the self-sizing menu-bar window. Mirrors HostBlock's
+    /// row limits; the result is clamped and the area scrolls past the cap.
+    private var listHeight: CGFloat {
+        guard !connectedSessions.isEmpty else { return 64 }
+        var h: CGFloat = 24 // inner VStack vertical padding (12 top + 12 bottom)
+        for (index, session) in connectedSessions.enumerated() {
+            if index > 0 { h += 12 } // spacing between host blocks
+            h += 24 // host header row
+            let running = session.containers.filter { $0.state.isRunning }.count
+            if running == 0 {
+                h += 20 // "No running containers"
+            } else {
+                h += CGFloat(min(running, 8)) * 24
+                if running > 8 { h += 18 } // "N more…"
+            }
+            let exited = session.containers.filter { $0.state == .exited }.count
+            if exited > 0 {
+                h += 20 // "Recently exited" label
+                h += CGFloat(min(exited, 3)) * 22
+            }
+        }
+        return min(h, 460)
     }
 }
 

@@ -253,6 +253,10 @@ struct QuickRunSheet: View {
 
     private func loadDomains() async {
         availableDomains = (try? await AppleContainerControl.listDomains(cliOverride: cliOverride)) ?? []
+        // Assign a DNS domain by default so the container is reachable by name.
+        if domain.isEmpty {
+            domain = DefaultDNSDomain.preferred(in: availableDomains)
+        }
     }
 
     private func suggestNameIfNeeded(force: Bool = false) {
@@ -295,6 +299,11 @@ struct QuickRunSheet: View {
         }
 
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        // Always give the container a friendly, unique name so its DNS hostname
+        // (name.domain) is meaningful even when the user left the field blank.
+        let resolvedName = trimmedName.isEmpty
+            ? session.uniqueContainerName(forImage: trimmedImage)
+            : trimmedName
         let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
         // Record the domain as a label so the container's address view can show
         // the resolvable hostname reliably later.
@@ -308,7 +317,7 @@ struct QuickRunSheet: View {
             tty: false,
             labels: labels,
             domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
-            name: trimmedName.isEmpty ? nil : trimmedName
+            name: resolvedName
         )
     }
 

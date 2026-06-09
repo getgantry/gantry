@@ -177,6 +177,10 @@ struct CreateContainerSheet: View {
                 availableDomains = (try? await AppleContainerControl.listDomains(
                     cliOverride: session.host.socketPathOverride
                 )) ?? []
+                // Assign a DNS domain by default so the container resolves by name.
+                if domain.isEmpty {
+                    domain = DefaultDNSDomain.preferred(in: availableDomains)
+                }
             }
         }
     }
@@ -269,14 +273,26 @@ struct CreateContainerSheet: View {
             .filter { !$0.host.isEmpty && !$0.container.isEmpty }
             .map { $0.readOnly ? "\($0.host):\($0.container):ro" : "\($0.host):\($0.container)" }
 
+        let trimmedImage = image.trimmingCharacters(in: .whitespaces)
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
         // Record the domain as a label so the container's address view can show
         // the resolvable hostname reliably later (matches Quick Run).
         let labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
 
+        // A DNS name needs a container name; auto-derive a unique one from the
+        // image when a domain is assigned and the user left the name blank.
+        let resolvedName: String?
+        if !trimmedName.isEmpty {
+            resolvedName = trimmedName
+        } else if !trimmedDomain.isEmpty {
+            resolvedName = session.uniqueContainerName(forImage: trimmedImage)
+        } else {
+            resolvedName = nil
+        }
+
         return ContainerCreateRequest(
-            image: image.trimmingCharacters(in: .whitespaces),
+            image: trimmedImage,
             cmd: cmd.isEmpty ? nil : cmd,
             env: envList,
             ports: portMap,
@@ -286,7 +302,7 @@ struct CreateContainerSheet: View {
             labels: labels,
             autoRemove: autoRemove,
             domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
-            name: trimmedName.isEmpty ? nil : trimmedName
+            name: resolvedName
         )
     }
 

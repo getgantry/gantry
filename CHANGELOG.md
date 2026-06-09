@@ -18,6 +18,18 @@ that section with the version and date when a release is cut.
 - **DNS domain** assignment is now available in the full **New Container** sheet
   (previously only in Quick Run) for apple/container hosts, so a container can be
   launched on a local domain and resolve as `name.domain` across the Mac.
+- **Automatic DNS names** (OrbStack-style): pick a **default domain** in
+  Settings → Apple (the first one you add becomes it) and new containers are
+  assigned it automatically, with a unique, image-derived name — so every
+  container is reachable by name without extra steps.
+- **Assign/Change DNS Name** action on a container's Address section: set or
+  change the domain after creation. Since apple/container fixes the domain at
+  create time, this recreates the container, preserving its image, command,
+  environment, published ports, volume binds, restart policy and labels.
+
+### Fixed
+- The menu-bar panel's running-container list could collapse to nothing in the
+  self-sizing popover (an unconstrained `ScrollView`); it now always renders.
 
 ## [0.11.0] - 2026-06-09
 
