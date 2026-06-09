@@ -208,7 +208,7 @@ private struct HostBlock: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("\(running.count)/\(session.containers.count)")
+                Text(verbatim: "\(running.count)/\(session.containers.count)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
                     .help("\(running.count) running of \(session.containers.count) containers")
@@ -337,7 +337,8 @@ private struct RunningRow: View {
                     if endpoint.isDNSName {
                         Image(systemName: "globe").font(.caption2)
                     }
-                    Text(":\(endpoint.port)")
+                    // verbatim: avoid SwiftUI localizing the port as "5.002".
+                    Text(verbatim: ":\(endpoint.port)")
                         .font(.caption.monospacedDigit())
                 }
                 .foregroundStyle(.secondary)
@@ -345,7 +346,7 @@ private struct RunningRow: View {
             .buttonStyle(.plain)
             .help("Copy \(endpoint.hostPort)")
         } else if let port = firstPublicPort {
-            Text(":\(port)")
+            Text(verbatim: ":\(port)")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }

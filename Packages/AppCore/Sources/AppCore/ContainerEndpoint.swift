@@ -72,13 +72,16 @@ extension HostSession {
     public func primaryEndpoint(for container: ContainerSummary) -> ContainerEndpoint? {
         if host.isAppleContainer {
             // apple/container is reachable on the container's own ports via its
-            // routable IP or DNS name — no publishing needed.
+            // routable IP — no publishing needed. Prefer the IP for the openable
+            // endpoint: it always resolves, whereas a `name.domain` only resolves
+            // once a default DNS domain is configured system-wide (the DNS name
+            // is still offered separately via `dnsHostname`).
             guard let port = exposedPorts(for: container).first else { return nil }
-            if let name = dnsHostname(for: container) {
-                return ContainerEndpoint(host: name, port: port, isDNSName: true)
-            }
             if let ip = containerIP(for: container) {
                 return ContainerEndpoint(host: ip, port: port, isDNSName: false)
+            }
+            if let name = dnsHostname(for: container) {
+                return ContainerEndpoint(host: name, port: port, isDNSName: true)
             }
             return nil
         }

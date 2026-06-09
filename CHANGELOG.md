@@ -30,6 +30,12 @@ that section with the version and date when a release is cut.
 ### Fixed
 - The menu-bar panel's running-container list could collapse to nothing in the
   self-sizing popover (an unconstrained `ScrollView`); it now always renders.
+- Port numbers in the menu bar were localized with a grouping separator (e.g.
+  `5.002` for `5002`); they now render verbatim.
+- "Open in browser" / the primary address for apple/container now uses the
+  container's reachable IP rather than its DNS name, which only resolves once a
+  default DNS domain is configured system-wide. The DNS name is still offered as
+  a separate copy action.
 
 ## [0.11.0] - 2026-06-09
 

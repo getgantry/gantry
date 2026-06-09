@@ -114,7 +114,7 @@ struct AppleAddressSection: View {
     }
 
     private var hostnameHint: some View {
-        Text("Tip: launch with a DNS domain to also reach it by name, e.g. \(container.displayName).test")
+        Text("Reach it directly at the IP above. Assign a DNS name below to also use \(container.displayName).<domain> (name resolution needs a default DNS domain configured in apple/container).")
             .font(.caption)
             .foregroundStyle(.tertiary)
     }
