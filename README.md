@@ -264,11 +264,13 @@ auth). On CI they skip cleanly.
 ```sh
 scripts/release.sh 0.6.0
 gh release create v0.6.0 dist/Gantry-0.6.0.zip --title "Gantry 0.6.0"
-git add appcast.xml && git commit -m "Appcast for 0.6.0" && git push
+git add appcast.xml CHANGELOG.md && git commit -m "Release 0.6.0" && git push
 ```
 
-The script builds the app, embeds `gantry-mcp`, zips, and signs the Sparkle
-appcast entry (EdDSA key in the login Keychain).
+The script builds the app, embeds `gantry-mcp`, zips, signs the Sparkle appcast
+entry (EdDSA key in the login Keychain), and stamps the `## [Unreleased]`
+section of [`CHANGELOG.md`](CHANGELOG.md) with the version and date — so the
+only manual changelog work is adding bullets under **Unreleased** as you go.
 
 ## Known limitations
 

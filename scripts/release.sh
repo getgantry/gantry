@@ -32,6 +32,35 @@ if [ "$BUILT_VERSION" != "$VERSION" ]; then
     exit 1
 fi
 
+echo "==> Stamping CHANGELOG"
+# Promote the running notes under "## [Unreleased]" into a dated version
+# section, then re-open an empty Unreleased for the next cycle. Idempotent per
+# version: re-running for the same version would duplicate the heading, so only
+# run release.sh once per version.
+CHANGELOG="$ROOT/CHANGELOG.md"
+DATE="$(date +%F)"
+grep -q '^## \[Unreleased\]$' "$CHANGELOG" \
+    || { echo "CHANGELOG.md is missing a '## [Unreleased]' section"; exit 1; }
+if grep -q "^## \[$VERSION\] " "$CHANGELOG"; then
+    echo "CHANGELOG.md already has a $VERSION section; skipping stamp."
+else
+    # Warn (don't block) when releasing with no notes recorded.
+    BODY="$(awk '/^## \[Unreleased\]$/{f=1;next} /^## \[/{f=0} f' "$CHANGELOG" \
+        | grep -v '^[[:space:]]*$' || true)"
+    [ -n "$BODY" ] || echo "    warning: [Unreleased] is empty — $VERSION will have no notes"
+
+    awk -v ver="$VERSION" -v date="$DATE" '
+        /^## \[Unreleased\]$/ && !h { print; print ""; print "## [" ver "] - " date; print ""; h=1; next }
+        /^\[Unreleased\]:/ && !l {
+            print "[Unreleased]: https://github.com/getgantry/gantry/compare/v" ver "...HEAD"
+            print "[" ver "]: https://github.com/getgantry/gantry/releases/tag/v" ver
+            l=1; next
+        }
+        { print }
+    ' "$CHANGELOG" > "$CHANGELOG.tmp" && mv "$CHANGELOG.tmp" "$CHANGELOG"
+    echo "    stamped $VERSION ($DATE)"
+fi
+
 echo "==> Building gantry-mcp (release, universal)"
 swift build -c release --package-path Packages/GantryMCP --arch arm64 --arch x86_64 | tail -1
 MCP_BIN="Packages/GantryMCP/.build/apple/Products/Release/gantry-mcp"
@@ -63,5 +92,6 @@ cp "$DIST/appcast.xml" "$ROOT/appcast.xml"
 echo "==> Done"
 echo "    app:     $APP"
 echo "    zip:     $ZIP"
-echo "    appcast: $ROOT/appcast.xml (commit it to main)"
+echo "    appcast:   $ROOT/appcast.xml (commit it to main)"
+echo "    changelog: $ROOT/CHANGELOG.md (stamped $VERSION; commit it to main)"
 echo "    release: gh release create v$VERSION dist/Gantry-$VERSION.zip --title 'Gantry $VERSION'"

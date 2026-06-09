@@ -100,6 +100,8 @@ Before opening a pull request:
 - Run the relevant package tests.
 - Make sure there are no new Swift 6 concurrency warnings.
 - Include screenshots for any user-facing UI changes.
+- Add a bullet under `## [Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md) for any
+  user-facing change (the release script stamps it with a version later).
 
 The pull request template includes this checklist. Keep each PR focused on a
 single change where practical.

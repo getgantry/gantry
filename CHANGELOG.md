@@ -5,6 +5,11 @@ All notable changes to Gantry are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Add new entries under **[Unreleased]** as you work; `scripts/release.sh` stamps
+that section with the version and date when a release is cut.
+
+## [Unreleased]
+
 ## [0.10.0] - 2026-06-08
 
 ### Added
@@ -143,6 +148,7 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.10.0...HEAD
 [0.10.0]: https://github.com/getgantry/gantry/releases/tag/v0.10.0
 [0.9.1]: https://github.com/getgantry/gantry/releases/tag/v0.9.1
 [0.9.0]: https://github.com/getgantry/gantry/releases/tag/v0.9.0
