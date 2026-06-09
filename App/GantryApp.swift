@@ -94,7 +94,7 @@ struct GantryApp: App {
         }
         .defaultSize(width: 840, height: 520)
 
-        MenuBarExtra("Gantry", systemImage: "shippingbox.fill", isInserted: $showMenuBarExtra) {
+        MenuBarExtra("Gantry", image: "MenuBarIcon", isInserted: $showMenuBarExtra) {
             MenuBarView()
                 .environment(model)
         }

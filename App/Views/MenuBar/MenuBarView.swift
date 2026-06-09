@@ -74,8 +74,10 @@ struct MenuBarView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Image(systemName: "shippingbox.fill")
-                .foregroundStyle(.tint)
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 18, height: 18)
             Text("Gantry")
                 .font(.headline)
             Spacer()
