@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-06-09
+
+
 ### Added
 - **Machines** section for apple/container hosts: manage `container machine`
   environments (long-lived Linux VMs, comparable to OrbStack machines) — create,
@@ -166,7 +169,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/getgantry/gantry/releases/tag/v0.11.0
 [0.10.0]: https://github.com/getgantry/gantry/releases/tag/v0.10.0
 [0.9.1]: https://github.com/getgantry/gantry/releases/tag/v0.9.1
 [0.9.0]: https://github.com/getgantry/gantry/releases/tag/v0.9.0
