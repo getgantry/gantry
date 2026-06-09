@@ -20,6 +20,10 @@ extension Notification.Name {
     /// Compose project comes up). The `object` is the host `UUID`.
     static let gantrySelectHostContainers = Notification.Name("gantrySelectHostContainers")
 
+    /// Posted to open a specific container's detail view (e.g. from the menu-bar
+    /// panel). The `object` is a `ContainerJump` carrying the host and container.
+    static let gantrySelectContainer = Notification.Name("gantrySelectContainer")
+
     /// Posted when a Dockerfile is dropped on the window, opened from Finder, or
     /// chosen from the Docker menu. ContentView observes it and presents the
     /// Build Image sheet. The `object` is the Dockerfile `URL`.
@@ -28,4 +32,10 @@ extension Notification.Name {
     /// Posted to open the apple/container install/upgrade sheet on demand (e.g.
     /// from the Add Host form when the CLI is missing).
     static let gantryShowContainerSetup = Notification.Name("gantryShowContainerSetup")
+}
+
+/// Identifies a container to jump to, carried by `.gantrySelectContainer`.
+struct ContainerJump: Hashable {
+    let hostID: UUID
+    let containerID: String
 }

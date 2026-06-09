@@ -201,6 +201,15 @@ struct ContentView: View {
                 selection = .host(SidebarSelection(hostID: hostID, section: .containers))
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { note in
+            if let jump = note.object as? ContainerJump {
+                navigate(
+                    to: jump.hostID,
+                    section: .containers,
+                    detail: .container(jump.containerID)
+                )
+            }
+        }
         .onAppear {
             // Drain any files opened before the window was ready (cold launch
             // via Finder).

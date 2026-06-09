@@ -4,8 +4,9 @@ import AppCore
 import DockerKit
 
 /// Compact menu-bar panel summarising every connected host: its running
-/// containers (with quick stop/restart), a short list of recently exited
-/// containers (with start), and a footer to open the main window.
+/// containers (open in browser, copy their dns/ip:port, quick stop/restart),
+/// a short list of recently exited containers (with start), and a footer to
+/// open the main window.
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
@@ -217,8 +218,9 @@ private struct HostBlock: View {
 
 // MARK: - Rows
 
-/// One running container: state dot, name (opens the app), uptime,
-/// first published port, and stop + restart buttons.
+/// One running container: state dot, name (jumps to it in the app), its
+/// reachable address (tap to copy dns/ip:port), an open-in-browser button when
+/// it resolves a URL, and stop + restart buttons.
 private struct RunningRow: View {
     let container: ContainerSummary
     var session: HostSession
@@ -226,14 +228,19 @@ private struct RunningRow: View {
     @Environment(\.openWindow) private var openWindow
     @State private var busy = false
 
+    /// Best directly-reachable endpoint (apple DNS/IP, or a local published
+    /// port). Nil for SSH hosts and not-yet-resolved apple containers.
+    private var endpoint: ContainerEndpoint? {
+        session.primaryEndpoint(for: container)
+    }
+
     var body: some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(container.state.tint)
                 .frame(width: 7, height: 7)
             Button {
-                openWindow(id: "main")
-                NSApp.activate(ignoringOtherApps: true)
+                openContainer()
             } label: {
                 Text(container.displayName)
                     .font(.callout)
@@ -243,13 +250,15 @@ private struct RunningRow: View {
             .buttonStyle(.plain)
             .help("Open in Gantry")
 
-            if let port = firstPublicPort {
-                Text(":\(port)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
             Spacer(minLength: 4)
 
+            address
+
+            if let url = endpoint?.url {
+                ActionButton(systemImage: "safari", help: "Open in browser", busy: false) {
+                    NSWorkspace.shared.open(url)
+                }
+            }
             ActionButton(systemImage: "stop.fill", help: "Stop", busy: busy) {
                 await run(.stop)
             }
@@ -258,6 +267,19 @@ private struct RunningRow: View {
             }
         }
         .contextMenu {
+            if let endpoint {
+                if let url = endpoint.url {
+                    Button("Open in Browser") { NSWorkspace.shared.open(url) }
+                }
+                Button("Copy Address — \(endpoint.hostPort)") {
+                    copyToPasteboard(endpoint.hostPort)
+                }
+            }
+            if let dns = session.dnsHostname(for: container) {
+                Button("Copy DNS Name — \(dns)") { copyToPasteboard(dns) }
+            }
+            Button("Open in Gantry") { openContainer() }
+            Divider()
             Button("Stop") { Task { await run(.stop) } }
             Button("Restart") { Task { await run(.restart) } }
             Button("Kill") { Task { await run(.kill) } }
@@ -265,10 +287,55 @@ private struct RunningRow: View {
             Button("Copy Container ID") { copyToPasteboard(container.id) }
             Button("Copy as Prompt") { ContainerPromptCopy.run(session: session, container: container) }
         }
+        .task(id: container.id) {
+            // apple/container exposes a routable IP/DNS only via inspect; fetch it
+            // lazily so the address and open-in-browser light up in the menu.
+            if session.host.isAppleContainer, session.cachedDetails(for: container.id) == nil {
+                _ = await session.details(for: container.id)
+            }
+        }
+    }
+
+    /// A tappable address chip that copies `host:port`. Falls back to the first
+    /// published port when no full endpoint resolved (e.g. SSH hosts).
+    @ViewBuilder
+    private var address: some View {
+        if let endpoint {
+            Button {
+                copyToPasteboard(endpoint.hostPort)
+            } label: {
+                HStack(spacing: 3) {
+                    if endpoint.isDNSName {
+                        Image(systemName: "globe").font(.caption2)
+                    }
+                    Text(":\(endpoint.port)")
+                        .font(.caption.monospacedDigit())
+                }
+                .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Copy \(endpoint.hostPort)")
+        } else if let port = firstPublicPort {
+            Text(":\(port)")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var firstPublicPort: Int? {
         container.ports.compactMap(\.publicPort).min()
+    }
+
+    /// Opens the main window and selects this container in its detail view.
+    private func openContainer() {
+        openWindow(id: "main")
+        NSApp.activate(ignoringOtherApps: true)
+        let jump = ContainerJump(hostID: session.host.id, containerID: container.id)
+        // Give a freshly-opened window a beat to subscribe before posting.
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
+            NotificationCenter.default.post(name: .gantrySelectContainer, object: jump)
+        }
     }
 
     private func run(_ action: ContainerAction) async {

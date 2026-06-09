@@ -20,6 +20,10 @@ struct CreateContainerSheet: View {
     @State private var restartPolicy = "no"
     @State private var tty = false
     @State private var autoRemove = false
+    /// apple/container DNS domain to launch on ("" = none), and the domains
+    /// available locally to pick from.
+    @State private var domain = ""
+    @State private var availableDomains: [String] = []
 
     @State private var isWorking = false
     @State private var errorText: String?
@@ -106,6 +110,10 @@ struct CreateContainerSheet: View {
                     }
                 }
 
+                if session.host.isAppleContainer {
+                    networkingSection
+                }
+
                 Section("Options") {
                     if session.host.capabilities.restartPolicy {
                         Picker("Restart Policy", selection: $restartPolicy) {
@@ -164,6 +172,39 @@ struct CreateContainerSheet: View {
             .padding()
         }
         .frame(width: 560, height: 640)
+        .task {
+            if session.host.isAppleContainer {
+                availableDomains = (try? await AppleContainerControl.listDomains(
+                    cliOverride: session.host.socketPathOverride
+                )) ?? []
+            }
+        }
+    }
+
+    /// DNS-domain picker for apple/container hosts: launch a container on a local
+    /// domain so it resolves as `name.domain` across the Mac. Mirrors Quick Run.
+    private var networkingSection: some View {
+        Section {
+            if availableDomains.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "globe").foregroundStyle(.secondary)
+                    Text("No local domains. Add one in Settings → Apple to reach this container by name.")
+                        .font(.callout).foregroundStyle(.secondary)
+                }
+            } else {
+                Picker("DNS domain", selection: $domain) {
+                    Text("None").tag("")
+                    ForEach(availableDomains, id: \.self) { Text($0).tag($0) }
+                }
+                let trimmedName = name.trimmingCharacters(in: .whitespaces)
+                if !domain.isEmpty, !trimmedName.isEmpty {
+                    Text("Reachable as \(trimmedName).\(domain)")
+                        .font(.caption).foregroundStyle(.tertiary)
+                }
+            }
+        } header: {
+            Text("Networking")
+        }
     }
 
     // MARK: - Reusable editor list
@@ -229,6 +270,10 @@ struct CreateContainerSheet: View {
             .map { $0.readOnly ? "\($0.host):\($0.container):ro" : "\($0.host):\($0.container)" }
 
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
+        // Record the domain as a label so the container's address view can show
+        // the resolvable hostname reliably later (matches Quick Run).
+        let labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
 
         return ContainerCreateRequest(
             image: image.trimmingCharacters(in: .whitespaces),
@@ -238,8 +283,9 @@ struct CreateContainerSheet: View {
             binds: bindList,
             restartPolicy: restartPolicy,
             tty: tty,
-            labels: [:],
+            labels: labels,
             autoRemove: autoRemove,
+            domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
             name: trimmedName.isEmpty ? nil : trimmedName
         )
     }

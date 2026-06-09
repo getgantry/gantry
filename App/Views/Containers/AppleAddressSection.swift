@@ -14,8 +14,9 @@ struct AppleAddressSection: View {
     let details: ContainerDetails
 
     /// Label Gantry stamps at create time recording the `--dns-domain` used, so
-    /// the resolvable hostname can be shown reliably here.
-    static let domainLabelKey = "com.gantry.dns-domain"
+    /// the resolvable hostname can be shown reliably here. Canonical definition
+    /// lives in `HostSession` so the tray menu and create sheets share it.
+    static let domainLabelKey = HostSession.dnsDomainLabelKey
 
     private var ip: String? {
         let value = details.networkSettings.ipAddress?.trimmingCharacters(in: .whitespaces)

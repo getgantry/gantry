@@ -9,6 +9,9 @@ DerivedData/
 .build/
 .swiftpm/
 
+## Tooling
+.claude/
+
 ## Build artifacts
 build/
 dist/

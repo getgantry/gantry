@@ -10,6 +10,15 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- The **menu-bar panel** now surfaces each running container's reachable address:
+  open it straight in the browser, or tap to copy its `dns/ip:port`. The
+  container's DNS name (apple/container) and address are also in the row's
+  right-click menu, and clicking a container jumps to it in the main window.
+- **DNS domain** assignment is now available in the full **New Container** sheet
+  (previously only in Quick Run) for apple/container hosts, so a container can be
+  launched on a local domain and resolve as `name.domain` across the Mac.
+
 ## [0.11.0] - 2026-06-09
 
 
