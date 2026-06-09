@@ -96,12 +96,12 @@ jobs:
           # Pull this version's notes out of the (now stamped) changelog.
           awk -v v="## [$V]" 'index($0, v) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > "${RUNNER_TEMP}/notes.md"
           [ -s "${RUNNER_TEMP}/notes.md" ] || echo "Gantry $V" > "${RUNNER_TEMP}/notes.md"
+          # Replace any existing release for this tag (keep the tag) so re-runs
+          # publish a fresh build cleanly.
+          gh release delete "v$V" --yes --cleanup-tag=false 2>/dev/null || true
           gh release create "v$V" "dist/Gantry-$V.zip" \
             --title "Gantry $V" \
-            --notes-file "${RUNNER_TEMP}/notes.md" \
-            --verify-tag 2>/dev/null \
-            || gh release create "v$V" "dist/Gantry-$V.zip" \
-                 --title "Gantry $V" --notes-file "${RUNNER_TEMP}/notes.md"
+            --notes-file "${RUNNER_TEMP}/notes.md"
 
       - name: Commit updated appcast and changelog to main
         run: |
