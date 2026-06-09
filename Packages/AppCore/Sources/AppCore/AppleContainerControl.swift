@@ -107,6 +107,108 @@ public enum AppleContainerControl {
         try await runPrivileged(cli, ["system", "dns", "delete", domain])
     }
 
+    // MARK: - Default DNS domain (host name resolution)
+
+    /// The system-wide default DNS domain from `~/.config/container/config.toml`,
+    /// i.e. the suffix containers resolve under (`<name>.<domain>`). Empty when
+    /// unset.
+    public static func defaultDNSDomain() -> String {
+        let url = configFileURL()
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return "" }
+        return parseDNSDomain(text) ?? ""
+    }
+
+    /// Sets (or clears, when `domain` is nil/empty) the default DNS domain in
+    /// `~/.config/container/config.toml`. Containers *created after this* resolve
+    /// as `<name>.<domain>` from the Mac. Takes effect once the services are
+    /// restarted (`restartServices`). No admin needed — the file is in the user's
+    /// home, written by the user account that runs the services.
+    public static func setDefaultDNSDomain(_ domain: String?) throws {
+        let trimmed = domain?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let validated = trimmed.isEmpty ? nil : try validatedDomain(trimmed)
+        let url = configFileURL()
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
+        let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        let updated = updatedConfigTOML(existing, dnsDomain: validated)
+        try updated.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    /// Stops then starts the background services so configuration changes (like a
+    /// new default DNS domain) take effect. Running containers restart with them.
+    public static func restartServices(cliOverride: String? = nil) async throws {
+        try? await stopServices(cliOverride: cliOverride)
+        try await startServices(cliOverride: cliOverride)
+    }
+
+    static func configFileURL() -> URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".config/container/config.toml")
+    }
+
+    /// Reads the `domain` value from a `[dns]` table in TOML text.
+    static func parseDNSDomain(_ toml: String) -> String? {
+        var inDNS = false
+        for raw in toml.components(separatedBy: "\n") {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("["), line.hasSuffix("]") {
+                inDNS = String(line.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces) == "dns"
+                continue
+            }
+            if inDNS, line.hasPrefix("domain"), let eq = line.firstIndex(of: "=") {
+                let value = line[line.index(after: eq)...]
+                    .trimmingCharacters(in: .whitespaces)
+                    .trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                return value.isEmpty ? nil : value
+            }
+        }
+        return nil
+    }
+
+    /// Pure transform: returns `toml` with the `[dns]` table's `domain` key set to
+    /// `domain` (or removed when nil), preserving every other section and key.
+    static func updatedConfigTOML(_ toml: String, dnsDomain domain: String?) -> String {
+        var lines = toml.isEmpty ? [] : toml.components(separatedBy: "\n")
+        func section(_ line: String) -> String? {
+            let t = line.trimmingCharacters(in: .whitespaces)
+            guard t.hasPrefix("["), t.hasSuffix("]") else { return nil }
+            return String(t.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+        }
+
+        var dnsHeader: Int?
+        var domainLine: Int?
+        var inDNS = false
+        for (i, line) in lines.enumerated() {
+            if let name = section(line) {
+                inDNS = (name == "dns")
+                if inDNS { dnsHeader = i }
+                continue
+            }
+            if inDNS, line.trimmingCharacters(in: .whitespaces).hasPrefix("domain"),
+               line.contains("=") {
+                domainLine = i
+            }
+        }
+
+        let newLine = domain.map { "domain = \"\($0)\"" }
+        if let di = domainLine {
+            if let newLine { lines[di] = newLine } else { lines.remove(at: di) }
+        } else if let newLine {
+            if let hi = dnsHeader {
+                lines.insert(newLine, at: hi + 1)
+            } else {
+                if let last = lines.last, !last.isEmpty { lines.append("") }
+                lines.append("[dns]")
+                lines.append(newLine)
+            }
+        }
+
+        var result = lines.joined(separator: "\n")
+        if !result.isEmpty, !result.hasSuffix("\n") { result += "\n" }
+        return result
+    }
+
     // MARK: - Validation
 
     /// A domain name safe to interpolate into the privileged shell command:

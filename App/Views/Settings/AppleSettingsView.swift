@@ -13,6 +13,9 @@ struct AppleSettingsView: View {
     @State private var newDomain = ""
     @State private var busy = false
     @State private var errorText: String?
+    /// True after changing the default domain until the services are restarted
+    /// (name resolution for new containers only applies after a restart).
+    @State private var needsRestart = false
     /// The domain new containers are assigned automatically (OrbStack-style).
     @AppStorage(DefaultDNSDomain.key) private var defaultDomain = ""
 
@@ -43,6 +46,9 @@ struct AppleSettingsView: View {
         Form {
             servicesSection
             domainsSection
+            if needsRestart {
+                restartSection
+            }
             if let errorText {
                 Section {
                     Label(errorText, systemImage: "exclamationmark.triangle")
@@ -103,12 +109,13 @@ struct AppleSettingsView: View {
                         }
                         Spacer()
                         Button {
-                            defaultDomain = (defaultDomain == domain) ? "" : domain
+                            applyDefault(domain)
                         } label: {
                             Image(systemName: defaultDomain == domain ? "star.fill" : "star")
                         }
                         .buttonStyle(.borderless)
-                        .help("Use as the default domain for new containers")
+                        .disabled(busy)
+                        .help("Use as the default domain — new containers resolve as name." + domain)
                         Button(role: .destructive) {
                             act {
                                 try await AppleContainerControl.deleteDomain(domain, cliOverride: cliOverride)
@@ -135,9 +142,28 @@ struct AppleSettingsView: View {
         } header: {
             Text("Local DNS Domains")
         } footer: {
-            Text("New containers are assigned the default domain (star) automatically and resolve as name.domain across your Mac. Creating or removing a domain requires administrator approval.")
+            Text("Star a domain to make it the default: new containers are assigned it automatically and resolve as name.domain across your Mac (after a services restart). Existing containers need to be recreated — use “Change DNS Name” on the container. Creating or removing a domain requires administrator approval.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private var restartSection: some View {
+        Section {
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.clockwise.circle.fill").foregroundStyle(.tint)
+                Text("Restart services to apply name resolution for new containers.")
+                    .font(.callout)
+                Spacer()
+                Button("Restart Services") {
+                    act {
+                        try await AppleContainerControl.restartServices(cliOverride: cliOverride)
+                    } onSuccess: {
+                        needsRestart = false
+                    }
+                }
+                .disabled(busy)
+            }
         }
     }
 
@@ -169,12 +195,30 @@ struct AppleSettingsView: View {
         } onSuccess: {
             newDomain = ""
             // The first domain becomes the automatic default for new containers.
-            if defaultDomain.isEmpty { defaultDomain = name }
+            if defaultDomain.isEmpty { applyDefault(name) }
+        }
+    }
+
+    /// Sets (or, when re-tapped, clears) the default DNS domain: records it for
+    /// Gantry, writes it to apple/container's config, and flags that a services
+    /// restart is needed for host name resolution to take effect.
+    private func applyDefault(_ domain: String) {
+        let next = (defaultDomain == domain) ? "" : domain
+        defaultDomain = next
+        do {
+            try AppleContainerControl.setDefaultDNSDomain(next.isEmpty ? nil : next)
+            needsRestart = true
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 
     private func reload() async {
         status = await AppleContainerControl.serviceStatus(cliOverride: cliOverride)
+        // The config file is the source of truth for the default domain; mirror
+        // it into Gantry's preference so the star and create sheets agree.
+        let configured = AppleContainerControl.defaultDNSDomain()
+        if configured != defaultDomain { defaultDomain = configured }
         await reloadDomains()
     }
 

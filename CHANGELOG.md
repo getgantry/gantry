@@ -18,10 +18,11 @@ that section with the version and date when a release is cut.
 - **DNS domain** assignment is now available in the full **New Container** sheet
   (previously only in Quick Run) for apple/container hosts, so a container can be
   launched on a local domain and resolve as `name.domain` across the Mac.
-- **Automatic DNS names** (OrbStack-style): pick a **default domain** in
+- **Automatic DNS names** (OrbStack-style): star a **default domain** in
   Settings → Apple (the first one you add becomes it) and new containers are
-  assigned it automatically, with a unique, image-derived name — so every
-  container is reachable by name without extra steps.
+  assigned it automatically, with a unique, image-derived name. Gantry writes the
+  default into apple/container's `config.toml` and offers a one-click services
+  restart, so `name.domain` actually resolves from the Mac — no manual CLI steps.
 - **Assign/Change DNS Name** action on a container's Address section: set or
   change the domain after creation. Since apple/container fixes the domain at
   create time, this recreates the container, preserving its image, command,
