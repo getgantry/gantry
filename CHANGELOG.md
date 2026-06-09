@@ -10,6 +10,18 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- **Machine detail view.** Selecting a machine now opens its details — facts, an
+  Inspect tab, and an editable CPU/memory panel — consistent with the Containers
+  section. Editing CPU or memory applies via `container machine set` and restarts
+  a running machine so the change takes effect immediately.
+- **Set CPU and memory when creating a machine,** via new steppers in the Create
+  Machine sheet.
+
+### Changed
+- The menu-bar icon and the menu-bar panel header now use the Gantry app icon
+  instead of a generic glyph.
+
 ## [0.12.0] - 2026-06-09
 
 
