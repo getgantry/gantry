@@ -1,0 +1,115 @@
+name: Release
+
+# Auto-deploy: build, sign and publish a Gantry release, then update the
+# Sparkle appcast on main so existing installs auto-update.
+#
+# Trigger by pushing a version tag from main:
+#   git tag v0.13.0 && git push origin v0.13.0
+# or run manually from the Actions tab with a version input.
+#
+# The tag (or input) must match MARKETING_VERSION in the Xcode project.
+#
+# Required repository secret:
+#   SPARKLE_PRIVATE_KEY  — the EdDSA private key that signs the appcast,
+#                          exported with Sparkle's `generate_keys -x`. It pairs
+#                          with SUPublicEDKey in Info.plist.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 0.13.0 (no leading v)'
+        required: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+
+jobs:
+  release:
+    name: Build & publish
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Always release from main so the appcast commit lands there.
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ github.event.inputs.version }}"
+          else
+            V="${GITHUB_REF_NAME#v}"
+          fi
+          V="${V#v}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Releasing Gantry $V"
+
+      - name: Verify project version matches
+        run: |
+          PV=$(grep -m1 'MARKETING_VERSION' Gantry.xcodeproj/project.pbxproj \
+            | sed -E 's/.*= (.*);/\1/')
+          if [ "$PV" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::MARKETING_VERSION ($PV) != release version (${{ steps.ver.outputs.version }}). Bump it on main first."
+            exit 1
+          fi
+
+      - name: Show toolchain
+        run: xcodebuild -version
+
+      - name: Write Sparkle signing key
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [ -z "${SPARKLE_PRIVATE_KEY}" ]; then
+            echo "::error::SPARKLE_PRIVATE_KEY secret is not set. Export it with Sparkle's 'generate_keys -x' and add it as a repository secret."
+            exit 1
+          fi
+          printf '%s' "${SPARKLE_PRIVATE_KEY}" > "${RUNNER_TEMP}/sparkle_ed_key"
+
+      - name: Build, sign and generate appcast
+        env:
+          # Unsigned build on CI; release.sh re-signs ad-hoc afterwards.
+          RELEASE_XCODEBUILD_FLAGS: CODE_SIGNING_ALLOWED=NO
+          SPARKLE_ED_KEY_FILE: ${{ runner.temp }}/sparkle_ed_key
+        run: scripts/release.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          # Pull this version's notes out of the (now stamped) changelog.
+          awk -v v="## [$V]" 'index($0, v) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > "${RUNNER_TEMP}/notes.md"
+          [ -s "${RUNNER_TEMP}/notes.md" ] || echo "Gantry $V" > "${RUNNER_TEMP}/notes.md"
+          gh release create "v$V" "dist/Gantry-$V.zip" \
+            --title "Gantry $V" \
+            --notes-file "${RUNNER_TEMP}/notes.md" \
+            --verify-tag 2>/dev/null \
+            || gh release create "v$V" "dist/Gantry-$V.zip" \
+                 --title "Gantry $V" --notes-file "${RUNNER_TEMP}/notes.md"
+
+      - name: Commit updated appcast and changelog to main
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "No appcast/changelog changes to commit."
+            exit 0
+          fi
+          git commit -m "Release $V: update appcast and changelog"
+          git push origin HEAD:main

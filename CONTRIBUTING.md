@@ -106,6 +106,27 @@ Before opening a pull request:
 The pull request template includes this checklist. Keep each PR focused on a
 single change where practical.
 
+## Releasing
+
+Releases are automated by the [`Release`](.github/workflows/release.yml)
+workflow. To cut one:
+
+1. On `main`, bump `MARKETING_VERSION` in the Xcode project and land any
+   `## [Unreleased]` changelog notes.
+2. Tag and push: `git tag v0.13.0 && git push origin v0.13.0` (the tag must
+   match `MARKETING_VERSION`). You can also run the workflow manually from the
+   Actions tab with a version input.
+
+The workflow builds and ad-hoc-signs the universal app, embeds `gantry-mcp`,
+generates the EdDSA-signed Sparkle appcast, publishes a GitHub release with the
+zip, and commits the updated `appcast.xml` and `CHANGELOG.md` back to `main` so
+existing installs auto-update.
+
+It needs one repository secret, `SPARKLE_PRIVATE_KEY` — the EdDSA private key
+from Sparkle's `generate_keys -x`, pairing with `SUPublicEDKey` in
+`Info.plist`. `scripts/release.sh <version>` runs the same steps locally using
+the key from your login Keychain.
+
 ## Reporting issues
 
 Use the issue templates for bug reports and feature requests. For questions and

@@ -17,8 +17,10 @@ cd "$ROOT"
 rm -rf "$DIST" && mkdir -p "$DIST"
 
 echo "==> Building Gantry.app (Release)"
+# RELEASE_XCODEBUILD_FLAGS lets CI pass e.g. CODE_SIGNING_ALLOWED=NO; the app is
+# re-signed ad-hoc below regardless.
 xcodebuild -project Gantry.xcodeproj -scheme Gantry -configuration Release \
-    -derivedDataPath "$BUILD" build | tail -2
+    -derivedDataPath "$BUILD" ${RELEASE_XCODEBUILD_FLAGS:-} build | tail -2
 
 APP="$BUILD/Build/Products/Release/Gantry.app"
 [ -d "$APP" ] || { echo "app not found at $APP"; exit 1; }
@@ -84,9 +86,15 @@ ditto -c -k --keepParent "$APP" "$ZIP"
 echo "==> Generating Sparkle appcast"
 SPARKLE_BIN="$(ls -d "$BUILD"/SourcePackages/artifacts/sparkle/Sparkle/bin 2>/dev/null \
     || ls -d ~/Library/Developer/Xcode/DerivedData/Gantry-*/SourcePackages/artifacts/sparkle/Sparkle/bin | head -1)"
-"$SPARKLE_BIN/generate_appcast" \
-    --download-url-prefix "https://github.com/getgantry/gantry/releases/download/v$VERSION/" \
-    "$DIST"
+PREFIX="https://github.com/getgantry/gantry/releases/download/v$VERSION/"
+# Locally the EdDSA key comes from the login Keychain; in CI, point
+# SPARKLE_ED_KEY_FILE at an exported key file (see .github/workflows/release.yml).
+if [ -n "${SPARKLE_ED_KEY_FILE:-}" ]; then
+    "$SPARKLE_BIN/generate_appcast" --ed-key-file "$SPARKLE_ED_KEY_FILE" \
+        --download-url-prefix "$PREFIX" "$DIST"
+else
+    "$SPARKLE_BIN/generate_appcast" --download-url-prefix "$PREFIX" "$DIST"
+fi
 cp "$DIST/appcast.xml" "$ROOT/appcast.xml"
 
 echo "==> Done"
