@@ -60,12 +60,19 @@ public protocol AppleContainerCLIRunning: Sendable {
 /// Locates the `container` binary across common installations.
 public enum AppleContainerCLIDiscovery {
     /// Standard install locations, in preference order.
+    ///
+    /// The Homebrew keg paths (`opt/container/bin`) are preferred over the
+    /// `bin` symlinks: on 1.0 the CLI derives its plugin search root from its
+    /// own executable path, so the symlinked `/opt/homebrew/bin/container`
+    /// resolves the root to `/opt/homebrew` and `system start` fails with
+    /// "cannot find any plugins with type network". The keg path resolves to
+    /// `/opt/homebrew/opt/container`, where the plugins actually live.
     public static func candidates() -> [String] {
         [
-            "/opt/homebrew/bin/container",
             "/opt/homebrew/opt/container/bin/container",
-            "/usr/local/bin/container",
             "/usr/local/opt/container/bin/container",
+            "/opt/homebrew/bin/container",
+            "/usr/local/bin/container",
             "/usr/bin/container"
         ]
     }

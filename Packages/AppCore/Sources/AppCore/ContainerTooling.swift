@@ -9,10 +9,13 @@ import DockerKit
 /// updates). The install path shells out to Homebrew — never silently — so the
 /// user always confirms a system change.
 public enum ContainerTooling {
-    /// The oldest CLI Gantry supports. Installs below this are flagged.
-    public static let minimumVersion = "0.12.0"
+    /// The oldest CLI Gantry supports. Installs below this are flagged. 1.0
+    /// restructured the CLI's JSON output and dropped major-version-0 XPC
+    /// compatibility, so it is the tested baseline (the JSON bridge still parses
+    /// 0.12 shapes defensively, but 0.12 is no longer the supported target).
+    public static let minimumVersion = "1.0.0"
     /// The version Gantry is tested against; offered on a fresh install.
-    public static let recommendedVersion = "0.12.3"
+    public static let recommendedVersion = "1.0.0"
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
 

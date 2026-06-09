@@ -166,7 +166,9 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
         try await client.negotiate()
     }
     let calls = runner.recordedCalls()
-    #expect(calls.contains(["system", "start"]))
+    // 1.0 would block on the interactive kernel prompt with stdin closed, so
+    // the transport must start with --disable-kernel-install.
+    #expect(calls.contains(["system", "start", "--disable-kernel-install"]))
 }
 
 // MARK: - Containers

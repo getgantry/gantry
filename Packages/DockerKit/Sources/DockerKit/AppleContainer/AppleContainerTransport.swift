@@ -331,10 +331,12 @@ public actor AppleContainerTransport: DockerTransport {
     private func version() async throws -> DockerResponse {
         var status = (try? await systemStatusJSON()) ?? [:]
         if !Self.isRunning(status) {
-            // `system start` may exit non-zero on its interactive kernel
-            // prompt (stdin is closed) while still registering the API
-            // server, so its failure is not authoritative — re-check status.
-            _ = try? await runner.run(["system", "start"])
+            // `--disable-kernel-install` is essential on 1.0: a bare
+            // `system start` prompts for the kernel download and, with stdin
+            // closed, blocks forever. Skipping the install still brings the API
+            // server up (the kernel only matters when running a container); its
+            // exit status is not authoritative, so re-check.
+            _ = try? await runner.run(["system", "start", "--disable-kernel-install"])
             status = try await systemStatusJSON()
         }
         guard Self.isRunning(status) else {
@@ -362,7 +364,7 @@ public actor AppleContainerTransport: DockerTransport {
         let containers = AppleContainerJSON.array(try AppleContainerJSON.decode(containersData))
         let images = AppleContainerJSON.array(try AppleContainerJSON.decode(imagesData))
         let running = containers.filter {
-            AppleContainerJSON.string($0["status"]).lowercased() == "running"
+            AppleContainerJSON.runtimeState($0).state.lowercased() == "running"
         }.count
 
         let body = try AppleContainerJSON.infoBody(
@@ -535,7 +537,7 @@ public actor AppleContainerTransport: DockerTransport {
         // No CLI equivalent; poll until the container leaves "running".
         while true {
             let element = try await appleInspect(id: id)
-            let status = AppleContainerJSON.string(element["status"]).lowercased()
+            let status = AppleContainerJSON.runtimeState(element).state.lowercased()
             if status != "running" {
                 return Self.ok(try AppleContainerJSON.encode(["StatusCode": 0]))
             }

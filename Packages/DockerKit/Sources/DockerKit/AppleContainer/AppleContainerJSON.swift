@@ -46,17 +46,31 @@ enum AppleContainerJSON {
         }
     }
 
-    /// Converts an apple/container date (seconds since 2001-01-01) to Unix seconds.
+    /// Converts an apple/container date to Unix seconds. The CLI emits a numeric
+    /// seconds-since-2001 value in 0.12 and an RFC 3339 string in 1.0; both are
+    /// accepted.
     static func unixSeconds(fromAppleDate value: Any?) -> Int64 {
+        if let text = value as? String {
+            guard let date = parseISO(text) else { return 0 }
+            return Int64(date.timeIntervalSince1970)
+        }
         guard let seconds = double(value) else { return 0 }
         return Int64(seconds + appleEpochOffset)
     }
 
     /// Converts an apple/container date to an RFC 3339 string ("" when absent).
+    /// A 1.0 ISO string passes through; a 0.12 numeric value is formatted.
     static func iso8601(fromAppleDate value: Any?) -> String {
+        if let text = value as? String { return text.isEmpty ? "" : text }
         guard let seconds = double(value) else { return "" }
         let date = Date(timeIntervalSinceReferenceDate: seconds)
         return isoFormatter.string(from: date)
+    }
+
+    /// Parses an RFC 3339 timestamp, tolerating fractional seconds.
+    private static func parseISO(_ text: String) -> Date? {
+        if let date = isoFormatter.date(from: text) { return date }
+        return isoFractionalFormatter.date(from: text)
     }
 
     // ISO8601DateFormatter is documented thread-safe.
@@ -65,6 +79,31 @@ enum AppleContainerJSON {
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
     }()
+
+    nonisolated(unsafe) private static let isoFractionalFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    // MARK: - Version-tolerant field access
+
+    /// Returns the resource's configuration sub-object, tolerating its key name
+    /// across CLI versions: 1.0 nests config under `configuration`, while 0.12
+    /// used `config` (networks) or no wrapper at all (images, volumes).
+    static func configuration(_ element: [String: Any]) -> [String: Any] {
+        if let nested = element["configuration"] as? [String: Any] { return nested }
+        if let nested = element["config"] as? [String: Any] { return nested }
+        return [:]
+    }
+
+    /// Looks a key up in the resource's `configuration`/`config` wrapper first
+    /// (1.0), then falls back to the element itself (0.12's flat shape).
+    static func field(_ element: [String: Any], _ key: String) -> Any? {
+        let config = configuration(element)
+        if let value = config[key] { return value }
+        return element[key]
+    }
 
     static func encode(_ json: Any) throws -> Data {
         try JSONSerialization.data(withJSONObject: json, options: [.sortedKeys])
@@ -160,11 +199,24 @@ enum AppleContainerJSON {
         return try encode(rows)
     }
 
+    /// Extracts the container's runtime facts, tolerating CLI versions. In 1.0
+    /// `status` is an object `{state, startedDate, networks}`; in 0.12 `status`
+    /// is a plain state string and `startedDate`/`networks` are top-level.
+    static func runtimeState(
+        _ element: [String: Any]
+    ) -> (state: String, startedDate: Any?, networks: [[String: Any]]) {
+        if let status = element["status"] as? [String: Any] {
+            return (string(status["state"]), status["startedDate"], array(status["networks"]))
+        }
+        return (string(element["status"]), element["startedDate"], array(element["networks"]))
+    }
+
     /// One element of the CLI list → one `/containers/json` row.
     static func containerSummaryJSON(fromAppleContainer element: [String: Any]) -> [String: Any] {
         let config = object(element["configuration"])
         let id = string(config["id"])
-        let state = dockerState(fromAppleStatus: string(element["status"]))
+        let runtime = runtimeState(element)
+        let state = dockerState(fromAppleStatus: runtime.state)
         let initProcess = object(config["initProcess"])
         let command = ([string(initProcess["executable"])]
             + ((initProcess["arguments"] as? [String]) ?? []))
@@ -198,7 +250,7 @@ enum AppleContainerJSON {
             "Image": string(image["reference"]),
             "ImageID": string(descriptor["digest"]),
             "Command": command,
-            "Created": unixSeconds(fromAppleDate: element["startedDate"]),
+            "Created": unixSeconds(fromAppleDate: config["creationDate"] ?? runtime.startedDate),
             "Ports": ports,
             "Labels": (config["labels"] as? [String: String]) ?? [:],
             "State": state,
@@ -238,14 +290,15 @@ enum AppleContainerJSON {
     static func containerInspectBody(fromAppleInspect element: [String: Any]) throws -> Data {
         let config = object(element["configuration"])
         let id = string(config["id"])
-        let state = dockerState(fromAppleStatus: string(element["status"]))
+        let runtime = runtimeState(element)
+        let state = dockerState(fromAppleStatus: runtime.state)
         let initProcess = object(config["initProcess"])
         let executable = string(initProcess["executable"])
         let arguments = (initProcess["arguments"] as? [String]) ?? []
         let image = object(config["image"])
 
         var ipAddress = ""
-        if let network = array(element["networks"]).first {
+        if let network = runtime.networks.first {
             // "192.168.64.2/24" → "192.168.64.2"
             ipAddress = string(network["ipv4Address"]).components(separatedBy: "/").first ?? ""
         }
@@ -268,7 +321,7 @@ enum AppleContainerJSON {
 
         let body: [String: Any] = [
             "Id": id,
-            "Created": iso8601(fromAppleDate: config["creationDate"] ?? element["startedDate"]),
+            "Created": iso8601(fromAppleDate: config["creationDate"] ?? runtime.startedDate),
             "Path": executable,
             "Args": arguments,
             "State": [
@@ -280,7 +333,7 @@ enum AppleContainerJSON {
                 "Pid": 0,
                 "ExitCode": 0,
                 "Error": "",
-                "StartedAt": iso8601(fromAppleDate: element["startedDate"]),
+                "StartedAt": iso8601(fromAppleDate: runtime.startedDate),
                 "FinishedAt": ""
             ],
             "Image": string(object(image["descriptor"])["digest"]),
@@ -293,7 +346,7 @@ enum AppleContainerJSON {
                 "NanoCpus": int64(object(config["resources"])["cpus"]) * 1_000_000_000
             ],
             "Config": [
-                "Hostname": string(array(element["networks"]).first?["hostname"]),
+                "Hostname": string(runtime.networks.first?["hostname"]),
                 "Domainname": string(object(config["dns"])["domain"]),
                 "Env": (initProcess["environment"] as? [String]) ?? [],
                 "Cmd": ([executable] + arguments).filter { !$0.isEmpty },
@@ -317,25 +370,57 @@ enum AppleContainerJSON {
     // MARK: - Images
 
     /// `container image list --format json` → `GET /images/json` body.
+    ///
+    /// 1.0 nests fields under `configuration` (`name`, `descriptor`,
+    /// `creationDate`), reports size as integer `variants[].size`, and exposes a
+    /// scheme-less top-level `id`; 0.12 was flat with `reference`, `descriptor`
+    /// and a localized `fullSize`. Both are handled.
     static func imagesListBody(fromAppleList data: Data) throws -> Data {
         let apple = array(try decode(data))
         var rows: [[String: Any]] = []
         for element in apple {
-            let descriptor = object(element["descriptor"])
-            let reference = string(element["reference"])
             rows.append([
-                "Id": string(descriptor["digest"]),
+                "Id": imageDockerID(element),
                 "ParentId": "",
-                "RepoTags": reference.isEmpty ? [] : [displayReference(reference)],
+                "RepoTags": imageReferenceString(element).isEmpty
+                    ? [] : [displayReference(imageReferenceString(element))],
                 "RepoDigests": [],
-                "Created": 0,
-                "Size": bytes(fromLocalizedSize: string(element["fullSize"])),
+                "Created": unixSeconds(fromAppleDate: field(element, "creationDate")),
+                "Size": imageSizeBytes(element),
                 "SharedSize": -1,
                 "Containers": -1,
                 "Labels": [:]
             ])
         }
         return try encode(rows)
+    }
+
+    /// The image's repository reference: `configuration.name` (1.0) or the flat
+    /// `reference` (0.12).
+    static func imageReferenceString(_ element: [String: Any]) -> String {
+        let name = string(field(element, "name"))
+        return name.isEmpty ? string(field(element, "reference")) : name
+    }
+
+    /// The Docker-style image id (`sha256:…`). Prefers the manifest digest from
+    /// the descriptor; falls back to the scheme-less top-level `id` (1.0),
+    /// re-adding the `sha256:` scheme so downstream code stays uniform.
+    static func imageDockerID(_ element: [String: Any]) -> String {
+        let digest = string(object(field(element, "descriptor"))["digest"])
+        if !digest.isEmpty { return digest }
+        let id = string(element["id"])
+        guard !id.isEmpty else { return "" }
+        return id.contains(":") ? id : "sha256:" + id
+    }
+
+    /// Total image size in bytes: the sum of `variants[].size` (1.0) or the
+    /// localized `fullSize` string (0.12).
+    static func imageSizeBytes(_ element: [String: Any]) -> Int64 {
+        let variants = array(element["variants"])
+        if !variants.isEmpty {
+            return variants.reduce(Int64(0)) { $0 + int64($1["size"]) }
+        }
+        return bytes(fromLocalizedSize: string(field(element, "fullSize")))
     }
 
     /// Strips the implicit registry prefix Docker also hides ("docker.io/library/").
@@ -349,16 +434,17 @@ enum AppleContainerJSON {
         return reference
     }
 
-    /// Maps an image identifier the app uses (a `sha256:` digest from a
-    /// previous list) back to a CLI-addressable reference using that list.
+    /// Maps an image identifier the app uses (a `sha256:` digest, or a
+    /// scheme-less id) back to a CLI-addressable reference using a prior list.
     /// Falls through to the identifier itself (already a reference).
     static func imageReference(forID id: String, inAppleList data: Data?) -> String {
-        guard id.hasPrefix("sha256:"), let data else { return id }
-        guard let apple = try? decode(data) else { return id }
+        // A bare reference (e.g. "nginx:alpine") is already addressable; only a
+        // digest or a scheme-less hex id needs mapping back to a reference.
+        let looksLikeID = id.hasPrefix("sha256:") || (!id.contains("/") && !id.contains(":"))
+        guard looksLikeID, let data, let apple = try? decode(data) else { return id }
         for element in array(apple) {
-            let descriptor = object(element["descriptor"])
-            if string(descriptor["digest"]) == id {
-                let reference = string(element["reference"])
+            if imageDockerID(element) == id || string(element["id"]) == id {
+                let reference = imageReferenceString(element)
                 if !reference.isEmpty { return reference }
             }
         }
@@ -375,25 +461,21 @@ enum AppleContainerJSON {
     }
 
     /// One CLI volume → Docker volume object (also the `/volumes/create` body).
+    ///
+    /// 1.0 nests fields under `configuration` and dates them with an ISO
+    /// `creationDate`; 0.12 was flat with an apple-epoch (or ISO) `createdAt`.
     static func volumeJSON(fromAppleVolume element: [String: Any]) -> [String: Any] {
-        // createdAt is an apple-epoch double in `list` output but an ISO
-        // string in `inspect` output; accept both.
-        let createdAt: String
-        if let text = element["createdAt"] as? String {
-            createdAt = text
-        } else {
-            createdAt = iso8601(fromAppleDate: element["createdAt"])
-        }
+        let driver = string(field(element, "driver"))
         var row: [String: Any] = [
-            "Name": string(element["name"]),
-            "Driver": string(element["driver"]).isEmpty ? "local" : string(element["driver"]),
-            "Mountpoint": string(element["source"]),
-            "CreatedAt": createdAt,
-            "Labels": (element["labels"] as? [String: String]) ?? [:],
+            "Name": string(field(element, "name")),
+            "Driver": driver.isEmpty ? "local" : driver,
+            "Mountpoint": string(field(element, "source")),
+            "CreatedAt": iso8601(fromAppleDate: field(element, "creationDate") ?? field(element, "createdAt")),
+            "Labels": (field(element, "labels") as? [String: String]) ?? [:],
             "Scope": "local",
-            "Options": (element["options"] as? [String: String]) ?? [:]
+            "Options": (field(element, "options") as? [String: String]) ?? [:]
         ]
-        let size = int64(element["sizeInBytes"])
+        let size = int64(field(element, "sizeInBytes"))
         if size > 0 {
             row["UsageData"] = ["Size": size, "RefCount": -1]
         }
@@ -407,9 +489,11 @@ enum AppleContainerJSON {
         let apple = array(try decode(data))
         var rows: [[String: Any]] = []
         for element in apple {
-            let config = object(element["config"])
+            // 1.0 nests under `configuration`; 0.12 used `config`.
+            let config = configuration(element)
             let status = object(element["status"])
             let id = string(element["id"]).isEmpty ? string(config["id"]) : string(element["id"])
+            let networkName = string(config["name"]).isEmpty ? id : string(config["name"])
 
             var ipamConfig: [[String: Any]] = []
             let subnet = string(status["ipv4Subnet"])
@@ -426,7 +510,7 @@ enum AppleContainerJSON {
 
             rows.append([
                 "Id": id,
-                "Name": id,
+                "Name": networkName,
                 "Created": iso8601(fromAppleDate: config["creationDate"]),
                 "Scope": "local",
                 "Driver": string(config["mode"]).isEmpty ? "nat" : string(config["mode"]),
