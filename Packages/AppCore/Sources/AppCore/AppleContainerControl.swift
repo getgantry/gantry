@@ -60,9 +60,11 @@ public enum AppleContainerControl {
 
     public static func startServices(cliOverride: String? = nil) async throws {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }
-        let result = await run(cli, ["system", "start"])
-        // `system start` can exit non-zero on its interactive kernel-install
-        // prompt while still bringing services up, so confirm by re-checking.
+        // `--disable-kernel-install` keeps 1.0 from blocking on the interactive
+        // kernel-download prompt when stdin is not a terminal.
+        let result = await run(cli, ["system", "start", "--disable-kernel-install"])
+        // `system start` can still exit non-zero (e.g. the machine API server
+        // check) while bringing the core services up, so confirm by re-checking.
         if result.exitCode != 0, await serviceStatus(cliOverride: cliOverride) != .running {
             throw AppleControlError.command(
                 result.stderr.isEmpty ? "Could not start apple/container services." : result.stderr
@@ -136,13 +138,13 @@ public enum AppleContainerControl {
 
     // MARK: - Process plumbing
 
-    private struct RunResult: Sendable {
+    struct RunResult: Sendable {
         var exitCode: Int32
         var stdout: String
         var stderr: String
     }
 
-    private static func run(_ executable: String, _ arguments: [String]) async -> RunResult {
+    static func run(_ executable: String, _ arguments: [String]) async -> RunResult {
         await withCheckedContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executable)

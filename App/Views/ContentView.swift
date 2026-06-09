@@ -9,6 +9,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     case images
     case volumes
     case networks
+    case machines
     case hostFiles
 
     var id: String { rawValue }
@@ -20,6 +21,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .images: "Images"
         case .volumes: "Volumes"
         case .networks: "Networks"
+        case .machines: "Machines"
         case .hostFiles: "Host Files"
         }
     }
@@ -31,14 +33,21 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .images: "square.stack.3d.up"
         case .volumes: "externaldrive"
         case .networks: "network"
+        case .machines: "cube.transparent"
         case .hostFiles: "folder"
         }
     }
 
     /// Sections shown for a host: SFTP-backed host file browsing exists only
-    /// for SSH hosts.
-    static func sections(forSSHHost isSSH: Bool) -> [HostSection] {
-        isSSH ? allCases : allCases.filter { $0 != .hostFiles }
+    /// for SSH hosts; `container machine` exists only for apple/container.
+    static func sections(for host: DockerHost) -> [HostSection] {
+        allCases.filter { section in
+            switch section {
+            case .hostFiles: host.isSSH
+            case .machines: host.isAppleContainer
+            default: true
+            }
+        }
     }
 }
 
@@ -302,7 +311,7 @@ struct ContentView: View {
 
             ForEach(model.sessions) { session in
                 Section(isExpanded: expansionBinding(for: session.host.id)) {
-                    ForEach(HostSection.sections(forSSHHost: session.host.isSSH)) { section in
+                    ForEach(HostSection.sections(for: session.host)) { section in
                         Label(section.title, systemImage: section.systemImage)
                             .tag(SidebarItem.host(SidebarSelection(hostID: session.host.id, section: section)))
                     }
@@ -461,6 +470,8 @@ struct ContentView: View {
                 VolumeListView(session: session, selection: volumeSelectionBinding)
             case .networks:
                 NetworkListView(session: session, selection: networkSelectionBinding)
+            case .machines:
+                MachineListView(session: session)
             case .hostFiles:
                 HostFilesView(session: session)
             }

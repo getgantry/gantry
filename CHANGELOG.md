@@ -10,6 +10,24 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- **Machines** section for apple/container hosts: manage `container machine`
+  environments (long-lived Linux VMs, comparable to OrbStack machines) — create,
+  start, stop, set-default, delete, and open a shell. Requires apple/container
+  1.0+ installed from the official signed installer.
+
+### Changed
+- Full support for **apple/container 1.0**. 1.0 restructured the CLI's JSON
+  output (resources nest under `configuration`, container `status` is now an
+  object, image size moved to `variants[]`, dates are RFC 3339, image ids lost
+  the `sha256:` scheme); the bridge parses the new shapes while staying
+  tolerant of 0.12. The connect path no longer blocks on 1.0's interactive
+  kernel-install prompt, and CLI discovery prefers the Homebrew keg path so
+  `system start` finds its plugins.
+- The setup prompt now recommends the **official signed installer** over
+  Homebrew, because the Homebrew bottle omits the machine API server and so
+  cannot run `container machine`.
+
 ## [0.10.0] - 2026-06-08
 
 ### Added

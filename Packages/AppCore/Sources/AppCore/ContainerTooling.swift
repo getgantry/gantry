@@ -19,6 +19,12 @@ public enum ContainerTooling {
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
 
+    /// The official signed installer releases page. Preferred over Homebrew:
+    /// the Homebrew bottle ships only the core plugins and omits the machine API
+    /// server, so `container machine` does not work on a brew install. The
+    /// signed `.pkg` includes the full backend.
+    public static let installerPageURL = URL(string: "https://github.com/apple/container/releases/latest")!
+
     /// The outcome of a tooling check.
     public enum State: Sendable, Equatable {
         /// A supported CLI is installed (carrying its version).

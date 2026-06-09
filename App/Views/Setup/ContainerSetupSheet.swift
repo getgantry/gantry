@@ -70,23 +70,33 @@ struct ContainerSetupSheet: View {
                 Text("apple/container is ready.")
             }
 
-            if status.brewAvailable {
-                Label("Gantry will run `brew \(brewVerb) \(ContainerTooling.formula)` for you.",
-                      systemImage: "terminal")
+            // Recommend the official signed installer — it's the only build
+            // that ships the machine API server, so `container machine` works.
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Recommended: the official signed installer", systemImage: "checkmark.seal.fill")
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(.tint)
+                Text("It's the only build with the **Machines** backend (`container machine`). Download the `.pkg`, then run it.")
                     .font(.callout).foregroundStyle(.secondary)
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Homebrew isn't installed, so Gantry can't do this automatically.",
-                          systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    Text("Install [Homebrew](https://brew.sh), then run:")
-                        .font(.callout)
-                    Text("brew \(brewVerb) \(ContainerTooling.formula)")
-                        .font(.callout.monospaced())
-                        .textSelection(.enabled)
-                        .padding(8)
-                        .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 6))
+                Link(destination: ContainerTooling.installerPageURL) {
+                    Label("Download Installer…", systemImage: "arrow.down.circle")
                 }
+                .font(.callout)
+            }
+
+            Divider().padding(.vertical, 2)
+
+            if status.brewAvailable {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("Or install via Homebrew (no `container machine` support):",
+                          systemImage: "terminal")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Text("Gantry will run `brew \(brewVerb) \(ContainerTooling.formula)` for you.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            } else {
+                Text("Homebrew (without `container machine`) is also available: install [Homebrew](https://brew.sh), then run `brew \(brewVerb) \(ContainerTooling.formula)`.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
         }

@@ -16,7 +16,12 @@ public final class HostSession: Identifiable {
     public private(set) var images: [ImageSummary] = []
     public private(set) var volumes: [Volume] = []
     public private(set) var networks: [NetworkResource] = []
+    /// `container machine` environments (apple/container 1.0+); empty elsewhere.
+    public private(set) var machines: [ContainerMachine] = []
     public private(set) var info: SystemInfo?
+
+    /// Whether this host exposes `container machine` (apple/container only).
+    public var supportsMachines: Bool { host.isAppleContainer }
 
     /// Last error surfaced to the UI; settable so a view can dismiss it.
     public var lastError: String?
@@ -672,6 +677,8 @@ public final class HostSession: Identifiable {
         if let value = await volumesResult { volumes = value }
         if let value = await networksResult { networks = value }
         if let value = await infoResult { info = value }
+
+        if supportsMachines { await refreshMachines() }
     }
 
     public func refreshContainers() async {
@@ -688,6 +695,74 @@ public final class HostSession: Identifiable {
 
     public func refreshNetworks() async {
         await refresh(\.networks) { try await $0.listNetworks() }
+    }
+
+    // MARK: - Machines (apple/container 1.0+)
+
+    /// The CLI path override for machine commands (the apple host's stored
+    /// `container` path, if any).
+    private var machineCLIOverride: String? { host.socketPathOverride }
+
+    /// Reloads the `container machine` list. No-op on non-apple hosts.
+    public func refreshMachines() async {
+        guard supportsMachines else { return }
+        if let value = try? await AppleContainerControl.listMachines(cliOverride: machineCLIOverride) {
+            machines = value
+        }
+    }
+
+    /// Runs a machine action, surfacing failures via `lastError` and refreshing
+    /// the list on completion. Returns whether it succeeded.
+    @discardableResult
+    private func machineAction(_ body: () async throws -> Void) async -> Bool {
+        guard supportsMachines else { return false }
+        do {
+            try await body()
+            await refreshMachines()
+            return true
+        } catch {
+            lastError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            await refreshMachines()
+            return false
+        }
+    }
+
+    @discardableResult
+    public func createMachine(image: String, name: String) async -> Bool {
+        await machineAction {
+            try await AppleContainerControl.createMachine(
+                image: image, name: name, cliOverride: machineCLIOverride
+            )
+        }
+    }
+
+    @discardableResult
+    public func startMachine(_ name: String) async -> Bool {
+        await machineAction { try await AppleContainerControl.startMachine(name, cliOverride: machineCLIOverride) }
+    }
+
+    @discardableResult
+    public func stopMachine(_ name: String) async -> Bool {
+        await machineAction { try await AppleContainerControl.stopMachine(name, cliOverride: machineCLIOverride) }
+    }
+
+    @discardableResult
+    public func deleteMachine(_ name: String) async -> Bool {
+        await machineAction { try await AppleContainerControl.deleteMachine(name, cliOverride: machineCLIOverride) }
+    }
+
+    @discardableResult
+    public func setDefaultMachine(_ name: String) async -> Bool {
+        await machineAction {
+            try await AppleContainerControl.setDefaultMachine(name, cliOverride: machineCLIOverride)
+        }
+    }
+
+    @discardableResult
+    public func setMachineResources(_ name: String, settings: [String]) async -> Bool {
+        await machineAction {
+            try await AppleContainerControl.setMachine(name, settings: settings, cliOverride: machineCLIOverride)
+        }
     }
 
     /// Reloads one resource list, storing the result on success.
