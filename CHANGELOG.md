@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-06-09
+
+
 ### Added
 - The **menu-bar panel** now surfaces each running container's reachable address:
   open it straight in the browser, or tap to copy its `dns/ip:port`. The
@@ -197,7 +200,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/getgantry/gantry/releases/tag/v0.12.0
 [0.11.0]: https://github.com/getgantry/gantry/releases/tag/v0.11.0
 [0.10.0]: https://github.com/getgantry/gantry/releases/tag/v0.10.0
 [0.9.1]: https://github.com/getgantry/gantry/releases/tag/v0.9.1
