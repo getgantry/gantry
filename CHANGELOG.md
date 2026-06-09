@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-06-09
+
+
 ### Added
 - **Machine detail view.** Selecting a machine now opens its details — facts, an
   Inspect tab, and an editable CPU/memory panel — consistent with the Containers
@@ -212,7 +215,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/getgantry/gantry/releases/tag/v0.13.0
 [0.12.0]: https://github.com/getgantry/gantry/releases/tag/v0.12.0
 [0.11.0]: https://github.com/getgantry/gantry/releases/tag/v0.11.0
 [0.10.0]: https://github.com/getgantry/gantry/releases/tag/v0.10.0
