@@ -81,8 +81,10 @@ jobs:
 
       - name: Build, sign and generate appcast
         env:
-          # Unsigned build on CI; release.sh re-signs ad-hoc afterwards.
-          RELEASE_XCODEBUILD_FLAGS: CODE_SIGNING_ALLOWED=NO
+          # Ad-hoc sign during the build so nested frameworks (Sparkle) get a
+          # valid seal — generate_appcast validates the embedded signature.
+          # release.sh then re-signs the embedded mcp + app top level.
+          RELEASE_XCODEBUILD_FLAGS: CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES DEVELOPMENT_TEAM=
           SPARKLE_ED_KEY_FILE: ${{ runner.temp }}/sparkle_ed_key
         run: scripts/release.sh "${{ steps.ver.outputs.version }}"
 
@@ -112,4 +114,13 @@ jobs:
             exit 0
           fi
           git commit -m "Release $V: update appcast and changelog"
-          git push origin HEAD:main
+          # Rebase + retry in case main advanced during the build.
+          for attempt in 1 2 3; do
+            git fetch -q origin main
+            if git rebase origin/main && git push origin HEAD:main; then
+              echo "pushed appcast/changelog to main"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $attempt hit a concurrent update; retrying"; sleep 5
+          done
+          echo "::error::could not push appcast/changelog to main"; exit 1

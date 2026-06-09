@@ -3,6 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
+    # The Release workflow commits only these back to main; don't spend CI
+    # minutes rebuilding for a docs/appcast-only auto-commit.
+    paths-ignore:
+      - appcast.xml
+      - CHANGELOG.md
   pull_request:
     branches: [main]
 
