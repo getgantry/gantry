@@ -9,8 +9,20 @@ struct CreateMachineSheet: View {
 
     @State private var image = "alpine:3.22"
     @State private var name = ""
+    @State private var cpus = defaultCPUs
+    @State private var memoryGB = defaultMemoryGB
     @State private var creating = false
     @State private var error: String?
+
+    private static let bytesPerGB: Double = 1_073_741_824
+    /// A sensible starting CPU count: half the host's cores, at least one.
+    private static var defaultCPUs: Int { max(1, ProcessInfo.processInfo.activeProcessorCount / 2) }
+    /// The CLI default is half of system memory — mirror that here.
+    private static var defaultMemoryGB: Int {
+        max(1, Int((Double(ProcessInfo.processInfo.physicalMemory) / bytesPerGB / 2).rounded()))
+    }
+    private var maxCPU: Int { max(1, ProcessInfo.processInfo.activeProcessorCount) }
+    private var maxMemGB: Int { max(1, Int((Double(ProcessInfo.processInfo.physicalMemory) / Self.bytesPerGB).rounded())) }
 
     private var canCreate: Bool {
         !creating
@@ -33,6 +45,18 @@ struct CreateMachineSheet: View {
                     TextField("alpine:3.22", text: $image)
                         .textFieldStyle(.roundedBorder)
                         .disabled(creating)
+                }
+                field("CPUs") {
+                    Stepper(value: $cpus, in: 1...maxCPU) {
+                        Text("\(cpus)").monospacedDigit()
+                    }
+                    .disabled(creating)
+                }
+                field("Memory") {
+                    Stepper(value: $memoryGB, in: 1...maxMemGB) {
+                        Text("\(memoryGB) GB").monospacedDigit()
+                    }
+                    .disabled(creating)
                 }
             }
 
@@ -78,7 +102,9 @@ struct CreateMachineSheet: View {
         creating = true
         error = nil
         Task {
-            let ok = await session.createMachine(image: machineImage, name: machineName)
+            let ok = await session.createMachine(
+                image: machineImage, name: machineName, cpus: cpus, memory: "\(memoryGB)G"
+            )
             creating = false
             if ok {
                 dismiss()

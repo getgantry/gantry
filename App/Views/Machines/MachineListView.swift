@@ -3,10 +3,11 @@ import AppKit
 import AppCore
 
 /// Lists `container machine` environments (apple/container 1.0+) — long-lived
-/// Linux VMs, comparable to OrbStack machines — with lifecycle actions and an
-/// "Open Shell" entry point.
+/// Linux VMs, comparable to OrbStack machines — as a master list that drives a
+/// detail pane, mirroring the Containers section.
 struct MachineListView: View {
     @Bindable var session: HostSession
+    @Binding var selection: String?
 
     @State private var showingCreate = false
     @State private var deleteTarget: ContainerMachine?
@@ -24,7 +25,7 @@ struct MachineListView: View {
                         .buttonStyle(.borderedProminent)
                 }
             } else {
-                List {
+                List(selection: $selection) {
                     ForEach(session.machines) { machine in
                         MachineRow(
                             machine: machine,
@@ -35,6 +36,7 @@ struct MachineListView: View {
                             onSetDefault: { run(machine.id) { await session.setDefaultMachine(machine.id) } },
                             onDelete: { deleteTarget = machine }
                         )
+                        .tag(machine.id)
                     }
                 }
             }
@@ -63,6 +65,7 @@ struct MachineListView: View {
         ) { machine in
             Button("Delete \(machine.id)", role: .destructive) {
                 run(machine.id) { await session.deleteMachine(machine.id) }
+                if selection == machine.id { selection = nil }
             }
             Button("Cancel", role: .cancel) {}
         } message: { machine in
@@ -187,5 +190,215 @@ private struct MachineRow: View {
         var parts = ["\(machine.cpus) CPU", Formatters.bytes(machine.memory), "\(Formatters.bytes(machine.diskSize)) disk"]
         if machine.isRunning, !machine.ipAddress.isEmpty { parts.append(machine.ipAddress) }
         return parts.joined(separator: " · ")
+    }
+}
+
+// MARK: - Detail
+
+/// Detail pane for a single machine: facts, an editable CPU/RAM panel
+/// (applied via `container machine set`, which takes effect on restart) and a
+/// raw inspect tab — keeping the Machines section consistent with Containers.
+struct MachineDetailView: View {
+    let machine: ContainerMachine
+    let session: HostSession
+
+    @State private var tab = 0
+    @State private var editCPU = 1
+    @State private var editMemGB = 1
+    @State private var applying = false
+    @State private var busy = false
+
+    /// 1 GiB in bytes, for converting the model's byte counts to the GB the CLI
+    /// and stepper speak in.
+    private static let bytesPerGB: Double = 1_073_741_824
+
+    private var currentMemGB: Int { max(1, Int((Double(machine.memory) / Self.bytesPerGB).rounded())) }
+    private var maxCPU: Int { max(1, ProcessInfo.processInfo.activeProcessorCount) }
+    private var maxMemGB: Int { max(1, Int((Double(ProcessInfo.processInfo.physicalMemory) / Self.bytesPerGB).rounded())) }
+    private var isDirty: Bool { editCPU != machine.cpus || editMemGB != currentMemGB }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+
+            Picker("Section", selection: $tab) {
+                Text("Overview").tag(0)
+                Text("Inspect").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding()
+
+            Divider()
+
+            if tab == 0 {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        FactGrid {
+                            Fact("Status", machine.status.capitalized)
+                            Fact("CPUs", "\(machine.cpus)")
+                            Fact("Memory", Formatters.bytes(machine.memory))
+                            Fact("Disk", Formatters.bytes(machine.diskSize))
+                            if machine.isRunning, !machine.ipAddress.isEmpty {
+                                Fact("IP Address", machine.ipAddress)
+                            }
+                            if let image = machine.imageReference { Fact("Image", image) }
+                            if let user = machine.username { Fact("User", user) }
+                            if let home = machine.homeMount { Fact("Home Mount", home) }
+                            if !machine.created.isEmpty { Fact("Created", machine.created) }
+                        }
+
+                        resourceEditor
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                InspectJSONView {
+                    await session.rawInspectMachine(machine.id) ?? ""
+                }
+            }
+        }
+        .navigationTitle(machine.id)
+        .task(id: machine.id) { syncEdits() }
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "cube.transparent")
+                .font(.largeTitle)
+                .foregroundStyle(machine.isRunning ? Color.accentColor : .secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(machine.id)
+                        .font(.largeTitle.weight(.bold))
+                        .lineLimit(1)
+                    if machine.isDefault { BadgePill(text: "default", tint: .blue) }
+                    BadgePill(text: machine.status.capitalized, tint: machine.isRunning ? .green : .secondary)
+                }
+            }
+            Spacer()
+            actionButtons
+        }
+        .padding([.horizontal, .top])
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        HStack(spacing: 8) {
+            if busy {
+                ProgressView().controlSize(.small)
+            }
+            if machine.isRunning {
+                Button { openShell() } label: { Label("Shell", systemImage: "terminal") }
+                Button { act { await session.stopMachine(machine.id) } } label: {
+                    Label("Stop", systemImage: "stop.fill")
+                }
+            } else {
+                Button { act { await session.startMachine(machine.id) } } label: {
+                    Label("Start", systemImage: "play.fill")
+                }
+            }
+            if !machine.isDefault {
+                Button { act { await session.setDefaultMachine(machine.id) } } label: {
+                    Label("Set Default", systemImage: "star")
+                }
+            }
+        }
+        .disabled(busy)
+    }
+
+    // MARK: Resource editor
+
+    private var resourceEditor: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionTitle("Resources")
+
+            HStack(spacing: 24) {
+                Stepper(value: $editCPU, in: 1...maxCPU) {
+                    HStack(spacing: 6) {
+                        Text("CPUs").foregroundStyle(.secondary)
+                        Text("\(editCPU)").monospacedDigit().fontWeight(.medium)
+                    }
+                }
+                .fixedSize()
+
+                Stepper(value: $editMemGB, in: 1...maxMemGB) {
+                    HStack(spacing: 6) {
+                        Text("Memory").foregroundStyle(.secondary)
+                        Text("\(editMemGB) GB").monospacedDigit().fontWeight(.medium)
+                    }
+                }
+                .fixedSize()
+            }
+            .disabled(applying)
+
+            HStack(spacing: 10) {
+                Button(machine.isRunning ? "Apply & Restart" : "Apply") { applyResources() }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!isDirty || applying)
+                if isDirty {
+                    Button("Reset") { syncEdits() }
+                        .disabled(applying)
+                }
+                if applying {
+                    ProgressView().controlSize(.small)
+                }
+            }
+
+            Text(machine.isRunning
+                 ? "Applying restarts the machine so the new CPU and memory take effect."
+                 : "Changes take effect the next time the machine starts.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: 460, alignment: .leading)
+    }
+
+    // MARK: Actions
+
+    private func syncEdits() {
+        editCPU = max(1, machine.cpus)
+        editMemGB = currentMemGB
+    }
+
+    private func applyResources() {
+        let settings = ["cpus=\(editCPU)", "memory=\(editMemGB)G"]
+        let wasRunning = machine.isRunning
+        applying = true
+        Task {
+            let ok = await session.setMachineResources(machine.id, settings: settings)
+            if ok && wasRunning {
+                // `machine set` only takes effect on restart — cycle it so the
+                // change is live immediately.
+                _ = await session.stopMachine(machine.id)
+                _ = await session.startMachine(machine.id)
+            }
+            applying = false
+        }
+    }
+
+    private func act(_ action: @escaping () async -> Void) {
+        busy = true
+        Task {
+            await action()
+            busy = false
+        }
+    }
+
+    private func openShell() {
+        guard let command = AppleContainerControl.shellCommand(
+            for: machine.id, cliOverride: session.host.socketPathOverride
+        ) else { return }
+        let line = ([command.path] + command.args)
+            .map { $0.contains(" ") ? "'\($0)'" : $0 }
+            .joined(separator: " ")
+        let script = "tell application \"Terminal\"\nactivate\ndo script \"\(line)\"\nend tell"
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script]
+        try? process.run()
     }
 }

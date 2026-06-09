@@ -728,12 +728,22 @@ public final class HostSession: Identifiable {
     }
 
     @discardableResult
-    public func createMachine(image: String, name: String) async -> Bool {
+    public func createMachine(
+        image: String,
+        name: String,
+        cpus: Int? = nil,
+        memory: String? = nil
+    ) async -> Bool {
         await machineAction {
             try await AppleContainerControl.createMachine(
-                image: image, name: name, cliOverride: machineCLIOverride
+                image: image, name: name, cpus: cpus, memory: memory, cliOverride: machineCLIOverride
             )
         }
+    }
+
+    /// Pretty JSON for `container machine inspect <name>`; nil on failure.
+    public func rawInspectMachine(_ name: String) async -> String? {
+        try? await AppleContainerControl.rawInspectMachine(name, cliOverride: machineCLIOverride)
     }
 
     @discardableResult

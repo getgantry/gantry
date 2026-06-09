@@ -89,6 +89,7 @@ enum DetailSelection: Hashable {
     case image(String)
     case volume(String)
     case network(String)
+    case machine(String)
 }
 
 struct ContentView: View {
@@ -480,7 +481,7 @@ struct ContentView: View {
             case .networks:
                 NetworkListView(session: session, selection: networkSelectionBinding)
             case .machines:
-                MachineListView(session: session)
+                MachineListView(session: session, selection: machineSelectionBinding)
             case .hostFiles:
                 HostFilesView(session: session)
             }
@@ -568,6 +569,12 @@ struct ContentView: View {
             } else {
                 detailGone("Network")
             }
+        case .machine(let id):
+            if let machine = session.machines.first(where: { $0.id == id }) {
+                MachineDetailView(machine: machine, session: session)
+            } else {
+                detailGone("Machine")
+            }
         }
     }
 
@@ -611,6 +618,13 @@ struct ContentView: View {
         Binding(
             get: { if case .network(let id) = detailSelection { id } else { nil } },
             set: { detailSelection = $0.map(DetailSelection.network) }
+        )
+    }
+
+    private var machineSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .machine(let id) = detailSelection { id } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.machine) }
         )
     }
 }

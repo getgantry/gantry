@@ -113,12 +113,27 @@ extension AppleContainerControl {
     }
 
     /// `container machine create <image> --name <name>` (boots the machine).
+    /// Optionally sets the virtual CPU count and memory (e.g. `"8G"`).
     public static func createMachine(
         image: String,
         name: String,
+        cpus: Int? = nil,
+        memory: String? = nil,
         cliOverride: String? = nil
     ) async throws {
-        try await runMachine(["machine", "create", image, "--name", name], cliOverride: cliOverride)
+        var args = ["machine", "create", image, "--name", name]
+        if let cpus, cpus > 0 { args += ["--cpus", String(cpus)] }
+        if let memory, !memory.isEmpty { args += ["--memory", memory] }
+        try await runMachine(args, cliOverride: cliOverride)
+    }
+
+    /// `container machine inspect <name>` as pretty-printed JSON, for the
+    /// detail view's Inspect tab.
+    public static func rawInspectMachine(
+        _ name: String,
+        cliOverride: String? = nil
+    ) async throws -> String {
+        try await runMachine(["machine", "inspect", name], cliOverride: cliOverride)
     }
 
     /// Boots a stopped machine. There is no `machine start`; running a trivial
