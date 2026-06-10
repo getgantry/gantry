@@ -3,12 +3,12 @@
     <channel>
         <title>Gantry</title>
         <item>
-            <title>0.13.0</title>
-            <pubDate>Tue, 09 Jun 2026 20:45:13 +0000</pubDate>
-            <sparkle:version>20</sparkle:version>
-            <sparkle:shortVersionString>0.13.0</sparkle:shortVersionString>
+            <title>0.14.0</title>
+            <pubDate>Wed, 10 Jun 2026 08:48:50 +0000</pubDate>
+            <sparkle:version>21</sparkle:version>
+            <sparkle:shortVersionString>0.14.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/getgantry/gantry/releases/download/v0.13.0/Gantry-0.13.0.zip" length="47932319" type="application/octet-stream" sparkle:edSignature="xq9i6rCyeSEcI1MyCde0yTp+kboOKbfxgLJ/KohrMZqQicCvtEB09QuCpsy11/JqH7N+bH5FQCp65t+lx8n3Dw=="/>
+            <enclosure url="https://github.com/getgantry/gantry/releases/download/v0.14.0/Gantry-0.14.0.zip" length="47962399" type="application/octet-stream" sparkle:edSignature="aRChVkzKz6+Li688Rk4Wlegw+aQ1QuA5k7O3gpEo/h2RcaFCr5iwtsMuBSV+KWmAvJKaCMHW0KpfqpDGjRG0Dw=="/>
         </item>
     </channel>
 </rss>

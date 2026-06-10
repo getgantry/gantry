@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-06-10
+
+
 ### Added
 - **Machine Terminal and Resources tabs.** The machine detail view now mirrors
   the Containers section's tabs — Overview, Resources, Terminal, and Inspect.
@@ -227,7 +230,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/getgantry/gantry/releases/tag/v0.14.0
 [0.13.0]: https://github.com/getgantry/gantry/releases/tag/v0.13.0
 [0.12.0]: https://github.com/getgantry/gantry/releases/tag/v0.12.0
 [0.11.0]: https://github.com/getgantry/gantry/releases/tag/v0.11.0
