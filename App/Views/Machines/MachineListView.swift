@@ -195,18 +195,27 @@ private struct MachineRow: View {
 
 // MARK: - Detail
 
-/// Detail pane for a single machine: facts, an editable CPU/RAM panel
-/// (applied via `container machine set`, which takes effect on restart) and a
-/// raw inspect tab — keeping the Machines section consistent with Containers.
+/// Detail pane for a single machine, mirroring the Containers section: an
+/// Overview of facts, a Resources tab with an editable CPU/RAM panel (applied
+/// via `container machine set`, which takes effect on restart), an interactive
+/// Terminal, and a raw Inspect tab.
 struct MachineDetailView: View {
     let machine: ContainerMachine
     let session: HostSession
 
-    @State private var tab = 0
+    @State private var tab: DetailTab = .overview
     @State private var editCPU = 1
     @State private var editMemGB = 1
     @State private var applying = false
     @State private var busy = false
+
+    enum DetailTab: String, CaseIterable, Identifiable {
+        case overview = "Overview"
+        case resources = "Resources"
+        case terminal = "Terminal"
+        case inspect = "Inspect"
+        var id: String { rawValue }
+    }
 
     /// 1 GiB in bytes, for converting the model's byte counts to the GB the CLI
     /// and stepper speak in.
@@ -222,8 +231,7 @@ struct MachineDetailView: View {
             header
 
             Picker("Section", selection: $tab) {
-                Text("Overview").tag(0)
-                Text("Inspect").tag(1)
+                ForEach(DetailTab.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -231,36 +239,55 @@ struct MachineDetailView: View {
 
             Divider()
 
-            if tab == 0 {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        FactGrid {
-                            Fact("Status", machine.status.capitalized)
-                            Fact("CPUs", "\(machine.cpus)")
-                            Fact("Memory", Formatters.bytes(machine.memory))
-                            Fact("Disk", Formatters.bytes(machine.diskSize))
-                            if machine.isRunning, !machine.ipAddress.isEmpty {
-                                Fact("IP Address", machine.ipAddress)
-                            }
-                            if let image = machine.imageReference { Fact("Image", image) }
-                            if let user = machine.username { Fact("User", user) }
-                            if let home = machine.homeMount { Fact("Home Mount", home) }
-                            if !machine.created.isEmpty { Fact("Created", machine.created) }
-                        }
-
-                        resourceEditor
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            } else {
-                InspectJSONView {
-                    await session.rawInspectMachine(machine.id) ?? ""
-                }
-            }
+            tabContent
         }
         .navigationTitle(machine.id)
         .task(id: machine.id) { syncEdits() }
+    }
+
+    // MARK: Tabs
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch tab {
+        case .overview:
+            overview
+        case .resources:
+            ScrollView {
+                resourceEditor
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        case .terminal:
+            MachineTerminalView(session: session, machine: machine)
+        case .inspect:
+            InspectJSONView {
+                // The CLI escapes forward slashes (`\/`) in inspect output; undo
+                // that so paths and image references read naturally.
+                let raw = await session.rawInspectMachine(machine.id) ?? ""
+                return raw.replacingOccurrences(of: "\\/", with: "/")
+            }
+        }
+    }
+
+    private var overview: some View {
+        ScrollView {
+            FactGrid {
+                Fact("Status", machine.status.capitalized)
+                Fact("CPUs", "\(machine.cpus)")
+                Fact("Memory", Formatters.bytes(machine.memory))
+                Fact("Disk", Formatters.bytes(machine.diskSize))
+                if machine.isRunning, !machine.ipAddress.isEmpty {
+                    Fact("IP Address", machine.ipAddress)
+                }
+                if let image = machine.imageReference { Fact("Image", image) }
+                if let user = machine.username { Fact("User", user) }
+                if let home = machine.homeMount { Fact("Home Mount", home) }
+                if !machine.created.isEmpty { Fact("Created", machine.created) }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     // MARK: Header

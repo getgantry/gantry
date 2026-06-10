@@ -10,6 +10,18 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- **Machine Terminal and Resources tabs.** The machine detail view now mirrors
+  the Containers section's tabs — Overview, Resources, Terminal, and Inspect.
+  The editable CPU/memory panel moved into its own Resources tab, and the new
+  Terminal tab opens an interactive shell into the machine in-app (instead of
+  only launching Terminal.app).
+
+### Fixed
+- **Inspect display.** Inspect JSON no longer floats in the middle of the pane
+  when it is shorter than the viewport, and escaped forward slashes (`\/`) in
+  machine inspect output are now shown as plain slashes.
+
 ## [0.13.0] - 2026-06-09
 
 

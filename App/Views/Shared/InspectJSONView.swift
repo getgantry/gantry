@@ -16,12 +16,22 @@ struct InspectJSONView: View {
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let json, !json.isEmpty {
-                ScrollView([.vertical, .horizontal]) {
-                    Text(json)
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                // A bidirectional ScrollView centers content that is smaller than
+                // the viewport; pin the text to the top-leading corner and let it
+                // fill the viewport so short inspect output starts at the top-left
+                // rather than floating in the middle.
+                GeometryReader { geo in
+                    ScrollView([.vertical, .horizontal]) {
+                        Text(json)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                            .padding(12)
+                            .frame(
+                                minWidth: geo.size.width,
+                                minHeight: geo.size.height,
+                                alignment: .topLeading
+                            )
+                    }
                 }
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
