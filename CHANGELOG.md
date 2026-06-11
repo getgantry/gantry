@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-06-11
+
+
 ### Fixed
 - **apple/container CLI could hang on verbose commands.** Control commands
   (service status, machine actions) drained the process's stdout and stderr one
@@ -236,7 +239,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/getgantry/gantry/releases/tag/v0.14.1
 [0.14.0]: https://github.com/getgantry/gantry/releases/tag/v0.14.0
 [0.13.0]: https://github.com/getgantry/gantry/releases/tag/v0.13.0
 [0.12.0]: https://github.com/getgantry/gantry/releases/tag/v0.12.0
