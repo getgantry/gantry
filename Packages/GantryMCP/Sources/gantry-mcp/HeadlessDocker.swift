@@ -1,20 +1,15 @@
 import Foundation
 import DockerKit
-import SSHKit
 import AppCore
 
 /// Headless Docker access for the MCP server.
 ///
-/// Mirrors the connection logic of the app's `HostSession` but without any UI:
-/// it loads the persisted host list, dials the local socket or a remote daemon
-/// over SSH, and caches one live `DockerClient` per host id for the lifetime of
-/// the process.
-///
-/// SSH connections are *trusted-only*: a remote host key that is neither in the
-/// app's trusted store nor in `~/.ssh/known_hosts` is rejected outright (no
-/// interactive trust-on-first-use prompt is possible in a headless context).
-/// Passphrase-protected keys are unlocked only from the Keychain; there is no
-/// interactive passphrase prompt either.
+/// A thin caching layer over `AppCore.HeadlessDocker`: it loads the persisted
+/// host list and caches one live, version-negotiated `DockerClient` per host id
+/// for the lifetime of the process. All transport selection and the
+/// trusted-only, non-interactive SSH credential resolution live in
+/// `AppCore.HeadlessDocker` (the shared contract) so the app, App Intents, and
+/// this server connect identically — including ProxyJump support.
 actor HeadlessDocker {
     /// Cached, already-negotiated clients keyed by host id.
     private var clients: [UUID: DockerClient] = [:]
@@ -43,33 +38,7 @@ actor HeadlessDocker {
         if let existing = clients[host.id] {
             return existing
         }
-
-        let transport: DockerTransport
-        switch host.kind {
-        case .local:
-            let socketPath = host.socketPathOverride ?? DockerSocketDiscovery.discover()
-            guard let socketPath else {
-                throw HeadlessError.noSocket
-            }
-            transport = UnixSocketTransport(socketPath: socketPath)
-
-        case .ssh(let endpoint):
-            transport = try makeSSHTransport(endpoint: endpoint, hostID: host.id)
-
-        case .appleContainer:
-            guard let appleTransport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
-                throw HeadlessError.appleContainerCLIMissing
-            }
-            transport = appleTransport
-        }
-
-        let client = DockerClient(transport: transport)
-        do {
-            try await client.negotiate()
-        } catch {
-            await client.shutdown()
-            throw error
-        }
+        let client = try await AppCore.HeadlessDocker.connect(to: host)
         clients[host.id] = client
         return client
     }
@@ -89,106 +58,15 @@ actor HeadlessDocker {
         }
         clients.removeAll()
     }
-
-    // MARK: - SSH (trusted-only, non-interactive)
-
-    private nonisolated func makeSSHTransport(
-        endpoint: SSHEndpoint,
-        hostID: UUID
-    ) throws -> DockerTransport {
-        let resolved = ResolvedSSHEndpoint.resolve(endpoint)
-
-        // Trusted-only: known hosts pass, everything else is rejected. No prompt.
-        let knownHosts = KnownHostsStore()
-        let policy = HostKeyPolicy.acceptKnown(knownHosts) { _, _ in .reject }
-
-        let auth = try resolveAuth(
-            endpoint: endpoint,
-            hostID: hostID,
-            resolvedIdentityFiles: resolved.identityFiles
-        )
-
-        let parameters = SSHConnectionParameters(
-            host: resolved.hostName,
-            port: resolved.port,
-            username: resolved.username,
-            auth: auth
-        )
-
-        return SSHDialStdioTransport {
-            try await SSHConnector.connect(parameters: parameters, policy: policy)
-        }
-    }
-
-    /// Resolves credentials without any interactive prompts. Keys load only if
-    /// unencrypted or unlockable with a Keychain-stored passphrase; passwords
-    /// come only from the Keychain.
-    private nonisolated func resolveAuth(
-        endpoint: SSHEndpoint,
-        hostID: UUID,
-        resolvedIdentityFiles: [String]
-    ) throws -> AuthSource {
-        switch endpoint.auth {
-        case .automatic:
-            let candidates = resolvedIdentityFiles + SSHKeyLoader.defaultKeyCandidates()
-            return try loadFirstUsableKey(from: candidates, hostID: hostID)
-        case .keyFile(let path):
-            return try loadFirstUsableKey(from: [path], hostID: hostID)
-        case .password:
-            let account = KeychainStore.sshPasswordAccount(hostID: hostID)
-            guard let stored = KeychainStore.get(account: account) else {
-                throw HeadlessError.credentialsUnavailable
-            }
-            return .password(stored)
-        }
-    }
-
-    private nonisolated func loadFirstUsableKey(
-        from paths: [String],
-        hostID: UUID
-    ) throws -> AuthSource {
-        let passphraseAccount = KeychainStore.keyPassphraseAccount(hostID: hostID)
-        var lastError: Error?
-
-        for path in paths {
-            do {
-                let key = try SSHKeyLoader.load(contentsOf: path, passphrase: nil)
-                return .key(key)
-            } catch SSHKeyError.needsPassphrase {
-                // Only a stored passphrase can unlock it headlessly.
-                if let stored = KeychainStore.get(account: passphraseAccount),
-                   let key = try? SSHKeyLoader.load(contentsOf: path, passphrase: stored) {
-                    return .key(key)
-                }
-                lastError = HeadlessError.credentialsUnavailable
-                continue
-            } catch {
-                lastError = error
-                continue
-            }
-        }
-
-        throw lastError ?? HeadlessError.credentialsUnavailable
-    }
-
 }
 
 enum HeadlessError: Error, LocalizedError {
-    case noSocket
     case unknownHost(UUID)
-    case credentialsUnavailable
-    case appleContainerCLIMissing
 
     var errorDescription: String? {
         switch self {
-        case .noSocket:
-            return "No Docker socket found on this machine."
         case .unknownHost(let id):
             return "No host with id \(id.uuidString)."
-        case .credentialsUnavailable:
-            return "SSH credentials are unavailable headlessly. Connect to this host once in the Gantry app to trust its key and store any secret in the Keychain."
-        case .appleContainerCLIMissing:
-            return "The apple/container CLI was not found. Install it with `brew install container`."
         }
     }
 }

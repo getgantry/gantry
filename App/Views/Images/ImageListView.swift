@@ -95,10 +95,7 @@ struct ImageListView: View {
         }
         .confirmationDialog(
             pruneConfirm?.title ?? "",
-            isPresented: Binding(
-                get: { pruneConfirm != nil },
-                set: { if !$0 { pruneConfirm = nil } }
-            ),
+            isPresented: Binding(presence: $pruneConfirm),
             titleVisibility: .visible,
             presenting: pruneConfirm
         ) { scope in
@@ -120,10 +117,7 @@ struct ImageListView: View {
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.displayName ?? "image")?",
-            isPresented: Binding(
-                get: { removeTarget != nil },
-                set: { if !$0 { removeTarget = nil } }
-            ),
+            isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget
         ) { image in
@@ -156,7 +150,7 @@ private struct DiskUsageFooter: View {
         Group {
             if let usage {
                 Text(
-                    "Storage: images \(usage.imagesSize.formatted(.byteCount(style: .file))) · "
+                    "Storage: images \(Formatters.bytes(usage.imagesSize, style: .file)) · "
                         + "containers \(usage.containersCount) · "
                         + "volumes \(usage.volumesCount)"
                 )
@@ -186,7 +180,7 @@ private struct ImageRow: View {
                 Text(image.displayName)
                     .font(.headline)
                     .lineLimit(1)
-                Text("\(image.sizeDisplay) · \(image.createdDate.formatted(.relative(presentation: .named)))")
+                Text("\(image.sizeDisplay) · \(Formatters.relative(image.createdDate))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -317,7 +311,7 @@ struct ImageDetailView: View {
                             .help(row.entry.createdBy)
                     }
                     TableColumn("Size") { (row: IndexedHistory) in
-                        Text(row.entry.size.formatted(.byteCount(style: .file)))
+                        Text(Formatters.bytes(row.entry.size, style: .file))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

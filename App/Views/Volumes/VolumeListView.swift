@@ -93,10 +93,7 @@ struct VolumeListView: View {
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.name ?? "volume")?",
-            isPresented: Binding(
-                get: { removeTarget != nil },
-                set: { if !$0 { removeTarget = nil } }
-            ),
+            isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget
         ) { volume in
@@ -163,7 +160,7 @@ struct VolumeDetailView: View {
                             Fact("Scope", volume.scope)
                             Fact("Mountpoint", volume.mountpoint)
                             if let usage = volume.usageData, usage.size >= 0 {
-                                Fact("Size", usage.size.formatted(.byteCount(style: .file)))
+                                Fact("Size", Formatters.bytes(usage.size, style: .file))
                             }
                             if !volume.createdAt.isEmpty {
                                 Fact("Created", Formatters.relative(fromRFC3339: volume.createdAt))

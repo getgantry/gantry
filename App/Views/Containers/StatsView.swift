@@ -173,7 +173,7 @@ struct StatsView: View {
                 AxisMarks { value in
                     AxisGridLine()
                     if let bytes = value.as(Double.self) {
-                        AxisValueLabel { Text(Int64(bytes).formatted(.byteCount(style: .memory))) }
+                        AxisValueLabel { Text(Formatters.bytes(Int64(bytes))) }
                     }
                 }
             }
@@ -184,8 +184,8 @@ struct StatsView: View {
 
     private var memoryValue: String {
         guard let s = samples.last else { return "—" }
-        let used = s.memoryUsageBytes.formatted(.byteCount(style: .memory))
-        let limit = s.memoryLimitBytes.formatted(.byteCount(style: .memory))
+        let used = Formatters.bytes(s.memoryUsageBytes)
+        let limit = Formatters.bytes(s.memoryLimitBytes)
         let pct = s.memoryPercent.formatted(.number.precision(.fractionLength(0)))
         return "\(used) / \(limit) (\(pct) %)"
     }
@@ -193,72 +193,57 @@ struct StatsView: View {
     // MARK: - Network
 
     private var networkCard: some View {
-        let points = rates { ($0.networkRxBytes, $0.networkTxBytes) }
-        let latest = points.last
-        return card("Network", systemImage: "network") {
-            HStack(spacing: 16) {
-                rateLabel("RX", latest?.first, color: .blue)
-                rateLabel("TX", latest?.second, color: .orange)
-            }
-        } chart: {
-            Chart(points) { point in
-                LineMark(
-                    x: .value("Time", point.at),
-                    y: .value("Bytes/s", point.first),
-                    series: .value("Series", "RX")
-                )
-                .foregroundStyle(by: .value("Series", "RX"))
-                .interpolationMethod(.monotone)
-                LineMark(
-                    x: .value("Time", point.at),
-                    y: .value("Bytes/s", point.second),
-                    series: .value("Series", "TX")
-                )
-                .foregroundStyle(by: .value("Series", "TX"))
-                .interpolationMethod(.monotone)
-            }
-            .chartForegroundStyleScale(["RX": Color.blue, "TX": Color.orange])
-            .chartLegend(position: .bottom)
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                    if let bytes = value.as(Double.self) {
-                        AxisValueLabel { Text(rateString(bytes)) }
-                    }
-                }
-            }
-            .modifier(TimeAxis())
-        }
+        dualSeriesCard(
+            title: "Network", systemImage: "network",
+            labels: ("RX", "TX"), colors: (.blue, .orange),
+            extract: { ($0.networkRxBytes, $0.networkTxBytes) }
+        )
     }
 
     // MARK: - Disk I/O
 
     private var diskCard: some View {
-        let points = rates { ($0.blockReadBytes, $0.blockWriteBytes) }
+        dualSeriesCard(
+            title: "Disk I/O", systemImage: "internaldrive",
+            labels: ("Read", "Write"), colors: (.purple, .pink),
+            extract: { ($0.blockReadBytes, $0.blockWriteBytes) }
+        )
+    }
+
+    /// A metric card charting two per-second rate series (derived from a pair of
+    /// cumulative counters) with current-value labels and a shared y-axis.
+    private func dualSeriesCard(
+        title: String,
+        systemImage: String,
+        labels: (String, String),
+        colors: (Color, Color),
+        extract: (ContainerStatsSample) -> (Int64, Int64)
+    ) -> some View {
+        let points = rates(extract)
         let latest = points.last
-        return card("Disk I/O", systemImage: "internaldrive") {
+        return card(title, systemImage: systemImage) {
             HStack(spacing: 16) {
-                rateLabel("Read", latest?.first, color: .purple)
-                rateLabel("Write", latest?.second, color: .pink)
+                rateLabel(labels.0, latest?.first, color: colors.0)
+                rateLabel(labels.1, latest?.second, color: colors.1)
             }
         } chart: {
             Chart(points) { point in
                 LineMark(
                     x: .value("Time", point.at),
                     y: .value("Bytes/s", point.first),
-                    series: .value("Series", "Read")
+                    series: .value("Series", labels.0)
                 )
-                .foregroundStyle(by: .value("Series", "Read"))
+                .foregroundStyle(by: .value("Series", labels.0))
                 .interpolationMethod(.monotone)
                 LineMark(
                     x: .value("Time", point.at),
                     y: .value("Bytes/s", point.second),
-                    series: .value("Series", "Write")
+                    series: .value("Series", labels.1)
                 )
-                .foregroundStyle(by: .value("Series", "Write"))
+                .foregroundStyle(by: .value("Series", labels.1))
                 .interpolationMethod(.monotone)
             }
-            .chartForegroundStyleScale(["Read": Color.purple, "Write": Color.pink])
+            .chartForegroundStyleScale([labels.0: colors.0, labels.1: colors.1])
             .chartLegend(position: .bottom)
             .chartYAxis {
                 AxisMarks { value in
@@ -318,7 +303,7 @@ struct StatsView: View {
     }
 
     private func rateString(_ bytesPerSecond: Double) -> String {
-        Int64(bytesPerSecond).formatted(.byteCount(style: .memory)) + "/s"
+        Formatters.bytes(Int64(bytesPerSecond)) + "/s"
     }
 
     // MARK: - Card

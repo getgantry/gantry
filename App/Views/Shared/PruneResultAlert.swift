@@ -10,7 +10,7 @@ struct PruneOutcome: Identifiable {
 
     /// "N deleted, X freed" with a byte-count formatted reclaimed size.
     var summary: String {
-        let freed = result.spaceReclaimed.formatted(.byteCount(style: .file))
+        let freed = Formatters.bytes(result.spaceReclaimed, style: .file)
         let noun = result.deletedCount == 1 ? "item" : "items"
         return "\(result.deletedCount) \(noun) deleted, \(freed) freed"
     }
@@ -21,10 +21,7 @@ extension View {
     func pruneResultAlert(_ outcome: Binding<PruneOutcome?>) -> some View {
         alert(
             outcome.wrappedValue?.title ?? "Prune Complete",
-            isPresented: Binding(
-                get: { outcome.wrappedValue != nil },
-                set: { if !$0 { outcome.wrappedValue = nil } }
-            ),
+            isPresented: Binding(presence: outcome),
             presenting: outcome.wrappedValue
         ) { _ in
             Button("OK", role: .cancel) { outcome.wrappedValue = nil }

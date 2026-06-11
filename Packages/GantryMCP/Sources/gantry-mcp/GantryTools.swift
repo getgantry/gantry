@@ -167,27 +167,20 @@ actor GantryTools {
 
     private func listContainers(_ args: Arguments) async throws -> CallTool.Result {
         let all = args.bool("all", default: true)
-        let hosts = try targetHosts(args)
-        var results: [ContainerListDTO] = []
-        for host in hosts {
-            do {
-                let client = try await docker.connect(to: host)
-                let containers = try await client.listContainers(all: all)
-                results.append(ContainerListDTO(
+        let results = try await forEachHost(
+            args,
+            body: { host, client in
+                ContainerListDTO(
                     hostID: host.id.uuidString,
                     hostName: host.name,
-                    containers: containers.map(ContainerDTO.init),
+                    containers: try await client.listContainers(all: all).map(ContainerDTO.init),
                     error: nil
-                ))
-            } catch {
-                results.append(ContainerListDTO(
-                    hostID: host.id.uuidString,
-                    hostName: host.name,
-                    containers: [],
-                    error: readable(error)
-                ))
+                )
+            },
+            failure: { host, error in
+                ContainerListDTO(hostID: host.id.uuidString, hostName: host.name, containers: [], error: error)
             }
-        }
+        )
         return .text(try jsonText(results))
     }
 
@@ -270,65 +263,50 @@ actor GantryTools {
     }
 
     private func listImages(_ args: Arguments) async throws -> CallTool.Result {
-        let hosts = try targetHosts(args)
-        var results: [ImageListDTO] = []
-        for host in hosts {
-            do {
-                let client = try await docker.connect(to: host)
-                let images = try await client.listImages()
-                results.append(ImageListDTO(
+        let results = try await forEachHost(
+            args,
+            body: { host, client in
+                ImageListDTO(
                     hostID: host.id.uuidString, hostName: host.name,
-                    images: images.map(ImageDTO.init), error: nil
-                ))
-            } catch {
-                results.append(ImageListDTO(
-                    hostID: host.id.uuidString, hostName: host.name,
-                    images: [], error: readable(error)
-                ))
+                    images: try await client.listImages().map(ImageDTO.init), error: nil
+                )
+            },
+            failure: { host, error in
+                ImageListDTO(hostID: host.id.uuidString, hostName: host.name, images: [], error: error)
             }
-        }
+        )
         return .text(try jsonText(results))
     }
 
     private func listVolumes(_ args: Arguments) async throws -> CallTool.Result {
-        let hosts = try targetHosts(args)
-        var results: [VolumeListDTO] = []
-        for host in hosts {
-            do {
-                let client = try await docker.connect(to: host)
-                let volumes = try await client.listVolumes()
-                results.append(VolumeListDTO(
+        let results = try await forEachHost(
+            args,
+            body: { host, client in
+                VolumeListDTO(
                     hostID: host.id.uuidString, hostName: host.name,
-                    volumes: volumes.map(VolumeDTO.init), error: nil
-                ))
-            } catch {
-                results.append(VolumeListDTO(
-                    hostID: host.id.uuidString, hostName: host.name,
-                    volumes: [], error: readable(error)
-                ))
+                    volumes: try await client.listVolumes().map(VolumeDTO.init), error: nil
+                )
+            },
+            failure: { host, error in
+                VolumeListDTO(hostID: host.id.uuidString, hostName: host.name, volumes: [], error: error)
             }
-        }
+        )
         return .text(try jsonText(results))
     }
 
     private func listNetworks(_ args: Arguments) async throws -> CallTool.Result {
-        let hosts = try targetHosts(args)
-        var results: [NetworkListDTO] = []
-        for host in hosts {
-            do {
-                let client = try await docker.connect(to: host)
-                let networks = try await client.listNetworks()
-                results.append(NetworkListDTO(
+        let results = try await forEachHost(
+            args,
+            body: { host, client in
+                NetworkListDTO(
                     hostID: host.id.uuidString, hostName: host.name,
-                    networks: networks.map(NetworkDTO.init), error: nil
-                ))
-            } catch {
-                results.append(NetworkListDTO(
-                    hostID: host.id.uuidString, hostName: host.name,
-                    networks: [], error: readable(error)
-                ))
+                    networks: try await client.listNetworks().map(NetworkDTO.init), error: nil
+                )
+            },
+            failure: { host, error in
+                NetworkListDTO(hostID: host.id.uuidString, hostName: host.name, networks: [], error: error)
             }
-        }
+        )
         return .text(try jsonText(results))
     }
 
@@ -340,6 +318,28 @@ actor GantryTools {
     }
 
     // MARK: - Helpers
+
+    /// Runs `body` against each target host's connected client, collecting one
+    /// `DTO` per host. A connection or query failure for a single host is turned
+    /// into an error DTO via `failure` so one unreachable host doesn't fail the
+    /// whole call.
+    private func forEachHost<DTO>(
+        _ args: Arguments,
+        body: (DockerHost, DockerClient) async throws -> DTO,
+        failure: (DockerHost, String) -> DTO
+    ) async throws -> [DTO] {
+        let hosts = try targetHosts(args)
+        var results: [DTO] = []
+        for host in hosts {
+            do {
+                let client = try await docker.connect(to: host)
+                results.append(try await body(host, client))
+            } catch {
+                results.append(failure(host, readable(error)))
+            }
+        }
+        return results
+    }
 
     private func readable(_ error: Error) -> String {
         (error as? LocalizedError)?.errorDescription ?? "\(error)"

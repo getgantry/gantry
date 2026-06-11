@@ -157,10 +157,7 @@ struct ContainerListView: View {
         }
         .confirmationDialog(
             "Remove \(removeTarget?.displayName ?? "container")?",
-            isPresented: Binding(
-                get: { removeTarget != nil },
-                set: { if !$0 { removeTarget = nil } }
-            ),
+            isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget
         ) { container in
@@ -616,10 +613,7 @@ struct RenameAlert: ViewModifier {
     func body(content: Content) -> some View {
         content.alert(
             "Rename Container",
-            isPresented: Binding(
-                get: { target != nil },
-                set: { if !$0 { target = nil } }
-            ),
+            isPresented: Binding(presence: $target),
             presenting: target
         ) { container in
             TextField("Name", text: $text)

@@ -75,7 +75,7 @@ struct MachineListView: View {
     }
 
     private var deleteDialogBinding: Binding<Bool> {
-        Binding(get: { deleteTarget != nil }, set: { if !$0 { deleteTarget = nil } })
+        Binding(presence: $deleteTarget)
     }
 
     /// Marks a machine busy while an async action runs (disables its buttons).
@@ -91,17 +91,9 @@ struct MachineListView: View {
     /// `machine run` allocates a PTY; routing it through Terminal keeps the
     /// session fully interactive.
     private func openShell(_ name: String) {
-        guard let command = AppleContainerControl.shellCommand(
+        AppleContainerControl.openShellInTerminal(
             for: name, cliOverride: session.host.socketPathOverride
-        ) else { return }
-        let line = ([command.path] + command.args)
-            .map { $0.contains(" ") ? "'\($0)'" : $0 }
-            .joined(separator: " ")
-        let script = "tell application \"Terminal\"\nactivate\ndo script \"\(line)\"\nend tell"
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        try? process.run()
+        )
     }
 }
 
@@ -179,11 +171,14 @@ private struct MachineRow: View {
     }
 
     private var statusPill: some View {
-        Text(machine.status.capitalized)
-            .font(.caption2.weight(.medium))
-            .padding(.horizontal, 6).padding(.vertical, 1)
-            .background((machine.isRunning ? Color.green : Color.secondary).opacity(0.18), in: Capsule())
-            .foregroundStyle(machine.isRunning ? .green : .secondary)
+        BadgePill(
+            text: machine.status.capitalized,
+            tint: machine.isRunning ? .green : .secondary,
+            font: .caption2.weight(.medium),
+            opacity: 0.18,
+            horizontalPadding: 6,
+            verticalPadding: 1
+        )
     }
 
     private var resourceSummary: String {
@@ -416,16 +411,8 @@ struct MachineDetailView: View {
     }
 
     private func openShell() {
-        guard let command = AppleContainerControl.shellCommand(
+        AppleContainerControl.openShellInTerminal(
             for: machine.id, cliOverride: session.host.socketPathOverride
-        ) else { return }
-        let line = ([command.path] + command.args)
-            .map { $0.contains(" ") ? "'\($0)'" : $0 }
-            .joined(separator: " ")
-        let script = "tell application \"Terminal\"\nactivate\ndo script \"\(line)\"\nend tell"
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        try? process.run()
+        )
     }
 }

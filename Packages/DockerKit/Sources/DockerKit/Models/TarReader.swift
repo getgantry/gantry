@@ -74,6 +74,38 @@ public enum TarReader {
         return entries
     }
 
+    /// Returns the payload of the first regular file in `data`, or nil if the
+    /// archive contains no regular-file member. Long-name/PAX extension headers
+    /// are skipped, mirroring `entries(in:)`.
+    public static func firstFilePayload(in data: Data) -> Data? {
+        let bytes = [UInt8](data)
+        var offset = 0
+
+        while offset + blockSize <= bytes.count {
+            let header = Array(bytes[offset ..< offset + blockSize])
+            offset += blockSize
+
+            if header.allSatisfy({ $0 == 0 }) { break }
+
+            let size = octal(header, at: 124, length: 12)
+            let typeFlag = header[156]
+
+            switch typeFlag {
+            case UInt8(ascii: "x"), UInt8(ascii: "g"), UInt8(ascii: "L"):
+                // Extension header; the real file header follows.
+                offset += paddedLength(size)
+            case UInt8(ascii: "0"), 0:
+                let end = min(offset + Int(size), bytes.count)
+                guard offset <= end else { return nil }
+                return data.subdata(in: offset ..< end)
+            default:
+                offset += paddedLength(size)
+            }
+        }
+
+        return nil
+    }
+
     // MARK: - Field decoding
 
     /// Reconstructs the member name from the ustar `name` and `prefix` fields.

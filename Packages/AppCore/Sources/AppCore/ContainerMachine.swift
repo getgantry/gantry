@@ -175,6 +175,20 @@ extension AppleContainerControl {
         return (cli, ["machine", "run", "-n", name])
     }
 
+    /// Opens an interactive shell into a machine in Terminal.app via AppleScript.
+    /// No-op if the CLI can't be located.
+    public static func openShellInTerminal(for name: String, cliOverride: String? = nil) {
+        guard let command = shellCommand(for: name, cliOverride: cliOverride) else { return }
+        let line = ([command.path] + command.args)
+            .map { $0.contains(" ") ? "'\($0)'" : $0 }
+            .joined(separator: " ")
+        let script = "tell application \"Terminal\"\nactivate\ndo script \"\(line)\"\nend tell"
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script]
+        try? process.run()
+    }
+
     @discardableResult
     private static func runMachine(_ arguments: [String], cliOverride: String?) async throws -> String {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }

@@ -145,12 +145,14 @@ struct ContainerDetailView: View {
     }
 
     private var stateBadge: some View {
-        Text(container.state.label)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(container.state.tint.opacity(0.18), in: .capsule)
-            .foregroundStyle(container.state.tint)
+        BadgePill(
+            text: container.state.label,
+            tint: container.state.tint,
+            font: .caption.weight(.semibold),
+            opacity: 0.18,
+            horizontalPadding: 10,
+            verticalPadding: 5
+        )
     }
 
     @ViewBuilder
@@ -208,7 +210,7 @@ private struct ContainerOverview: View {
                 } else if let details {
                     stateSection(details)
                     AppleAddressSection(session: session, container: container, details: details)
-                    portsSection(details)
+                    PortsSection(session: session, container: container)
                     mountsSection(details)
                     networksSection(details)
                     configSection(details)
@@ -261,11 +263,6 @@ private struct ContainerOverview: View {
                 }
             }
         }
-    }
-
-    @ViewBuilder
-    private func portsSection(_ d: ContainerDetails) -> some View {
-        PortsSection(session: session, container: container)
     }
 
     @ViewBuilder

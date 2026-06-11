@@ -175,10 +175,7 @@ struct PortsSection: View {
     }
 
     private var editAlertBinding: Binding<Bool> {
-        Binding(
-            get: { editingForward != nil },
-            set: { if !$0 { editingForward = nil } }
-        )
+        Binding(presence: $editingForward)
     }
 
     private func applyEditedPort() {

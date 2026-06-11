@@ -259,10 +259,7 @@ struct ContentView: View {
     }
 
     private var removalDialogBinding: Binding<Bool> {
-        Binding(
-            get: { confirmRemoval != nil },
-            set: { if !$0 { confirmRemoval = nil } }
-        )
+        Binding(presence: $confirmRemoval)
     }
 
     private var hostKeySheetBinding: Binding<Bool> {

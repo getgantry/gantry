@@ -433,48 +433,10 @@ struct ContainerFileTransfer: Transferable {
             return url
         } else {
             let url = dir.appendingPathComponent(name)
-            let contents = Self.singleFilePayload(fromArchive: buffer) ?? Data()
+            let contents = TarReader.firstFilePayload(in: buffer) ?? Data()
             try contents.write(to: url)
             return url
         }
     }
 
-    /// Extracts the first regular-file payload from a tar archive.
-    private static func singleFilePayload(fromArchive data: Data) -> Data? {
-        let bytes = [UInt8](data)
-        let block = 512
-        var offset = 0
-        while offset + block <= bytes.count {
-            let header = Array(bytes[offset ..< offset + block])
-            offset += block
-            if header.allSatisfy({ $0 == 0 }) { break }
-
-            // size field (octal, 12 bytes at 124).
-            var size = 0
-            for i in 124..<136 {
-                let b = header[i]
-                if b == 0 || b == UInt8(ascii: " ") {
-                    if size != 0 { break } else { continue }
-                }
-                guard b >= UInt8(ascii: "0"), b <= UInt8(ascii: "7") else { break }
-                size = size * 8 + Int(b - UInt8(ascii: "0"))
-            }
-            let padded = ((size + block - 1) / block) * block
-            let typeFlag = header[156]
-
-            // Skip GNU/PAX long-name extension headers; the next header is the file.
-            if typeFlag == UInt8(ascii: "L") || typeFlag == UInt8(ascii: "x") || typeFlag == UInt8(ascii: "g") {
-                offset += padded
-                continue
-            }
-
-            if typeFlag == UInt8(ascii: "0") || typeFlag == 0 {
-                let end = min(offset + size, bytes.count)
-                guard offset <= end else { return nil }
-                return data.subdata(in: offset ..< end)
-            }
-            offset += padded
-        }
-        return nil
-    }
 }

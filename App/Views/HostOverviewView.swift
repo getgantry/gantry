@@ -105,8 +105,8 @@ struct HostOverviewView: View {
             title: "Memory",
             systemImage: "memorychip",
             fraction: min(Double(used) / Double(total), 1.0),
-            centerText: used.formatted(.byteCount(style: .memory)),
-            caption: "of \(info.memTotal.formatted(.byteCount(style: .memory))) · containers",
+            centerText: Formatters.bytes(used),
+            caption: "of \(Formatters.bytes(info.memTotal)) · containers",
             tint: .green
         )
     }
@@ -179,7 +179,7 @@ struct HostOverviewView: View {
                     .font(.headline)
                 Spacer()
                 if let diskUsage {
-                    Text("Docker data: \(totalDisk(diskUsage).formatted(.byteCount(style: .file)))")
+                    Text("Docker data: \(Formatters.bytes(totalDisk(diskUsage), style: .file))")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -192,7 +192,7 @@ struct HostOverviewView: View {
                     ForEach(segments, id: \.label) { segment in
                         HStack(spacing: 5) {
                             Circle().fill(segment.tint).frame(width: 8, height: 8)
-                            Text("\(segment.label) \(segment.size.formatted(.byteCount(style: .file)))")
+                            Text("\(segment.label) \(Formatters.bytes(segment.size, style: .file))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -259,7 +259,7 @@ struct HostOverviewView: View {
                 Fact("Architecture", info.architecture.isEmpty ? "—" : info.architecture)
                 Fact("Docker", info.serverVersion.isEmpty ? "—" : info.serverVersion)
                 Fact("CPUs", "\(info.ncpu)")
-                Fact("Memory", info.memTotal.formatted(.byteCount(style: .memory)))
+                Fact("Memory", Formatters.bytes(info.memTotal))
             }
         }
         .padding(14)

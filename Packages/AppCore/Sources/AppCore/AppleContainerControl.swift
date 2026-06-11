@@ -268,20 +268,42 @@ public enum AppleContainerControl {
             let errPipe = Pipe()
             process.standardOutput = outPipe
             process.standardError = errPipe
+
+            // Drain stdout and stderr concurrently via readability handlers:
+            // reading one pipe to EOF before the other can deadlock once the
+            // process fills the second pipe's buffer.
+            let collector = ProcessOutputCollector()
+            outPipe.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if data.isEmpty { handle.readabilityHandler = nil }
+                collector.appendStdout(data)
+            }
+            errPipe.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if data.isEmpty { handle.readabilityHandler = nil }
+                collector.appendStderr(data)
+            }
+            process.terminationHandler = { process in
+                let trailingOut = (try? outPipe.fileHandleForReading.readToEnd()) ?? Data()
+                let trailingErr = (try? errPipe.fileHandleForReading.readToEnd()) ?? Data()
+                outPipe.fileHandleForReading.readabilityHandler = nil
+                errPipe.fileHandleForReading.readabilityHandler = nil
+                let (outData, errData) = collector.snapshot(
+                    trailingStdout: trailingOut,
+                    trailingStderr: trailingErr
+                )
+                continuation.resume(returning: RunResult(
+                    exitCode: process.terminationStatus,
+                    stdout: String(decoding: outData, as: UTF8.self),
+                    stderr: String(decoding: errData, as: UTF8.self)
+                ))
+            }
             do {
                 try process.run()
             } catch {
+                process.terminationHandler = nil
                 continuation.resume(returning: RunResult(exitCode: -1, stdout: "", stderr: error.localizedDescription))
-                return
             }
-            let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-            let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-            continuation.resume(returning: RunResult(
-                exitCode: process.terminationStatus,
-                stdout: String(decoding: outData, as: UTF8.self),
-                stderr: String(decoding: errData, as: UTF8.self)
-            ))
         }
     }
 
@@ -299,5 +321,30 @@ public enum AppleContainerControl {
             }
             throw AppleControlError.command(message.isEmpty ? "The privileged command failed." : message)
         }
+    }
+}
+
+/// Thread-safe accumulator for a process's stdout/stderr, fed from the pipe
+/// readability handlers that drain both streams concurrently.
+private final class ProcessOutputCollector: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stdout = Data()
+    private var stderr = Data()
+
+    func appendStdout(_ data: Data) {
+        lock.lock(); defer { lock.unlock() }
+        stdout.append(data)
+    }
+
+    func appendStderr(_ data: Data) {
+        lock.lock(); defer { lock.unlock() }
+        stderr.append(data)
+    }
+
+    func snapshot(trailingStdout: Data, trailingStderr: Data) -> (Data, Data) {
+        lock.lock(); defer { lock.unlock() }
+        stdout.append(trailingStdout)
+        stderr.append(trailingStderr)
+        return (stdout, stderr)
     }
 }

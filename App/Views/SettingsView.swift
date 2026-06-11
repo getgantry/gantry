@@ -232,10 +232,7 @@ private struct HostsSettings: View {
     }
 
     private var removalDialogBinding: Binding<Bool> {
-        Binding(
-            get: { confirmRemoval != nil },
-            set: { if !$0 { confirmRemoval = nil } }
-        )
+        Binding(presence: $confirmRemoval)
     }
 
     private func reconnect(_ session: HostSession) {
@@ -283,8 +280,6 @@ private struct HostRow: View {
         case (false, false): return nil
         }
     }
-
-    private var hasStoredCredentials: Bool { storedCredentialHint != nil }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {

@@ -96,17 +96,24 @@ struct DetailSection<Content: View>: View {
     }
 }
 
-/// A small pill badge used for boolean/enum attributes (e.g. network flags).
+/// A small pill badge used for boolean/enum attributes (e.g. network flags) and
+/// status indicators. The font/padding/opacity are tunable so list rows can use
+/// a compact form while detail headers use a larger one, all sharing the single
+/// tinted-capsule rendering.
 struct BadgePill: View {
     let text: String
     var tint: Color = .accentColor
+    var font: Font = .caption.weight(.medium)
+    var opacity: Double = 0.16
+    var horizontalPadding: CGFloat = 8
+    var verticalPadding: CGFloat = 3
 
     var body: some View {
         Text(text)
-            .font(.caption.weight(.medium))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(tint.opacity(0.16), in: .capsule)
+            .font(font)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .background(tint.opacity(opacity), in: .capsule)
             .foregroundStyle(tint)
     }
 }

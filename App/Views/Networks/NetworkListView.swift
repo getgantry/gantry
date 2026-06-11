@@ -97,10 +97,7 @@ struct NetworkListView: View {
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
             "Remove \(removeTarget?.name ?? "network")?",
-            isPresented: Binding(
-                get: { removeTarget != nil },
-                set: { if !$0 { removeTarget = nil } }
-            ),
+            isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget
         ) { network in

@@ -237,12 +237,13 @@ private struct HostCard: View {
     }
 
     private func badge(_ text: String, tint: Color) -> some View {
-        Text(text)
-            .font(.caption2.weight(.medium))
-            .padding(.horizontal, 7)
-            .padding(.vertical, 2)
-            .background(tint.opacity(0.16), in: .capsule)
-            .foregroundStyle(tint)
+        BadgePill(
+            text: text,
+            tint: tint,
+            font: .caption2.weight(.medium),
+            horizontalPadding: 7,
+            verticalPadding: 2
+        )
     }
 
     // MARK: Live metrics
@@ -258,8 +259,8 @@ private struct HostCard: View {
             )
             metricCell(
                 title: "Memory",
-                value: latest.map { $0.memBytes.formatted(.byteCount(style: .memory)) } ?? "—",
-                caption: session.info.map { "of \($0.memTotal.formatted(.byteCount(style: .memory)))" } ?? "",
+                value: latest.map { Formatters.bytes($0.memBytes) } ?? "—",
+                caption: session.info.map { "of \(Formatters.bytes($0.memTotal))" } ?? "",
                 series: samples.map { ($0.date, $0.memFraction) },
                 tint: .green
             )
@@ -412,7 +413,7 @@ private struct HostCard: View {
         var parts: [String] = []
         if !info.serverVersion.isEmpty { parts.append("Docker \(info.serverVersion)") }
         if !info.operatingSystem.isEmpty { parts.append(info.operatingSystem) }
-        parts.append("\(info.ncpu) CPU · \(info.memTotal.formatted(.byteCount(style: .memory)))")
+        parts.append("\(info.ncpu) CPU · \(Formatters.bytes(info.memTotal))")
         return parts.joined(separator: " · ")
     }
 

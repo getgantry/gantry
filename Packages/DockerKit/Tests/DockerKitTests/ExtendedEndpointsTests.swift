@@ -123,6 +123,44 @@ private func tarAppend(_ buffer: inout [UInt8], name: String, payload: [UInt8], 
     #expect(entries[0].size == 4)
 }
 
+@Test func firstFilePayloadReturnsLeadingRegularFile() {
+    var buffer: [UInt8] = []
+    // A directory precedes the file; the directory must be skipped.
+    tarAppend(&buffer, name: "etc/", payload: [], typeFlag: "5")
+    tarAppend(&buffer, name: "etc/hosts", payload: Array("127.0.0.1 localhost\n".utf8), typeFlag: "0")
+    tarAppend(&buffer, name: "etc/other", payload: Array("ignored".utf8), typeFlag: "0")
+    buffer.append(contentsOf: [UInt8](repeating: 0, count: 1024))
+
+    let payload = TarReader.firstFilePayload(in: Data(buffer))
+    #expect(payload == Data("127.0.0.1 localhost\n".utf8))
+}
+
+@Test func firstFilePayloadSkipsPaxExtensionHeader() {
+    let paxRecord = "path=etc/renamed\n"
+    var lengthGuess = paxRecord.utf8.count + 4
+    var line = "\(lengthGuess) \(paxRecord)"
+    while line.utf8.count != lengthGuess {
+        lengthGuess = line.utf8.count
+        line = "\(lengthGuess) \(paxRecord)"
+    }
+
+    var buffer: [UInt8] = []
+    tarAppend(&buffer, name: "PaxHeaders/file", payload: Array(line.utf8), typeFlag: "x")
+    tarAppend(&buffer, name: "etc/truncated", payload: Array("data".utf8), typeFlag: "0")
+    buffer.append(contentsOf: [UInt8](repeating: 0, count: 1024))
+
+    #expect(TarReader.firstFilePayload(in: Data(buffer)) == Data("data".utf8))
+}
+
+@Test func firstFilePayloadReturnsNilWhenNoRegularFile() {
+    var buffer: [UInt8] = []
+    tarAppend(&buffer, name: "etc/", payload: [], typeFlag: "5")
+    tarAppend(&buffer, name: "etc/link", payload: [], typeFlag: "2")
+    buffer.append(contentsOf: [UInt8](repeating: 0, count: 1024))
+
+    #expect(TarReader.firstFilePayload(in: Data(buffer)) == nil)
+}
+
 @Test func directoryEntriesReturnsImmediateChildren() {
     var buffer: [UInt8] = []
     tarAppend(&buffer, name: "etc/", payload: [], typeFlag: "5")
