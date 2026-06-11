@@ -10,6 +10,12 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- **apple/container CLI could hang on verbose commands.** Control commands
+  (service status, machine actions) drained the process's stdout and stderr one
+  after the other, which could stall once the second stream filled its pipe
+  buffer. Both streams are now read concurrently.
+
 ## [0.14.0] - 2026-06-10
 
 
