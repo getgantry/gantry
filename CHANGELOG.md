@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.3] - 2026-06-13
+
+
 ### Fixed
 - **Detail panes no longer drift to the middle of the window on empty states.** Tabs that display a placeholder (Terminal on a stopped machine or container, Files in an error state, Inspect with no data) previously caused the entire detail view to shrink and float vertically, leaving a large gap above the header. The placeholders now fill their available space so the header stays pinned to the top.
 
@@ -248,7 +251,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.3...HEAD
+[0.14.3]: https://github.com/getgantry/gantry/releases/tag/v0.14.3
 [0.14.2]: https://github.com/getgantry/gantry/releases/tag/v0.14.2
 [0.14.1]: https://github.com/getgantry/gantry/releases/tag/v0.14.1
 [0.14.0]: https://github.com/getgantry/gantry/releases/tag/v0.14.0
