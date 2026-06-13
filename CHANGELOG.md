@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-06-13
+
+
 ### Fixed
 - **Container list could freeze on remote (SSH) hosts after a silent connection drop.** The live `/events` stream can go half-open over SSH with no error reported, leaving the container list, running/stopped state, and counts frozen — a manual Refresh also failed silently. Gantry now runs a periodic reconcile loop and reconnects automatically when the stream stalls.
 
@@ -242,7 +245,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/getgantry/gantry/releases/tag/v0.14.2
 [0.14.1]: https://github.com/getgantry/gantry/releases/tag/v0.14.1
 [0.14.0]: https://github.com/getgantry/gantry/releases/tag/v0.14.0
 [0.13.0]: https://github.com/getgantry/gantry/releases/tag/v0.13.0
