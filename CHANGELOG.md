@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- **Detail panes no longer drift to the middle of the window on empty states.** Tabs that display a placeholder (Terminal on a stopped machine or container, Files in an error state, Inspect with no data) previously caused the entire detail view to shrink and float vertically, leaving a large gap above the header. The placeholders now fill their available space so the header stays pinned to the top.
+
 ## [0.14.2] - 2026-06-13
 
 
