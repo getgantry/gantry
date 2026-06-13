@@ -97,6 +97,11 @@ public final class HostSession: Identifiable {
     /// Background sampler feeding `loadHistory`; runs while connected.
     private var loadSamplingTask: Task<Void, Never>?
 
+    /// Periodic reconcile + heartbeat; runs while connected, independent of the
+    /// event stream. Guards against missed or stalled `/events` (see
+    /// `startReconcileLoop`).
+    private var reconcileTask: Task<Void, Never>?
+
     private static let loadHistoryWindow = 120
 
     /// Pending automatic reconnect after a lost connection; cancelled by
@@ -192,6 +197,7 @@ public final class HostSession: Identifiable {
             await refreshAll()
             startEventMonitoring()
             startLoadSampling()
+            startReconcileLoop()
         } catch {
             await client.shutdown()
             guard generation == connectionGeneration else { return }
@@ -472,6 +478,8 @@ public final class HostSession: Identifiable {
         eventTask = nil
         loadSamplingTask?.cancel()
         loadSamplingTask = nil
+        reconcileTask?.cancel()
+        reconcileTask = nil
         loadHistory = []
         loadCPUBaseline = [:]
         pendingContainerRefresh?.cancel()
@@ -579,6 +587,8 @@ public final class HostSession: Identifiable {
         eventTask = nil
         loadSamplingTask?.cancel()
         loadSamplingTask = nil
+        reconcileTask?.cancel()
+        reconcileTask = nil
         sshClientFactory = nil
         liveUpdatesActive = false
         if let dead = client {
@@ -682,7 +692,16 @@ public final class HostSession: Identifiable {
     }
 
     public func refreshContainers() async {
-        await refresh(\.containers) { try await $0.listContainers(all: true) }
+        guard let client else { return }
+        if let value = await fetch({ try await client.listContainers(all: true) }) {
+            containers = value
+        } else if status.isConnected, await connectionLost() {
+            // The fetch failed and the daemon no longer answers a ping: the
+            // transport has gone half-open (a silently dropped SSH tunnel).
+            // Recover instead of sitting on a stale list — this is what makes a
+            // manual Refresh on a dead connection reconnect rather than no-op.
+            handleConnectionLoss()
+        }
     }
 
     public func refreshImages() async {
@@ -1364,6 +1383,33 @@ public struct LoadSample: Identifiable, Sendable {
 }
 
 extension HostSession {
+    /// Starts (or restarts) the periodic reconcile + heartbeat loop. Runs for
+    /// the whole connected lifetime, independent of the live event stream.
+    ///
+    /// The event stream delivers instant updates, but it has two blind spots —
+    /// especially over SSH: a `/events` message can be missed, and the stream
+    /// can silently stall when the connection goes half-open (laptop sleep,
+    /// network change, NAT timeout) — no error, no EOF, just nothing, so
+    /// `consumeEvents` waits forever. Either way the container list, the
+    /// running/stopped state, and the counts would freeze, and a manual Refresh
+    /// would fail silently against the dead tunnel.
+    ///
+    /// This loop re-fetches the full list on the configured cadence so the UI
+    /// always converges even when events are lost, and a failed round-trip whose
+    /// ping also fails hands over to the reconnect path instead of holding a
+    /// stale list (the reconnect detection lives in `refreshContainers`).
+    private func startReconcileLoop() {
+        reconcileTask?.cancel()
+        reconcileTask = Task { [weak self] in
+            while !Task.isCancelled {
+                let waited = await self?.sleepForPollInterval(retryBackoff: 0) ?? false
+                if !waited { break }
+                guard let self, !Task.isCancelled, self.status.isConnected else { continue }
+                await self.refreshContainers()
+            }
+        }
+    }
+
     /// Starts (or restarts) the background load sampler. One sample every 5 s
     /// per host, independent of every other host and of what's on screen.
     private func startLoadSampling() {
