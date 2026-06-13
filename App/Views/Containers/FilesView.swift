@@ -73,6 +73,7 @@ struct FilesView: View {
                 systemImage: "folder.badge.questionmark",
                 description: Text(errorText)
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List(selection: $selection) {
                 if path != "/" {

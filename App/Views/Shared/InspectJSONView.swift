@@ -49,6 +49,7 @@ struct InspectJSONView: View {
                     systemImage: "doc.text.magnifyingglass",
                     description: Text("Inspect data could not be loaded.")
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .task {

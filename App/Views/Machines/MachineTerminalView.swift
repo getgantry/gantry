@@ -15,6 +15,7 @@ struct MachineTerminalView: View {
                 systemImage: "pause.circle",
                 description: Text("Start the machine to open a shell.")
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let command = AppleContainerControl.shellCommand(
             for: machine.id,
             cliOverride: session.host.socketPathOverride
@@ -33,6 +34,7 @@ struct MachineTerminalView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text("The container CLI could not be located.")
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }

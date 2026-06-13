@@ -110,6 +110,7 @@ struct ContainerTerminalView: View {
                 "Container is not running",
                 systemImage: "pause.circle"
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             TerminalPane(
                 title: container.displayName,
