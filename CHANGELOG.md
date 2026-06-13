@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- **Container list could freeze on remote (SSH) hosts after a silent connection drop.** The live `/events` stream can go half-open over SSH with no error reported, leaving the container list, running/stopped state, and counts frozen — a manual Refresh also failed silently. Gantry now runs a periodic reconcile loop and reconnects automatically when the stream stalls.
+
 ## [0.14.1] - 2026-06-11
 
 
