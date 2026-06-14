@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.4] - 2026-06-14
+
+
 ### Fixed
 - **A "Docker Error" alert could pop up unprompted during background refreshes** (most often on Apple Container hosts). Automatic refreshes now fail quietly and keep the last good data; the error modal is only shown for actions you initiate.
 
@@ -254,7 +257,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.3...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.4...HEAD
+[0.14.4]: https://github.com/getgantry/gantry/releases/tag/v0.14.4
 [0.14.3]: https://github.com/getgantry/gantry/releases/tag/v0.14.3
 [0.14.2]: https://github.com/getgantry/gantry/releases/tag/v0.14.2
 [0.14.1]: https://github.com/getgantry/gantry/releases/tag/v0.14.1
