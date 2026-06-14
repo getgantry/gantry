@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- **A "Docker Error" alert could pop up unprompted during background refreshes** (most often on Apple Container hosts). Automatic refreshes now fail quietly and keep the last good data; the error modal is only shown for actions you initiate.
+
 ## [0.14.3] - 2026-06-13
 
 
