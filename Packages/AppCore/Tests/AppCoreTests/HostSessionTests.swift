@@ -58,14 +58,19 @@ import Testing
         #expect(session.networks.count == 1)
     }
 
-    @Test func refreshSurfacesErrorAndKeepsOldValue() async {
-        let (session, _) = await connectedSession { t in
-            // No /containers/json route -> 599 apiError.
-            t.on(.get, "/images/json", json: Fixtures.images)
+    @Test func refreshFailureIsSilentAndKeepsOldValue() async {
+        let (session, transport) = await connectedSession { t in
+            t.on(.get, "/containers/json", json: Fixtures.containers([("a", "running")]))
         }
         await session.refreshContainers()
-        #expect(session.containers.isEmpty)
-        #expect(session.lastError != nil)
+        #expect(session.containers.count == 1)
+        // Break the route so the next refresh fails (599 apiError).
+        transport.on(.get, "/containers/json", status: 599, json: #"{"message":"boom"}"#)
+        await session.refreshContainers()
+        // The prior list is kept, and a background refresh failure must NOT
+        // surface a blocking modal — only user actions do.
+        #expect(session.containers.count == 1)
+        #expect(session.lastError == nil)
     }
 
     // MARK: - perform / mutate
@@ -125,11 +130,13 @@ import Testing
         #expect(details?.state.running == true)
     }
 
-    @Test func detailsFailsSurfaces() async {
+    @Test func detailsFailureIsSilent() async {
         let (session, _) = await connectedSession { _ in }
         let details = await session.details(for: "missing")
         #expect(details == nil)
-        #expect(session.lastError != nil)
+        // The Overview tab renders an inline "Details Unavailable" placeholder
+        // when this returns nil; a failed inspect must not pop a modal.
+        #expect(session.lastError == nil)
     }
 
     @Test func detailsNotConnected() async {

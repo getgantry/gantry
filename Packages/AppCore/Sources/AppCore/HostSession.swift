@@ -840,14 +840,13 @@ public final class HostSession: Identifiable {
             lastError = "Not connected"
             return nil
         }
-        do {
-            let details = try await client.inspectContainer(id: containerID)
-            detailsCache[containerID] = details
-            return details
-        } catch {
-            surface(error)
-            return nil
-        }
+        // A failure here is not surfaced as the modal: the Overview tab renders
+        // its own inline "Details Unavailable" placeholder when this returns
+        // nil, and the inspect runs automatically when the tab appears, so a
+        // transient decode/fetch error must not pop a blocking alert.
+        let details = try? await client.inspectContainer(id: containerID)
+        if let details { detailsCache[containerID] = details }
+        return details
     }
 
     // MARK: - Log / stats streams
@@ -898,14 +897,19 @@ public final class HostSession: Identifiable {
 
     // MARK: - Helpers
 
-    /// Runs a throwing client call, records any error, returns the value or nil.
+    /// Runs a throwing client call for a background/periodic refresh, returning
+    /// the value or nil on failure.
+    ///
+    /// Failures are deliberately NOT surfaced as the `lastError` modal: these
+    /// calls run on a timer (the event loop and the reconcile loop poll every
+    /// few seconds), so a transient hiccup — a decode of partial CLI output
+    /// while an apple/container machine boots, a list fetched mid–state-change,
+    /// a momentarily unreachable daemon — must not interrupt the user with a
+    /// blocking alert. The previous good data simply stays on screen; genuine
+    /// connection loss is handled separately via the reconnect path, and
+    /// user-initiated actions surface their own errors through `mutate`.
     private func fetch<T>(_ body: () async throws -> T) async -> T? {
-        do {
-            return try await body()
-        } catch {
-            surface(error)
-            return nil
-        }
+        try? await body()
     }
 
     /// Runs a mutation against the client; on success runs `refresh` and
