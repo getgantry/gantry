@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.14.5] - 2026-06-15
+
+
 ### Changed
 - The menu bar icon is now a monochrome template that matches the rest of the macOS menu bar and adapts to light and dark menu bars.
 
@@ -260,7 +263,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.4...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.5...HEAD
+[0.14.5]: https://github.com/getgantry/gantry/releases/tag/v0.14.5
 [0.14.4]: https://github.com/getgantry/gantry/releases/tag/v0.14.4
 [0.14.3]: https://github.com/getgantry/gantry/releases/tag/v0.14.3
 [0.14.2]: https://github.com/getgantry/gantry/releases/tag/v0.14.2
