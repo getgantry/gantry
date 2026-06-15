@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-06-15
+
+
 ### Added
 - Private registry pulls now work everywhere — create, quick run and compose read your docker login credentials from ~/.docker/config.json, not just the Pull Image window.
 
@@ -266,7 +269,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.14.5...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/getgantry/gantry/releases/tag/v0.15.0
 [0.14.5]: https://github.com/getgantry/gantry/releases/tag/v0.14.5
 [0.14.4]: https://github.com/getgantry/gantry/releases/tag/v0.14.4
 [0.14.3]: https://github.com/getgantry/gantry/releases/tag/v0.14.3
