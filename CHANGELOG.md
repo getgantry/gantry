@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Private registry pulls now work everywhere — create, quick run and compose read your docker login credentials from ~/.docker/config.json, not just the Pull Image window.
+
 ## [0.14.5] - 2026-06-15
 
 
