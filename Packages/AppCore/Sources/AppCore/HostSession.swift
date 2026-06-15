@@ -77,6 +77,10 @@ public final class HostSession: Identifiable {
 
     private var client: DockerClient?
 
+    /// Resolves registry credentials from `~/.docker/config.json` for private
+    /// pulls (Docker/SSH hosts only). Stateless; safe to hold for the session.
+    private let registryCredentials = RegistryCredentialStore()
+
     /// Background task that consumes the daemon event stream and, when events
     /// are unavailable, polls for container changes instead.
     private var eventTask: Task<Void, Never>?
@@ -1150,7 +1154,20 @@ extension HostSession {
         guard let client else {
             throw DockerError.connectionFailed("Not connected")
         }
-        return try await client.pullImage(reference: reference, auth: auth)
+        // When the caller didn't pass explicit credentials, resolve them from
+        // `~/.docker/config.json` the way the docker CLI would. This is what
+        // lets create-and-run, quick-run and compose pull private images without
+        // each call site wiring up auth. apple/container pulls go through its own
+        // CLI, which handles auth itself, so we leave those anonymous here.
+        let resolvedAuth: RegistryAuth?
+        if let auth {
+            resolvedAuth = auth
+        } else if host.isAppleContainer {
+            resolvedAuth = nil
+        } else {
+            resolvedAuth = await registryCredentials.auth(forImageReference: reference)
+        }
+        return try await client.pullImage(reference: reference, auth: resolvedAuth)
     }
 
     /// Builds an image from a local context directory, returning the build log.
