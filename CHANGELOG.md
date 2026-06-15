@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Changed
+- The menu bar icon is now a monochrome template that matches the rest of the macOS menu bar and adapts to light and dark menu bars.
+
 ## [0.14.4] - 2026-06-14
 
 
