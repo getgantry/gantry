@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-06-16
+
+
 ### Fixed
 - Reclaim Space now shows the actually-reclaimable size/count per category instead of misleading disk-usage totals, and a slow build-cache prune no longer spins forever.
 - Host overview disk usage no longer briefly shows the previous host's data when switching hosts.
@@ -297,7 +300,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.17.2...HEAD
+[0.17.2]: https://github.com/getgantry/gantry/releases/tag/v0.17.2
 [0.17.1]: https://github.com/getgantry/gantry/releases/tag/v0.17.1
 [0.17.0]: https://github.com/getgantry/gantry/releases/tag/v0.17.0
 [0.16.0]: https://github.com/getgantry/gantry/releases/tag/v0.16.0
