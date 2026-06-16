@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-06-16
+
+
 ### Added
 - Get a macOS notification the moment a container crashes, runs out of memory, or goes unhealthy on any host — click it to jump straight to the container. Manual stops and restarts stay quiet. Toggle it in Settings > General.
 
@@ -272,7 +275,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/getgantry/gantry/releases/tag/v0.16.0
 [0.15.0]: https://github.com/getgantry/gantry/releases/tag/v0.15.0
 [0.14.5]: https://github.com/getgantry/gantry/releases/tag/v0.14.5
 [0.14.4]: https://github.com/getgantry/gantry/releases/tag/v0.14.4
