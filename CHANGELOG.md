@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Changed
+- Compose project actions (Stack Logs, Start/Stop/Restart All) are now inline buttons on the group header instead of a dropdown menu.
+
 ## [0.17.0] - 2026-06-16
 
 
