@@ -25,7 +25,12 @@ Website: **https://getgantry.github.io/**
 - **Containers** — list, inspect, start/stop/restart/kill/pause, rename, remove,
   create and run with ports/env/volumes/restart-policy, commit to image,
   export filesystem, view processes (`top`), update restart policy
-- **Images** — list, history, tag, pull with per-layer progress, remove, prune
+- **Images** — list, **build from a Dockerfile** (drag-and-drop, live build log),
+  history, tag, pull with per-layer progress, remove, prune
+- **Private registries** — pulls resolve credentials from your
+  `~/.docker/config.json` (inline `auth`, credential helpers, macOS Keychain),
+  the same `docker login` you already ran — so create-and-run, Quick Run and
+  Compose pull private images, not just the manual Pull sheet
 - **Volumes / Networks** — list, inspect, create, remove, prune,
   connect/disconnect containers
 - **Docker Compose awareness** — containers grouped by compose project with
@@ -38,6 +43,17 @@ Website: **https://getgantry.github.io/**
 - **Stats** — CPU, memory, network and disk I/O charts (Swift Charts), 1s sampling
 - **Events-driven UI** — lists update live from the Docker events stream,
   with polling fallback
+
+### Notifications
+- **Failure alerts** — a native macOS notification the moment a container
+  crashes (non-zero exit), runs out of memory, or fails its health check, on
+  any host (local, SSH, apple/container). Derived from the live events stream
+- **Click through** — opening a notification activates Gantry and jumps
+  straight to the offending container's detail view
+- **No false alarms** — stops, restarts, kills and removes you trigger from
+  Gantry are never reported as crashes, and an unhealthy container alerts once
+  per episode, not on every health re-check. Toggle the whole thing in
+  Settings ▸ General
 
 ![Live stats](assets/stats.png)
 
