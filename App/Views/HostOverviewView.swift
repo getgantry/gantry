@@ -11,6 +11,7 @@ struct HostOverviewView: View {
 
     @State private var diskUsage: SystemDiskUsage?
     @State private var refreshing = false
+    @State private var showCleanup = false
 
     /// Live load for the gauges, fed by the session's background sampler.
     private var load: LoadSample? { session.loadHistory.last }
@@ -183,6 +184,12 @@ struct HostOverviewView: View {
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
+                Button {
+                    showCleanup = true
+                } label: {
+                    Label("Reclaim Space…", systemImage: "sparkles")
+                }
+                .controlSize(.small)
             }
 
             if let diskUsage {
@@ -210,6 +217,9 @@ struct HostOverviewView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .sheet(isPresented: $showCleanup, onDismiss: { Task { diskUsage = await session.systemDF() } }) {
+            HostCleanupSheet(session: session)
+        }
     }
 
     private struct DiskSegment {
