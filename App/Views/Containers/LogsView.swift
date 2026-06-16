@@ -7,32 +7,59 @@ struct LogsView: View {
     let session: HostSession
     let container: ContainerSummary
 
-    private static let maxLines = 5000
+    /// Ring-buffer cap. Large enough to scroll real history, bounded so memory
+    /// stays sane; `LazyVStack` only builds the rows actually on screen.
+    private static let maxLines = 50_000
 
-    @State private var lines: [LogEntry] = []
+    @State private var lines: [DisplayLine] = []
     @State private var paused = false
     @State private var autoScroll = true
     @State private var search = ""
+    @State private var regexSearch = false
+    @State private var minLevel: LogLevel?
     @State private var streamError: String?
 
-    /// When true, only lines containing the query are shown; otherwise every
-    /// line is shown with matches highlighted in place.
+    /// When true, only lines matching the query are shown; otherwise every line
+    /// is shown with matches highlighted in place.
     @State private var filterOnly = false
 
-    /// Indices (into `lines`) of every line that matches the current query.
-    /// Recomputed once per (query, lines.count) change, never per row.
-    @State private var matchIndices: [Int] = []
-
-    /// Position within `matchIndices` of the currently focused match.
+    /// Line ids (within the visible set) that match the current query, in order.
+    @State private var matchLineIDs: [UInt64] = []
+    /// Position within `matchLineIDs` of the currently focused match.
     @State private var currentMatch = 0
 
     @FocusState private var searchFocused: Bool
 
-    /// Lines to render: all lines, or only matching lines in filter mode.
-    private var visibleLines: [LogEntry] {
-        guard filterOnly, !search.isEmpty else { return lines }
-        let matchSet = Set(matchIndices)
-        return lines.enumerated().filter { matchSet.contains($0.offset) }.map(\.element)
+    /// One parsed, classified log line. ANSI parsing and level detection run
+    /// once on ingest so rendering and filtering never re-parse.
+    private struct DisplayLine: Identifiable {
+        let id: UInt64
+        let stream: LogStreamType
+        let plain: String
+        let level: LogLevel?
+        let spans: [ANSISpan]
+        var hasColor: Bool { spans.contains { $0.color != nil } }
+
+        init(entry: LogEntry) {
+            id = entry.id
+            stream = entry.stream
+            spans = ANSIParser.parse(entry.text)
+            plain = spans.map(\.text).joined()
+            level = LogLevel.detect(plain)
+        }
+    }
+
+    /// Lines to render: all lines, narrowed by the level filter, and — in filter
+    /// mode — to only those matching the query.
+    private var visibleLines: [DisplayLine] {
+        var result = lines
+        if let minLevel {
+            result = result.filter { ($0.level?.severity ?? -1) >= minLevel.severity }
+        }
+        if filterOnly, isSearching {
+            result = result.filter { LogSearch.matches($0.plain, query: search, regex: regexSearch) }
+        }
+        return result
     }
 
     private var isSearching: Bool { !search.isEmpty }
@@ -51,6 +78,8 @@ struct LogsView: View {
             await consume()
         }
         .onChange(of: search) { recomputeMatches() }
+        .onChange(of: regexSearch) { recomputeMatches() }
+        .onChange(of: minLevel) { recomputeMatches() }
         .onChange(of: lines.count) { recomputeMatches() }
         .background {
             // Invisible button gives Cmd+F a target that focuses the field.
@@ -91,6 +120,8 @@ struct LogsView: View {
             }
             .help("Copy all")
 
+            levelMenu
+
             Text("\(visibleLines.count) lines")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -104,15 +135,50 @@ struct LogsView: View {
         .padding(.vertical, 8)
     }
 
+    private var levelMenu: some View {
+        Menu {
+            Button {
+                minLevel = nil
+            } label: {
+                Label("All levels", systemImage: minLevel == nil ? "checkmark" : "")
+            }
+            Divider()
+            ForEach(LogLevel.allCases.sorted(by: >), id: \.self) { level in
+                Button {
+                    minLevel = level
+                } label: {
+                    Label("\(level.displayName) and up", systemImage: minLevel == level ? "checkmark" : "")
+                }
+            }
+        } label: {
+            Image(systemName: minLevel == nil
+                  ? "line.3.horizontal.decrease.circle"
+                  : "line.3.horizontal.decrease.circle.fill")
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .help(minLevel == nil ? "Filter by level" : "Showing \(minLevel!.displayName) and up")
+    }
+
     private var searchBar: some View {
         HStack(spacing: 6) {
             HStack(spacing: 4) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField("Search", text: $search)
+                TextField(regexSearch ? "Regex" : "Search", text: $search)
                     .textFieldStyle(.plain)
                     .focused($searchFocused)
                     .onSubmit { advance(by: 1) }
+
+                Button {
+                    regexSearch.toggle()
+                } label: {
+                    Text(".*")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(regexSearch ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.plain)
+                .help(regexSearch ? "Regular expression search (on)" : "Regular expression search (off)")
 
                 if isSearching {
                     Text(matchCounterText)
@@ -131,18 +197,18 @@ struct LogsView: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
             .background(.quaternary, in: .rect(cornerRadius: 6))
-            .frame(minWidth: 110, idealWidth: 230, maxWidth: 230)
+            .frame(minWidth: 130, idealWidth: 250, maxWidth: 250)
 
             Button { advance(by: -1) } label: {
                 Image(systemName: "chevron.up")
             }
-            .disabled(matchIndices.isEmpty)
+            .disabled(matchLineIDs.isEmpty)
             .help("Previous match")
 
             Button { advance(by: 1) } label: {
                 Image(systemName: "chevron.down")
             }
-            .disabled(matchIndices.isEmpty)
+            .disabled(matchLineIDs.isEmpty)
             .help("Next match")
 
             Toggle(isOn: $filterOnly) {
@@ -154,8 +220,8 @@ struct LogsView: View {
     }
 
     private var matchCounterText: String {
-        guard !matchIndices.isEmpty else { return "0 of 0" }
-        return "\(currentMatch + 1) of \(matchIndices.count)"
+        guard !matchLineIDs.isEmpty else { return "0 of 0" }
+        return "\(currentMatch + 1) of \(matchLineIDs.count)"
     }
 
     private func errorBanner(_ message: String) -> some View {
@@ -212,29 +278,87 @@ struct LogsView: View {
         }
     }
 
-    /// Renders one log line, highlighting search matches when searching. The
-    /// line that holds the currently focused match gets a stronger highlight.
-    ///
-    /// stderr is deliberately NOT colored: many daemons (postgres, nginx)
-    /// route all routine logging to stderr, so painting it red reads as a
-    /// wall of false alarms. Only lines that look like real errors get tinted.
+    /// Renders one log line: ANSI colors applied, search matches highlighted.
+    /// The line holding the focused match gets a stronger highlight.
     @ViewBuilder
-    private func row(for entry: LogEntry) -> some View {
-        let isCurrentLine = currentMatchLineID == entry.id
-        Text(highlighted(entry.text, strong: isCurrentLine))
+    private func row(for entry: DisplayLine) -> some View {
+        Text(attributed(for: entry, strong: currentMatchLineID == entry.id))
             .font(.system(size: 11.5, design: .monospaced))
-            .foregroundStyle(Self.looksLikeError(entry.text) ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))
             .textSelection(.enabled)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// Heuristic severity check for tinting: explicit error/fatal markers
-    /// only, so routine stderr output stays in the default color.
+    /// Builds the styled line: ANSI spans → colored runs, a red tint for
+    /// error-looking lines that carry no color of their own, and yellow search
+    /// highlights mapped on by character offset.
+    ///
+    /// stderr is deliberately NOT colored wholesale: many daemons route routine
+    /// logging to stderr, so only lines that look like real errors get tinted.
+    private func attributed(for line: DisplayLine, strong: Bool) -> AttributedString {
+        var result = AttributedString()
+        for span in line.spans {
+            var seg = AttributedString(span.text)
+            if let color = span.color {
+                seg.foregroundColor = Self.color(for: color)
+            }
+            var intent: InlinePresentationIntent = []
+            if span.bold { intent.insert(.stronglyEmphasized) }
+            if span.italic { intent.insert(.emphasized) }
+            if !intent.isEmpty { seg.inlinePresentationIntent = intent }
+            result += seg
+        }
+
+        if !line.hasColor, line.level == .error || Self.looksLikeError(line.plain) {
+            result.foregroundColor = .red
+        }
+
+        if isSearching {
+            let ranges = LogSearch.matchRanges(in: line.plain, query: search, regex: regexSearch)
+            let background = Color.yellow.opacity(strong ? 0.8 : 0.4)
+            let count = result.characters.count
+            for range in ranges where range.upperBound <= count {
+                let lower = result.index(result.startIndex, offsetByCharacters: range.lowerBound)
+                let upper = result.index(result.startIndex, offsetByCharacters: range.upperBound)
+                result[lower..<upper].backgroundColor = background
+            }
+        }
+        return result
+    }
+
+    /// SwiftUI color for an ANSI color: 24-bit passes through; the 16 standard
+    /// slots use a palette tuned to read on both light and dark backgrounds.
+    private static func color(for ansi: ANSIColor) -> Color {
+        switch ansi {
+        case .rgb(let r, let g, let b):
+            Color(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+        case .standard(let index):
+            standardPalette[max(0, min(15, index))]
+        }
+    }
+
+    private static let standardPalette: [Color] = [
+        Color(red: 0.42, green: 0.42, blue: 0.42), // black → dim gray
+        Color(red: 0.90, green: 0.30, blue: 0.27), // red
+        Color(red: 0.30, green: 0.74, blue: 0.36), // green
+        Color(red: 0.82, green: 0.64, blue: 0.20), // yellow
+        Color(red: 0.34, green: 0.55, blue: 0.92), // blue
+        Color(red: 0.74, green: 0.40, blue: 0.84), // magenta
+        Color(red: 0.25, green: 0.70, blue: 0.77), // cyan
+        Color(red: 0.78, green: 0.78, blue: 0.78), // white → light gray
+        Color(red: 0.55, green: 0.55, blue: 0.55), // bright black
+        Color(red: 1.00, green: 0.42, blue: 0.38), // bright red
+        Color(red: 0.42, green: 0.85, blue: 0.46), // bright green
+        Color(red: 0.95, green: 0.78, blue: 0.30), // bright yellow
+        Color(red: 0.46, green: 0.66, blue: 1.00), // bright blue
+        Color(red: 0.86, green: 0.52, blue: 0.95), // bright magenta
+        Color(red: 0.40, green: 0.83, blue: 0.88), // bright cyan
+        Color(red: 0.95, green: 0.95, blue: 0.95)  // bright white
+    ]
+
+    /// Explicit error/fatal markers only, so routine stderr stays default-colored.
     private static func looksLikeError(_ text: String) -> Bool {
         for marker in ["error", "fatal", "panic", "critical"] {
             if let range = text.range(of: marker, options: .caseInsensitive) {
-                // Require a word-ish boundary before the marker so e.g.
-                // "stderror_count" or URLs do not light up.
                 if range.lowerBound == text.startIndex { return true }
                 let before = text[text.index(before: range.lowerBound)]
                 if !before.isLetter && !before.isNumber { return true }
@@ -243,59 +367,36 @@ struct LogsView: View {
         return false
     }
 
-    /// The `LogEntry.id` of the line containing the currently focused match,
-    /// or nil if there is no active match.
-    private var currentMatchLineID: LogEntry.ID? {
-        guard !matchIndices.isEmpty, matchIndices.indices.contains(currentMatch) else { return nil }
-        let lineIndex = matchIndices[currentMatch]
-        guard lines.indices.contains(lineIndex) else { return nil }
-        return lines[lineIndex].id
-    }
-
-    /// Builds an `AttributedString` with case-insensitive query matches given a
-    /// yellow background; the focused line uses a stronger opacity.
-    private func highlighted(_ text: String, strong: Bool) -> AttributedString {
-        var attributed = AttributedString(text)
-        guard isSearching else { return attributed }
-
-        let background = Color.yellow.opacity(strong ? 0.8 : 0.4)
-        var searchRange = text.startIndex..<text.endIndex
-        while let found = text.range(of: search, options: .caseInsensitive, range: searchRange) {
-            if let lower = AttributedString.Index(found.lowerBound, within: attributed),
-               let upper = AttributedString.Index(found.upperBound, within: attributed) {
-                attributed[lower..<upper].backgroundColor = background
-            }
-            searchRange = found.upperBound..<text.endIndex
-        }
-        return attributed
+    /// The id of the line containing the currently focused match, or nil.
+    private var currentMatchLineID: UInt64? {
+        guard matchLineIDs.indices.contains(currentMatch) else { return nil }
+        return matchLineIDs[currentMatch]
     }
 
     private let bottomAnchor = "logs.bottom"
 
     // MARK: - Search
 
-    /// Recomputes the set of matching line indices for the current query and
-    /// clamps the focused-match cursor. Runs once per query/length change.
+    /// Recomputes the ordered list of matching visible lines and clamps the
+    /// focused-match cursor. Runs once per query/regex/level/length change.
     private func recomputeMatches() {
         guard isSearching else {
-            matchIndices = []
+            matchLineIDs = []
             currentMatch = 0
             return
         }
-        var indices: [Int] = []
-        for (i, line) in lines.enumerated() where line.text.range(of: search, options: .caseInsensitive) != nil {
-            indices.append(i)
-        }
-        matchIndices = indices
-        if currentMatch >= indices.count {
-            currentMatch = max(0, indices.count - 1)
+        matchLineIDs = visibleLines
+            .filter { LogSearch.matches($0.plain, query: search, regex: regexSearch) }
+            .map(\.id)
+        if currentMatch >= matchLineIDs.count {
+            currentMatch = max(0, matchLineIDs.count - 1)
         }
     }
 
     /// Advances the focused match by `delta`, wrapping around the match list.
     private func advance(by delta: Int) {
-        guard !matchIndices.isEmpty else { return }
-        let count = matchIndices.count
+        guard !matchLineIDs.isEmpty else { return }
+        let count = matchLineIDs.count
         currentMatch = ((currentMatch + delta) % count + count) % count
     }
 
@@ -315,7 +416,7 @@ struct LogsView: View {
             let stream = try await session.logStream(for: container.id)
             for try await entry in stream {
                 if paused { continue }
-                lines.append(entry)
+                lines.append(DisplayLine(entry: entry))
                 if lines.count > Self.maxLines {
                     lines.removeFirst(lines.count - Self.maxLines)
                 }
@@ -330,6 +431,6 @@ struct LogsView: View {
     // MARK: - Actions
 
     private func copyAll() {
-        copyToPasteboard(visibleLines.map(\.text).joined(separator: "\n"))
+        copyToPasteboard(visibleLines.map(\.plain).joined(separator: "\n"))
     }
 }
