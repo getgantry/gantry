@@ -101,8 +101,8 @@ struct HostCleanupSheet: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text(category.title).fontWeight(.medium)
-                    if let size = approxSize(category) {
-                        Text(Formatters.bytes(size, style: .file))
+                    if let badge = badge(category) {
+                        Text(badge)
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
                     }
@@ -141,15 +141,31 @@ struct HostCleanupSheet: View {
         .padding(16)
     }
 
-    // MARK: - Sizes (rough, from system df totals)
+    // MARK: - What's actually reclaimable
 
-    private func approxSize(_ category: Category) -> Int64? {
-        guard let usage else { return nil }
+    /// Dangling images are those left without a usable repo tag.
+    private var danglingImages: [ImageSummary] {
+        session.images.filter { $0.repoTags.isEmpty || $0.repoTags == ["<none>:<none>"] }
+    }
+
+    /// A count/size hint computed from the live lists — the reclaimable amount,
+    /// not the system-df category total (which counts everything, in use or not,
+    /// and made "dangling images" read as 8 GB while pruning freed nothing).
+    private func badge(_ category: Category) -> String? {
         switch category {
-        case .danglingImages: return usage.layersSize > 0 ? usage.layersSize : nil
-        case .stoppedContainers: return usage.containersSize > 0 ? usage.containersSize : nil
-        case .unusedVolumes: return usage.volumesSize > 0 ? usage.volumesSize : nil
-        case .buildCache: return nil
+        case .danglingImages:
+            let images = danglingImages
+            guard !images.isEmpty else { return nil }
+            let size = images.reduce(Int64(0)) { $0 + $1.size }
+            return "\(images.count) · \(Formatters.bytes(size, style: .file))"
+        case .stoppedContainers:
+            let n = session.containers.filter { !$0.state.isRunning }.count
+            return n > 0 ? "\(n) container\(n == 1 ? "" : "s")" : nil
+        case .unusedVolumes:
+            let n = session.volumes.count
+            return n > 0 ? "\(n) volume\(n == 1 ? "" : "s")" : nil
+        case .buildCache:
+            return nil
         }
     }
 
@@ -159,18 +175,45 @@ struct HostCleanupSheet: View {
 
     // MARK: - Actions
 
+    private enum PruneOutcome { case completed(PruneResult?); case timedOut }
+
     private func clean(_ category: Category) async {
         working = category
         defer { working = nil }
-        let result: PruneResult?
-        switch category {
-        case .danglingImages: result = await session.pruneImages(dangling: true)
-        case .stoppedContainers: result = await session.pruneStoppedContainers()
-        case .unusedVolumes: result = await session.pruneVolumes()
-        case .buildCache: result = await session.pruneBuildCache()
+        switch await prune(category, timeoutSeconds: 60) {
+        case .completed(let result):
+            record(category, result)
+        case .timedOut:
+            // Build-cache prunes on a busy BuildKit daemon can take a while; let
+            // the user move on rather than watching an endless spinner.
+            results[category] = "Still running on the daemon — check back in a moment."
         }
-        record(category, result)
         usage = await session.systemDF()
+    }
+
+    private func rawPrune(_ category: Category) async -> PruneResult? {
+        switch category {
+        case .danglingImages: return await session.pruneImages(dangling: true)
+        case .stoppedContainers: return await session.pruneStoppedContainers()
+        case .unusedVolumes: return await session.pruneVolumes()
+        case .buildCache: return await session.pruneBuildCache()
+        }
+    }
+
+    /// Races the prune against a timeout so a stuck call can't freeze the UI.
+    /// The loser keeps running; only the first result drives the continuation.
+    private func prune(_ category: Category, timeoutSeconds: Double) async -> PruneOutcome {
+        await withCheckedContinuation { (cont: CheckedContinuation<PruneOutcome, Never>) in
+            let gate = ResumeGate()
+            Task { @MainActor in
+                let result = await rawPrune(category)
+                if gate.open() { cont.resume(returning: .completed(result)) }
+            }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(timeoutSeconds))
+                if gate.open() { cont.resume(returning: .timedOut) }
+            }
+        }
     }
 
     private func cleanAll() async {
@@ -189,5 +232,17 @@ struct HostCleanupSheet: View {
         reclaimedTotal += result.spaceReclaimed
         results[category] = "Freed \(Formatters.bytes(result.spaceReclaimed, style: .file))"
             + (result.deletedCount > 0 ? " · \(result.deletedCount) removed" : "")
+    }
+}
+
+/// One-shot guard so a timeout race resumes its continuation exactly once.
+/// Both racers run on the main actor, so its state is accessed serially.
+@MainActor
+private final class ResumeGate {
+    private var opened = false
+    func open() -> Bool {
+        if opened { return false }
+        opened = true
+        return true
     }
 }

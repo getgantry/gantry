@@ -60,6 +60,10 @@ struct HostOverviewView: View {
             }
         }
         .task(id: session.id) {
+            // Switching hosts reuses this view, so clear the previous host's
+            // figure immediately — otherwise its disk usage lingers on screen
+            // until the (slow) df for the new host returns.
+            diskUsage = nil
             // The gauges feed off the session's background load sampler; only
             // disk usage needs its own loop (df walks the daemon's whole
             // store, so it refreshes on a slow 30s cadence).
