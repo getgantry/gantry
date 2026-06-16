@@ -24,6 +24,7 @@ struct ContainerListView: View {
     @State private var showPruneConfirm = false
     @State private var pruneResult: PruneResult?
     @State private var showPruneResult = false
+    @State private var stackLogsTarget: StackLogsTarget?
 
     enum StateFilter: String, CaseIterable, Identifiable {
         case all = "All"
@@ -130,6 +131,9 @@ struct ContainerListView: View {
         .sheet(item: $commitTarget) { target in
             CommitImageSheet(session: session, container: target)
         }
+        .sheet(item: $stackLogsTarget) { target in
+            StackLogsView(session: session, project: target.project, containers: target.containers)
+        }
         .modifier(RenameAlert(
             target: $renameTarget,
             text: $renameText,
@@ -201,6 +205,12 @@ struct ContainerListView: View {
                 .font(.subheadline.weight(.semibold))
             Spacer()
             Menu {
+                if let name = group.name {
+                    Button {
+                        stackLogsTarget = StackLogsTarget(project: name, containers: group.containers)
+                    } label: { Label("Stack Logs", systemImage: "square.stack.3d.up") }
+                    Divider()
+                }
                 Button {
                     runOnGroup(group, .start)
                 } label: { Label("Start All", systemImage: "play.fill") }
@@ -317,6 +327,13 @@ private struct ContainerGroup: Identifiable {
     let name: String?
     let containers: [ContainerSummary]
     var id: String { name ?? "\u{0000}standalone" }
+}
+
+/// Identifies a Compose project to open merged stack logs for.
+struct StackLogsTarget: Identifiable {
+    let project: String
+    let containers: [ContainerSummary]
+    var id: String { project }
 }
 
 // MARK: - Row
