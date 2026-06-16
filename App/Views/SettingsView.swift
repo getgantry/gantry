@@ -37,6 +37,7 @@ private struct GeneralSettings: View {
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage(ContainerNotifier.preferenceKey) private var notifyContainerEvents = true
     @AppStorage(BiometricGate.preferenceKey) private var requireBiometrics = false
+    @AppStorage(TerminalTheme.preferenceKey) private var terminalTheme = "system"
 
     /// Working copy of the local host's socket override, committed on Enter or
     /// via the Reconnect button. Seeded from the live host below.
@@ -58,6 +59,12 @@ private struct GeneralSettings: View {
                     Text("Dark").tag("dark")
                 }
                 .pickerStyle(.segmented)
+
+                Picker("Terminal theme", selection: $terminalTheme) {
+                    ForEach(TerminalTheme.all) { theme in
+                        Text(theme.name).tag(theme.id)
+                    }
+                }
             } header: {
                 Text("Appearance")
             }

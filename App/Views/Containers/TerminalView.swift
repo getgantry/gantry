@@ -26,6 +26,8 @@ struct GantryTerminalView: NSViewRepresentable {
     let onInput: (Data) -> Void
     let onResize: (_ cols: Int, _ rows: Int) -> Void
 
+    @AppStorage(TerminalTheme.preferenceKey) private var themeID = "system"
+
     func makeCoordinator() -> Coordinator {
         Coordinator(onInput: onInput, onResize: onResize)
     }
@@ -34,10 +36,9 @@ struct GantryTerminalView: NSViewRepresentable {
         let view = SwiftTerm.TerminalView(frame: .zero)
         view.terminalDelegate = context.coordinator
         view.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
-        view.nativeBackgroundColor = .textBackgroundColor
-        view.nativeForegroundColor = .textColor
         // Treat the Option key as Meta so common shell shortcuts work.
         view.optionAsMetaKey = true
+        TerminalTheme.theme(id: themeID).apply(to: view)
         feedHandle.view = view
         return view
     }
@@ -45,9 +46,9 @@ struct GantryTerminalView: NSViewRepresentable {
     func updateNSView(_ nsView: SwiftTerm.TerminalView, context: Context) {
         context.coordinator.onInput = onInput
         context.coordinator.onResize = onResize
-        // Keep colors in sync with light/dark appearance changes.
-        nsView.nativeBackgroundColor = .textBackgroundColor
-        nsView.nativeForegroundColor = .textColor
+        // Re-apply the selected theme (also keeps the System theme in sync with
+        // light/dark appearance changes).
+        TerminalTheme.theme(id: themeID).apply(to: nsView)
     }
 
     @MainActor
