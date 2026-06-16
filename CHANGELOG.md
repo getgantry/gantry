@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Get a macOS notification the moment a container crashes, runs out of memory, or goes unhealthy on any host — click it to jump straight to the container. Manual stops and restarts stay quiet. Toggle it in Settings > General.
+
 ## [0.15.0] - 2026-06-15
 
 
