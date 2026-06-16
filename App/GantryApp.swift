@@ -27,6 +27,9 @@ struct GantryApp: App {
     /// Preferred app appearance: "system", "light", or "dark".
     @AppStorage("appearance") private var appearance = "system"
 
+    /// Guards one-time notification setup against repeated `onAppear` calls.
+    @State private var notificationsConfigured = false
+
     var body: some Scene {
         WindowGroup(id: "main") {
             ContentView()
@@ -39,6 +42,7 @@ struct GantryApp: App {
                 .onAppear {
                     applyAppearance(appearance)
                     applyActivationPolicy()
+                    configureNotifications()
                 }
                 .onChange(of: appearance) { _, newValue in
                     applyAppearance(newValue)
@@ -129,6 +133,17 @@ struct GantryApp: App {
         panel.message = "Choose a Dockerfile to build into an image"
         if panel.runModal() == .OK, let url = panel.url {
             AppDelegate.openDockerfile(url)
+        }
+    }
+
+    /// Wires container alerts to system notifications and requests
+    /// authorization. Runs once; later `onAppear` calls are no-ops.
+    private func configureNotifications() {
+        guard !notificationsConfigured else { return }
+        notificationsConfigured = true
+        ContainerNotifier.shared.start()
+        model.containerAlertHandler = { alert in
+            ContainerNotifier.shared.present(alert)
         }
     }
 

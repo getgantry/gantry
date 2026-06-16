@@ -35,6 +35,7 @@ private struct GeneralSettings: View {
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
     @AppStorage("showDockIcon") private var showDockIcon = true
     @AppStorage("appearance") private var appearance = "system"
+    @AppStorage(ContainerNotifier.preferenceKey) private var notifyContainerEvents = true
 
     /// Working copy of the local host's socket override, committed on Enter or
     /// via the Reconnect button. Seeded from the live host below.
@@ -121,6 +122,16 @@ private struct GeneralSettings: View {
                     .foregroundStyle(.secondary)
             } header: {
                 Text("Refresh")
+            }
+
+            Section {
+                Toggle("Notify when a container fails", isOn: $notifyContainerEvents)
+            } header: {
+                Text("Notifications")
+            } footer: {
+                Text("Send a macOS notification when a container crashes, runs out of memory, or fails its health check on any host. Manual stops and restarts are not reported. Click a notification to jump to the container.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

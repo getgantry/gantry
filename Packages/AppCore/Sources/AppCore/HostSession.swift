@@ -81,6 +81,21 @@ public final class HostSession: Identifiable {
     /// pulls (Docker/SSH hosts only). Stateless; safe to hold for the session.
     private let registryCredentials = RegistryCredentialStore()
 
+    /// Invoked on the main actor when a notable container event arrives (crash,
+    /// OOM, unhealthy). The app layer turns these into user notifications. Set
+    /// by `AppModel`; nil means alerting is off for this session.
+    @ObservationIgnored
+    public var onContainerAlert: ((ContainerAlert) -> Void)?
+
+    /// Containers currently flagged unhealthy, so a health check that keeps
+    /// reporting unhealthy notifies only on the transition into that state.
+    private var unhealthyContainers: Set<String> = []
+
+    /// Containers whose imminent exit was triggered by the user from within
+    /// Gantry (stop/restart/kill/remove). Their `die` event is expected and must
+    /// not be reported as a crash.
+    private var expectedExits: Set<String> = []
+
     /// Background task that consumes the daemon event stream and, when events
     /// are unavailable, polls for container changes instead.
     private var eventTask: Task<Void, Never>?
@@ -495,6 +510,8 @@ public final class HostSession: Identifiable {
         }
         stopAllPortForwards()
         detailsCache.removeAll()
+        unhealthyContainers.removeAll()
+        expectedExits.removeAll()
         liveUpdatesActive = false
         // Resolve any prompt left hanging by an interrupted connect attempt.
         cancelCredential()
@@ -645,6 +662,7 @@ public final class HostSession: Identifiable {
             if Task.isCancelled { break }
             switch event.type {
             case "container":
+                evaluateContainerAlert(event)
                 scheduleContainerRefresh()
             case "image":
                 await refreshImages()
@@ -659,6 +677,64 @@ public final class HostSession: Identifiable {
 
         pendingContainerRefresh?.cancel()
         pendingContainerRefresh = nil
+    }
+
+    /// Derives a user-facing alert from a container `/events` message: a
+    /// non-zero `die`, an `oom`, or a transition to unhealthy. App-initiated
+    /// stops are suppressed via `expectedExits` so a manual stop/restart never
+    /// looks like a crash. No-op when no alert handler is attached.
+    func evaluateContainerAlert(_ event: DockerEvent) {
+        guard onContainerAlert != nil else { return }
+        let id = event.actorID
+        guard !id.isEmpty else { return }
+        let name = event.containerName ?? String(id.prefix(12))
+
+        func emit(_ kind: ContainerAlert.Kind) {
+            onContainerAlert?(ContainerAlert(
+                hostID: host.id,
+                hostName: host.name,
+                containerID: id,
+                containerName: name,
+                kind: kind
+            ))
+        }
+
+        switch event.action {
+        case "oom":
+            unhealthyContainers.remove(id)
+            emit(.outOfMemory)
+        case "die":
+            let code = Int(event.actorAttributes["exitCode"] ?? "") ?? 0
+            let expected = expectedExits.remove(id) != nil
+            unhealthyContainers.remove(id)
+            if code != 0 && !expected {
+                emit(.exited(code: code))
+            }
+        case let action where action.hasPrefix("health_status"):
+            if action.contains("unhealthy") {
+                // Notify once per unhealthy episode, not on every recheck.
+                if unhealthyContainers.insert(id).inserted {
+                    emit(.unhealthy)
+                }
+            } else {
+                unhealthyContainers.remove(id)
+            }
+        case "start", "destroy", "stop", "rename":
+            unhealthyContainers.remove(id)
+        default:
+            break
+        }
+    }
+
+    /// Records that the user asked Gantry to stop/restart/kill/remove a
+    /// container, so its resulting `die` is not reported as a crash. Self-clears
+    /// after a grace period in case the daemon never emits the expected event.
+    func markExpectedExit(_ id: String) {
+        expectedExits.insert(id)
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(30))
+            self?.expectedExits.remove(id)
+        }
     }
 
     /// Schedules a container list refresh ~300ms out, coalescing any further
@@ -812,7 +888,15 @@ public final class HostSession: Identifiable {
     // MARK: - Container actions
 
     public func perform(_ action: ContainerAction, on id: String) async -> Bool {
-        await mutate(refresh: refreshContainers) { client in
+        // A user-driven stop/restart/kill/remove makes the container's exit
+        // expected, so its `die` event is not reported as a crash.
+        switch action {
+        case .stop, .restart, .kill, .remove:
+            markExpectedExit(id)
+        case .start, .pause, .unpause:
+            break
+        }
+        return await mutate(refresh: refreshContainers) { client in
             switch action {
             case .start:
                 try await client.startContainer(id: id)

@@ -9,6 +9,18 @@ public final class AppModel {
     private static let log = Logger(subsystem: "com.andrewkomkov.Gantry", category: "AppModel")
     public private(set) var sessions: [HostSession]
 
+    /// Receives notable container events (crash/OOM/unhealthy) from every
+    /// session. The app layer sets this to post system notifications. Assigning
+    /// it wires the handler into all existing sessions; new sessions inherit it.
+    @ObservationIgnored
+    public var containerAlertHandler: ((ContainerAlert) -> Void)? {
+        didSet {
+            for session in sessions {
+                session.onContainerAlert = containerAlertHandler
+            }
+        }
+    }
+
     public init() {
         let hosts = Self.loadHosts()
         sessions = hosts.map(HostSession.init)
@@ -19,7 +31,9 @@ public final class AppModel {
     }
 
     public func addHost(_ host: DockerHost) {
-        sessions.append(HostSession(host: host))
+        let session = HostSession(host: host)
+        session.onContainerAlert = containerAlertHandler
+        sessions.append(session)
         persist()
     }
 
@@ -65,6 +79,7 @@ public final class AppModel {
                 result = existing
             } else {
                 let replacement = HostSession(host: host)
+                replacement.onContainerAlert = containerAlertHandler
                 sessions[index] = replacement
                 result = replacement
             }
@@ -72,6 +87,7 @@ public final class AppModel {
             // Connection-relevant change: replace the session so the new host
             // takes effect on the next connect(). The caller reconnects.
             let replacement = HostSession(host: host)
+            replacement.onContainerAlert = containerAlertHandler
             sessions[index] = replacement
             result = replacement
         }
