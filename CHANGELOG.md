@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-06-16
+
+
 ### Added
 - Logs on steroids: regex or literal log search, a minimum-level filter (Error/Warn/Info/Debug/Trace), ANSI color rendering, and a much larger 50,000-line buffer.
 - Merged Compose stack logs: a Stack Logs action on each Compose project shows every service's output in one feed, each line tagged with its colored service name, with per-service show/hide.
@@ -284,7 +287,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/getgantry/gantry/releases/tag/v0.17.0
 [0.16.0]: https://github.com/getgantry/gantry/releases/tag/v0.16.0
 [0.15.0]: https://github.com/getgantry/gantry/releases/tag/v0.15.0
 [0.14.5]: https://github.com/getgantry/gantry/releases/tag/v0.14.5
