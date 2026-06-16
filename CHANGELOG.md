@@ -10,6 +10,10 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- Reclaim Space now shows the actually-reclaimable size/count per category instead of misleading disk-usage totals, and a slow build-cache prune no longer spins forever.
+- Host overview disk usage no longer briefly shows the previous host's data when switching hosts.
+
 ## [0.17.1] - 2026-06-16
 
 
