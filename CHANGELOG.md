@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-06-16
+
+
 ### Changed
 - Compose project actions (Stack Logs, Start/Stop/Restart All) are now inline buttons on the group header instead of a dropdown menu.
 
@@ -290,7 +293,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/getgantry/gantry/releases/tag/v0.17.1
 [0.17.0]: https://github.com/getgantry/gantry/releases/tag/v0.17.0
 [0.16.0]: https://github.com/getgantry/gantry/releases/tag/v0.16.0
 [0.15.0]: https://github.com/getgantry/gantry/releases/tag/v0.15.0
