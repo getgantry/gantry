@@ -33,13 +33,20 @@ Website: **https://getgantry.github.io/**
   Compose pull private images, not just the manual Pull sheet
 - **Volumes / Networks** — list, inspect, create, remove, prune,
   connect/disconnect containers
-- **Docker Compose awareness** — containers grouped by compose project with
-  collapsible sections and group start/stop/restart
+- **Docker Compose** — containers grouped by compose project with collapsible
+  sections and group start/stop/restart; **run a compose file on any host**
+  (local Docker, SSH or apple/container — the runner adapts per engine) with an
+  inline **YAML editor**, and open **merged stack logs** for a whole project
 - **System** — disk usage (`docker system df`), prune build cache
+- **Smart Cleanup** — a *Reclaim Space* panel that shows dangling images,
+  stopped containers, unused volumes and build cache with their sizes and prunes
+  each, or all at once, reporting how much was freed
 
 ### Live
-- **Logs** — streamed in real time with follow mode, Cmd+F search with match
-  highlighting and next/previous navigation, stderr coloring, filtering
+- **Logs** — streamed in real time with follow mode, **regex** or literal
+  Cmd+F search with match highlighting and next/previous navigation, a
+  **minimum-level filter** (Error/Warn/Info/Debug/Trace), **ANSI color**
+  rendering, and a 50k-line virtualized buffer
 - **Stats** — CPU, memory, network and disk I/O charts (Swift Charts), 1s sampling
 - **Events-driven UI** — lists update live from the Docker events stream,
   with polling fallback
@@ -94,7 +101,8 @@ Website: **https://getgantry.github.io/**
   over it — nothing to install on the server beyond Docker itself
 - Reads `~/.ssh/config` (aliases, HostName, User, Port, IdentityFile,
   **ProxyJump** — bastion chains with per-hop auth and host key checks);
-  the Add Host sheet offers one-click import of your config hosts
+  the Add Host sheet offers one-click import of your config hosts and of
+  `ssh://` **Docker contexts** (`docker context ls`)
 - ed25519 and RSA keys (openssh-key-v1, optional passphrase), password auth;
   RSA signs with **rsa-sha2-256** so it works against modern OpenSSH servers
 - Host key verification with trust-on-first-use prompts (SHA256 fingerprints),
@@ -155,6 +163,8 @@ Website: **https://getgantry.github.io/**
 - Menu bar panel listing running containers per host — open one in your browser,
   copy its `dns`/`ip:port`, stop/restart inline, or click through to its details
 - Keyboard shortcuts (Cmd+R refresh, Cmd+N new container, Cmd+F log search)
+- **Terminal themes** (System, Solarized Dark, Dracula, Nord) for the embedded shell
+- Optional **Touch ID** confirmation before removing a container or deleting a host
 - Auto-updates via **Sparkle** (EdDSA-signed appcast)
 
 ### Agent-friendly
