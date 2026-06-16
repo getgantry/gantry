@@ -8,6 +8,8 @@
 	<string>+rH5zy+DZ5DGa+Nk3s66+zJpn9EuLAaRVyWHaLl9TRI=</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Gantry uses Touch ID to confirm destructive actions like removing a container or deleting a host.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

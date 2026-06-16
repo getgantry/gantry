@@ -166,11 +166,19 @@ struct ContainerListView: View {
             presenting: removeTarget
         ) { container in
             Button("Remove", role: .destructive) {
-                Task { _ = await session.perform(.remove(force: false), on: container.id) }
+                let id = container.id, name = container.displayName
+                Task {
+                    guard await BiometricGate.confirm("remove container \(name)") else { return }
+                    _ = await session.perform(.remove(force: false), on: id)
+                }
                 removeTarget = nil
             }
             Button("Force Remove", role: .destructive) {
-                Task { _ = await session.perform(.remove(force: true), on: container.id) }
+                let id = container.id, name = container.displayName
+                Task {
+                    guard await BiometricGate.confirm("force-remove container \(name)") else { return }
+                    _ = await session.perform(.remove(force: true), on: id)
+                }
                 removeTarget = nil
             }
             Button("Cancel", role: .cancel) { removeTarget = nil }

@@ -36,6 +36,7 @@ private struct GeneralSettings: View {
     @AppStorage("showDockIcon") private var showDockIcon = true
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage(ContainerNotifier.preferenceKey) private var notifyContainerEvents = true
+    @AppStorage(BiometricGate.preferenceKey) private var requireBiometrics = false
 
     /// Working copy of the local host's socket override, committed on Enter or
     /// via the Reconnect button. Seeded from the live host below.
@@ -130,6 +131,16 @@ private struct GeneralSettings: View {
                 Text("Notifications")
             } footer: {
                 Text("Send a macOS notification when a container crashes, runs out of memory, or fails its health check on any host. Manual stops and restarts are not reported. Click a notification to jump to the container.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Confirm destructive actions with Touch ID", isOn: $requireBiometrics)
+            } header: {
+                Text("Security")
+            } footer: {
+                Text("Require Touch ID (or your login password) before removing a container or deleting a host.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -230,10 +241,14 @@ private struct HostsSettings: View {
             presenting: confirmRemoval
         ) { hostID in
             Button("Remove Host", role: .destructive) {
-                if let session = model.session(id: hostID) {
-                    Task { await session.disconnect() }
+                let name = model.session(id: hostID)?.host.name ?? "host"
+                Task {
+                    guard await BiometricGate.confirm("remove host \(name)") else { return }
+                    if let session = model.session(id: hostID) {
+                        await session.disconnect()
+                    }
+                    model.removeHost(id: hostID)
                 }
-                model.removeHost(id: hostID)
             }
             Button("Cancel", role: .cancel) {}
         } message: { hostID in
