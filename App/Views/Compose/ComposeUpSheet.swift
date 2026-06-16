@@ -2,11 +2,12 @@ import SwiftUI
 import AppCore
 import DockerKit
 
-/// Sheet that brings a `docker-compose` file up on an apple/container host.
+/// Sheet that brings a `docker-compose` file up on any connected host.
 ///
 /// Presented when a Compose file is opened from Finder (Open With / Quick
-/// Action) or the File menu. Parses the file, lets the user pick the target
-/// Apple Container host, and streams the `up` progress.
+/// Action) or the File menu. Parses the file, lets the user pick the target host
+/// (local Docker, SSH or apple/container), optionally edit the YAML inline, and
+/// streams the `up` progress.
 struct ComposeUpSheet: View {
     let fileURL: URL
 
@@ -18,6 +19,10 @@ struct ComposeUpSheet: View {
     @State private var selectedHostID: UUID?
     @State private var recreate = true
     @State private var noCache = false
+
+    @State private var editingYAML = false
+    @State private var yamlText = ""
+    @State private var yamlError: String?
 
     @State private var running = false
     @State private var finished = false
@@ -31,9 +36,9 @@ struct ComposeUpSheet: View {
         enum Kind { case info, warning, success, error, step }
     }
 
-    /// Apple Container hosts are the only valid targets for now.
-    private var appleHosts: [HostSession] {
-        model.sessions.filter { $0.host.isAppleContainer }
+    /// Every connected host is a valid target; Compose adapts per engine.
+    private var eligibleHosts: [HostSession] {
+        model.sessions
     }
 
     var body: some View {
@@ -72,16 +77,47 @@ struct ComposeUpSheet: View {
 
     @ViewBuilder
     private var content: some View {
-        if let parseError {
+        if running || finished || runError != nil {
+            runLog
+        } else if editingYAML {
+            yamlEditor
+        } else if let parseError {
             errorState(parseError)
         } else if let project {
-            if running || finished || runError != nil {
-                runLog
-            } else {
-                configForm(project)
-            }
+            configForm(project)
         } else {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var yamlEditor: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            TextEditor(text: $yamlText)
+                .font(.system(size: 12, design: .monospaced))
+                .autocorrectionDisabled()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(8)
+            if let yamlError {
+                Divider()
+                Label(yamlError, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .lineLimit(2)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Divider()
+            HStack {
+                Spacer()
+                Button("Cancel") {
+                    yamlError = nil
+                    editingYAML = false
+                }
+                Button("Apply Changes") { applyYAMLEdits() }
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding(12)
         }
     }
 
@@ -104,12 +140,12 @@ struct ComposeUpSheet: View {
                 labeled("Project") { Text(project.name).fontWeight(.medium) }
 
                 labeled("Host") {
-                    if appleHosts.isEmpty {
-                        Text("Add an Apple Container host first")
+                    if eligibleHosts.isEmpty {
+                        Text("Add a host first")
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("", selection: $selectedHostID) {
-                            ForEach(appleHosts) { session in
+                            ForEach(eligibleHosts) { session in
                                 Text(session.host.name).tag(Optional(session.id))
                             }
                         }
@@ -119,7 +155,17 @@ struct ComposeUpSheet: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Services").font(.headline)
+                    HStack {
+                        Text("Services").font(.headline)
+                        Spacer()
+                        Button {
+                            yamlError = nil
+                            editingYAML = true
+                        } label: {
+                            Label("Edit YAML", systemImage: "pencil")
+                        }
+                        .controlSize(.small)
+                    }
                     ForEach(project.services) { service in
                         serviceRow(service)
                     }
@@ -203,11 +249,11 @@ struct ComposeUpSheet: View {
             Spacer()
             Button(finished || runError != nil ? "Close" : "Cancel") { dismiss() }
                 .keyboardShortcut(.cancelAction)
-            if !finished && runError == nil {
+            if !finished && runError == nil && !editingYAML {
                 Button("Up") { Task { await runUp() } }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
-                    .disabled(project == nil || parseError != nil || appleHosts.isEmpty || running)
+                    .disabled(project == nil || parseError != nil || eligibleHosts.isEmpty || running)
             }
         }
         .padding(16)
@@ -216,12 +262,33 @@ struct ComposeUpSheet: View {
     // MARK: - Logic
 
     private func load() {
+        yamlText = (try? String(contentsOf: fileURL, encoding: .utf8)) ?? ""
         do {
             let parsed = try ComposeParser().parse(fileURL: fileURL)
             project = parsed
-            if selectedHostID == nil { selectedHostID = appleHosts.first?.id }
+            if selectedHostID == nil {
+                // Prefer a connected host, else the first available.
+                selectedHostID = eligibleHosts.first(where: { $0.status.isConnected })?.id
+                    ?? eligibleHosts.first?.id
+            }
         } catch {
             parseError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    /// Re-parses the edited YAML; on success replaces the project, writes the
+    /// edits back to the file so build contexts and env files stay consistent,
+    /// and leaves the editor.
+    private func applyYAMLEdits() {
+        do {
+            let parsed = try ComposeParser().parse(text: yamlText, fileURL: fileURL)
+            project = parsed
+            parseError = nil
+            yamlError = nil
+            try? yamlText.write(to: fileURL, atomically: true, encoding: .utf8)
+            editingYAML = false
+        } catch {
+            yamlError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 

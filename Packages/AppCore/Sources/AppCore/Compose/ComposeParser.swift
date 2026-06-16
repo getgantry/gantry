@@ -24,6 +24,15 @@ public struct ComposeParser: Sendable {
         return try parse(text: text, fileURL: fileURL, directory: directory, environment: interp)
     }
 
+    /// Parses edited YAML text for a file at `fileURL`, deriving the project
+    /// directory and interpolation environment the same way the on-disk entry
+    /// point does. Used by the in-sheet YAML editor.
+    public func parse(text: String, fileURL: URL, environment: [String: String]? = nil) throws -> ComposeProject {
+        let directory = fileURL.deletingLastPathComponent()
+        let interp = environment ?? Self.defaultEnvironment(projectDir: directory)
+        return try parse(text: text, fileURL: fileURL, directory: directory, environment: interp)
+    }
+
     /// Core parse over raw YAML text (the on-disk entry point delegates here).
     public func parse(
         text: String,

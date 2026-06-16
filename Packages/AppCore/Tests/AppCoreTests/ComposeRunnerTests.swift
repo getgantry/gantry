@@ -162,6 +162,55 @@ import Testing
         #expect(events.contains { if case .warning(let m) = $0 { return m.contains("restart") } else { return false } })
     }
 
+    @Test func appliesRestartPolicyAndAllNetworksOnDocker() async throws {
+        let yaml = """
+        services:
+          web:
+            image: nginx
+            restart: unless-stopped
+            networks: [front, back]
+        networks:
+          front: {}
+          back: {}
+        """
+        let project = try ComposeParser().parse(
+            text: yaml,
+            fileURL: URL(fileURLWithPath: "/tmp/p/docker-compose.yml"),
+            directory: URL(fileURLWithPath: "/tmp/p"),
+            environment: [:]
+        )
+
+        // A local Docker host (not apple/container): restart and multi-network
+        // are supported, so they are applied rather than warned about.
+        let transport = MockTransport()
+        transport.on(.get, "/version", json: Fixtures.version)
+        configureUpRoutes(transport)
+        let client = DockerClient(transport: transport)
+        let version = try! await client.negotiate()
+        let session = HostSession(host: DockerHost(name: "Local", kind: .local))
+        session._setConnectedClientForTesting(client, version: version)
+        await session.refreshImages()
+
+        var events: [ComposeUpEvent] = []
+        _ = try await ComposeRunner(session: session, project: project).up { events.append($0) }
+
+        #expect(!events.contains { if case .warning(let m) = $0 { return m.contains("restart") } else { return false } })
+
+        let create = try #require(transport.executed.first {
+            $0.method == .post && $0.path.hasSuffix("/containers/create")
+        })
+        let body = try #require(create.body)
+        let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+        let hostConfig = try #require(json["HostConfig"] as? [String: Any])
+        let restart = try #require(hostConfig["RestartPolicy"] as? [String: Any])
+        #expect(restart["Name"] as? String == "unless-stopped")
+
+        let networking = try #require(json["NetworkingConfig"] as? [String: Any])
+        let endpoints = try #require(networking["EndpointsConfig"] as? [String: Any])
+        #expect(endpoints["p_front"] != nil)
+        #expect(endpoints["p_back"] != nil)
+    }
+
     /// The create container name travels as a `name` query parameter.
     static func queryName(_ request: DockerRequest) -> String? {
         request.query.first { $0.name == "name" }?.value

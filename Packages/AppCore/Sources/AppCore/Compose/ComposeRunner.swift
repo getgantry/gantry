@@ -32,8 +32,10 @@ public struct ComposeUpOptions: Sendable {
 /// dependency order — labeling containers with `com.docker.compose.*` so the
 /// existing project grouping picks them up.
 ///
-/// The feature targets apple/container hosts (the only kind that serves the
-/// `/build` route); the UI gates host selection accordingly.
+/// Works on every engine the app supports — local Docker, Docker over SSH and
+/// apple/container — adapting per host: Docker honors restart policies and joins
+/// every declared network, apple/container does neither. Over SSH the daemon is
+/// remote, so bind-mount host paths must exist on the server (the runner warns).
 @MainActor
 public struct ComposeRunner {
     /// Docker Compose labels (mirrors the upstream convention).
@@ -261,24 +263,49 @@ public struct ComposeRunner {
             binds.append(mount.readOnly ? "\(source):\(mount.containerPath):ro" : "\(source):\(mount.containerPath)")
         }
 
+        let caps = session.host.capabilities
+
+        // Restart policy: Docker honors it; apple/container has no equivalent.
+        var restartPolicy: ContainerCreateRequest.RestartPolicy?
         if let restart = service.restart, restart != "no" {
-            emit(.warning("\(service.name): restart policy `\(restart)` is not supported on apple/container and was ignored."))
+            if caps.restartPolicy {
+                restartPolicy = ContainerCreateRequest.RestartPolicy(name: restart)
+            } else {
+                emit(.warning("\(service.name): restart policy `\(restart)` is not supported on apple/container and was ignored."))
+            }
         }
         if service.user != nil {
-            emit(.warning("\(service.name): `user:` is not yet applied on apple/container."))
+            emit(.warning("\(service.name): `user:` is not yet applied and was ignored."))
         }
 
-        let networks = serviceNetworks(service)
-        if networks.count > 1 {
-            emit(.warning("\(service.name): joins multiple networks; apple/container attaches only `\(networks[0])`."))
+        // Bind mounts resolve on whichever host the daemon runs on. Over SSH the
+        // daemon is remote, so a host path from the local compose file won't
+        // exist there — warn rather than silently mounting an empty directory.
+        if session.host.isSSH, service.volumes.contains(where: { if case .bind = $0.kind { return true } else { return false } }) {
+            emit(.warning("\(service.name): bind-mount host paths must exist on the remote server, not your Mac."))
         }
-        let endpoints = networks.first.map { key in
-            [networkFullName(key): ContainerCreateRequest.EndpointConfig(aliases: [service.name])]
+
+        // Networks: Docker attaches every declared network; apple/container
+        // attaches only the first.
+        let networks = serviceNetworks(service)
+        let endpoints: [String: ContainerCreateRequest.EndpointConfig]?
+        if caps.networkAttach {
+            endpoints = networks.reduce(into: [:]) { result, key in
+                result[networkFullName(key)] = ContainerCreateRequest.EndpointConfig(aliases: [service.name])
+            }
+        } else {
+            if networks.count > 1 {
+                emit(.warning("\(service.name): joins multiple networks; apple/container attaches only `\(networks[0])`."))
+            }
+            endpoints = networks.first.map { key in
+                [networkFullName(key): ContainerCreateRequest.EndpointConfig(aliases: [service.name])]
+            }
         }
 
         let hostConfig = ContainerCreateRequest.HostConfig(
             binds: binds.isEmpty ? nil : binds,
             portBindings: portBindings.isEmpty ? nil : portBindings,
+            restartPolicy: restartPolicy,
             memory: service.memoryBytes,
             nanoCPUs: service.cpus.map { Int64($0 * 1_000_000_000) },
             privileged: service.privileged ? true : nil
