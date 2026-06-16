@@ -10,6 +10,15 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Logs on steroids: regex or literal log search, a minimum-level filter (Error/Warn/Info/Debug/Trace), ANSI color rendering, and a much larger 50,000-line buffer.
+- Merged Compose stack logs: a Stack Logs action on each Compose project shows every service's output in one feed, each line tagged with its colored service name, with per-service show/hide.
+- Run Docker Compose on any host: Compose is no longer apple/container-only — bring a compose file up on local Docker or a remote SSH host too, with an inline YAML editor; the runner adapts per engine (restart policies and multi-network on Docker, remote bind-path warnings over SSH).
+- Smart Cleanup: a Reclaim Space panel on the host overview that shows dangling images, stopped containers, unused volumes and build cache with sizes and prunes each — or all — reporting how much was freed.
+- Touch ID for destructive actions: an optional Settings toggle that requires Touch ID (or your login password) before removing a container or deleting a host.
+- Import Docker contexts: the Add Host sheet can now one-click import ssh:// hosts from `docker context ls`, alongside the existing ~/.ssh/config import.
+- Terminal color themes: pick System, Solarized Dark, Dracula or Nord for the embedded shell in Settings.
+
 ## [0.16.0] - 2026-06-16
 
 
