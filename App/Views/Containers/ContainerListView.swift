@@ -208,33 +208,37 @@ struct ContainerListView: View {
     // MARK: - Group header
 
     private func groupHeader(_ group: ContainerGroup) -> some View {
-        HStack {
+        HStack(spacing: 4) {
             Text(group.name ?? "Standalone")
                 .font(.subheadline.weight(.semibold))
             Spacer()
-            Menu {
-                if let name = group.name {
-                    Button {
-                        stackLogsTarget = StackLogsTarget(project: name, containers: group.containers)
-                    } label: { Label("Stack Logs", systemImage: "square.stack.3d.up") }
-                    Divider()
+            if let name = group.name {
+                groupButton("square.stack.3d.up", "Stack Logs") {
+                    stackLogsTarget = StackLogsTarget(project: name, containers: group.containers)
                 }
-                Button {
-                    runOnGroup(group, .start)
-                } label: { Label("Start All", systemImage: "play.fill") }
-                Button {
-                    runOnGroup(group, .stop)
-                } label: { Label("Stop All", systemImage: "stop.fill") }
-                Button {
-                    runOnGroup(group, .restart)
-                } label: { Label("Restart All", systemImage: "arrow.clockwise") }
-            } label: {
-                Image(systemName: "ellipsis.circle")
             }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
-            .help("Group actions")
+            groupButton("play.fill", "Start All") { runOnGroup(group, .start) }
+            groupButton("stop.fill", "Stop All") { runOnGroup(group, .stop) }
+            groupButton("arrow.clockwise", "Restart All") { runOnGroup(group, .restart) }
         }
+        .padding(.vertical, 5)
+    }
+
+    /// An inline icon button shown on the group header row.
+    private func groupButton(
+        _ icon: String,
+        _ help: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .frame(width: 24, height: 22)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .help(help)
     }
 
     /// Runs an action across every container in a group concurrently.
