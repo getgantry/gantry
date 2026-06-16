@@ -40,6 +40,13 @@ struct AddHostSheet: View {
     private let configHosts = SSHConfig.listHosts()
     @State private var selectedConfigHost: String?
 
+    /// SSH-based Docker contexts (`docker context ls`) for one-click import.
+    private let dockerContexts: [DockerContextStore.Entry] = DockerContextStore.list().filter {
+        if case .ssh = DockerContextStore.endpoint(for: $0.host) { return true }
+        return false
+    }
+    @State private var selectedContext: String?
+
     /// Where the apple/container CLI was found, if anywhere.
     private let appleCLIPath = AppleContainerCLIDiscovery.discover()
 
@@ -157,6 +164,24 @@ struct AddHostSheet: View {
                     }
                 }
 
+                if !dockerContexts.isEmpty {
+                    Section {
+                        Picker("Import from Docker context", selection: $selectedContext) {
+                            Text("Choose a context…").tag(String?.none)
+                            ForEach(dockerContexts, id: \.name) { entry in
+                                Text(entry.name).tag(String?.some(entry.name))
+                            }
+                        }
+                        .onChange(of: selectedContext) { _, contextName in
+                            if let contextName { applyDockerContext(contextName) }
+                        }
+                    } footer: {
+                        Text("SSH contexts from docker context ls. Picking one fills the fields below.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section {
                     TextField("Name", text: $name)
                     TextField("Host", text: $host, prompt: Text("server.local or 192.168.1.10"))
@@ -258,6 +283,19 @@ struct AddHostSheet: View {
         host = alias
         port = String(resolved.port)
         user = resolved.user ?? ""
+        authChoice = .automatic
+        scheduleResolve()
+    }
+
+    /// Fills the SSH fields from a saved Docker context's `ssh://` endpoint.
+    private func applyDockerContext(_ contextName: String) {
+        guard let entry = dockerContexts.first(where: { $0.name == contextName }),
+              case .ssh(let h, let p, let u) = DockerContextStore.endpoint(for: entry.host)
+        else { return }
+        name = contextName
+        host = h
+        port = String(p)
+        user = u
         authChoice = .automatic
         scheduleResolve()
     }
