@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Cloudflare Tunnel sharing now works on apple/container hosts: the Share to the internet control appears in the container's Address section (apple/container exposes ports via the container IP rather than a published-ports list, so the Ports-section button never applied).
+
 ## [0.18.1] - 2026-06-19
 
 
