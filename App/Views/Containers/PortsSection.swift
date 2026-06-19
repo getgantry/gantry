@@ -46,7 +46,7 @@ struct PortsSection: View {
                     }
                     if !tunnels.isEmpty {
                         Divider().padding(.vertical, 2)
-                        tunnelsList
+                        CloudflareTunnelsList(session: session, tunnels: tunnels)
                     }
                 }
             }
@@ -62,7 +62,7 @@ struct PortsSection: View {
                     session: session,
                     containerID: container.id,
                     label: container.displayName,
-                    port: item.port
+                    source: .port(item.port)
                 )
             }
         }
@@ -161,73 +161,6 @@ struct PortsSection: View {
                     .help("Stop forward")
                 }
             }
-        }
-    }
-
-    // MARK: - Cloudflare tunnels
-
-    private var tunnelsList: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Shared via Cloudflare")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            ForEach(tunnels) { tunnel in
-                HStack(spacing: 8) {
-                    tunnelStatusDot(tunnel.status)
-                    Text(tunnelLabel(tunnel))
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    if case .failed(let message) = tunnel.status {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                            .help(message)
-                    }
-                    Spacer()
-                    if let url = tunnel.publicURL {
-                        Button {
-                            NSWorkspace.shared.open(url)
-                        } label: {
-                            Image(systemName: "safari")
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Open in browser")
-                        Button {
-                            copyToPasteboard(url.absoluteString)
-                        } label: {
-                            Image(systemName: "doc.on.doc")
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Copy URL")
-                    }
-                    Button {
-                        let id = tunnel.id
-                        Task { await session.stopCloudflareTunnel(id) }
-                    } label: {
-                        Image(systemName: "xmark.circle")
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Stop sharing")
-                }
-            }
-        }
-    }
-
-    private func tunnelLabel(_ tunnel: CloudflareTunnel) -> String {
-        if let url = tunnel.publicURL { return url.absoluteString }
-        return "port \(tunnel.port) → starting…"
-    }
-
-    @ViewBuilder
-    private func tunnelStatusDot(_ status: CloudflareTunnel.Status) -> some View {
-        switch status {
-        case .starting:
-            ProgressView().controlSize(.mini)
-        case .active:
-            Circle().fill(.green).frame(width: 8, height: 8)
-        case .failed:
-            Circle().fill(.red).frame(width: 8, height: 8)
         }
     }
 

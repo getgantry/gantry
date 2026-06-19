@@ -217,10 +217,10 @@ extension HostSession {
         return forward.localURL
     }
 
-    /// Starts a Cloudflare tunnel exposing `port` to the internet. Resolves a
-    /// local target (forwarding first for SSH hosts), launches `cloudflared`,
-    /// and mirrors a `CloudflareTunnel` into `cloudflareTunnels`. On failure the
-    /// tunnel's `status` is `.failed` and `lastError` is set.
+    /// Starts a Cloudflare tunnel exposing a published `port` (Docker local or
+    /// SSH) to the internet. Resolves a local target — forwarding first for SSH
+    /// hosts — then delegates to the explicit-target overload. On failure
+    /// `lastError` is set and the result is nil or `.failed`.
     @discardableResult
     public func startCloudflareTunnel(
         containerID: String,
@@ -233,7 +233,7 @@ extension HostSession {
             lastError = "This port isn't published, so it can't be shared."
             return nil
         }
-        guard let cli = CloudflaredTooling.cliPath() else {
+        guard CloudflaredTooling.cliPath() != nil else {
             lastError = "cloudflared isn't installed."
             return nil
         }
@@ -241,15 +241,44 @@ extension HostSession {
             lastError = "Could not reach this port locally to tunnel it."
             return nil
         }
+        return await startCloudflareTunnel(
+            containerID: containerID,
+            label: label,
+            port: publicPort,
+            targetURL: target,
+            mode: mode,
+            onLine: onLine
+        )
+    }
+
+    /// Starts a Cloudflare tunnel pointing `cloudflared` at an explicit local
+    /// `targetURL` (e.g. an apple/container's `http://<ip>:<port>`, which is
+    /// reachable directly without publishing). Launches `cloudflared`, mirrors a
+    /// `CloudflareTunnel` into `cloudflareTunnels`, and on failure sets the
+    /// tunnel's `status` to `.failed` and `lastError`.
+    @discardableResult
+    public func startCloudflareTunnel(
+        containerID: String,
+        label: String,
+        port: Int,
+        targetURL: URL,
+        mode: CloudflareTunnel.Mode,
+        onLine: (@Sendable (String) -> Void)? = nil
+    ) async -> CloudflareTunnel? {
+        guard let cli = CloudflaredTooling.cliPath() else {
+            lastError = "cloudflared isn't installed."
+            return nil
+        }
 
         var tunnel = CloudflareTunnel(
             containerID: containerID,
             label: label,
-            port: publicPort,
+            port: port,
             mode: mode,
             status: .starting
         )
         cloudflareTunnels.append(tunnel)
+        let target = targetURL
 
         let expectedURL: URL?
         if case .named(let hostname) = mode {

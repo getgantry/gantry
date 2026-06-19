@@ -14,6 +14,20 @@ struct AppleAddressSection: View {
     let details: ContainerDetails
 
     @State private var showAssign = false
+    /// The port being shared via Cloudflare (drives the sheet), with the IP to
+    /// point cloudflared at.
+    @State private var sharing: SharingTarget?
+
+    private struct SharingTarget: Identifiable {
+        let id = UUID()
+        let ip: String
+        let port: Int
+        var url: URL? { URL(string: "http://\(ip):\(port)") }
+    }
+
+    private var tunnels: [CloudflareTunnel] {
+        session.cloudflareTunnels.filter { $0.containerID == container.id }
+    }
 
     /// Label Gantry stamps at create time recording the `--dns-domain` used, so
     /// the resolvable hostname can be shown reliably here. Canonical definition
@@ -58,10 +72,57 @@ struct AppleAddressSection: View {
                         hostnameHint
                     }
                     assignButton
+                    if let ip, !ports.isEmpty {
+                        Divider().padding(.vertical, 2)
+                        shareSection(ip: ip)
+                    }
+                    if !tunnels.isEmpty {
+                        Divider().padding(.vertical, 2)
+                        CloudflareTunnelsList(session: session, tunnels: tunnels)
+                    }
                 }
             }
             .sheet(isPresented: $showAssign) {
                 AssignDomainSheet(session: session, container: container, details: details)
+            }
+            .sheet(item: $sharing) { target in
+                if let url = target.url {
+                    CloudflareShareSheet(
+                        session: session,
+                        containerID: container.id,
+                        label: container.displayName,
+                        source: .direct(url: url, port: target.port)
+                    )
+                }
+            }
+        }
+    }
+
+    /// Per-port "share to the internet" controls. cloudflared is pointed at the
+    /// container's routable IP (reliable, unlike a DNS name that may not resolve
+    /// from the host), so this is offered on the IP, not the hostname.
+    private func shareSection(ip: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Share to the internet")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                ForEach(ports, id: \.self) { port in
+                    Button {
+                        sharing = SharingTarget(ip: ip, port: port)
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "cloud").font(.caption2)
+                            Text(":\(String(port))").font(.caption.monospacedDigit())
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.accentColor.opacity(0.14), in: .capsule)
+                        .foregroundStyle(Color.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Share http://\(ip):\(String(port)) publicly via Cloudflare")
+                }
             }
         }
     }

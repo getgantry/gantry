@@ -6,11 +6,92 @@ import DockerKit
 /// tunnel. Installs `cloudflared` via Homebrew if missing, lets the user pick a
 /// quick tunnel (no account) or a named tunnel on their own hostname (requires
 /// `cloudflared tunnel login`), then starts the tunnel and shows its public URL.
+/// What a Cloudflare share targets: a published port (Docker local / SSH, where
+/// the local target — and any SSH forward — is resolved at start time) or a
+/// direct local URL (apple/container, reachable straight at `http://<ip>:<port>`).
+enum CloudflareShareSource {
+    case port(PortBinding)
+    case direct(url: URL, port: Int)
+
+    var displayPort: Int {
+        switch self {
+        case .port(let binding): return binding.publicPort ?? binding.privatePort
+        case .direct(_, let port): return port
+        }
+    }
+}
+
+/// The "Shared via Cloudflare" block listing a container's active tunnels with
+/// open / copy / stop controls. Shared by the Ports section (Docker/SSH) and the
+/// apple/container Address section.
+struct CloudflareTunnelsList: View {
+    let session: HostSession
+    let tunnels: [CloudflareTunnel]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Shared via Cloudflare")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            ForEach(tunnels) { tunnel in
+                HStack(spacing: 8) {
+                    statusDot(tunnel.status)
+                    Text(label(tunnel))
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    if case .failed(let message) = tunnel.status {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .help(message)
+                    }
+                    Spacer()
+                    if let url = tunnel.publicURL {
+                        Button { NSWorkspace.shared.open(url) } label: {
+                            Image(systemName: "safari")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Open in browser")
+                        Button { copyToPasteboard(url.absoluteString) } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Copy URL")
+                    }
+                    Button {
+                        let id = tunnel.id
+                        Task { await session.stopCloudflareTunnel(id) }
+                    } label: {
+                        Image(systemName: "xmark.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Stop sharing")
+                }
+            }
+        }
+    }
+
+    private func label(_ tunnel: CloudflareTunnel) -> String {
+        if let url = tunnel.publicURL { return url.absoluteString }
+        return "port \(tunnel.port) → starting…"
+    }
+
+    @ViewBuilder
+    private func statusDot(_ status: CloudflareTunnel.Status) -> some View {
+        switch status {
+        case .starting: ProgressView().controlSize(.mini)
+        case .active: Circle().fill(.green).frame(width: 8, height: 8)
+        case .failed: Circle().fill(.red).frame(width: 8, height: 8)
+        }
+    }
+}
+
 struct CloudflareShareSheet: View {
     let session: HostSession
     let containerID: String
     let label: String
-    let port: PortBinding
+    let source: CloudflareShareSource
 
     @Environment(\.dismiss) private var dismiss
 
@@ -57,7 +138,7 @@ struct CloudflareShareSheet: View {
                 .font(.system(size: 26)).foregroundStyle(.tint)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Share via Cloudflare").font(.title2.weight(.semibold))
-                Text("Expose port \(String(port.publicPort ?? port.privatePort)) of \(label) to the internet")
+                Text("Expose port \(String(source.displayPort)) of \(label) to the internet")
                     .font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
@@ -279,13 +360,26 @@ struct CloudflareShareSheet: View {
         case .quick: .quick
         case .named: .named(hostname: hostname.trimmingCharacters(in: .whitespaces))
         }
-        let tunnel = await session.startCloudflareTunnel(
-            containerID: containerID,
-            label: label,
-            port: port,
-            mode: tunnelMode,
-            onLine: logSink
-        )
+        let tunnel: CloudflareTunnel?
+        switch source {
+        case .port(let binding):
+            tunnel = await session.startCloudflareTunnel(
+                containerID: containerID,
+                label: label,
+                port: binding,
+                mode: tunnelMode,
+                onLine: logSink
+            )
+        case .direct(let url, let port):
+            tunnel = await session.startCloudflareTunnel(
+                containerID: containerID,
+                label: label,
+                port: port,
+                targetURL: url,
+                mode: tunnelMode,
+                onLine: logSink
+            )
+        }
         busy = false
         if let tunnel {
             startedTunnelID = tunnel.id
