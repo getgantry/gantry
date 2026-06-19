@@ -55,6 +55,20 @@ public struct CloudflareTunnel: Identifiable, Sendable, Hashable {
 
     // MARK: - Command construction (static, for testing)
 
+    /// Normalizes a local target URL for `cloudflared`'s origin dial. `localhost`
+    /// can resolve to IPv6 `::1` first while the published port (or SSH forward)
+    /// only listens on IPv4 `127.0.0.1` — cloudflared then can't reach the origin
+    /// and the edge serves a 502. Pinning the host to `127.0.0.1` avoids that.
+    /// A concrete address (e.g. an apple/container IP) is left untouched.
+    public static func originTarget(from url: URL) -> String {
+        guard url.host == "localhost",
+              var comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url.absoluteString
+        }
+        comps.host = "127.0.0.1"
+        return comps.url?.absoluteString ?? url.absoluteString
+    }
+
     /// The `cloudflared` arguments for a tunnel pointing at `targetURL`
     /// (a local `http://host:port` the daemon publishes the port onto).
     public static func arguments(mode: Mode, targetURL: String) -> [String] {
@@ -251,7 +265,7 @@ extension HostSession {
         do {
             try await service.start(
                 cliPath: cli,
-                arguments: CloudflareTunnel.arguments(mode: mode, targetURL: target.absoluteString),
+                arguments: CloudflareTunnel.arguments(mode: mode, targetURL: CloudflareTunnel.originTarget(from: target)),
                 expectedURL: expectedURL,
                 onLine: { line in onLine?(line) },
                 onActive: { [weak self] url in

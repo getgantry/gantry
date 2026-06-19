@@ -17,6 +17,14 @@ struct CloudflareTunnelTests {
         )
     }
 
+    @Test func originTargetPinsLocalhostToIPv4() {
+        // localhost may resolve to ::1 while the origin listens on 127.0.0.1 — pin it.
+        #expect(CloudflareTunnel.originTarget(from: URL(string: "http://localhost:8080")!) == "http://127.0.0.1:8080")
+        // A concrete address (apple/container IP, etc.) is left as-is.
+        #expect(CloudflareTunnel.originTarget(from: URL(string: "http://192.168.64.3:80")!) == "http://192.168.64.3:80")
+        #expect(CloudflareTunnel.originTarget(from: URL(string: "http://127.0.0.1:3000")!) == "http://127.0.0.1:3000")
+    }
+
     @Test func extractsQuickTunnelURL() {
         let banner = "2024-08-01T10:00:00Z INF |  https://random-words-here.trycloudflare.com  |"
         #expect(
