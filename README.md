@@ -94,6 +94,15 @@ Website: **https://getgantry.github.io/**
   `localhost` (an `ssh -L`-style tunnel over a dedicated connection). If the
   local port is taken, Gantry picks a free one — and you can edit it. Active
   forwards are listed with open/copy-URL/stop controls
+- **Share publicly via Cloudflare Tunnel** — one click on a published port
+  exposes it to the internet over [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
+  Gantry installs `cloudflared` via Homebrew if it's missing, then starts either
+  a **quick tunnel** (no Cloudflare account, an ephemeral `*.trycloudflare.com`
+  URL) or a **named tunnel** on your own hostname (after `cloudflared tunnel
+  login`). The public URL shows under the port with open/copy/stop. SSH-host
+  ports are forwarded locally first, and tunnels are torn down on disconnect —
+  great for sharing a dev server or letting an AI agent or webhook reach a
+  container running on your Mac
 
 ### Remote hosts over SSH
 - Connects exactly like `docker -H ssh://user@host`: an SSH exec channel runs
