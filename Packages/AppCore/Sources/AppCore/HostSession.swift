@@ -152,6 +152,14 @@ public final class HostSession: Identifiable {
     /// The running SSH forward services, keyed by `PortForward.id`.
     var portForwardServices: [UUID: SSHPortForward] = [:]
 
+    /// Active public Cloudflare tunnels for this host's containers, mirrored for
+    /// the UI. The running `cloudflared` processes are owned privately by
+    /// `cloudflaredServices`.
+    public internal(set) var cloudflareTunnels: [CloudflareTunnel] = []
+
+    /// The running `cloudflared` tunnel services, keyed by `CloudflareTunnel.id`.
+    var cloudflaredServices: [UUID: CloudflaredTunnelService] = [:]
+
     /// Session cache of container inspect results, so reselecting a container
     /// renders its Overview instantly while a fresh copy loads in the
     /// background. Keyed by container id; cleared on disconnect.
@@ -509,6 +517,7 @@ public final class HostSession: Identifiable {
             Task { await fs.close() }
         }
         stopAllPortForwards()
+        stopAllCloudflareTunnels()
         detailsCache.removeAll()
         unhealthyContainers.removeAll()
         expectedExits.removeAll()

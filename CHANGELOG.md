@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Share a container's published port to the internet over a Cloudflare Tunnel: a cloud button on each published port opens a sheet that installs `cloudflared` via Homebrew if needed, then starts a quick tunnel (no account, an ephemeral `*.trycloudflare.com` URL) or a named tunnel on your own hostname (after `cloudflared tunnel login`). The public URL appears under the port with open/copy/stop; SSH-host ports are forwarded locally first. Tunnels are torn down on disconnect.
+
 ## [0.17.2] - 2026-06-16
 
 

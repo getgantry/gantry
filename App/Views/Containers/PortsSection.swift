@@ -16,9 +16,21 @@ struct PortsSection: View {
     /// Forward whose local port is being edited, plus the field text.
     @State private var editingForward: PortForward?
     @State private var editPortText = ""
+    /// The port currently being shared via Cloudflare (drives the sheet).
+    @State private var sharingPort: SharablePort?
+
+    /// Identifiable wrapper so a `PortBinding` can drive `.sheet(item:)`.
+    private struct SharablePort: Identifiable {
+        let id = UUID()
+        let port: PortBinding
+    }
 
     private var forwards: [PortForward] {
         session.portForwards.filter { $0.containerID == container.id }
+    }
+
+    private var tunnels: [CloudflareTunnel] {
+        session.cloudflareTunnels.filter { $0.containerID == container.id }
     }
 
     var body: some View {
@@ -32,6 +44,10 @@ struct PortsSection: View {
                         Divider().padding(.vertical, 2)
                         forwardsList
                     }
+                    if !tunnels.isEmpty {
+                        Divider().padding(.vertical, 2)
+                        tunnelsList
+                    }
                 }
             }
             .alert("Local Port", isPresented: editAlertBinding) {
@@ -40,6 +56,14 @@ struct PortsSection: View {
                 Button("Cancel", role: .cancel) { editingForward = nil }
             } message: {
                 Text("Forward to a different local port on 127.0.0.1.")
+            }
+            .sheet(item: $sharingPort) { item in
+                CloudflareShareSheet(
+                    session: session,
+                    containerID: container.id,
+                    label: container.displayName,
+                    port: item.port
+                )
             }
         }
     }
@@ -73,6 +97,13 @@ struct PortsSection: View {
                 }
                 .buttonStyle(.borderless)
                 .help("Open in browser")
+                Button {
+                    sharingPort = SharablePort(port: port)
+                } label: {
+                    Image(systemName: "cloud")
+                }
+                .buttonStyle(.borderless)
+                .help("Share publicly via Cloudflare")
             }
         }
     }
@@ -130,6 +161,73 @@ struct PortsSection: View {
                     .help("Stop forward")
                 }
             }
+        }
+    }
+
+    // MARK: - Cloudflare tunnels
+
+    private var tunnelsList: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Shared via Cloudflare")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            ForEach(tunnels) { tunnel in
+                HStack(spacing: 8) {
+                    tunnelStatusDot(tunnel.status)
+                    Text(tunnelLabel(tunnel))
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    if case .failed(let message) = tunnel.status {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .help(message)
+                    }
+                    Spacer()
+                    if let url = tunnel.publicURL {
+                        Button {
+                            NSWorkspace.shared.open(url)
+                        } label: {
+                            Image(systemName: "safari")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Open in browser")
+                        Button {
+                            copyToPasteboard(url.absoluteString)
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Copy URL")
+                    }
+                    Button {
+                        let id = tunnel.id
+                        Task { await session.stopCloudflareTunnel(id) }
+                    } label: {
+                        Image(systemName: "xmark.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Stop sharing")
+                }
+            }
+        }
+    }
+
+    private func tunnelLabel(_ tunnel: CloudflareTunnel) -> String {
+        if let url = tunnel.publicURL { return url.absoluteString }
+        return "port \(tunnel.port) → starting…"
+    }
+
+    @ViewBuilder
+    private func tunnelStatusDot(_ status: CloudflareTunnel.Status) -> some View {
+        switch status {
+        case .starting:
+            ProgressView().controlSize(.mini)
+        case .active:
+            Circle().fill(.green).frame(width: 8, height: 8)
+        case .failed:
+            Circle().fill(.red).frame(width: 8, height: 8)
         }
     }
 
