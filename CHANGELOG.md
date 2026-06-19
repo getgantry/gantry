@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Fixed
+- Sharing a port via Cloudflare Tunnel no longer fails with a 502 Bad Gateway: cloudflared is now pointed at 127.0.0.1 instead of localhost, which could resolve to IPv6 while the published port only listened on IPv4.
+
 ## [0.18.0] - 2026-06-19
 
 
