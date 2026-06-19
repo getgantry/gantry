@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.18.2] - 2026-06-19
+
+
 ### Added
 - Cloudflare Tunnel sharing now works on apple/container hosts: the Share to the internet control appears in the container's Address section (apple/container exposes ports via the container IP rather than a published-ports list, so the Ports-section button never applied).
 
@@ -315,7 +318,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.18.1...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.18.2...HEAD
+[0.18.2]: https://github.com/getgantry/gantry/releases/tag/v0.18.2
 [0.18.1]: https://github.com/getgantry/gantry/releases/tag/v0.18.1
 [0.18.0]: https://github.com/getgantry/gantry/releases/tag/v0.18.0
 [0.17.2]: https://github.com/getgantry/gantry/releases/tag/v0.17.2
