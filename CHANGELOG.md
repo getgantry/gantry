@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-06-22
+
+
 ### Added
 - The bundled MCP server now reaches GUI parity: beyond the existing read/lifecycle tools it can create containers, rename/commit/set-restart-policy, read and write container files, list processes and inspect; pull, build, tag, remove, prune and inspect images; create/remove/inspect/prune volumes and networks and connect/disconnect containers; prune the build cache; manage apple/container machines, services and DNS domains; bring a Docker Compose project up; and expose a port publicly via a Cloudflare Tunnel or an SSH port forward. AI agents can now drive everything Gantry's UI can.
 
@@ -321,7 +324,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.18.2...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/getgantry/gantry/releases/tag/v0.19.0
 [0.18.2]: https://github.com/getgantry/gantry/releases/tag/v0.18.2
 [0.18.1]: https://github.com/getgantry/gantry/releases/tag/v0.18.1
 [0.18.0]: https://github.com/getgantry/gantry/releases/tag/v0.18.0
