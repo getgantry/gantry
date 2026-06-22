@@ -180,16 +180,25 @@ Website: **https://getgantry.github.io/**
 - **App Intents** — list/start/stop/restart containers and fetch logs from
   Shortcuts, Siri, Spotlight, or scripts (`shortcuts run`); works even when
   the app is closed
-- **MCP server** — a bundled `gantry-mcp` binary exposes hosts, containers,
-  images, volumes, networks, logs, stats, exec and disk usage as
-  [Model Context Protocol](https://modelcontextprotocol.io) tools over stdio,
-  so AI agents can manage your Docker hosts (including SSH ones):
+- **MCP server** — a bundled `gantry-mcp` binary exposes the whole app as
+  [Model Context Protocol](https://modelcontextprotocol.io) tools over stdio, so
+  AI agents can manage your Docker hosts (including SSH ones) with the same reach
+  as the GUI:
 
   ```sh
   claude mcp add gantry -- /Applications/Gantry.app/Contents/Resources/gantry-mcp
   ```
 
-  Headless SSH connections only use hosts whose keys you already trusted in the app.
+  Tools cover containers (list, lifecycle, **create**, rename, commit, restart
+  policy, processes, inspect, logs, stats, exec, **read/write files**, prune),
+  images (**pull**, **build**, tag, remove, history, inspect, prune), volumes and
+  networks (create, remove, inspect, connect/disconnect, prune), system disk
+  usage and build-cache prune, **apple/container machines, services and DNS
+  domains**, **Docker Compose up**, and exposing a port publicly via a
+  **Cloudflare Tunnel** or an **SSH port forward**. Streaming operations (pull,
+  build, compose) run to completion and return their log; tunnels and forwards
+  live as long as the server process. Headless SSH connections only use hosts
+  whose keys you already trusted in the app.
 - **Copy as Prompt** — every container (list, detail view with ⌥⌘P, menu bar,
   dashboard issues) can be copied as a paste-ready debugging prompt for an AI
   coding agent. The prompt carries the host and how to reach it (the exact

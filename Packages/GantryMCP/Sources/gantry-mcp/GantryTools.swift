@@ -6,11 +6,22 @@ import AppCore
 /// The tool catalog and dispatch for the Gantry MCP server. Owns the
 /// `HeadlessDocker` connection cache for the process lifetime.
 actor GantryTools {
-    private let docker = HeadlessDocker()
+    let docker = HeadlessDocker()
 
     // MARK: - Tool catalog
 
+    /// The full catalog: the core read/lifecycle tools plus every category
+    /// extension's tools, so the server reaches GUI parity.
     func toolDefinitions() -> [Tool] {
+        coreTools()
+            + containerTools()
+            + imageTools()
+            + volumeNetworkTools()
+            + systemAppleTools()
+            + sessionTools()
+    }
+
+    private func coreTools() -> [Tool] {
         let hostIDProp = Schema.string("Gantry host id (UUID, from list_hosts). Omit to target all hosts.")
         let hostIDRequired = Schema.string("Gantry host id (UUID, from list_hosts).")
         let containerProp = Schema.string("Container id or name.")
@@ -107,20 +118,13 @@ actor GantryTools {
     func call(name: String, arguments: [String: Value]?) async -> CallTool.Result {
         let args = Arguments(arguments)
         do {
-            switch name {
-            case "list_hosts":      return try await listHosts()
-            case "list_containers": return try await listContainers(args)
-            case "container_action": return try await containerAction(args)
-            case "container_logs":  return try await containerLogs(args)
-            case "container_stats": return try await containerStats(args)
-            case "container_exec":  return try await containerExec(args)
-            case "list_images":     return try await listImages(args)
-            case "list_volumes":    return try await listVolumes(args)
-            case "list_networks":   return try await listNetworks(args)
-            case "system_df":       return try await systemDF(args)
-            default:
-                return .failure("Unknown tool '\(name)'.")
-            }
+            if let result = try await handleCore(name, args) { return result }
+            if let result = try await handleContainers(name, args) { return result }
+            if let result = try await handleImages(name, args) { return result }
+            if let result = try await handleVolumesNetworks(name, args) { return result }
+            if let result = try await handleSystemApple(name, args) { return result }
+            if let result = try await handleSessions(name, args) { return result }
+            return .failure("Unknown tool '\(name)'.")
         } catch let error as LocalizedError {
             return .failure(error.errorDescription ?? "\(error)")
         } catch {
@@ -128,14 +132,34 @@ actor GantryTools {
         }
     }
 
+    /// Dispatches the core read/lifecycle tools; nil if `name` isn't one of them.
+    private func handleCore(_ name: String, _ args: Arguments) async throws -> CallTool.Result? {
+        switch name {
+        case "list_hosts":      return try await listHosts()
+        case "list_containers": return try await listContainers(args)
+        case "container_action": return try await containerAction(args)
+        case "container_logs":  return try await containerLogs(args)
+        case "container_stats": return try await containerStats(args)
+        case "container_exec":  return try await containerExec(args)
+        case "list_images":     return try await listImages(args)
+        case "list_volumes":    return try await listVolumes(args)
+        case "list_networks":   return try await listNetworks(args)
+        case "system_df":       return try await systemDF(args)
+        default:                return nil
+        }
+    }
+
     func shutdown() async {
+        // Tear down live sessions first so their cloudflared processes and port
+        // forwards are terminated, then close the cached Docker clients.
+        await HostSessionManager.shared.shutdown()
         await docker.shutdown()
     }
 
     // MARK: - Host resolution
 
     /// Resolves the target hosts: a single host if `host_id` was given, else all.
-    private func targetHosts(_ args: Arguments) throws -> [DockerHost] {
+    func targetHosts(_ args: Arguments) throws -> [DockerHost] {
         let all = docker.loadHosts()
         if let id = try args.uuid("host_id") {
             guard let host = all.first(where: { $0.id == id }) else {
@@ -146,7 +170,7 @@ actor GantryTools {
         return all
     }
 
-    private func requiredHost(_ args: Arguments) throws -> DockerHost {
+    func requiredHost(_ args: Arguments) throws -> DockerHost {
         let id = try args.uuid("host_id")
         let all = docker.loadHosts()
         guard let id else {
@@ -323,7 +347,7 @@ actor GantryTools {
     /// `DTO` per host. A connection or query failure for a single host is turned
     /// into an error DTO via `failure` so one unreachable host doesn't fail the
     /// whole call.
-    private func forEachHost<DTO>(
+    func forEachHost<DTO>(
         _ args: Arguments,
         body: (DockerHost, DockerClient) async throws -> DTO,
         failure: (DockerHost, String) -> DTO
@@ -341,7 +365,7 @@ actor GantryTools {
         return results
     }
 
-    private func readable(_ error: Error) -> String {
+    func readable(_ error: Error) -> String {
         (error as? LocalizedError)?.errorDescription ?? "\(error)"
     }
 }

@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- The bundled MCP server now reaches GUI parity: beyond the existing read/lifecycle tools it can create containers, rename/commit/set-restart-policy, read and write container files, list processes and inspect; pull, build, tag, remove, prune and inspect images; create/remove/inspect/prune volumes and networks and connect/disconnect containers; prune the build cache; manage apple/container machines, services and DNS domains; bring a Docker Compose project up; and expose a port publicly via a Cloudflare Tunnel or an SSH port forward. AI agents can now drive everything Gantry's UI can.
+
 ## [0.18.2] - 2026-06-19
 
 

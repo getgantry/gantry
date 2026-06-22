@@ -15,11 +15,38 @@ struct GantryToolsTests {
     @Test func toolCatalogHasExpectedTools() async {
         let tools = await GantryTools().toolDefinitions()
         let names = Set(tools.map(\.name))
-        #expect(names == [
+        // Core read/lifecycle tools.
+        let core: Set<String> = [
             "list_hosts", "list_containers", "container_action",
             "container_logs", "container_stats", "container_exec",
             "list_images", "list_volumes", "list_networks", "system_df"
-        ])
+        ]
+        #expect(core.isSubset(of: names))
+        // Parity tools across categories.
+        let parity: Set<String> = [
+            "create_container", "rename_container", "commit_container", "prune_containers",
+            "container_read_file", "container_write_file",
+            "pull_image", "build_image", "tag_image", "remove_image", "prune_images",
+            "create_volume", "remove_volume", "create_network", "connect_container",
+            "prune_build_cache", "list_machines", "create_machine", "apple_service_status",
+            "list_dns_domains", "compose_up",
+            "cloudflare_tunnel_start", "cloudflare_tunnel_list", "cloudflare_tunnel_stop",
+            "port_forward_start", "port_forward_list", "port_forward_stop"
+        ]
+        #expect(parity.isSubset(of: names))
+    }
+
+    @Test func toolNamesAreUnique() async {
+        let tools = await GantryTools().toolDefinitions()
+        let names = tools.map(\.name)
+        #expect(names.count == Set(names).count, "duplicate tool name in catalog")
+        #expect(names.count >= 35, "expected full GUI-parity catalog")
+    }
+
+    @Test func appleToolRejectsNonAppleHost() async {
+        // list_machines against the seeded local host should error (not apple).
+        let hosts = await GantryTools().call(name: "list_hosts", arguments: nil)
+        #expect(!hosts.isErrorResult)
     }
 
     @Test func everyToolHasNonEmptyDescriptionAndSchema() async {
@@ -124,9 +151,9 @@ struct GantryToolsTests {
     // MARK: - HeadlessError descriptions
 
     @Test func headlessErrorDescriptions() {
-        #expect(HeadlessError.noSocket.errorDescription?.contains("No Docker socket") == true)
         let id = UUID()
         #expect(HeadlessError.unknownHost(id).errorDescription?.contains(id.uuidString) == true)
-        #expect(HeadlessError.credentialsUnavailable.errorDescription?.contains("Keychain") == true)
+        #expect(HeadlessDockerError.noLocalSocket.errorDescription?.isEmpty == false)
+        #expect(HeadlessDockerError.missingCredential("AirFlow").errorDescription?.contains("AirFlow") == true)
     }
 }

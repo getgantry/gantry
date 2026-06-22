@@ -81,6 +81,13 @@ public struct PortBinding: Hashable, Codable, Sendable {
     public var publicPort: Int?
     public var type: String
 
+    public init(ip: String? = nil, privatePort: Int, publicPort: Int? = nil, type: String = "tcp") {
+        self.ip = ip
+        self.privatePort = privatePort
+        self.publicPort = publicPort
+        self.type = type
+    }
+
     enum CodingKeys: String, CodingKey {
         case ip = "IP"
         case privatePort = "PrivatePort"

@@ -38,6 +38,34 @@ struct Arguments {
         return fallback
     }
 
+    func double(_ key: String) -> Double? {
+        if let d = raw[key]?.doubleValue { return d }
+        if let i = raw[key]?.intValue { return Double(i) }
+        return nil
+    }
+
+    func intOrNil(_ key: String) -> Int? {
+        if let i = raw[key]?.intValue { return i }
+        if let d = raw[key]?.doubleValue { return Int(d) }
+        return nil
+    }
+
+    /// A `[String]` from a JSON array of strings (non-strings skipped); empty if absent.
+    func stringArray(_ key: String) -> [String] {
+        guard let array = raw[key]?.arrayValue else { return [] }
+        return array.compactMap { $0.stringValue }
+    }
+
+    /// A `[String: String]` from a JSON object of string values; empty if absent.
+    func stringDict(_ key: String) -> [String: String] {
+        guard let obj = raw[key]?.objectValue else { return [:] }
+        var result: [String: String] = [:]
+        for (k, v) in obj {
+            if let s = v.stringValue { result[k] = s }
+        }
+        return result
+    }
+
     /// A UUID parsed from a string argument, if present and valid.
     func uuid(_ key: String) throws -> UUID? {
         guard let s = raw[key]?.stringValue, !s.isEmpty else { return nil }
