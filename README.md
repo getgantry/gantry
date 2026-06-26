@@ -15,7 +15,7 @@ Electron, no subscription, no artificial limits. It is built to be driven by AI 
 too: a bundled [MCP server](#agent-friendly) and App Intents expose your Docker
 hosts to Claude, Shortcuts, Siri and scripts.
 
-Website: **https://getgantry.github.io/**
+Website: **[Gantry — native Docker & apple/container app for Mac](https://getgantry.github.io/)**
 
 ![Fleet dashboard](assets/dashboard.png)
 
