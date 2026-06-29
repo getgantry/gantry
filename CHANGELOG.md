@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-06-29
+
+
 ### Added
 - Volumes list can now be sorted: a sort menu in the toolbar lets you order volumes by Name, Size, Driver, or Created date, ascending or descending. The chosen sort order persists across launches.
 
@@ -333,7 +336,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/getgantry/gantry/releases/tag/v0.21.0
 [0.20.0]: https://github.com/getgantry/gantry/releases/tag/v0.20.0
 [0.19.0]: https://github.com/getgantry/gantry/releases/tag/v0.19.0
 [0.18.2]: https://github.com/getgantry/gantry/releases/tag/v0.18.2
