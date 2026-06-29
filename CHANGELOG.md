@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-06-29
+
+
 ### Added
 - Volumes list now shows the on-disk size of each volume, sourced from the Docker disk-usage endpoint (`GET /system/df`). The size is measured once per session and cached; a Refresh button lets you re-measure on demand.
 
@@ -327,7 +330,8 @@ Initial public release.
   selection.
 - Sparkle auto-updates.
 
-[Unreleased]: https://github.com/getgantry/gantry/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/getgantry/gantry/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/getgantry/gantry/releases/tag/v0.20.0
 [0.19.0]: https://github.com/getgantry/gantry/releases/tag/v0.19.0
 [0.18.2]: https://github.com/getgantry/gantry/releases/tag/v0.18.2
 [0.18.1]: https://github.com/getgantry/gantry/releases/tag/v0.18.1
