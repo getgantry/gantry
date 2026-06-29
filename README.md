@@ -32,7 +32,8 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
   the same `docker login` you already ran — so create-and-run, Quick Run and
   Compose pull private images, not just the manual Pull sheet
 - **Volumes / Networks** — list, inspect, create, remove, prune,
-  connect/disconnect containers
+  connect/disconnect containers; volumes show their on-disk size and sort by
+  name, size, driver or creation date
 - **Docker Compose** — containers grouped by compose project with collapsible
   sections and group start/stop/restart; **run a compose file on any host**
   (local Docker, SSH or apple/container — the runner adapts per engine) with an
