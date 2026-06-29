@@ -3,6 +3,24 @@ import AppKit
 import AppCore
 import DockerKit
 
+/// How the volumes list is ordered. Raw values double as the menu labels.
+enum VolumeSort: String, CaseIterable, Identifiable {
+    case name = "Name"
+    case size = "Size"
+    case driver = "Driver"
+    case created = "Created"
+
+    var id: String { rawValue }
+    var systemImage: String {
+        switch self {
+        case .name: "textformat"
+        case .size: "externaldrive"
+        case .driver: "gearshape"
+        case .created: "clock"
+        }
+    }
+}
+
 struct VolumeListView: View {
     @Bindable var session: HostSession
     @Binding var selection: String?
@@ -12,18 +30,50 @@ struct VolumeListView: View {
     @State private var showingNew = false
     @State private var pruneConfirm = false
     @State private var pruneOutcome: PruneOutcome?
+    @AppStorage("volumeSort") private var sort: VolumeSort = .name
+    @AppStorage("volumeSortAscending") private var ascending = true
 
-    private var filtered: [Volume] {
-        guard !searchText.isEmpty else { return session.volumes }
-        let needle = searchText.lowercased()
-        return session.volumes.filter {
-            $0.name.lowercased().contains(needle) || $0.driver.lowercased().contains(needle)
+    /// Filtered by the search field, then ordered by the active sort. Volumes
+    /// whose size hasn't been measured yet sort as if zero so they don't jump
+    /// around as `df` results stream in.
+    private var displayed: [Volume] {
+        let base: [Volume]
+        if searchText.isEmpty {
+            base = session.volumes
+        } else {
+            let needle = searchText.lowercased()
+            base = session.volumes.filter {
+                $0.name.lowercased().contains(needle) || $0.driver.lowercased().contains(needle)
+            }
         }
+        let sorted = base.sorted { a, b in
+            switch sort {
+            case .name:
+                return a.name.localizedStandardCompare(b.name) == .orderedAscending
+            case .driver:
+                let c = a.driver.localizedStandardCompare(b.driver)
+                return c == .orderedSame
+                    ? a.name.localizedStandardCompare(b.name) == .orderedAscending
+                    : c == .orderedAscending
+            case .created:
+                // CreatedAt is RFC3339, so lexical order is chronological.
+                return a.createdAt == b.createdAt
+                    ? a.name.localizedStandardCompare(b.name) == .orderedAscending
+                    : a.createdAt < b.createdAt
+            case .size:
+                let sa = session.volumeSizes[a.name] ?? 0
+                let sb = session.volumeSizes[b.name] ?? 0
+                return sa == sb
+                    ? a.name.localizedStandardCompare(b.name) == .orderedAscending
+                    : sa < sb
+            }
+        }
+        return ascending ? sorted : sorted.reversed()
     }
 
     var body: some View {
         List(selection: $selection) {
-            ForEach(filtered) { volume in
+            ForEach(displayed) { volume in
                 VolumeRow(
                     volume: volume,
                     size: session.volumeSizes[volume.name],
@@ -46,7 +96,7 @@ struct VolumeListView: View {
                     }
             }
         }
-        .animation(.snappy, value: filtered)
+        .animation(.snappy, value: displayed)
         .task(id: session.id) { await session.refreshVolumeSizes(force: false) }
         .navigationTitle("Volumes")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
@@ -58,6 +108,23 @@ struct VolumeListView: View {
                     Label("New Volume…", systemImage: "plus")
                 }
                 .keyboardShortcut("n", modifiers: .command)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Picker("Sort By", selection: $sort) {
+                        ForEach(VolumeSort.allCases) { option in
+                            Label(option.rawValue, systemImage: option.systemImage).tag(option)
+                        }
+                    }
+                    Divider()
+                    Picker("Order", selection: $ascending) {
+                        Label("Ascending", systemImage: "arrow.up").tag(true)
+                        Label("Descending", systemImage: "arrow.down").tag(false)
+                    }
+                } label: {
+                    Label("Sort", systemImage: "arrow.up.arrow.down")
+                }
+                .menuIndicator(.hidden)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
