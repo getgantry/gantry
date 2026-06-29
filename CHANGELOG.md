@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Volumes list can now be sorted: a sort menu in the toolbar lets you order volumes by Name, Size, Driver, or Created date, ascending or descending. The chosen sort order persists across launches.
+
 ## [0.20.0] - 2026-06-29
 
 
