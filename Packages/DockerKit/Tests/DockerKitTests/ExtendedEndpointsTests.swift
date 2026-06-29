@@ -303,6 +303,25 @@ private func tarAppend(_ buffer: inout [UInt8], name: String, payload: [UInt8], 
     #expect(df.volumesSize == 300)
 }
 
+@Test func systemDiskUsageMapsPerVolumeSizes() throws {
+    let json = """
+    {
+      "Volumes": [
+        {"Name": "pgdata", "UsageData": {"Size": 300}},
+        {"Name": "cache", "UsageData": {"Size": -1}},
+        {"UsageData": {"Size": 500}}
+      ]
+    }
+    """
+    let df = try JSONDecoder().decode(SystemDiskUsage.self, from: Data(json.utf8))
+    #expect(df.volumeSizes["pgdata"] == 300)
+    // -1 (unknown) clamped to 0.
+    #expect(df.volumeSizes["cache"] == 0)
+    // A row without a name is skipped rather than keyed under "".
+    #expect(df.volumeSizes[""] == nil)
+    #expect(df.volumeSizes.count == 2)
+}
+
 // MARK: - ContainerCreateRequest encoding
 
 @Test func containerCreateRequestEncodesExpectedKeys() throws {

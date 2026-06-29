@@ -15,6 +15,17 @@ public final class HostSession: Identifiable {
     public private(set) var containers: [ContainerSummary] = []
     public private(set) var images: [ImageSummary] = []
     public private(set) var volumes: [Volume] = []
+    /// Per-volume size in bytes keyed by volume name, sourced from
+    /// `GET /system/df`. Populated lazily by ``refreshVolumeSizes()`` because
+    /// `df` walks the disk and is far slower than listing volumes. A name absent
+    /// from the map simply hasn't been measured yet.
+    public private(set) var volumeSizes: [String: Int64] = [:]
+    /// Whether ``refreshVolumeSizes()`` has completed at least once this session.
+    /// Lets the UI measure sizes once on first view and then cache them, instead
+    /// of re-running the costly `df` every time the volumes list reappears. An
+    /// empty ``volumeSizes`` can't carry this — a host with no volumes also
+    /// yields an empty map.
+    public private(set) var volumeSizesLoaded = false
     public private(set) var networks: [NetworkResource] = []
     /// `container machine` environments (apple/container 1.0+); empty elsewhere.
     public private(set) var machines: [ContainerMachine] = []
@@ -532,6 +543,8 @@ public final class HostSession: Identifiable {
         containers = []
         images = []
         volumes = []
+        volumeSizes = [:]
+        volumeSizesLoaded = false
         networks = []
         info = nil
         status = .disconnected
@@ -799,6 +812,22 @@ public final class HostSession: Identifiable {
 
     public func refreshVolumes() async {
         await refresh(\.volumes) { try await $0.listVolumes() }
+    }
+
+    /// Loads per-volume sizes from `GET /system/df` into ``volumeSizes``. Kept
+    /// separate from ``refreshVolumes()`` because `df` walks the filesystem and
+    /// can take seconds; the list renders immediately and sizes fill in after.
+    ///
+    /// The cheap auto-measure on first view passes `force: false` so it runs
+    /// only once per session; the Refresh button passes `force: true` to
+    /// re-measure on demand.
+    public func refreshVolumeSizes(force: Bool = true) async {
+        guard let client else { return }
+        guard force || !volumeSizesLoaded else { return }
+        if let usage = await fetch({ try await client.systemDF() }) {
+            volumeSizes = usage.volumeSizes
+            volumeSizesLoaded = true
+        }
     }
 
     public func refreshNetworks() async {

@@ -24,8 +24,12 @@ struct VolumeListView: View {
     var body: some View {
         List(selection: $selection) {
             ForEach(filtered) { volume in
-                VolumeRow(volume: volume)
-                    .tag(volume.name)
+                VolumeRow(
+                    volume: volume,
+                    size: session.volumeSizes[volume.name],
+                    sizesLoaded: session.volumeSizesLoaded
+                )
+                .tag(volume.name)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .contextMenu {
                         Button {
@@ -43,6 +47,7 @@ struct VolumeListView: View {
             }
         }
         .animation(.snappy, value: filtered)
+        .task(id: session.id) { await session.refreshVolumeSizes(force: false) }
         .navigationTitle("Volumes")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
         .toolbar {
@@ -56,7 +61,10 @@ struct VolumeListView: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await session.refreshVolumes() }
+                    Task {
+                        await session.refreshVolumes()
+                        await session.refreshVolumeSizes()
+                    }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
@@ -110,6 +118,10 @@ struct VolumeListView: View {
 
 private struct VolumeRow: View {
     let volume: Volume
+    /// Per-volume size in bytes, or `nil` if not present in the measured map.
+    let size: Int64?
+    /// Whether the `df` measure has completed for this session.
+    let sizesLoaded: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -124,8 +136,26 @@ private struct VolumeRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            sizeLabel
         }
         .padding(.vertical, 2)
+    }
+
+    @ViewBuilder private var sizeLabel: some View {
+        if let size {
+            Text(Formatters.bytes(size, style: .file))
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+        } else if sizesLoaded {
+            // Measured, but this volume had no `df` entry (e.g. created after
+            // the last measure, or a backend that doesn't size volumes).
+            Text("—")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        } else {
+            ProgressView()
+                .controlSize(.small)
+        }
     }
 }
 
@@ -134,6 +164,12 @@ struct VolumeDetailView: View {
     let session: HostSession
 
     @State private var tab = 0
+
+    /// Size from the session's `df`-sourced map, falling back to any size the
+    /// volume already carried from its inspect payload.
+    private var volumeSize: Int64? {
+        session.volumeSizes[volume.name] ?? volume.usageData?.size
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -159,8 +195,8 @@ struct VolumeDetailView: View {
                             Fact("Driver", volume.driver)
                             Fact("Scope", volume.scope)
                             Fact("Mountpoint", volume.mountpoint)
-                            if let usage = volume.usageData, usage.size >= 0 {
-                                Fact("Size", Formatters.bytes(usage.size, style: .file))
+                            if let size = volumeSize, size >= 0 {
+                                Fact("Size", Formatters.bytes(size, style: .file))
                             }
                             if !volume.createdAt.isEmpty {
                                 Fact("Created", Formatters.relative(fromRFC3339: volume.createdAt))
