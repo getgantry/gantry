@@ -10,6 +10,9 @@ that section with the version and date when a release is cut.
 
 ## [Unreleased]
 
+### Added
+- Volumes list now shows the on-disk size of each volume, sourced from the Docker disk-usage endpoint (`GET /system/df`). The size is measured once per session and cached; a Refresh button lets you re-measure on demand.
+
 ## [0.19.0] - 2026-06-22
 
 
