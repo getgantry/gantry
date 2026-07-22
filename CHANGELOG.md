@@ -11,6 +11,19 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.23.0](https://github.com/getgantry/gantry/compare/v0.22.0...v0.23.0) (2026-07-22)
+
+
+### Features
+
+* **containers:** add a debug shell for containers without one ([4d67470](https://github.com/getgantry/gantry/commit/4d67470e816a1b9273d7d265ac8e72e8138e7b05))
+
+
+### Fixes
+
+* **mcp:** give the synthesised local host a stable id ([36491b7](https://github.com/getgantry/gantry/commit/36491b706b9ba89c119f0363cb3a8e128cb7582b))
+* **ui:** keep detail panes pinned to the top ([2ecffd4](https://github.com/getgantry/gantry/commit/2ecffd479eaa44807c58c3d08441959fc4e83e81))
+
 ## [0.22.0](https://github.com/getgantry/gantry/compare/v0.21.0...v0.22.0) (2026-07-22)
 
 
