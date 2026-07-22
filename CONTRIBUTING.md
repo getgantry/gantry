@@ -88,6 +88,11 @@ tests are skipped rather than failed. The non-live unit tests always run.
 
 ## Commit messages
 
+Pull requests are **squash-merged**, so the **PR title** becomes the single
+commit on `main` — and therefore the changelog entry. That title is the one
+that has to be a Conventional Commit; a CI check validates it. Individual
+commits on your branch are for review, and are free to be scrappier.
+
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) —
 `<type>[optional scope]: <description>` — because
 [release-please](https://github.com/googleapis/release-please) derives the next
@@ -116,8 +121,9 @@ Before opening a pull request:
 - Run the relevant package tests.
 - Make sure there are no new Swift 6 concurrency warnings.
 - Include screenshots for any user-facing UI changes.
-- Write the commit message as a Conventional Commit — it becomes the changelog
-  entry, so make the description read the way you want it to appear there.
+- Make the **PR title** a Conventional Commit: it is squashed into the commit
+  subject on `main` and read straight into the changelog, so write it the way
+  you want it to appear there.
 
 The pull request template includes this checklist. Keep each PR focused on a
 single change where practical.
@@ -142,6 +148,11 @@ by hand:
 generates the EdDSA-signed Sparkle appcast, uploads the zip to the release, and
 commits the updated `appcast.xml` back to `main` so existing installs
 auto-update.
+
+Merging anything other than by squash would put both the branch commits and a
+merge commit into the history, and release-please counts both — the same change
+then appears twice in the changelog. Hence squash-only, enforced in the repo
+settings rather than by convention.
 
 The release PR itself gets no CI run — anything pushed with `GITHUB_TOKEN`
 cannot start another workflow, and CI already built the same commits on `main`.
