@@ -35,6 +35,9 @@ struct ContainerListView: View {
 
     private var filtered: [ContainerSummary] {
         session.containers.filter { container in
+            // Debug sidecars are Gantry's own plumbing, not something the user
+            // started — showing them would double every debugged container.
+            guard !DebugShell.isSidecar(container) else { return false }
             let matchesFilter: Bool = switch filter {
             case .all: true
             case .running: container.state.isRunning
@@ -554,6 +557,21 @@ struct ContainerActionsMenu: View {
             ContainerPromptCopy.run(session: session, container: container)
         } label: {
             Label("Copy as Prompt", systemImage: "text.badge.star")
+        }
+
+        if session.supportsDebugShell, container.state.isRunning {
+            Button {
+                // Navigate first, then tell the pane which mode to open in.
+                NotificationCenter.default.post(
+                    name: .gantrySelectContainer,
+                    object: ContainerJump(hostID: session.host.id, containerID: container.id)
+                )
+                NotificationCenter.default.post(
+                    name: .gantryOpenDebugShell, object: container.id
+                )
+            } label: {
+                Label("Open Debug Shell", systemImage: "stethoscope")
+            }
         }
 
         Divider()

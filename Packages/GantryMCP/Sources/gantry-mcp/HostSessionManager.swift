@@ -87,6 +87,17 @@ final class HostSessionManager {
         return (started, log)
     }
 
+    /// The id of a ready debug sidecar for `containerID` on `host`.
+    ///
+    /// The sidecar joins the target's namespaces, so exec'ing into it reaches
+    /// the target's processes, network and filesystem — which is what makes a
+    /// distroless or read-only container debuggable at all. Needs a live
+    /// `HostSession` rather than a bare client, hence living here.
+    func debugSidecarID(host: DockerHost, containerID: String) async throws -> String {
+        let session = try await session(for: host)
+        return try await session.debugSidecarID(for: containerID)
+    }
+
     private static func describe(_ event: ComposeUpEvent) -> String {
         switch event {
         case .info(let s): return s

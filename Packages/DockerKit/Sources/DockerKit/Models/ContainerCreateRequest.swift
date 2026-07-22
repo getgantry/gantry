@@ -169,6 +169,19 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         public var nanoCPUs: Int64?
         public var autoRemove: Bool?
         public var privileged: Bool?
+        /// PID namespace to join, e.g. `"container:<id>"`. Sharing the target's
+        /// PID namespace is what lets a debug sidecar see its processes — and
+        /// reach its filesystem through `/proc/1/root`.
+        public var pidMode: String?
+        /// Network mode; `"container:<id>"` joins another container's network
+        /// namespace, so `curl localhost:<port>` hits the target's listener.
+        public var networkMode: String?
+        /// IPC namespace to join, e.g. `"container:<id>"`.
+        public var ipcMode: String?
+        /// Extra Linux capabilities, e.g. `["SYS_PTRACE"]`.
+        public var capAdd: [String]?
+        /// Security options, e.g. `["apparmor=unconfined"]`.
+        public var securityOpt: [String]?
 
         enum CodingKeys: String, CodingKey {
             case binds = "Binds"
@@ -178,6 +191,11 @@ public struct ContainerCreateRequest: Encodable, Sendable {
             case nanoCPUs = "NanoCpus"
             case autoRemove = "AutoRemove"
             case privileged = "Privileged"
+            case pidMode = "PidMode"
+            case networkMode = "NetworkMode"
+            case ipcMode = "IpcMode"
+            case capAdd = "CapAdd"
+            case securityOpt = "SecurityOpt"
         }
 
         public init(
@@ -187,7 +205,12 @@ public struct ContainerCreateRequest: Encodable, Sendable {
             memory: Int64? = nil,
             nanoCPUs: Int64? = nil,
             autoRemove: Bool? = nil,
-            privileged: Bool? = nil
+            privileged: Bool? = nil,
+            pidMode: String? = nil,
+            networkMode: String? = nil,
+            ipcMode: String? = nil,
+            capAdd: [String]? = nil,
+            securityOpt: [String]? = nil
         ) {
             self.binds = binds
             self.portBindings = portBindings
@@ -196,6 +219,11 @@ public struct ContainerCreateRequest: Encodable, Sendable {
             self.nanoCPUs = nanoCPUs
             self.autoRemove = autoRemove
             self.privileged = privileged
+            self.pidMode = pidMode
+            self.networkMode = networkMode
+            self.ipcMode = ipcMode
+            self.capAdd = capAdd
+            self.securityOpt = securityOpt
         }
     }
 

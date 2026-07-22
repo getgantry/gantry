@@ -80,6 +80,15 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
 ### Terminal & Files
 - **Exec terminal** — full terminal emulation (SwiftTerm) into any running
   container, local or remote
+- **Debug shell** — a shell for containers that don't have one. Distroless
+  images have no `/bin/sh` at all, slim ones are missing `curl`, `ps` and `ip`,
+  and a read-only container can't be given them. Switch the Terminal tab to
+  **Debug** (or right-click a container ▸ *Open Debug Shell*) and Gantry
+  attaches a toolbox sidecar sharing the container's process and network
+  namespaces: its processes are listed, its filesystem is the working
+  directory, and `curl localhost:8080` reaches its own listener. The container
+  itself is never modified, so this works on distroless and read-only alike.
+  Docker hosts, local and over SSH; the toolbox image is configurable
 - **File browser** — browse the container filesystem, download and upload files,
   **drag & drop** between Finder and the container (tar-packed transparently)
 - **Drop any folder into a container** — upload whole folder trees from the
@@ -200,7 +209,8 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
   ```
 
   Tools cover containers (list, lifecycle, **create**, rename, commit, restart
-  policy, processes, inspect, logs, stats, exec, **read/write files**, prune),
+  policy, processes, inspect, logs, stats, exec, **debug exec** — run a command
+  against a container with no shell of its own, **read/write files**, prune),
   images (**pull**, **build**, tag, remove, history, inspect, prune), volumes and
   networks (create, remove, inspect, connect/disconnect, prune), system disk
   usage and build-cache prune, **apple/container machines, services and DNS

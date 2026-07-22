@@ -90,11 +90,27 @@ struct GantryTerminalView: NSViewRepresentable {
 
 // MARK: - Container terminal tab
 
-/// The Terminal tab content: opens a shell exec session into the container
+/// The Terminal tab content. Opens a shell exec session into the container
 /// and drives it through the shared `TerminalPane`.
+///
+/// On a Docker host it also offers a **debug shell**: many images ship without
+/// `/bin/sh` at all (distroless) or without `curl`, `ps` and `ip` to debug
+/// with, and a read-only container can't be given them. The debug mode instead
+/// attaches a toolbox sidecar to the container's namespaces, leaving the
+/// container itself untouched. See `DebugShell`.
 struct ContainerTerminalView: View {
     let session: HostSession
     let container: ContainerSummary
+
+    private enum Mode: String, CaseIterable, Identifiable {
+        case shell = "Shell"
+        case debug = "Debug"
+        var id: String { rawValue }
+    }
+
+    @State private var mode: Mode = .shell
+    /// Preparation status while the sidecar is being pulled/started.
+    @State private var preparing: String?
 
     /// Single robust command: prefer bash, fall back to sh inside one shell.
     /// Note: a failed `exec` kills a non-interactive POSIX shell, so `exec bash
@@ -113,6 +129,60 @@ struct ContainerTerminalView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
+            VStack(spacing: 0) {
+                if session.supportsDebugShell {
+                    modeBar
+                    Divider()
+                }
+                pane
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .gantryOpenDebugShell)) { note in
+                if note.object as? String == container.id, session.supportsDebugShell {
+                    mode = .debug
+                }
+            }
+            .onDisappear {
+                // Don't leave a toolbox running for a pane nobody is looking
+                // at; it restarts in well under a second when reopened.
+                let id = container.id
+                Task { await session.stopDebugSidecar(for: id) }
+            }
+        }
+    }
+
+    private var modeBar: some View {
+        HStack(spacing: 10) {
+            Picker("Mode", selection: $mode) {
+                ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+
+            if let preparing {
+                ProgressView().controlSize(.small)
+                Text(preparing)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            } else {
+                Text(mode == .shell
+                     ? "Runs the container's own shell."
+                     : "Attaches a toolbox with curl, ps, ip and friends — works even without a shell in the image.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    @ViewBuilder
+    private var pane: some View {
+        switch mode {
+        case .shell:
             TerminalPane(
                 title: container.displayName,
                 subtitle: "shell",
@@ -122,6 +192,20 @@ struct ContainerTerminalView: View {
                         containerID: container.id,
                         command: shellCommand
                     )
+                }
+            )
+        case .debug:
+            TerminalPane(
+                title: container.displayName,
+                subtitle: "debug shell",
+                // A distinct identity so switching modes reconnects rather
+                // than reusing the plain shell's session.
+                connectionID: "\(container.id)#debug",
+                connect: {
+                    defer { preparing = nil }
+                    return try await session.openDebugSession(containerID: container.id) { step in
+                        preparing = step
+                    }
                 }
             )
         }

@@ -88,6 +88,10 @@ public struct HostCapabilities: Hashable, Sendable {
     /// archive endpoint) and apple/container (emulated with `tar` over exec),
     /// even though the latter has no download/drag-out support.
     public var containerUpload: Bool
+    /// Opening a debug shell in a container that has none of its own. Needs an
+    /// engine that can start a sidecar sharing the target's namespaces;
+    /// apple/container gives each container its own VM and cannot.
+    public var debugShell: Bool
 
     /// Docker engine: everything on.
     public static let docker = HostCapabilities(
@@ -99,7 +103,8 @@ public struct HostCapabilities: Hashable, Sendable {
         buildCachePrune: true,
         imageHistory: true,
         containerFileTransfer: true,
-        containerUpload: true
+        containerUpload: true,
+        debugShell: true
     )
 
     /// apple/container: lifecycle, logs, exec, stats, images, volumes and
@@ -113,7 +118,11 @@ public struct HostCapabilities: Hashable, Sendable {
         buildCachePrune: false,
         imageHistory: false,
         containerFileTransfer: false,
-        containerUpload: true
+        containerUpload: true,
+        // Each apple/container container is its own lightweight VM and the CLI
+        // exposes no namespace sharing, so a debug sidecar has nothing to
+        // attach to. Hidden rather than offered in a degraded form.
+        debugShell: false
     )
 }
 
