@@ -53,6 +53,14 @@ concurrency:
   group: codeql-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  # Must be workflow-level, not per-step: CodeQL's init step configures the
+  # Swift extractor against whatever Xcode it sees, and the runner's default is
+  # a different build (17E188) from the pinned one (17E202). With only the
+  # build step pinned, the tracer looked for a Metal toolchain belonging to the
+  # other Xcode and the analysis build died with "cannot execute tool 'metal'".
+  DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+
 permissions:
   contents: read
 
@@ -109,22 +117,8 @@ jobs:
 
       # An explicit build rather than autobuild: autobuild guesses a scheme, and
       # a wrong guess analyses a subset of the app without saying so.
-      # SwiftTerm compiles a Metal shader, and the Metal toolchain ships as an
-      # on-demand MobileAsset rather than inside Xcode. The runner image has it
-      # and a plain build resolves it, but under CodeQL's build tracer it did
-      # not — the build died with "cannot execute tool 'metal' due to missing
-      # Metal Toolchain". Asking for it explicitly is a no-op when it is
-      # already resolved.
-      - name: Ensure the Metal toolchain is available
-        if: matrix.language == 'swift'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
-        run: xcodebuild -downloadComponent MetalToolchain
-
       - name: Build Gantry for analysis
         if: matrix.language == 'swift'
-        env:
-          DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
         run: |
           xcodebuild \
             -project Gantry.xcodeproj \
