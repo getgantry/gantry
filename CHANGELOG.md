@@ -17,18 +17,12 @@ Earlier entries were hand-written under **[Unreleased]** and stamped by
 ### Features
 
 * **containers:** add a debug shell for containers without one ([4d67470](https://github.com/getgantry/gantry/commit/4d67470e816a1b9273d7d265ac8e72e8138e7b05))
-* **containers:** add a debug shell for containers without one ([2e7ab25](https://github.com/getgantry/gantry/commit/2e7ab25a92205feff90b4c1bb6ceadad14713b69))
 
 
 ### Fixes
 
-* **ci:** install the metal toolchain for the codeql runner ([8925619](https://github.com/getgantry/gantry/commit/8925619e2868f3a15c499c7181386e1780d37688))
-* **ci:** let codeql autobuild instead of driving xcodebuild ([c4cdb74](https://github.com/getgantry/gantry/commit/c4cdb7457e3c59b5cca30767ae50144c89f75c95))
-* **ci:** pin the xcode for codeql at workflow level ([46cc82c](https://github.com/getgantry/gantry/commit/46cc82c2e71336b02430906147c4521660cc810c))
-* **ci:** resolve the metal toolchain before the codeql build ([083ce38](https://github.com/getgantry/gantry/commit/083ce38717292c05700795819c2b6ca2c2d6fd38))
 * **mcp:** give the synthesised local host a stable id ([36491b7](https://github.com/getgantry/gantry/commit/36491b706b9ba89c119f0363cb3a8e128cb7582b))
 * **ui:** keep detail panes pinned to the top ([2ecffd4](https://github.com/getgantry/gantry/commit/2ecffd479eaa44807c58c3d08441959fc4e83e81))
-* **ui:** keep detail panes pinned to the top ([db00c90](https://github.com/getgantry/gantry/commit/db00c9054ed2ea4c4beb0d6d06a5e9c2503913b4))
 
 ## [0.22.0](https://github.com/getgantry/gantry/compare/v0.21.0...v0.22.0) (2026-07-22)
 
