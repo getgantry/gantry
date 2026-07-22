@@ -20,9 +20,18 @@ actor HeadlessDocker {
 
     /// Loads the persisted host list (the same `hosts.json` the app writes),
     /// seeding the default local host when no file exists yet.
+    /// Stable id for the synthesised fallback Local host.
+    ///
+    /// It must not be random: `host(id:)` re-reads the host list on every call,
+    /// so a fresh UUID each time makes the host `list_hosts` just advertised
+    /// impossible to look up again — an agent that reads an id and passes it
+    /// straight back gets "unknown host" on a machine with no hosts.json yet.
+    static let fallbackLocalHostID = UUID(uuidString: "6A6E7472-0000-4000-8000-000000000001")!
+
     nonisolated func loadHosts() -> [DockerHost] {
         let hosts = AppCore.HeadlessDocker.loadHosts()
-        return hosts.isEmpty ? [DockerHost(name: "Local", kind: .local)] : hosts
+        guard hosts.isEmpty else { return hosts }
+        return [DockerHost(id: Self.fallbackLocalHostID, name: "Local", kind: .local)]
     }
 
     /// Returns the host with the given id, or nil.
