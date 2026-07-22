@@ -37,23 +37,6 @@ Earlier entries were hand-written under **[Unreleased]** and stamped by
 
 ## [Unreleased]
 
-### Added
-- **apple/container 1.1 support.** Machines can be created and reconfigured with
-  **nested virtualization** (`--virtualization`) and a **custom kernel**
-  (`--kernel`), from the Create Machine sheet, the machine's Resources tab and
-  the MCP server. The toggle is offered only when the installed CLI is 1.1 or
-  newer and the Mac can run nested VMs (Apple silicon M3+ on macOS 15+), and the
-  machine overview shows both settings when the CLI reports them.
-- Bind-mounting a **Unix domain socket** into a container is called out in the
-  Create Container sheet, including whether the installed CLI is new enough for
-  the socket to work in a non-root container (apple/container 1.1+). The host
-  path picker now reaches hidden and system paths where sockets live.
-
-### Fixed
-- The MCP `set_machine_resources` tool sent `--cpus`/`--memory` flags, which
-  `container machine set` rejects; it now sends the `key=value` settings the CLI
-  expects, and also accepts `home_mount`, `nested_virtualization` and `kernel`.
-
 ## [0.21.0] - 2026-06-29
 
 
