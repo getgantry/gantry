@@ -201,6 +201,10 @@ struct NetworkDetailView: View {
                 }
             }
         }
+        // Pin the pane to the top: a tab whose content doesn't
+        // expand would otherwise let the VStack shrink to fit and
+        // SwiftUI would centre the header and tab strip vertically.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle(network.name)
         .task(id: network.id) { await reloadAttached() }
     }
