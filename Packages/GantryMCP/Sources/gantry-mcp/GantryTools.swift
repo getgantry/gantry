@@ -85,6 +85,23 @@ actor GantryTools {
                 annotations: .init(readOnlyHint: false, destructiveHint: true, openWorldHint: false)
             ),
             Tool(
+                name: "container_debug_exec",
+                description: """
+                    Run a shell command against a container that has no usable shell of its own \
+                    — distroless, read-only, or simply missing curl/ps/ip. Attaches a toolbox \
+                    sidecar sharing the container's process, network and IPC namespaces; the \
+                    container's filesystem is the working directory, and localhost is its \
+                    network, so `curl localhost:8080` reaches its own listener. The container is \
+                    never modified. Docker hosts only. Same 30s / 200KB caps as container_exec.
+                    """,
+                inputSchema: Schema.object(properties: [
+                    "host_id": hostIDRequired,
+                    "container_id": containerProp,
+                    "command": Schema.string("Shell command to run against the target container.")
+                ], required: ["host_id", "container_id", "command"]),
+                annotations: .init(readOnlyHint: false, destructiveHint: true, openWorldHint: false)
+            ),
+            Tool(
                 name: "list_images",
                 description: "List images on one or all hosts.",
                 inputSchema: Schema.object(properties: ["host_id": hostIDProp]),
@@ -141,6 +158,7 @@ actor GantryTools {
         case "container_logs":  return try await containerLogs(args)
         case "container_stats": return try await containerStats(args)
         case "container_exec":  return try await containerExec(args)
+        case "container_debug_exec": return try await containerDebugExec(args)
         case "list_images":     return try await listImages(args)
         case "list_volumes":    return try await listVolumes(args)
         case "list_networks":   return try await listNetworks(args)
@@ -284,6 +302,39 @@ actor GantryTools {
             command: command
         )
         return .text(try jsonText(result))
+    }
+
+    private func containerDebugExec(_ args: Arguments) async throws -> CallTool.Result {
+        let host = try requiredHost(args)
+        let containerID = try args.requiredString("container_id")
+        let command = try args.requiredString("command")
+        guard host.capabilities.debugShell else {
+            throw ToolError(
+                "\(host.name) can't open a debug shell — it needs a Docker engine. "
+                + "apple/container runs each container in its own VM with no way to share "
+                + "namespaces, so use container_exec there."
+            )
+        }
+
+        // Preparing the sidecar may pull the toolbox image on first use.
+        let sidecarID = try await HostSessionManager.shared.debugSidecarID(
+            host: host, containerID: containerID
+        )
+        let client = try await docker.connect(to: host)
+        let result = try await ExecRunner.run(
+            client: client,
+            containerID: sidecarID,
+            // Run against the target's filesystem, not the toolbox's.
+            command: "cd /proc/1/root 2>/dev/null || cd /; \(command)"
+        )
+        // Report the container the user asked about, not Gantry's plumbing.
+        return .text(try jsonText(ExecResultDTO(
+            containerID: containerID,
+            command: command,
+            exitCode: result.exitCode,
+            stdout: result.stdout,
+            stderr: result.stderr
+        )))
     }
 
     private func listImages(_ args: Arguments) async throws -> CallTool.Result {

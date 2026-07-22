@@ -32,6 +32,12 @@ extension Notification.Name {
     /// Posted to open the apple/container install/upgrade sheet on demand (e.g.
     /// from the Add Host form when the CLI is missing).
     static let gantryShowContainerSetup = Notification.Name("gantryShowContainerSetup")
+
+    /// Open a container's Terminal tab in debug-shell mode. Object: the
+    /// container id (`String`). Posted alongside `gantrySelectContainer`, which
+    /// does the navigating — this only chooses what the pane shows on arrival.
+    static let gantryOpenDebugShell = Notification.Name("gantryOpenDebugShell")
+
 }
 
 /// Identifies a container to jump to, carried by `.gantrySelectContainer`.
