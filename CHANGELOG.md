@@ -11,24 +11,31 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.22.0](https://github.com/getgantry/gantry/compare/v0.21.0...v0.22.0) (2026-07-22)
+
+
+### Features
+
+* adopt apple/container 1.1, automate releases, watch upstream ([04f013d](https://github.com/getgantry/gantry/commit/04f013d092261f43edff06bbc96191a8d58bd71d))
+* **containers:** flag unix socket mounts in the create sheet ([c4f0f91](https://github.com/getgantry/gantry/commit/c4f0f91a9169e388d6c2ed487b8a569d6e6b9bd2))
+* **machines:** boot machines with nested virtualization and a custom kernel ([9f56e64](https://github.com/getgantry/gantry/commit/9f56e64ea469571094d8e17ed23a961461d3451b))
+
+
+### Fixes
+
+* **ci:** don't parse the release-please pr output with fromJSON ([5fafcbc](https://github.com/getgantry/gantry/commit/5fafcbc2736d16585c9d0bdd1a1d802ec52c5637))
+* **ci:** don't parse the release-please pr output with fromJSON ([5b84d69](https://github.com/getgantry/gantry/commit/5b84d6951310d90ccfaf692da4ccab5a8837eb9f))
+* **ci:** make the version sync work with gnu sed ([460fee7](https://github.com/getgantry/gantry/commit/460fee79990311dbd93eb406c076eb883041d25c))
+* **ci:** make the version sync work with gnu sed ([ba801d8](https://github.com/getgantry/gantry/commit/ba801d817243feea3c4a4a461013e72bfc1424e4))
+* **mcp:** send machine settings as key=value ([03393e1](https://github.com/getgantry/gantry/commit/03393e1b3c4120cd5a3fc9ab539ec1d4bbfb477f))
+
+
+### Documentation
+
+* cover 1.1 machine options, release-please and the upstream watcher ([ce2fd7e](https://github.com/getgantry/gantry/commit/ce2fd7e1acd5230cbb04885bfb3407245e86eb91))
+* **readme:** note volume sizes and sorting ([2c626a6](https://github.com/getgantry/gantry/commit/2c626a62fc73e88acd3cb04c8753cab82560fd1d))
+
 ## [Unreleased]
-
-### Added
-- **apple/container 1.1 support.** Machines can be created and reconfigured with
-  **nested virtualization** (`--virtualization`) and a **custom kernel**
-  (`--kernel`), from the Create Machine sheet, the machine's Resources tab and
-  the MCP server. The toggle is offered only when the installed CLI is 1.1 or
-  newer and the Mac can run nested VMs (Apple silicon M3+ on macOS 15+), and the
-  machine overview shows both settings when the CLI reports them.
-- Bind-mounting a **Unix domain socket** into a container is called out in the
-  Create Container sheet, including whether the installed CLI is new enough for
-  the socket to work in a non-root container (apple/container 1.1+). The host
-  path picker now reaches hidden and system paths where sockets live.
-
-### Fixed
-- The MCP `set_machine_resources` tool sent `--cpus`/`--memory` flags, which
-  `container machine set` rejects; it now sends the `key=value` settings the CLI
-  expects, and also accepts `home_mount`, `nested_virtualization` and `kernel`.
 
 ## [0.21.0] - 2026-06-29
 
