@@ -161,6 +161,15 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
   `com.docker.compose.*` labels — so the project groups in the sidebar just
   like Compose on Docker. apple/container has no native `compose`; Gantry does
   the orchestration itself over the `container` CLI
+- **Machines** — list, create, start/stop, delete and set-default the long-lived
+  Linux environments `container machine` provides, with an editable CPU/memory
+  panel, an interactive shell and a raw inspect view. On apple/container 1.1+ a
+  machine can also boot with **nested virtualization** and a **custom kernel**,
+  so you can run VMs (or another container runtime) inside one — offered only
+  when the Mac supports it, Apple silicon M3 or newer on macOS 15+
+- **Unix socket mounts** — bind a socket from your Mac into a container and
+  Gantry flags whether the installed CLI propagates its permissions to non-root
+  containers (apple/container 1.1+)
 - Features the platform does not offer (pause, rename, commit, restart
   policies, network attach, image history, file *download*) are hidden
   for these hosts instead of erroring

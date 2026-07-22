@@ -46,4 +46,88 @@ struct ContainerMachineTests {
     @Test func emptyListDecodes() throws {
         #expect(try ContainerMachine.list(fromJSON: Data("[]".utf8)).isEmpty)
     }
+
+    // MARK: - Boot config (apple/container 1.1)
+
+    @Test func bootConfigIsNilWhenTheCLIOmitsIt() throws {
+        // 1.1's inspect output still leaves virtualization/kernel out.
+        let data = Data("""
+        [{"cpus":5,"status":"running","memory":8589934592,"diskSize":0,"id":"gantry-m1","default":true}]
+        """.utf8)
+        let m = try #require(try ContainerMachine.list(fromJSON: data).first)
+        #expect(m.nestedVirtualization == nil)
+        #expect(m.kernelPath == nil)
+    }
+
+    @Test func decodesFlattenedBootConfig() throws {
+        let data = Data("""
+        [{"cpus":5,"status":"running","memory":8589934592,"diskSize":0,"id":"gantry-m1","virtualization":true,"kernelPath":"/opt/kernels/vmlinux"}]
+        """.utf8)
+        let m = try #require(try ContainerMachine.list(fromJSON: data).first)
+        #expect(m.nestedVirtualization == true)
+        #expect(m.kernelPath == "/opt/kernels/vmlinux")
+    }
+
+    @Test func decodesNestedBootConfig() throws {
+        let data = Data("""
+        [{"cpus":5,"status":"running","memory":8589934592,"diskSize":0,"id":"gantry-m1","bootConfig":{"cpus":5,"virtualization":true,"kernelPath":"/opt/kernels/vmlinux"}}]
+        """.utf8)
+        let m = try #require(try ContainerMachine.list(fromJSON: data).first)
+        #expect(m.nestedVirtualization == true)
+        #expect(m.kernelPath == "/opt/kernels/vmlinux")
+    }
+}
+
+struct MachineSettingsTests {
+    @Test func rendersKeyValueArguments() {
+        let settings = AppleContainerControl.MachineSettings(
+            cpus: 4,
+            memory: "8G",
+            homeMount: "ro",
+            nestedVirtualization: true,
+            kernelPath: "/opt/kernels/vmlinux"
+        )
+        #expect(settings.arguments == [
+            "cpus=4", "memory=8G", "home-mount=ro",
+            "virtualization=true", "kernel=/opt/kernels/vmlinux",
+        ])
+    }
+
+    @Test func skipsUnsetValues() {
+        let settings = AppleContainerControl.MachineSettings(cpus: 2)
+        #expect(settings.arguments == ["cpus=2"])
+        #expect(!settings.isEmpty)
+    }
+
+    @Test func emptyKernelResetsToTheSystemDefault() {
+        // An empty (not nil) kernel path is meaningful: the CLI reads it as
+        // "go back to the system kernel".
+        let settings = AppleContainerControl.MachineSettings(kernelPath: "")
+        #expect(settings.arguments == ["kernel="])
+    }
+
+    @Test func nothingSetIsEmpty() {
+        #expect(AppleContainerControl.MachineSettings().isEmpty)
+    }
+}
+
+struct ContainerToolingFeatureTests {
+    @Test func nestedVirtualizationNeeds1_1() {
+        #expect(!ContainerTooling.features(for: "1.0.0").nestedVirtualization)
+        #expect(!ContainerTooling.features(for: "1.0.9").nestedVirtualization)
+        #expect(ContainerTooling.features(for: "1.1.0").nestedVirtualization)
+        #expect(ContainerTooling.features(for: "1.2").nestedVirtualization)
+        #expect(ContainerTooling.features(for: "2.0.0").nestedVirtualization)
+    }
+
+    @Test func socketMountsNeed1_1() {
+        #expect(!ContainerTooling.features(for: "1.0.0").nonRootSocketMounts)
+        #expect(ContainerTooling.features(for: "1.1.0").nonRootSocketMounts)
+    }
+
+    @Test func unknownVersionsAreTreatedOptimistically() {
+        // A CLI we can't version-parse shouldn't have its options hidden.
+        #expect(ContainerTooling.features(for: nil).nestedVirtualization)
+        #expect(ContainerTooling.features(for: "unknown").nestedVirtualization)
+    }
 }

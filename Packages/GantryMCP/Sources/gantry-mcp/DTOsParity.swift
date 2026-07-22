@@ -37,6 +37,9 @@ struct MachineDTO: Encodable {
     var ipAddress: String
     var isDefault: Bool
     var imageReference: String?
+    /// Only present on CLI output that reports the boot config back.
+    var nestedVirtualization: Bool?
+    var kernelPath: String?
 
     init(_ m: ContainerMachine) {
         name = m.id
@@ -47,6 +50,8 @@ struct MachineDTO: Encodable {
         ipAddress = m.ipAddress
         isDefault = m.isDefault
         imageReference = m.imageReference
+        nestedVirtualization = m.nestedVirtualization
+        kernelPath = m.kernelPath
     }
 }
 

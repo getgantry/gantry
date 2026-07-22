@@ -1,0 +1,87 @@
+name: Release Please
+
+# Version management from Conventional Commits.
+#
+# On every push to main, release-please keeps a release PR up to date with the
+# next version and the changelog entries it derives from the commit messages.
+# Merging that PR tags the release, publishes the GitHub release, and hands off
+# to the Release workflow, which does the signed build, uploads the zip and
+# refreshes the Sparkle appcast.
+#
+#   commits on main ──▶ release PR (version.txt, CHANGELOG.md, Xcode version)
+#                         └─ merge ──▶ tag v0.22.0 + GitHub release
+#                                        └─ dispatch Release workflow ──▶ zip + appcast
+#
+# The Release workflow is dispatched explicitly rather than triggered by the
+# tag: pushes made with GITHUB_TOKEN don't start other workflows, but an
+# explicit workflow_dispatch does.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  release-please:
+    name: Release PR / tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          # GITHUB_TOKEN is enough, but anything it pushes doesn't start other
+          # workflows — so the release PR gets no CI run of its own (main
+          # already built the same commits). Set RELEASE_PLEASE_TOKEN to a PAT
+          # to have CI run on the release PR too.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+
+      # release-please only knows about version.txt and the changelog. The
+      # Xcode project carries the version the app is actually built with, so
+      # sync it into the release PR — the Release workflow refuses to build
+      # when MARKETING_VERSION and the tag disagree.
+      - name: Sync the Xcode project version into the release PR
+        if: ${{ steps.release.outputs.pr }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git clone --branch "$BRANCH" --depth 1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" release-pr
+          cd release-pr
+          scripts/sync-version.sh
+          if git diff --quiet; then
+            echo "Xcode project already matches version.txt"
+            exit 0
+          fi
+          V="$(tr -d '[:space:]' < version.txt)"
+          git add Gantry.xcodeproj/project.pbxproj
+          git commit -m "build: bump version to $V"
+          git push origin "HEAD:$BRANCH"
+
+      # The tag release-please just pushed can't trigger the Release workflow
+      # on its own (GITHUB_TOKEN pushes don't cascade), so ask for it directly.
+      - name: Dispatch the signed build
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          echo "Dispatching Release for $VERSION"
+          gh workflow run release.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f version="$VERSION"

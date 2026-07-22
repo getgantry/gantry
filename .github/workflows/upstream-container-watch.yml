@@ -1,0 +1,135 @@
+name: Watch apple/container
+
+# Gantry drives the `container` CLI, so a new apple/container release can add
+# flags, change JSON shapes or fix behaviour Gantry works around. GitHub can
+# only notify a person about that (Watch → Releases), so this workflow does the
+# machine-readable half: it checks the upstream releases API weekly and opens a
+# PR when a version Gantry hasn't looked at yet appears.
+#
+# The PR carries the upstream notes and a review checklist; a human decides
+# what actually needs building. Merging it records the version as reviewed in
+# .github/upstream/apple-container-version.txt, which is what stops the next
+# run from re-opening the same PR.
+#
+# Run it by hand from the Actions tab to check immediately, or point it at an
+# older version to re-open a PR for a release already recorded.
+
+on:
+  schedule:
+    # Mondays at 07:00 UTC. apple/container ships every few weeks, so a weekly
+    # check is well inside the release cadence.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Upstream tag to open a PR for (default: the latest release)'
+        required: false
+
+concurrency:
+  group: upstream-container-watch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  UPSTREAM_REPO: apple/container
+  TRACK_FILE: .github/upstream/apple-container-version.txt
+
+jobs:
+  watch:
+    name: Check for a new release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve the upstream release
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TAG}" ]; then
+            REL="$(gh release view "${INPUT_TAG}" --repo "$UPSTREAM_REPO" --json tagName,name,body,url,publishedAt)"
+          else
+            REL="$(gh api "repos/$UPSTREAM_REPO/releases/latest" \
+              --jq '{tagName: .tag_name, name: .name, body: .body, url: .html_url, publishedAt: .published_at}')"
+          fi
+          TAG="$(jq -r '.tagName' <<<"$REL")"
+          KNOWN="$(tr -d '[:space:]' < "$TRACK_FILE" 2>/dev/null || echo '')"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "known=$KNOWN" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r '.url' <<<"$REL")" >> "$GITHUB_OUTPUT"
+          echo "published=$(jq -r '.publishedAt' <<<"$REL")" >> "$GITHUB_OUTPUT"
+          jq -r '.body' <<<"$REL" > "${RUNNER_TEMP}/upstream-notes.md"
+
+          if [ "$TAG" = "$KNOWN" ]; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            echo "apple/container $TAG is already recorded — nothing to do."
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+            echo "apple/container $TAG is new (recorded: ${KNOWN:-none})."
+          fi
+
+      - name: Open the adoption PR
+        if: steps.upstream.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.upstream.outputs.tag }}
+          KNOWN: ${{ steps.upstream.outputs.known }}
+          URL: ${{ steps.upstream.outputs.url }}
+          PUBLISHED: ${{ steps.upstream.outputs.published }}
+        run: |
+          set -euo pipefail
+          BRANCH="upstream/apple-container-${TAG}"
+
+          # An open PR for this tag from an earlier run is enough.
+          OPEN="$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')"
+          if [ "$OPEN" != "0" ]; then
+            echo "A PR for $TAG is already open."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+
+          printf '%s\n' "$TAG" > "$TRACK_FILE"
+
+          NOTES="docs/upstream/apple-container-${TAG}.md"
+          mkdir -p docs/upstream
+          {
+            printf '# apple/container %s\n\n' "$TAG"
+            printf 'Released %s — %s\n\n' "$PUBLISHED" "$URL"
+            printf -- '---\n\n'
+            cat "${RUNNER_TEMP}/upstream-notes.md"
+          } > "$NOTES"
+
+          git add "$TRACK_FILE" "$NOTES"
+          git commit -m "chore(upstream): record apple/container $TAG"
+          git push --force origin "$BRANCH"
+
+          {
+            printf 'apple/container **%s** is out (previously tracked: `%s`).\n\n' "$TAG" "${KNOWN:-none}"
+            printf 'Upstream notes: %s — mirrored in `%s`.\n\n' "$URL" "$NOTES"
+            printf '## Review checklist\n\n'
+            printf -- '- [ ] New or changed CLI flags Gantry should surface (`container run/create/machine/build`)\n'
+            printf -- '- [ ] Changed `--format json` shapes the DockerKit apple transport decodes\n'
+            printf -- '- [ ] Fixed upstream bugs Gantry currently works around\n'
+            printf -- '- [ ] `ContainerTooling.recommendedVersion` / feature gates need moving to `%s`\n' "$TAG"
+            printf -- '- [ ] MCP tools and App Intents that expose the affected commands\n'
+            printf -- '- [ ] README and CHANGELOG entries for whatever is adopted\n\n'
+            printf 'Merging records the version as reviewed. Implement the adopted parts on this branch, or merge as-is and open follow-ups.\n\n'
+            printf -- '---\n\n<details><summary>Upstream release notes</summary>\n\n'
+            cat "${RUNNER_TEMP}/upstream-notes.md"
+            printf '\n</details>\n'
+          } > "${RUNNER_TEMP}/pr-body.md"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore(upstream): adopt apple/container $TAG" \
+            --body-file "${RUNNER_TEMP}/pr-body.md"

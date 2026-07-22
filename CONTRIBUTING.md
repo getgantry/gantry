@@ -88,9 +88,25 @@ tests are skipped rather than failed. The non-live unit tests always run.
 
 ## Commit messages
 
-Write commit messages in plain, imperative English (for example,
-"Add container exec terminal"). Keep them concise and factual. Do not add
-attribution or co-author trailers.
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) —
+`<type>[optional scope]: <description>` — because
+[release-please](https://github.com/googleapis/release-please) derives the next
+version number and the changelog from them:
+
+```
+feat(machines): create machines with nested virtualization
+fix(logs): keep follow mode after a reconnect
+docs(readme): note volume sizes and sorting
+```
+
+Use `feat`, `fix`, `build`, `chore`, `ci`, `docs`, `style`, `refactor`, `perf`
+or `test`. A `!` after the type/scope (or a `BREAKING CHANGE:` footer) marks a
+breaking change. Keep the description in plain, imperative, lowercase English
+with no trailing period. Do not add attribution or co-author trailers.
+
+Which type you pick decides the version bump: `feat` moves the minor version,
+`fix` the patch, a breaking change the major. `feat` and `fix` (plus `perf`,
+`refactor` and `docs`) appear in the changelog; the rest stay hidden.
 
 ## Pull requests
 
@@ -100,32 +116,63 @@ Before opening a pull request:
 - Run the relevant package tests.
 - Make sure there are no new Swift 6 concurrency warnings.
 - Include screenshots for any user-facing UI changes.
-- Add a bullet under `## [Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md) for any
-  user-facing change (the release script stamps it with a version later).
+- Write the commit message as a Conventional Commit — it becomes the changelog
+  entry, so make the description read the way you want it to appear there.
 
 The pull request template includes this checklist. Keep each PR focused on a
 single change where practical.
 
 ## Releasing
 
-Releases are automated by the [`Release`](.github/workflows/release.yml)
-workflow. To cut one:
+Releases are driven by
+[release-please](https://github.com/googleapis/release-please) and finished by
+the [`Release`](.github/workflows/release.yml) workflow. Nobody picks a version
+by hand:
 
-1. On `main`, bump `MARKETING_VERSION` in the Xcode project and land any
-   `## [Unreleased]` changelog notes.
-2. Tag and push: `git tag v0.13.0 && git push origin v0.13.0` (the tag must
-   match `MARKETING_VERSION`). You can also run the workflow manually from the
-   Actions tab with a version input.
+1. Land Conventional Commits on `main`. The
+   [`Release Please`](.github/workflows/release-please.yml) workflow keeps a
+   release PR open with the next version and the changelog entries it derived
+   from those commits, and syncs `MARKETING_VERSION` (and the build number)
+   into the Xcode project on the PR branch.
+2. Review that PR — it is the release. Merging it tags `vX.Y.Z`, publishes the
+   GitHub release with the changelog notes, and dispatches the `Release`
+   workflow.
 
-The workflow builds and ad-hoc-signs the universal app, embeds `gantry-mcp`,
-generates the EdDSA-signed Sparkle appcast, publishes a GitHub release with the
-zip, and commits the updated `appcast.xml` and `CHANGELOG.md` back to `main` so
-existing installs auto-update.
+`Release` then builds and ad-hoc-signs the universal app, embeds `gantry-mcp`,
+generates the EdDSA-signed Sparkle appcast, uploads the zip to the release, and
+commits the updated `appcast.xml` back to `main` so existing installs
+auto-update.
 
-It needs one repository secret, `SPARKLE_PRIVATE_KEY` — the EdDSA private key
-from Sparkle's `generate_keys -x`, pairing with `SUPublicEDKey` in
+The release PR itself gets no CI run — anything pushed with `GITHUB_TOKEN`
+cannot start another workflow, and CI already built the same commits on `main`.
+Set a `RELEASE_PLEASE_TOKEN` secret (a PAT) if you want CI on the release PR too.
+
+The version release-please owns lives in `version.txt` and
+`.release-please-manifest.json`; `scripts/sync-version.sh` is what copies it
+into `Gantry.xcodeproj`. To release without release-please (a hotfix, say), bump
+the project version, push a matching `vX.Y.Z` tag, and `Release` will create the
+release itself.
+
+`Release` needs one repository secret, `SPARKLE_PRIVATE_KEY` — the EdDSA private
+key from Sparkle's `generate_keys -x`, pairing with `SUPublicEDKey` in
 `Info.plist`. `scripts/release.sh <version>` runs the same steps locally using
 the key from your login Keychain.
+
+## Tracking apple/container
+
+Gantry drives the `container` CLI, so upstream releases matter. The
+[`Watch apple/container`](.github/workflows/upstream-container-watch.yml)
+workflow checks [apple/container](https://github.com/apple/container) weekly
+and opens a PR whenever a release appears that Gantry has not looked at yet. The PR
+mirrors the upstream notes into `docs/upstream/` and carries a review checklist
+(new flags, changed JSON shapes, workarounds that can go, version gates to
+move).
+
+The last reviewed version is recorded in
+`.github/upstream/apple-container-version.txt`; merging the PR is what stops the
+next run from re-opening it. Run the workflow by hand from the Actions tab to
+check immediately, optionally passing a tag to re-open a PR for an older
+release.
 
 ## Reporting issues
 

@@ -39,12 +39,18 @@ echo "==> Stamping CHANGELOG"
 # section, then re-open an empty Unreleased for the next cycle. Idempotent per
 # version: re-running for the same version would duplicate the heading, so only
 # run release.sh once per version.
+#
+# Under the normal release-please flow this is already done — the release PR
+# carries the changelog entry — so the whole block is a no-op and only a
+# hand-driven release reaches it.
 CHANGELOG="$ROOT/CHANGELOG.md"
 DATE="$(date +%F)"
-grep -q '^## \[Unreleased\]$' "$CHANGELOG" \
-    || { echo "CHANGELOG.md is missing a '## [Unreleased]' section"; exit 1; }
-if grep -q "^## \[$VERSION\] " "$CHANGELOG"; then
+# Matches both "## [0.21.0] - 2026-06-29" (stamped here) and release-please's
+# "## [0.21.0](compare-link) (2026-06-29)".
+if grep -qE "^## \[$VERSION\][ (]" "$CHANGELOG"; then
     echo "CHANGELOG.md already has a $VERSION section; skipping stamp."
+elif ! grep -q '^## \[Unreleased\]$' "$CHANGELOG"; then
+    echo "CHANGELOG.md has neither a $VERSION section nor '## [Unreleased]'; skipping stamp."
 else
     # Warn (don't block) when releasing with no notes recorded.
     BODY="$(awk '/^## \[Unreleased\]$/{f=1;next} /^## \[/{f=0} f' "$CHANGELOG" \

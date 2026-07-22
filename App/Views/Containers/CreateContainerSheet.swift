@@ -24,6 +24,8 @@ struct CreateContainerSheet: View {
     /// available locally to pick from.
     @State private var domain = ""
     @State private var availableDomains: [String] = []
+    /// nil until the CLI version is known; gates the socket-mount hint.
+    @State private var appleFeatures: ContainerTooling.Features?
 
     @State private var isWorking = false
     @State private var errorText: String?
@@ -108,6 +110,11 @@ struct CreateContainerSheet: View {
                         Toggle("ro", isOn: $row.readOnly)
                             .toggleStyle(.checkbox)
                     }
+                    if let note = socketMountNote {
+                        Label(note, systemImage: "point.3.connected.trianglepath.dotted")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if session.host.isAppleContainer {
@@ -174,6 +181,7 @@ struct CreateContainerSheet: View {
         .frame(width: 560, height: 640)
         .task {
             if session.host.isAppleContainer {
+                appleFeatures = await ContainerTooling.currentFeatures()
                 availableDomains = (try? await AppleContainerControl.listDomains(
                     cliOverride: session.host.socketPathOverride
                 )) ?? []
@@ -242,11 +250,28 @@ struct CreateContainerSheet: View {
 
     // MARK: - Actions
 
+    /// A note shown once a Unix socket is bound in: apple/container only mounts
+    /// sockets with the right permissions for non-root containers from 1.1 on,
+    /// so an older CLI is worth calling out before the container fails to talk
+    /// through it.
+    private var socketMountNote: String? {
+        guard session.host.isAppleContainer,
+              binds.contains(where: { MachineCapabilities.isUnixSocket($0.host) }) else { return nil }
+        if appleFeatures?.nonRootSocketMounts ?? true {
+            return "Unix socket mount — permissions are propagated into the container, including when it runs as a non-root user."
+        }
+        return "Unix socket mount — containers that run as a non-root user need apple/container \(ContainerTooling.socketMountVersion) or newer to use it."
+    }
+
     private func pickHostPath(for id: UUID) {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
+        // Sockets commonly live under hidden or system paths (/var/run, ~/.),
+        // so let the panel reach them.
+        panel.showsHiddenFiles = true
+        panel.treatsFilePackagesAsDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if let idx = binds.firstIndex(where: { $0.id == id }) {
             binds[idx].host = url.path

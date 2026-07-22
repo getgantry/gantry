@@ -34,7 +34,11 @@ extension GantryTools {
                     "name": machineName,
                     "image": Schema.string("Machine image reference (optional; CLI default if omitted)."),
                     "cpus": Schema.integer("Number of CPUs (optional)."),
-                    "memory": Schema.string("Memory, e.g. 4g (optional).")
+                    "memory": Schema.string("Memory, e.g. 4g (optional)."),
+                    "nested_virtualization": Schema.boolean(
+                        "Enable nested virtualization (optional; apple/container 1.1+, Apple silicon M3+ on macOS 15+, needs a kernel with CONFIG_KVM=y)."
+                    ),
+                    "kernel": Schema.string("Path to a custom kernel binary (optional; apple/container 1.1+).")
                 ], required: ["host_id", "name"]),
                 annotations: .init(readOnlyHint: false, destructiveHint: false, openWorldHint: false)
             ),
@@ -64,11 +68,16 @@ extension GantryTools {
             ),
             Tool(
                 name: "set_machine_resources",
-                description: "Set CPU and/or memory for a machine (restarts a running machine to take effect).",
+                description: "Set boot settings for a machine — CPU, memory, home mount, nested virtualization, custom kernel (restarts a running machine to take effect).",
                 inputSchema: Schema.object(properties: [
                     "host_id": appleHostID, "name": machineName,
                     "cpus": Schema.integer("Number of CPUs (optional)."),
-                    "memory": Schema.string("Memory, e.g. 8g (optional).")
+                    "memory": Schema.string("Memory, e.g. 8g (optional)."),
+                    "home_mount": Schema.string("Home directory mount mode: ro, rw or none (optional)."),
+                    "nested_virtualization": Schema.boolean(
+                        "Enable nested virtualization (optional; apple/container 1.1+, Apple silicon M3+ on macOS 15+, needs a kernel with CONFIG_KVM=y)."
+                    ),
+                    "kernel": Schema.string("Path to a custom kernel binary, or an empty string to reset to the system default (optional; apple/container 1.1+).")
                 ], required: ["host_id", "name"]),
                 annotations: .init(readOnlyHint: false, destructiveHint: false, openWorldHint: false)
             ),
@@ -196,6 +205,8 @@ extension GantryTools {
             name: name,
             cpus: args.intOrNil("cpus"),
             memory: args.string("memory"),
+            nestedVirtualization: args.bool("nested_virtualization", default: false),
+            kernelPath: args.string("kernel"),
             cliOverride: cli
         )
         return .text("OK: created machine \(name).")
@@ -217,12 +228,20 @@ extension GantryTools {
     private func setMachineResources(_ args: Arguments) async throws -> CallTool.Result {
         let cli = try appleCLIOverride(args)
         let name = try args.requiredString("name")
-        var settings: [String] = []
-        if let cpus = args.intOrNil("cpus") { settings += ["--cpus", String(cpus)] }
-        if let memory = args.string("memory") { settings += ["--memory", memory] }
-        guard !settings.isEmpty else { throw ToolError("Provide cpus and/or memory.") }
+        // `container machine set` only understands `key=value` arguments — a
+        // flag form like `--cpus 4` is rejected as an invalid setting.
+        let settings = AppleContainerControl.MachineSettings(
+            cpus: args.intOrNil("cpus"),
+            memory: args.string("memory"),
+            homeMount: args.string("home_mount"),
+            nestedVirtualization: args.boolOrNil("nested_virtualization"),
+            kernelPath: args.string("kernel")
+        )
+        guard !settings.isEmpty else {
+            throw ToolError("Provide at least one of cpus, memory, home_mount, nested_virtualization or kernel.")
+        }
         try await AppleContainerControl.setMachine(name, settings: settings, cliOverride: cli)
-        return .text("OK: updated resources for machine \(name).")
+        return .text("OK: updated machine \(name) with \(settings.arguments.joined(separator: " ")). Restart it for the change to take effect.")
     }
 
     private func inspectMachine(_ args: Arguments) async throws -> CallTool.Result {

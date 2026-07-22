@@ -15,9 +15,43 @@ public enum ContainerTooling {
     /// 0.12 shapes defensively, but 0.12 is no longer the supported target).
     public static let minimumVersion = "1.0.0"
     /// The version Gantry is tested against; offered on a fresh install.
-    public static let recommendedVersion = "1.0.0"
+    public static let recommendedVersion = "1.1.0"
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
+
+    /// The first CLI release with `container machine --virtualization` and
+    /// `--kernel` (nested virtualization plus custom kernels).
+    public static let nestedVirtualizationVersion = "1.1.0"
+    /// The first CLI release where bind-mounting a Unix domain socket also
+    /// works in containers that run as a non-root user.
+    public static let socketMountVersion = "1.1.0"
+
+    /// CLI features Gantry gates its UI on. Everything here is derived from the
+    /// detected version — the CLI has no capability query.
+    public struct Features: Sendable, Equatable {
+        /// `container machine create --virtualization / --kernel`.
+        public var nestedVirtualization: Bool
+        /// Socket mounts that work in non-root containers.
+        public var nonRootSocketMounts: Bool
+
+        public init(nestedVirtualization: Bool, nonRootSocketMounts: Bool) {
+            self.nestedVirtualization = nestedVirtualization
+            self.nonRootSocketMounts = nonRootSocketMounts
+        }
+    }
+
+    /// The features an installed CLI of `version` offers. An unknown version
+    /// (the binary answered `--version` in a shape we can't parse) is treated
+    /// optimistically so the UI doesn't hide options from a newer CLI.
+    public static func features(for version: String?) -> Features {
+        guard let version, version != "unknown" else {
+            return Features(nestedVirtualization: true, nonRootSocketMounts: true)
+        }
+        return Features(
+            nestedVirtualization: isVersion(version, atLeast: nestedVirtualizationVersion),
+            nonRootSocketMounts: isVersion(version, atLeast: socketMountVersion)
+        )
+    }
 
     /// The official signed installer releases page. Preferred over Homebrew:
     /// the Homebrew bottle ships only the core plugins and omits the machine API
@@ -52,19 +86,48 @@ public enum ContainerTooling {
     public static func check() async -> Status {
         let brew = brewPath() != nil
         guard let cli = AppleContainerCLIDiscovery.discover() else {
+            await versionCache.store(nil)
             return Status(state: .notInstalled, brewAvailable: brew)
         }
         guard let raw = try? await runCapture(cli, ["--version"]),
               let version = parseVersion(raw) else {
             // The binary exists but didn't report a version — treat it as
             // present-and-usable rather than nagging on a parse miss.
+            await versionCache.store("unknown")
             return Status(state: .ok(version: "unknown"), brewAvailable: brew)
         }
+        await versionCache.store(version)
         if isVersion(version, atLeast: minimumVersion) {
             return Status(state: .ok(version: version), brewAvailable: brew)
         }
         return Status(state: .outdated(current: version), brewAvailable: brew)
     }
+
+    /// The version the last `check()` detected, running one if none has yet.
+    /// Views use this to gate version-dependent options without shelling out on
+    /// every redraw.
+    public static func currentVersion() async -> String? {
+        if await versionCache.checked { return await versionCache.value }
+        _ = await check()
+        return await versionCache.value
+    }
+
+    /// `features(for:)` against the detected CLI version.
+    public static func currentFeatures() async -> Features {
+        features(for: await currentVersion())
+    }
+
+    /// Caches the detected version for the life of the process.
+    private actor VersionCache {
+        private(set) var value: String?
+        private(set) var checked = false
+        func store(_ version: String?) {
+            value = version
+            checked = true
+        }
+    }
+
+    private static let versionCache = VersionCache()
 
     /// Extracts an `x.y[.z]` version from `container --version` output.
     public static func parseVersion(_ text: String) -> String? {
