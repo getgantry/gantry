@@ -5,7 +5,7 @@ so its releases can add flags worth surfacing, change the JSON Gantry decodes,
 or fix behaviour Gantry works around.
 
 The [`Watch apple/container`](../../.github/workflows/upstream-container-watch.yml)
-workflow polls upstream daily and opens a PR for any release Gantry has not
+workflow checks upstream weekly and opens a PR for any release Gantry has not
 looked at yet. Each PR drops the release notes here as
 `apple-container-<tag>.md` and records the tag in
 `.github/upstream/apple-container-version.txt` — that file is what tells the

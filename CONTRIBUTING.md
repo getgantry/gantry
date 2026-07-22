@@ -162,8 +162,8 @@ the key from your login Keychain.
 
 Gantry drives the `container` CLI, so upstream releases matter. The
 [`Watch apple/container`](.github/workflows/upstream-container-watch.yml)
-workflow polls [apple/container](https://github.com/apple/container) daily and
-opens a PR whenever a release appears that Gantry has not looked at yet. The PR
+workflow checks [apple/container](https://github.com/apple/container) weekly
+and opens a PR whenever a release appears that Gantry has not looked at yet. The PR
 mirrors the upstream notes into `docs/upstream/` and carries a review checklist
 (new flags, changed JSON shapes, workarounds that can go, version gates to
 move).

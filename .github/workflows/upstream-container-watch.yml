@@ -3,8 +3,8 @@ name: Watch apple/container
 # Gantry drives the `container` CLI, so a new apple/container release can add
 # flags, change JSON shapes or fix behaviour Gantry works around. GitHub can
 # only notify a person about that (Watch → Releases), so this workflow does the
-# machine-readable half: it polls the upstream releases API and opens a PR the
-# moment a version Gantry hasn't looked at yet appears.
+# machine-readable half: it checks the upstream releases API weekly and opens a
+# PR when a version Gantry hasn't looked at yet appears.
 #
 # The PR carries the upstream notes and a review checklist; a human decides
 # what actually needs building. Merging it records the version as reviewed in
@@ -16,8 +16,9 @@ name: Watch apple/container
 
 on:
   schedule:
-    # Daily at 07:00 UTC.
-    - cron: '0 7 * * *'
+    # Mondays at 07:00 UTC. apple/container ships every few weeks, so a weekly
+    # check is well inside the release cadence.
+    - cron: '0 7 * * 1'
   workflow_dispatch:
     inputs:
       tag:
