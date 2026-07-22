@@ -1,11 +1,24 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Dependabot version updates.
+#
+# Only the GitHub Actions ecosystem is enabled. The Swift ecosystem is
+# deliberately left off: Gantry pins two dependencies to branches of our own
+# forks (andrewkomkov/Citadel `gantry`, andrewkomkov/swift-nio-ssh
+# `gantry-fixes`) carrying patches that aren't upstream, so automated bumps
+# there would be noise at best and would quietly drop those patches at worst.
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: monday
+    # One PR for all action bumps rather than one per action.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      # Conventional Commits — release-please reads these, and `ci` is a hidden
+      # type, so action bumps stay out of the changelog.
+      prefix: ci

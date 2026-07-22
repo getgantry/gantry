@@ -19,6 +19,10 @@ name: Release Please
 on:
   push:
     branches: [main]
+    paths-ignore:
+      # The Release workflow commits this back to main at the end of a release;
+      # re-running release-please for it can never produce anything.
+      - appcast.xml
   workflow_dispatch:
 
 concurrency:

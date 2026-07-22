@@ -32,6 +32,16 @@ struct HeadlessDockerTests {
         #expect(docker.host(id: UUID()) == nil)
     }
 
+    @Test func synthesisedLocalHostKeepsAStableID() {
+        // Regression: the fallback host used to get a fresh UUID per call, so
+        // an id handed out by list_hosts could not be used for anything.
+        let docker = gantry_mcp.HeadlessDocker()
+        let first = docker.loadHosts().first { $0.isLocal }?.id
+        let second = docker.loadHosts().first { $0.isLocal }?.id
+        #expect(first == second)
+        #expect(first.map { docker.host(id: $0)?.id } == first)
+    }
+
     @Test func clientForUnknownHostIDThrows() async {
         let docker = gantry_mcp.HeadlessDocker()
         await #expect(throws: HeadlessError.self) {

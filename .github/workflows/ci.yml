@@ -3,13 +3,36 @@ name: CI
 on:
   push:
     branches: [main]
-    # The Release workflow commits only these back to main; don't spend CI
-    # minutes rebuilding for a docs/appcast-only auto-commit.
+    # Kept in step with the pull_request list below — GitHub Actions does not
+    # support YAML anchors, so the two have to be edited together.
+    paths-ignore:
+      # The Release workflow commits the appcast back to main, and
+      # release-please owns the changelog — neither is worth a macOS rebuild.
+      - appcast.xml
+      - CHANGELOG.md
+      # Nothing below feeds the build. A change touching only these skips CI;
+      # a change touching one of them *and* any source file still runs it.
+      - '**/*.md'
+      - docs/**
+      - assets/**
+      - screenshots/**
+      - .github/ISSUE_TEMPLATE/**
+      - .github/PULL_REQUEST_TEMPLATE.md
+      - .github/upstream/**
+      - LICENSE
+  pull_request:
+    branches: [main]
     paths-ignore:
       - appcast.xml
       - CHANGELOG.md
-  pull_request:
-    branches: [main]
+      - '**/*.md'
+      - docs/**
+      - assets/**
+      - screenshots/**
+      - .github/ISSUE_TEMPLATE/**
+      - .github/PULL_REQUEST_TEMPLATE.md
+      - .github/upstream/**
+      - LICENSE
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,12 +56,25 @@ jobs:
           xcodebuild -version
           swift --version
 
+      # Gantry pulls its dependencies (Sparkle, SwiftTerm, Citadel, swift-nio,
+      # swift-crypto…) from git on every build. Cloning them again each run is
+      # the slowest part of a cold build and none of it changes unless
+      # Package.resolved does.
+      - name: Cache resolved packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/SourcePackages
+          key: spm-xcode-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            spm-xcode-${{ runner.os }}-
+
       - name: Build Gantry (Release)
         run: |
           xcodebuild \
             -project Gantry.xcodeproj \
             -scheme Gantry \
             -configuration Release \
+            -clonedSourcePackagesDirPath "${{ github.workspace }}/SourcePackages" \
             build \
             CODE_SIGNING_ALLOWED=NO
 
@@ -49,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [AppCore, DockerKit, SSHKit]
+        package: [AppCore, DockerKit, GantryMCP, SSHKit]
     steps:
       - uses: actions/checkout@v4
 
@@ -57,6 +93,14 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
+
+      - name: Cache the build directory
+        uses: actions/cache@v4
+        with:
+          path: Packages/${{ matrix.package }}/.build
+          key: spm-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
+          restore-keys: |
+            spm-${{ matrix.package }}-${{ runner.os }}-
 
       - name: Test ${{ matrix.package }}
         # Live tests are gated with .enabled(if:) on the presence of a local
