@@ -55,8 +55,17 @@ jobs:
         if: ${{ steps.release.outputs.pr }}
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
-          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+          # Passed as raw JSON and parsed in the script: a `fromJSON()` here is
+          # evaluated while the step is being prepared, even when `if:` skips
+          # it, so an empty output from a failed release-please run takes the
+          # whole workflow down with a template error.
+          PR_JSON: ${{ steps.release.outputs.pr }}
         run: |
+          BRANCH="$(jq -r '.headBranchName // empty' <<<"$PR_JSON")"
+          if [ -z "$BRANCH" ]; then
+            echo "::error::release-please reported a PR without a head branch"
+            exit 1
+          fi
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git clone --branch "$BRANCH" --depth 1 \
