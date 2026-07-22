@@ -1,0 +1,34 @@
+name: PR title
+
+# The PR title becomes the commit subject on merge, and release-please reads
+# those subjects to pick the next version and write the changelog. A title it
+# can't parse doesn't fail loudly — the change just silently vanishes from the
+# release notes, and a mistyped `feat` means the minor bump never happens.
+#
+# Cheap to run, catches it while the title is still one click from being fixed.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Conventional Commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate the title
+        env:
+          # Through the environment, never interpolated into the script — a PR
+          # title is attacker-controlled text.
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: scripts/check-conventional-commit.py "$PR_TITLE"

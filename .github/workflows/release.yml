@@ -18,6 +18,12 @@ name: Release
 #   SPARKLE_PRIVATE_KEY  — the EdDSA private key that signs the appcast,
 #                          exported with Sparkle's `generate_keys -x`. It pairs
 #                          with SUPublicEDKey in Info.plist.
+#
+# Optional repository secret:
+#   HOMEBREW_TAP_TOKEN   — a token with contents:write on getgantry/homebrew-tap.
+#                          When set, the cask is bumped automatically after the
+#                          release; without it that stays a manual step and the
+#                          job just prints what to do.
 
 on:
   push:
@@ -43,6 +49,8 @@ jobs:
     name: Build & publish
     runs-on: macos-26
     timeout-minutes: 45
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -136,3 +144,75 @@ jobs:
             echo "push attempt $attempt hit a concurrent update; retrying"; sleep 5
           done
           echo "::error::could not push appcast/changelog to main"; exit 1
+
+      # Sparkle decides an update is newer by comparing sparkle:version
+      # (CFBundleVersion), not the marketing version. A release that forgets to
+      # increment the build number publishes fine and is silently never offered
+      # to anyone — this is the check that catches that before we call it shipped.
+      - name: Verify the published appcast
+        run: scripts/verify-appcast.py "${{ steps.ver.outputs.version }}"
+
+  tap:
+    # Homebrew is the real update channel for Gantry — the app is ad-hoc signed,
+    # so Sparkle's in-app installer is refused by Gatekeeper and users update
+    # with `brew upgrade --cask gantry`. A release that doesn't reach the tap
+    # effectively doesn't reach anyone, which is how the tap ended up three
+    # versions behind.
+    name: Bump the Homebrew cask
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check for the tap token
+        id: token
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -n "$TAP_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::HOMEBREW_TAP_TOKEN is not set — bump getgantry/homebrew-tap by hand."
+          fi
+
+      - name: Bump version and sha256
+        if: steps.token.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          ZIP="Gantry-${VERSION}.zip"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/${ZIP}"
+
+          # Hash the asset that was actually published, not a local rebuild.
+          curl -fsSL --retry 5 --retry-delay 5 -o "$ZIP" "$URL"
+          SHA="$(sha256sum "$ZIP" | cut -d' ' -f1)"
+          echo "$ZIP sha256=$SHA"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git clone --depth 1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/getgantry/homebrew-tap.git" tap
+          cd tap
+
+          CASK=Casks/gantry.rb
+          CURRENT="$(sed -nE 's/^  version "(.*)"$/\1/p' "$CASK")"
+          if [ "$CURRENT" = "$VERSION" ]; then
+            echo "cask is already at $VERSION"
+            exit 0
+          fi
+
+          sed -i -E \
+            -e "s/^  version \".*\"$/  version \"${VERSION}\"/" \
+            -e "s/^  sha256 \".*\"$/  sha256 \"${SHA}\"/" \
+            "$CASK"
+
+          # Refuse to push a cask that didn't actually take both values.
+          grep -q "version \"${VERSION}\"" "$CASK" && grep -q "sha256 \"${SHA}\"" "$CASK" \
+            || { echo "::error::cask rewrite did not apply"; exit 1; }
+
+          git add "$CASK"
+          git commit -m "gantry ${VERSION}"
+          git push origin HEAD:main
+          echo "bumped the cask ${CURRENT} -> ${VERSION}"
