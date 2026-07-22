@@ -53,14 +53,6 @@ concurrency:
   group: codeql-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  # Must be workflow-level, not per-step: CodeQL's init step configures the
-  # Swift extractor against whatever Xcode it sees, and the runner's default is
-  # a different build (17E188) from the pinned one (17E202). With only the
-  # build step pinned, the tracer looked for a Metal toolchain belonging to the
-  # other Xcode and the analysis build died with "cannot execute tool 'metal'".
-  DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
-
 permissions:
   contents: read
 
@@ -83,10 +75,15 @@ jobs:
           # macOS — this is the expensive half.
           - language: swift
             runner: macos-26
-            build-mode: manual
+            build-mode: autobuild
             timeout: 60
-          # Workflow files: no build, so this is seconds on a Linux runner.
+          # Workflow files and the release/CI helper scripts: no build, so
+          # these are seconds on a Linux runner.
           - language: actions
+            runner: ubuntu-latest
+            build-mode: none
+            timeout: 15
+          - language: python
             runner: ubuntu-latest
             build-mode: none
             timeout: 15
@@ -104,43 +101,19 @@ jobs:
           # about coverage. `security-extended` is the knob if we ever want
           # more, at the cost of a longer run and more low-severity noise.
 
-      # Same dependency cache the CI build uses — the analysis build otherwise
-      # re-clones Sparkle, SwiftTerm, Citadel and swift-nio from scratch.
-      - name: Cache resolved packages
-        if: matrix.language == 'swift'
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/SourcePackages
-          key: spm-xcode-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            spm-xcode-${{ runner.os }}-
-
-      # An explicit build rather than autobuild: autobuild guesses a scheme, and
-      # a wrong guess analyses a subset of the app without saying so.
-      # SwiftTerm compiles a Metal shader, and on macos-26 the Metal toolchain
-      # is an on-demand MobileAsset rather than part of Xcode. Every job gets a
-      # fresh VM: the CI build's runner happens to have the asset mounted, this
-      # one does not, and the traced build then resolves `metal` inside
-      # XcodeDefault.xctoolchain where it does not exist. Requesting it puts the
-      # asset in place; harmless when it is already there.
+      # Autobuild rather than an explicit xcodebuild invocation.
       #
-      # This needs the workflow-level DEVELOPER_DIR above — an earlier attempt
-      # ran against the runner's default Xcode and died fetching a catalog for
-      # the wrong build (17E188 vs the pinned 17E202).
-      - name: Ensure the Metal toolchain is available
+      # A manual `xcodebuild -scheme Gantry` cannot compile SwiftTerm's Metal
+      # shader under CodeQL's build tracer: `metal` lives in an on-demand
+      # MobileAsset that a traced build resolves to XcodeDefault.xctoolchain,
+      # where it does not exist, and -downloadComponent cannot install it (it
+      # asks for a catalog keyed on the runner's macOS build, which Apple does
+      # not publish one for). The default code-scanning setup this workflow
+      # replaces built the project happily via autobuild, so use that — the
+      # point of this workflow is when the analysis runs, not how it builds.
+      - name: Autobuild
         if: matrix.language == 'swift'
-        run: xcodebuild -downloadComponent MetalToolchain
-
-      - name: Build Gantry for analysis
-        if: matrix.language == 'swift'
-        run: |
-          xcodebuild \
-            -project Gantry.xcodeproj \
-            -scheme Gantry \
-            -configuration Debug \
-            -clonedSourcePackagesDirPath "${{ github.workspace }}/SourcePackages" \
-            build \
-            CODE_SIGNING_ALLOWED=NO
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
