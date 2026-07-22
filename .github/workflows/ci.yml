@@ -49,7 +49,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Show toolchain
         run: |
@@ -61,7 +61,7 @@ jobs:
       # the slowest part of a cold build and none of it changes unless
       # Package.resolved does.
       - name: Cache resolved packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/SourcePackages
           key: spm-xcode-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
@@ -87,7 +87,7 @@ jobs:
       matrix:
         package: [AppCore, DockerKit, GantryMCP, SSHKit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Show toolchain
         run: |
@@ -95,7 +95,7 @@ jobs:
           swift --version
 
       - name: Cache the build directory
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: Packages/${{ matrix.package }}/.build
           key: spm-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
