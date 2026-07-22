@@ -117,6 +117,20 @@ jobs:
 
       # An explicit build rather than autobuild: autobuild guesses a scheme, and
       # a wrong guess analyses a subset of the app without saying so.
+      # SwiftTerm compiles a Metal shader, and on macos-26 the Metal toolchain
+      # is an on-demand MobileAsset rather than part of Xcode. Every job gets a
+      # fresh VM: the CI build's runner happens to have the asset mounted, this
+      # one does not, and the traced build then resolves `metal` inside
+      # XcodeDefault.xctoolchain where it does not exist. Requesting it puts the
+      # asset in place; harmless when it is already there.
+      #
+      # This needs the workflow-level DEVELOPER_DIR above — an earlier attempt
+      # ran against the runner's default Xcode and died fetching a catalog for
+      # the wrong build (17E188 vs the pinned 17E202).
+      - name: Ensure the Metal toolchain is available
+        if: matrix.language == 'swift'
+        run: xcodebuild -downloadComponent MetalToolchain
+
       - name: Build Gantry for analysis
         if: matrix.language == 'swift'
         run: |
