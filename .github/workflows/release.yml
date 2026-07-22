@@ -3,11 +3,16 @@ name: Release
 # Auto-deploy: build, sign and publish a Gantry release, then update the
 # Sparkle appcast on main so existing installs auto-update.
 #
-# Trigger by pushing a version tag from main:
+# Normally dispatched by the Release Please workflow once its release PR is
+# merged and the tag exists. It can also be started by hand — from the Actions
+# tab with a version input, or by pushing a version tag from main:
 #   git tag v0.13.0 && git push origin v0.13.0
-# or run manually from the Actions tab with a version input.
 #
-# The tag (or input) must match MARKETING_VERSION in the Xcode project.
+# The tag (or input) must match MARKETING_VERSION in the Xcode project;
+# release-please keeps the two in step via scripts/sync-version.sh.
+#
+# The GitHub release itself belongs to release-please: this workflow uploads
+# the build to it and only creates one when it is missing (a hand-pushed tag).
 #
 # Required repository secret:
 #   SPARKLE_PRIVATE_KEY  — the EdDSA private key that signs the appcast,
@@ -88,17 +93,22 @@ jobs:
           SPARKLE_ED_KEY_FILE: ${{ runner.temp }}/sparkle_ed_key
         run: scripts/release.sh "${{ steps.ver.outputs.version }}"
 
-      - name: Publish GitHub release
+      - name: Attach the build to the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           V="${{ steps.ver.outputs.version }}"
-          # Pull this version's notes out of the (now stamped) changelog.
+          if gh release view "v$V" >/dev/null 2>&1; then
+            # release-please already published the release and its notes; just
+            # add (or replace, on a re-run) the build.
+            gh release upload "v$V" "dist/Gantry-$V.zip" --clobber
+            echo "uploaded Gantry-$V.zip to the existing release v$V"
+            exit 0
+          fi
+          # No release yet — a hand-pushed tag. Fall back to the changelog for
+          # notes and create it.
           awk -v v="## [$V]" 'index($0, v) == 1 {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > "${RUNNER_TEMP}/notes.md"
           [ -s "${RUNNER_TEMP}/notes.md" ] || echo "Gantry $V" > "${RUNNER_TEMP}/notes.md"
-          # Replace any existing release for this tag (keep the tag) so re-runs
-          # publish a fresh build cleanly.
-          gh release delete "v$V" --yes --cleanup-tag=false 2>/dev/null || true
           gh release create "v$V" "dist/Gantry-$V.zip" \
             --title "Gantry $V" \
             --notes-file "${RUNNER_TEMP}/notes.md"
@@ -108,6 +118,8 @@ jobs:
           V="${{ steps.ver.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # CHANGELOG.md is release-please's to write; it only changes here when
+          # release.sh had to stamp it for a hand-pushed tag.
           git add appcast.xml CHANGELOG.md
           if git diff --cached --quiet; then
             echo "No appcast/changelog changes to commit."
