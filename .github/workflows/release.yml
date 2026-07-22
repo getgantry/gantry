@@ -20,10 +20,13 @@ name: Release
 #                          with SUPublicEDKey in Info.plist.
 #
 # Optional repository secret:
-#   HOMEBREW_TAP_TOKEN   — a token with contents:write on getgantry/homebrew-tap.
-#                          When set, the cask is bumped automatically after the
-#                          release; without it that stays a manual step and the
-#                          job just prints what to do.
+#   HOMEBREW_TAP_DEPLOY_KEY — the private half of a write-enabled deploy key on
+#                          getgantry/homebrew-tap. When set, the cask is bumped
+#                          as soon as the release is published. A deploy key
+#                          rather than a PAT: it reaches exactly one repository,
+#                          belongs to no user account and does not expire.
+#                          The tap also bumps itself on a schedule, so this only
+#                          decides whether the bump is immediate.
 
 on:
   push:
@@ -163,43 +166,51 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check for the tap token
-        id: token
+      - name: Check for the deploy key
+        id: key
         env:
-          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
         run: |
-          if [ -n "$TAP_TOKEN" ]; then
+          if [ -n "$DEPLOY_KEY" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::HOMEBREW_TAP_TOKEN is not set — bump getgantry/homebrew-tap by hand."
+            echo "::notice::HOMEBREW_TAP_DEPLOY_KEY is not set — the tap will pick this release up on its own schedule instead."
           fi
 
       - name: Bump version and sha256
-        if: steps.token.outputs.present == 'true'
+        if: steps.key.outputs.present == 'true'
         env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
           set -euo pipefail
           ZIP="Gantry-${VERSION}.zip"
-          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/${ZIP}"
 
           # Hash the asset that was actually published, not a local rebuild.
-          curl -fsSL --retry 5 --retry-delay 5 -o "$ZIP" "$URL"
-          SHA="$(sha256sum "$ZIP" | cut -d' ' -f1)"
+          gh release download "v${VERSION}" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$ZIP" --dir "$RUNNER_TEMP"
+          SHA="$(sha256sum "${RUNNER_TEMP}/${ZIP}" | cut -d' ' -f1)"
           echo "$ZIP sha256=$SHA"
+
+          # A deploy key reaches exactly one repository, so it is checked out
+          # over SSH rather than with a token in the clone URL.
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/tap_key
+          chmod 600 ~/.ssh/tap_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/tap_key -o IdentitiesOnly=yes"
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git clone --depth 1 \
-            "https://x-access-token:${GH_TOKEN}@github.com/getgantry/homebrew-tap.git" tap
+          git clone --depth 1 git@github.com:getgantry/homebrew-tap.git tap
           cd tap
 
           CASK=Casks/gantry.rb
           CURRENT="$(sed -nE 's/^  version "(.*)"$/\1/p' "$CASK")"
           if [ "$CURRENT" = "$VERSION" ]; then
-            echo "cask is already at $VERSION"
+            echo "cask is already at $VERSION (the tap's own workflow got there first)"
             exit 0
           fi
 
