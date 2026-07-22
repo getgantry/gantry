@@ -34,9 +34,13 @@ fi
 NEXT_BUILD=$((BUILD + 1))
 
 # Both Debug and Release build configurations carry the pair, so replace all.
-sed -i '' -E \
+# Written through a temp file rather than `sed -i`, whose in-place syntax
+# differs between BSD sed (macOS, where this is run by hand) and GNU sed (the
+# Linux runner the release workflow uses).
+sed -E \
     -e "s/(MARKETING_VERSION = ).*;/\1$VERSION;/" \
     -e "s/(CURRENT_PROJECT_VERSION = ).*;/\1$NEXT_BUILD;/" \
-    "$PROJECT"
+    "$PROJECT" > "$PROJECT.tmp"
+mv "$PROJECT.tmp" "$PROJECT"
 
 echo "bumped $CURRENT (build $BUILD) -> $VERSION (build $NEXT_BUILD)"
