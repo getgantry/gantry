@@ -1,0 +1,121 @@
+name: CodeQL
+
+# Replaces GitHub's default code-scanning setup, which could not be tuned:
+#
+#   * it re-analysed Swift on every docs-only change (46 minutes for a one-line
+#     shell script edit),
+#   * it had no concurrency control, so three pushes to a branch left three
+#     46-minute analyses running in parallel — for a PR that had already been
+#     merged,
+#   * and because Swift analysis needs a macOS runner, those runs occupied the
+#     macOS pool a public repo gets and left an actual release queued behind
+#     them for the better part of an hour.
+#
+# Same coverage (Swift + Actions, default query suite), scoped so it runs when
+# it can find something.
+
+on:
+  push:
+    branches: [main]
+    # Kept in step with the pull_request list below — GitHub Actions does not
+    # support YAML anchors, so the two have to be edited together.
+    paths-ignore:
+      # Nothing here is analysed by either language, and the Release workflow
+      # commits the appcast back to main on every release.
+      - '**/*.md'
+      - docs/**
+      - assets/**
+      - screenshots/**
+      - appcast.xml
+      - .github/ISSUE_TEMPLATE/**
+      - .github/upstream/**
+      - LICENSE
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - docs/**
+      - assets/**
+      - screenshots/**
+      - appcast.xml
+      - .github/ISSUE_TEMPLATE/**
+      - .github/upstream/**
+      - LICENSE
+  schedule:
+    # Mondays at 05:00 UTC — catches newly published CodeQL queries finding
+    # something in code nobody has touched since the last push.
+    - cron: '0 5 * * 1'
+
+# A new push supersedes the analysis in flight for the same ref. Never cancel
+# on main or on the schedule: those results are what the security dashboard
+# shows for the default branch.
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: ${{ matrix.timeout }}
+    permissions:
+      # Only the analyze job needs to write findings.
+      security-events: write
+      # Lets CodeQL correlate alerts with the workflow runs that produced them.
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Swift has to be compiled to be analysed, and the app only builds on
+          # macOS — this is the expensive half.
+          - language: swift
+            runner: macos-26
+            build-mode: autobuild
+            timeout: 60
+          # Workflow files and the release/CI helper scripts: no build, so
+          # these are seconds on a Linux runner.
+          - language: actions
+            runner: ubuntu-latest
+            build-mode: none
+            timeout: 15
+          - language: python
+            runner: ubuntu-latest
+            build-mode: none
+            timeout: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # No `queries:` — that leaves the default suite, which is what the
+          # previous setup ran, so this change alters scheduling and nothing
+          # about coverage. `security-extended` is the knob if we ever want
+          # more, at the cost of a longer run and more low-severity noise.
+
+      # Autobuild rather than an explicit xcodebuild invocation.
+      #
+      # A manual `xcodebuild -scheme Gantry` cannot compile SwiftTerm's Metal
+      # shader under CodeQL's build tracer: `metal` lives in an on-demand
+      # MobileAsset that a traced build resolves to XcodeDefault.xctoolchain,
+      # where it does not exist, and -downloadComponent cannot install it (it
+      # asks for a catalog keyed on the runner's macOS build, which Apple does
+      # not publish one for). The default code-scanning setup this workflow
+      # replaces built the project happily via autobuild, so use that — the
+      # point of this workflow is when the analysis runs, not how it builds.
+      - name: Autobuild
+        if: matrix.language == 'swift'
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
