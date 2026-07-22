@@ -32,6 +32,12 @@ struct Arguments {
         raw[key]?.boolValue ?? fallback
     }
 
+    /// A boolean only when the caller actually sent one — lets a tool tell
+    /// "leave this setting alone" apart from "set it to false".
+    func boolOrNil(_ key: String) -> Bool? {
+        raw[key]?.boolValue
+    }
+
     func int(_ key: String, default fallback: Int) -> Int {
         if let i = raw[key]?.intValue { return i }
         if let d = raw[key]?.doubleValue { return Int(d) }
