@@ -201,8 +201,12 @@ struct MachineDetailView: View {
     @State private var tab: DetailTab = .overview
     @State private var editCPU = 1
     @State private var editMemGB = 1
+    @State private var editNestedVirt = false
+    @State private var editKernel = ""
     @State private var applying = false
     @State private var busy = false
+    /// nil until the CLI version is known; gates the 1.1-only boot options.
+    @State private var features: ContainerTooling.Features?
 
     enum DetailTab: String, CaseIterable, Identifiable {
         case overview = "Overview"
@@ -219,7 +223,14 @@ struct MachineDetailView: View {
     private var currentMemGB: Int { max(1, Int((Double(machine.memory) / Self.bytesPerGB).rounded())) }
     private var maxCPU: Int { max(1, ProcessInfo.processInfo.activeProcessorCount) }
     private var maxMemGB: Int { max(1, Int((Double(ProcessInfo.processInfo.physicalMemory) / Self.bytesPerGB).rounded())) }
-    private var isDirty: Bool { editCPU != machine.cpus || editMemGB != currentMemGB }
+    private var currentNestedVirt: Bool { machine.nestedVirtualization ?? false }
+    private var currentKernel: String { machine.kernelPath ?? "" }
+    private var isDirty: Bool {
+        editCPU != machine.cpus
+            || editMemGB != currentMemGB
+            || editNestedVirt != currentNestedVirt
+            || editKernel != currentKernel
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -238,6 +249,7 @@ struct MachineDetailView: View {
         }
         .navigationTitle(machine.id)
         .task(id: machine.id) { syncEdits() }
+        .task { features = await ContainerTooling.currentFeatures() }
     }
 
     // MARK: Tabs
@@ -278,6 +290,10 @@ struct MachineDetailView: View {
                 if let image = machine.imageReference { Fact("Image", image) }
                 if let user = machine.username { Fact("User", user) }
                 if let home = machine.homeMount { Fact("Home Mount", home) }
+                if let nested = machine.nestedVirtualization {
+                    Fact("Nested Virtualization", nested ? "Enabled" : "Disabled")
+                }
+                if let kernel = machine.kernelPath, !kernel.isEmpty { Fact("Kernel", kernel) }
                 if !machine.created.isEmpty { Fact("Created", machine.created) }
             }
             .padding()
@@ -357,6 +373,10 @@ struct MachineDetailView: View {
             }
             .disabled(applying)
 
+            if features?.nestedVirtualization ?? false {
+                bootOptions
+            }
+
             HStack(spacing: 10) {
                 Button(machine.isRunning ? "Apply & Restart" : "Apply") { applyResources() }
                     .buttonStyle(.borderedProminent)
@@ -379,19 +399,73 @@ struct MachineDetailView: View {
         .frame(maxWidth: 460, alignment: .leading)
     }
 
+    /// apple/container 1.1 boot settings. `container machine inspect` doesn't
+    /// report the boot config back, so these show what will be applied rather
+    /// than what the machine currently runs with.
+    @ViewBuilder
+    private var bootOptions: some View {
+        let unsupported = MachineCapabilities.nestedVirtualizationUnavailableReason
+
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Boot")
+
+            Toggle("Nested virtualization", isOn: $editNestedVirt)
+                .toggleStyle(.checkbox)
+                .disabled(applying || unsupported != nil)
+
+            HStack(spacing: 6) {
+                Text("Kernel").foregroundStyle(.secondary)
+                TextField("System default", text: $editKernel)
+                    .textFieldStyle(.roundedBorder)
+                Button {
+                    pickKernel()
+                } label: {
+                    Image(systemName: "folder")
+                }
+                .buttonStyle(.borderless)
+            }
+            .disabled(applying)
+
+            Text(unsupported
+                 ?? "Nested virtualization needs a custom kernel built with CONFIG_KVM=y. The CLI doesn't report these back, so they show what will be applied.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     // MARK: Actions
 
     private func syncEdits() {
         editCPU = max(1, machine.cpus)
         editMemGB = currentMemGB
+        editNestedVirt = currentNestedVirt
+        editKernel = currentKernel
+    }
+
+    private func pickKernel() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = "Choose a kernel binary (e.g. vmlinux)."
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        editKernel = url.path
     }
 
     private func applyResources() {
-        let settings = ["cpus=\(editCPU)", "memory=\(editMemGB)G"]
+        let supportsBootOptions = features?.nestedVirtualization ?? false
+        var settings = AppleContainerControl.MachineSettings(
+            cpus: editCPU,
+            memory: "\(editMemGB)G"
+        )
+        if supportsBootOptions {
+            if editNestedVirt != currentNestedVirt { settings.nestedVirtualization = editNestedVirt }
+            if editKernel != currentKernel { settings.kernelPath = editKernel }
+        }
         let wasRunning = machine.isRunning
         applying = true
         Task {
-            let ok = await session.setMachineResources(machine.id, settings: settings)
+            let ok = await session.setMachineSettings(machine.id, settings)
             if ok && wasRunning {
                 // `machine set` only takes effect on restart — cycle it so the
                 // change is live immediately.

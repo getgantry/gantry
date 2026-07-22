@@ -25,6 +25,13 @@ public struct ContainerMachine: Identifiable, Hashable, Sendable, Decodable {
     /// Home-directory mount mode ("rw" / "ro").
     public var homeMount: String?
     public var username: String?
+    /// Whether the machine boots with nested virtualization (apple/container
+    /// 1.1+). `container machine inspect` does not report the boot config's
+    /// virtualization flag yet, so this is nil on every CLI that omits it.
+    public var nestedVirtualization: Bool?
+    /// A custom kernel binary the machine boots (apple/container 1.1+); nil for
+    /// the system default. Also absent from today's inspect output.
+    public var kernelPath: String?
 
     public var isRunning: Bool { status.lowercased() == "running" }
 
@@ -40,7 +47,9 @@ public struct ContainerMachine: Identifiable, Hashable, Sendable, Decodable {
         imageReference: String? = nil,
         startedDate: String? = nil,
         homeMount: String? = nil,
-        username: String? = nil
+        username: String? = nil,
+        nestedVirtualization: Bool? = nil,
+        kernelPath: String? = nil
     ) {
         self.id = id
         self.status = status
@@ -54,6 +63,8 @@ public struct ContainerMachine: Identifiable, Hashable, Sendable, Decodable {
         self.startedDate = startedDate
         self.homeMount = homeMount
         self.username = username
+        self.nestedVirtualization = nestedVirtualization
+        self.kernelPath = kernelPath
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -61,10 +72,12 @@ public struct ContainerMachine: Identifiable, Hashable, Sendable, Decodable {
         case isDefault = "default"
         case created = "createdDate"
         case startedDate, homeMount, image, userSetup
+        case virtualization, kernelPath, bootConfig
     }
 
     private enum ImageKeys: String, CodingKey { case reference }
     private enum UserKeys: String, CodingKey { case username }
+    private enum BootKeys: String, CodingKey { case virtualization, kernelPath }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -83,6 +96,15 @@ public struct ContainerMachine: Identifiable, Hashable, Sendable, Decodable {
         }
         if let user = try? c.nestedContainer(keyedBy: UserKeys.self, forKey: .userSetup) {
             username = try? user.decode(String.self, forKey: .username)
+        }
+        // Boot-config fields (apple/container 1.1) — read from the flattened
+        // inspect shape first, then from a nested `bootConfig`, so both the
+        // current output and a future one that exposes them are understood.
+        nestedVirtualization = try? c.decode(Bool.self, forKey: .virtualization)
+        kernelPath = try? c.decode(String.self, forKey: .kernelPath)
+        if let boot = try? c.nestedContainer(keyedBy: BootKeys.self, forKey: .bootConfig) {
+            nestedVirtualization = (try? boot.decode(Bool.self, forKey: .virtualization)) ?? nestedVirtualization
+            kernelPath = (try? boot.decode(String.self, forKey: .kernelPath)) ?? kernelPath
         }
     }
 
@@ -114,16 +136,25 @@ extension AppleContainerControl {
 
     /// `container machine create <image> --name <name>` (boots the machine).
     /// Optionally sets the virtual CPU count and memory (e.g. `"8G"`).
+    ///
+    /// `nestedVirtualization` and `kernelPath` map to the CLI's
+    /// `--virtualization` / `--kernel` (apple/container 1.1+). Nested
+    /// virtualization needs a kernel built with `CONFIG_KVM=y`, so the two are
+    /// normally passed together.
     public static func createMachine(
         image: String,
         name: String,
         cpus: Int? = nil,
         memory: String? = nil,
+        nestedVirtualization: Bool = false,
+        kernelPath: String? = nil,
         cliOverride: String? = nil
     ) async throws {
         var args = ["machine", "create", image, "--name", name]
         if let cpus, cpus > 0 { args += ["--cpus", String(cpus)] }
         if let memory, !memory.isEmpty { args += ["--memory", memory] }
+        if nestedVirtualization { args += ["--virtualization"] }
+        if let kernelPath, !kernelPath.isEmpty { args += ["--kernel", kernelPath] }
         try await runMachine(args, cliOverride: cliOverride)
     }
 
@@ -155,6 +186,53 @@ extension AppleContainerControl {
     /// `container machine set-default <name>`.
     public static func setDefaultMachine(_ name: String, cliOverride: String? = nil) async throws {
         try await runMachine(["machine", "set-default", name], cliOverride: cliOverride)
+    }
+
+    /// The boot settings `container machine set` accepts, rendered as the
+    /// `key=value` arguments the CLI expects. `virtualization` and `kernel`
+    /// arrived in apple/container 1.1; an empty `kernelPath` resets the machine
+    /// to the system default kernel.
+    public struct MachineSettings: Sendable, Equatable {
+        public var cpus: Int?
+        public var memory: String?
+        public var homeMount: String?
+        public var nestedVirtualization: Bool?
+        public var kernelPath: String?
+
+        public init(
+            cpus: Int? = nil,
+            memory: String? = nil,
+            homeMount: String? = nil,
+            nestedVirtualization: Bool? = nil,
+            kernelPath: String? = nil
+        ) {
+            self.cpus = cpus
+            self.memory = memory
+            self.homeMount = homeMount
+            self.nestedVirtualization = nestedVirtualization
+            self.kernelPath = kernelPath
+        }
+
+        public var arguments: [String] {
+            var args: [String] = []
+            if let cpus, cpus > 0 { args.append("cpus=\(cpus)") }
+            if let memory, !memory.isEmpty { args.append("memory=\(memory)") }
+            if let homeMount, !homeMount.isEmpty { args.append("home-mount=\(homeMount)") }
+            if let nestedVirtualization { args.append("virtualization=\(nestedVirtualization)") }
+            if let kernelPath { args.append("kernel=\(kernelPath)") }
+            return args
+        }
+
+        public var isEmpty: Bool { arguments.isEmpty }
+    }
+
+    /// `container machine set -n <name> <key=value>…` from typed settings.
+    public static func setMachine(
+        _ name: String,
+        settings: MachineSettings,
+        cliOverride: String? = nil
+    ) async throws {
+        try await setMachine(name, settings: settings.arguments, cliOverride: cliOverride)
     }
 
     /// `container machine set -n <name> <key=value>…`. Takes effect after a

@@ -869,11 +869,19 @@ public final class HostSession: Identifiable {
         image: String,
         name: String,
         cpus: Int? = nil,
-        memory: String? = nil
+        memory: String? = nil,
+        nestedVirtualization: Bool = false,
+        kernelPath: String? = nil
     ) async -> Bool {
         await machineAction {
             try await AppleContainerControl.createMachine(
-                image: image, name: name, cpus: cpus, memory: memory, cliOverride: machineCLIOverride
+                image: image,
+                name: name,
+                cpus: cpus,
+                memory: memory,
+                nestedVirtualization: nestedVirtualization,
+                kernelPath: kernelPath,
+                cliOverride: machineCLIOverride
             )
         }
     }
@@ -908,6 +916,19 @@ public final class HostSession: Identifiable {
     @discardableResult
     public func setMachineResources(_ name: String, settings: [String]) async -> Bool {
         await machineAction {
+            try await AppleContainerControl.setMachine(name, settings: settings, cliOverride: machineCLIOverride)
+        }
+    }
+
+    /// Applies typed boot settings (CPUs, memory, nested virtualization,
+    /// custom kernel) to a machine. They take effect on the next start.
+    @discardableResult
+    public func setMachineSettings(
+        _ name: String,
+        _ settings: AppleContainerControl.MachineSettings
+    ) async -> Bool {
+        guard !settings.isEmpty else { return true }
+        return await machineAction {
             try await AppleContainerControl.setMachine(name, settings: settings, cliOverride: machineCLIOverride)
         }
     }
