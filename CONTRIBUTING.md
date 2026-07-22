@@ -143,6 +143,10 @@ generates the EdDSA-signed Sparkle appcast, uploads the zip to the release, and
 commits the updated `appcast.xml` back to `main` so existing installs
 auto-update.
 
+The release PR itself gets no CI run — anything pushed with `GITHUB_TOKEN`
+cannot start another workflow, and CI already built the same commits on `main`.
+Set a `RELEASE_PLEASE_TOKEN` secret (a PAT) if you want CI on the release PR too.
+
 The version release-please owns lives in `version.txt` and
 `.release-please-manifest.json`; `scripts/sync-version.sh` is what copies it
 into `Gantry.xcodeproj`. To release without release-please (a hotfix, say), bump

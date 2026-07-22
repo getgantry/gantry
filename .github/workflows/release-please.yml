@@ -41,6 +41,11 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          # GITHUB_TOKEN is enough, but anything it pushes doesn't start other
+          # workflows — so the release PR gets no CI run of its own (main
+          # already built the same commits). Set RELEASE_PLEASE_TOKEN to a PAT
+          # to have CI run on the release PR too.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
 
       # release-please only knows about version.txt and the changelog. The
       # Xcode project carries the version the app is actually built with, so
@@ -49,7 +54,7 @@ jobs:
       - name: Sync the Xcode project version into the release PR
         if: ${{ steps.release.outputs.pr }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
         run: |
           git config --global user.name "github-actions[bot]"
