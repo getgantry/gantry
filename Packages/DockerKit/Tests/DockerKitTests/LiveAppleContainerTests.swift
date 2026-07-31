@@ -127,6 +127,60 @@ func liveAppleEndToEnd() async throws {
     #expect(!remaining.contains { $0.id == liveContainerName })
 }
 
+/// Kernel boot arguments end to end: the request the create sheet builds has
+/// to reach the container's actual kernel command line, and the labels it
+/// stamps have to survive a round trip through the CLI so a recreate can
+/// restore them. Needs apple/container 1.2 or newer for `--kernel-arg`.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(2)))
+func liveAppleKernelBootArguments() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+
+    let version = try await client.negotiate()
+    // Nothing to assert on an older CLI — the sheet hides the option there.
+    try #require(
+        version.version.compare("1.2.0", options: .numeric) != .orderedAscending,
+        "apple/container 1.2 or newer is needed for --kernel-arg"
+    )
+
+    let name = "gantry-apple-live-kernel"
+    _ = try? await client.removeContainer(id: name, force: true)
+
+    // Exactly what CreateContainerSheet.buildRequest produces for a container
+    // with one boot argument: the option itself plus its marker labels.
+    let options = ContainerCreateRequest.AppleOptions(kernelArgs: ["gantry.check=1"])
+    let config = ContainerCreateRequest(
+        image: "alpine:latest",
+        cmd: ["sleep", "120"],
+        labels: options.labels,
+        appleOptions: options,
+        name: name
+    )
+    let id = try await client.createContainer(config: config, name: name)
+    try await client.startContainer(id: id)
+
+    do {
+        // The argument has to show up on the kernel command line, and the
+        // CLI's own defaults have to survive alongside it.
+        let execID = try await client.createExec(
+            containerID: id, command: ["/bin/sh", "-c", "cat /proc/cmdline"], tty: false
+        )
+        let connection = try await client.startExecHijacked(execID: execID, tty: false)
+        let output = try await DockerClient.collectExecLines(from: connection.bytes)
+        #expect(output.stdout.contains("gantry.check=1"))
+        #expect(output.stdout.contains("init=/sbin/vminitd"))
+
+        // The recreate path reads the options back out of the stamped labels.
+        let details = try await client.inspectContainer(id: id)
+        let restored = ContainerCreateRequest.AppleOptions(labels: details.config.labels ?? [:])
+        #expect(restored == options)
+    } catch {
+        try? await client.removeContainer(id: id, force: true)
+        throw error
+    }
+    try await client.removeContainer(id: id, force: true)
+}
+
 @Test(.enabled(if: liveEnabled), .timeLimit(.minutes(1)))
 func liveAppleVolumeLifecycle() async throws {
     let client = try makeLiveClient()
