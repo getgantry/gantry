@@ -179,6 +179,11 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
 - **Unix socket mounts** — bind a socket from your Mac into a container and
   Gantry flags whether the installed CLI propagates its permissions to non-root
   containers (apple/container 1.1+)
+- **Custom kernels per container** — boot a container from your own kernel
+  binary and append raw **boot arguments** to its command line, straight from
+  the New Container sheet. Useful for kernel features the stock command line
+  leaves off, such as enabling the BPF LSM. Arguments need apple/container
+  1.2+; the kernel path works on any supported CLI
 - Features the platform does not offer (pause, rename, commit, restart
   policies, network attach, image history, file *download*) are hidden
   for these hosts instead of erroring

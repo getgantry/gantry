@@ -324,6 +324,69 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     #expect(create[idx + 1] == "test")
 }
 
+@Test func appleTransportCreateContainerMapsKernelOptions() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "web-1\n")
+
+    let config = ContainerCreateRequest(
+        image: "nginx:latest",
+        appleOptions: .init(
+            kernel: "/kernels/custom-bzImage",
+            kernelArgs: ["lsm=lockdown,capability,bpf", "oops=continue"]
+        ),
+        name: "web-1"
+    )
+    _ = try await client.createContainer(config: config, name: "web-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let kernelIndex = try #require(create.firstIndex(of: "--kernel"))
+    #expect(create[kernelIndex + 1] == "/kernels/custom-bzImage")
+    // `--kernel-arg` is repeatable and order matters: the CLI appends the
+    // arguments to the command line in the order they are given.
+    let args = zip(create, create.dropFirst())
+        .filter { $0.0 == "--kernel-arg" }
+        .map(\.1)
+    #expect(args == ["lsm=lockdown,capability,bpf", "oops=continue"])
+}
+
+@Test func appleTransportCreateContainerOmitsEmptyKernelOptions() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "web-1\n")
+
+    // An options object with nothing set must not leak an empty flag.
+    let config = ContainerCreateRequest(
+        image: "nginx:latest",
+        appleOptions: .init(kernel: "", kernelArgs: [""]),
+        name: "web-1"
+    )
+    _ = try await client.createContainer(config: config, name: "web-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    #expect(!create.contains("--kernel"))
+    #expect(!create.contains("--kernel-arg"))
+}
+
+@Test func appleOptionsRoundTripThroughLabels() {
+    // Recreate rebuilds its request from labels, since inspect reports no
+    // kernel fields at all — so what is stamped has to come back verbatim.
+    let options = ContainerCreateRequest.AppleOptions(
+        kernel: "/kernels/custom-bzImage",
+        kernelArgs: ["lsm=lockdown,capability,bpf", #"foo="a b""#, "pct=100%", "literal=%3D"]
+    )
+    let restored = ContainerCreateRequest.AppleOptions(labels: options.labels)
+    #expect(restored == options)
+    // apple/container rejects a label whose value contains `=`, so none may
+    // survive the escaping — see AppleOptions.escape(_:).
+    #expect(options.labels.values.allSatisfy { !$0.contains("=") })
+}
+
+@Test func appleOptionsFromLabelsWithoutMarkersAreEmpty() {
+    let restored = ContainerCreateRequest.AppleOptions(labels: ["app": "web"])
+    #expect(restored.isEmpty)
+    #expect(restored.kernel == nil)
+    #expect(restored.kernelArgs.isEmpty)
+}
+
 @Test func appleTransportBuildImageArgv() async throws {
     let (client, runner) = try await makeConnectedClient()
     runner.stub(["build"], stdout: "step 1/3\n", stderr: "")

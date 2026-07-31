@@ -15,7 +15,7 @@ public enum ContainerTooling {
     /// 0.12 shapes defensively, but 0.12 is no longer the supported target).
     public static let minimumVersion = "1.0.0"
     /// The version Gantry is tested against; offered on a fresh install.
-    public static let recommendedVersion = "1.1.0"
+    public static let recommendedVersion = "1.2.0"
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
 
@@ -25,6 +25,11 @@ public enum ContainerTooling {
     /// The first CLI release where bind-mounting a Unix domain socket also
     /// works in containers that run as a non-root user.
     public static let socketMountVersion = "1.1.0"
+    /// The first CLI release with `container run/create --kernel-arg`, which
+    /// appends raw boot arguments to a container's kernel command line. The
+    /// per-container `--kernel` it pairs with has been there since 1.0, so only
+    /// the arguments need gating.
+    public static let kernelArgumentsVersion = "1.2.0"
 
     /// CLI features Gantry gates its UI on. Everything here is derived from the
     /// detected version — the CLI has no capability query.
@@ -33,10 +38,17 @@ public enum ContainerTooling {
         public var nestedVirtualization: Bool
         /// Socket mounts that work in non-root containers.
         public var nonRootSocketMounts: Bool
+        /// `container run/create --kernel-arg`.
+        public var kernelArguments: Bool
 
-        public init(nestedVirtualization: Bool, nonRootSocketMounts: Bool) {
+        public init(
+            nestedVirtualization: Bool,
+            nonRootSocketMounts: Bool,
+            kernelArguments: Bool
+        ) {
             self.nestedVirtualization = nestedVirtualization
             self.nonRootSocketMounts = nonRootSocketMounts
+            self.kernelArguments = kernelArguments
         }
     }
 
@@ -45,11 +57,16 @@ public enum ContainerTooling {
     /// optimistically so the UI doesn't hide options from a newer CLI.
     public static func features(for version: String?) -> Features {
         guard let version, version != "unknown" else {
-            return Features(nestedVirtualization: true, nonRootSocketMounts: true)
+            return Features(
+                nestedVirtualization: true,
+                nonRootSocketMounts: true,
+                kernelArguments: true
+            )
         }
         return Features(
             nestedVirtualization: isVersion(version, atLeast: nestedVirtualizationVersion),
-            nonRootSocketMounts: isVersion(version, atLeast: socketMountVersion)
+            nonRootSocketMounts: isVersion(version, atLeast: socketMountVersion),
+            kernelArguments: isVersion(version, atLeast: kernelArgumentsVersion)
         )
     }
 

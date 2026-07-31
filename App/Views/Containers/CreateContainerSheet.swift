@@ -24,7 +24,12 @@ struct CreateContainerSheet: View {
     /// available locally to pick from.
     @State private var domain = ""
     @State private var availableDomains: [String] = []
-    /// nil until the CLI version is known; gates the socket-mount hint.
+    /// apple/container custom kernel binary ("" = the CLI's default kernel) and
+    /// the raw boot arguments appended to its command line.
+    @State private var kernelPath = ""
+    @State private var kernelArgs: [KernelArgRow] = []
+    /// nil until the CLI version is known; gates the socket-mount hint and the
+    /// kernel-argument editor.
     @State private var appleFeatures: ContainerTooling.Features?
 
     @State private var isWorking = false
@@ -131,6 +136,10 @@ struct CreateContainerSheet: View {
                     Toggle("Remove on exit (--rm)", isOn: $autoRemove)
                 }
 
+                if session.host.isAppleContainer {
+                    kernelSection
+                }
+
                 if let errorText {
                     Section {
                         Label(errorText, systemImage: "exclamationmark.triangle.fill")
@@ -219,6 +228,43 @@ struct CreateContainerSheet: View {
         }
     }
 
+    /// apple/container boot options. Both are power-user knobs and both are
+    /// optional: left alone, the container boots the CLI's own kernel with its
+    /// default command line, which is what every other sheet does.
+    private var kernelSection: some View {
+        Section {
+            HStack(spacing: 6) {
+                TextField("Kernel", text: $kernelPath, prompt: Text("Default kernel"))
+                    .textFieldStyle(.roundedBorder)
+                Button("Choose…") { pickKernelPath() }
+                    .buttonStyle(.borderless)
+            }
+            if appleFeatures?.kernelArguments ?? true {
+                editorRows(
+                    $kernelArgs,
+                    addLabel: "Add Boot Argument",
+                    empty: { KernelArgRow() }
+                ) { $row in
+                    TextField("Argument", text: $row.value, prompt: Text("lsm=lockdown,capability,bpf"))
+                        .textFieldStyle(.roundedBorder)
+                }
+            } else {
+                Label(
+                    "Kernel boot arguments need apple/container \(ContainerTooling.kernelArgumentsVersion) or newer.",
+                    systemImage: "info.circle"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Kernel")
+        } footer: {
+            Text("Boot arguments are appended to the kernel command line. The CLI's own defaults still apply unless an argument overrides the same key.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
     // MARK: - Reusable editor list
 
     @ViewBuilder
@@ -278,6 +324,19 @@ struct CreateContainerSheet: View {
         }
     }
 
+    /// Picks the custom kernel binary. A kernel is a plain file (an uncompressed
+    /// `bzImage` or similar), and they are usually kept out of the way, so the
+    /// panel allows hidden paths but not directories.
+    private func pickKernelPath() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        panel.showsHiddenFiles = true
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        kernelPath = url.path
+    }
+
     private func buildRequest() -> ContainerCreateRequest {
         let cmd: [String] = command
             .split(separator: " ")
@@ -303,7 +362,7 @@ struct CreateContainerSheet: View {
         let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
         // Record the domain as a label so the container's address view can show
         // the resolvable hostname reliably later (matches Quick Run).
-        let labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
+        var labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
 
         // A DNS name needs a container name; auto-derive a unique one from the
         // image when a domain is assigned and the user left the name blank.
@@ -316,6 +375,22 @@ struct CreateContainerSheet: View {
             resolvedName = nil
         }
 
+        // Kernel options only exist on apple/container, and boot arguments only
+        // from 1.2 on — drop them rather than send a flag the CLI would reject.
+        let trimmedKernel = kernelPath.trimmingCharacters(in: .whitespaces)
+        let argList: [String] = (appleFeatures?.kernelArguments ?? true)
+            ? kernelArgs.map { $0.value.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            : []
+        let appleOptions: ContainerCreateRequest.AppleOptions? = session.host.isAppleContainer
+            ? ContainerCreateRequest.AppleOptions(
+                kernel: trimmedKernel.isEmpty ? nil : trimmedKernel,
+                kernelArgs: argList
+            )
+            : nil
+        // Stamp the kernel options as labels too: inspect doesn't report them,
+        // so this is what lets a later recreate boot the same way.
+        labels.merge(appleOptions?.labels ?? [:]) { _, new in new }
+
         return ContainerCreateRequest(
             image: trimmedImage,
             cmd: cmd.isEmpty ? nil : cmd,
@@ -327,6 +402,7 @@ struct CreateContainerSheet: View {
             labels: labels,
             autoRemove: autoRemove,
             domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
+            appleOptions: appleOptions,
             name: resolvedName
         )
     }
@@ -391,4 +467,9 @@ private struct BindRow: Identifiable {
     var host = ""
     var container = ""
     var readOnly = false
+}
+
+private struct KernelArgRow: Identifiable {
+    let id = UUID()
+    var value = ""
 }

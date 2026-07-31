@@ -40,6 +40,12 @@ extension HostSession {
             labels.removeValue(forKey: Self.dnsDomainLabelKey)
         }
 
+        // apple/container's inspect reports neither the custom kernel nor its
+        // boot arguments, so the labels stamped at create time are the only
+        // record of them — without this the container would come back on the
+        // stock kernel.
+        let appleOptions = ContainerCreateRequest.AppleOptions(labels: labels)
+
         let request = ContainerCreateRequest(
             image: image,
             cmd: config.cmd,
@@ -51,6 +57,7 @@ extension HostSession {
             labels: labels,
             autoRemove: details.hostConfig.autoRemove ?? false,
             domainname: hasDomain ? trimmedDomain : nil,
+            appleOptions: appleOptions,
             name: container.displayName
         )
 

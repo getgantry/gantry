@@ -125,9 +125,17 @@ struct ContainerToolingFeatureTests {
         #expect(ContainerTooling.features(for: "1.1.0").nonRootSocketMounts)
     }
 
+    @Test func kernelArgumentsNeed1_2() {
+        #expect(!ContainerTooling.features(for: "1.0.0").kernelArguments)
+        #expect(!ContainerTooling.features(for: "1.1.0").kernelArguments)
+        #expect(ContainerTooling.features(for: "1.2.0").kernelArguments)
+        #expect(ContainerTooling.features(for: "2.0.0").kernelArguments)
+    }
+
     @Test func unknownVersionsAreTreatedOptimistically() {
         // A CLI we can't version-parse shouldn't have its options hidden.
         #expect(ContainerTooling.features(for: nil).nestedVirtualization)
         #expect(ContainerTooling.features(for: "unknown").nestedVirtualization)
+        #expect(ContainerTooling.features(for: "unknown").kernelArguments)
     }
 }
