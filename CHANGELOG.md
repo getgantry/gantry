@@ -11,6 +11,18 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.24.0](https://github.com/getgantry/gantry/compare/v0.23.0...v0.24.0) (2026-08-01)
+
+
+### Features
+
+* **containers:** boot containers from a custom kernel with custom boot args ([#14](https://github.com/getgantry/gantry/issues/14)) ([e9d2df2](https://github.com/getgantry/gantry/commit/e9d2df21cbe537aea305a1988548d30797807745))
+
+
+### Documentation
+
+* document the squash-merge flow ([#11](https://github.com/getgantry/gantry/issues/11)) ([8f934c1](https://github.com/getgantry/gantry/commit/8f934c1155da2393d30f87334b0f4172c7947c44))
+
 ## [0.23.0](https://github.com/getgantry/gantry/compare/v0.22.0...v0.23.0) (2026-07-22)
 
 
