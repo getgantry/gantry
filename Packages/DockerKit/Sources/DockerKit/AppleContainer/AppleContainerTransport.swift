@@ -470,6 +470,19 @@ public actor AppleContainerTransport: DockerTransport {
             arguments += ["--cpus", String(max(Int(nanoCPUs / 1_000_000_000), 1))]
         }
 
+        // Gantry's own extension key: kernel knobs the Docker schema has no
+        // place for. `--kernel` works on every supported CLI; `--kernel-arg`
+        // arrived in 1.2, and the create sheet only offers it when the detected
+        // CLI is new enough, so an older CLI never sees it here.
+        let appleOptions = AppleContainerJSON.object(json["GantryAppleOptions"])
+        let kernel = AppleContainerJSON.string(appleOptions["Kernel"])
+        if !kernel.isEmpty {
+            arguments += ["--kernel", kernel]
+        }
+        for arg in (appleOptions["KernelArgs"] as? [String]) ?? [] where !arg.isEmpty {
+            arguments += ["--kernel-arg", arg]
+        }
+
         let networking = AppleContainerJSON.object(json["NetworkingConfig"])
         for network in AppleContainerJSON.object(networking["EndpointsConfig"]).keys.sorted() {
             arguments += ["--network", network]

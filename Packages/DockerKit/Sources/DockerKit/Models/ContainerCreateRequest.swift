@@ -21,6 +21,10 @@ public struct ContainerCreateRequest: Encodable, Sendable {
     public var workingDir: String?
     public var hostConfig: HostConfig?
     public var networkingConfig: NetworkingConfig?
+    /// apple/container knobs that have no Docker equivalent. Only
+    /// `AppleContainerTransport` reads this; a real Docker daemon ignores body
+    /// keys it doesn't know, so carrying it costs nothing on Docker hosts.
+    public var appleOptions: AppleOptions?
 
     /// Desired container name. Not part of the request body — Docker takes the
     /// name as a query parameter on `POST /containers/create`, so this is
@@ -39,6 +43,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         case workingDir = "WorkingDir"
         case hostConfig = "HostConfig"
         case networkingConfig = "NetworkingConfig"
+        case appleOptions = "GantryAppleOptions"
     }
 
     public init(
@@ -53,6 +58,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         workingDir: String? = nil,
         hostConfig: HostConfig? = nil,
         networkingConfig: NetworkingConfig? = nil,
+        appleOptions: AppleOptions? = nil,
         name: String? = nil
     ) {
         self.image = image
@@ -70,6 +76,9 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         self.workingDir = workingDir
         self.hostConfig = hostConfig
         self.networkingConfig = networkingConfig
+        // An options object with nothing set would encode as an empty `{}` the
+        // transport then has to special-case; drop it here instead.
+        self.appleOptions = (appleOptions?.isEmpty ?? true) ? nil : appleOptions
         self.name = name
     }
 
@@ -88,6 +97,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         labels: [String: String] = [:],
         autoRemove: Bool = false,
         domainname: String? = nil,
+        appleOptions: AppleOptions? = nil,
         name: String? = nil
     ) {
         let exposed: [String]? = ports.isEmpty ? nil : Array(ports.keys)
@@ -113,8 +123,98 @@ public struct ContainerCreateRequest: Encodable, Sendable {
             labels: labels,
             tty: tty,
             hostConfig: hostConfig,
+            appleOptions: appleOptions,
             name: name
         )
+    }
+
+    /// apple/container-specific create options with no Docker counterpart.
+    ///
+    /// Kept out of `HostConfig` deliberately: that struct mirrors Docker's own
+    /// schema, and these keys are Gantry's own extension, read only by the
+    /// apple/container transport.
+    public struct AppleOptions: Encodable, Hashable, Sendable {
+        /// A custom kernel binary the container boots (`--kernel`). Supported
+        /// by every CLI Gantry targets (1.0+).
+        public var kernel: String?
+        /// Raw boot arguments appended to the kernel command line, in order
+        /// (`--kernel-arg`, repeatable). Needs CLI 1.2 or newer — see
+        /// `ContainerTooling.kernelArgumentsVersion`.
+        public var kernelArgs: [String]
+
+        enum CodingKeys: String, CodingKey {
+            case kernel = "Kernel"
+            case kernelArgs = "KernelArgs"
+        }
+
+        /// Whether nothing is actually set, so the key can be omitted.
+        public var isEmpty: Bool {
+            (kernel?.isEmpty ?? true) && kernelArgs.isEmpty
+        }
+
+        public init(kernel: String? = nil, kernelArgs: [String] = []) {
+            self.kernel = kernel
+            self.kernelArgs = kernelArgs
+        }
+
+        // MARK: - Label round-trip
+
+        /// Label recording the custom kernel a container was created with.
+        public static let kernelLabelKey = "com.gantry.kernel"
+        /// Label recording its boot arguments, one per line.
+        public static let kernelArgsLabelKey = "com.gantry.kernel-args"
+
+        /// Marker labels to stamp at create time, empty when nothing is set.
+        ///
+        /// `container inspect` reports neither the kernel path nor its boot
+        /// arguments (checked against CLI 1.2), so without these a recreate
+        /// would silently boot the container off the stock kernel. Mirrors the
+        /// DNS-domain marker Gantry already stamps.
+        ///
+        /// Arguments are joined with newlines rather than spaces because a
+        /// single boot argument may legitimately contain a quoted space.
+        public var labels: [String: String] {
+            var labels: [String: String] = [:]
+            if let kernel, !kernel.isEmpty { labels[Self.kernelLabelKey] = Self.escape(kernel) }
+            if !kernelArgs.isEmpty {
+                labels[Self.kernelArgsLabelKey] = Self.escape(kernelArgs.joined(separator: "\n"))
+            }
+            return labels
+        }
+
+        /// Rebuilds the options a previous create stamped into `labels`.
+        /// Yields empty options when the labels carry no kernel markers.
+        public init(labels: [String: String]) {
+            let kernel = labels[Self.kernelLabelKey].map(Self.unescape)
+            self.kernel = (kernel?.isEmpty ?? true) ? nil : kernel
+            self.kernelArgs = Self.unescape(labels[Self.kernelArgsLabelKey] ?? "")
+                .split(separator: "\n")
+                .map(String.init)
+                .filter { !$0.isEmpty }
+        }
+
+        /// Boot arguments are `key=value` and apple/container parses a label as
+        /// `key=value` too, rejecting outright any label whose value contains a
+        /// second `=` (`Parser.parseLabels`, checked against CLI 1.2). So the
+        /// `=` is percent-escaped on the way into a label — `%` first, or
+        /// unescaping would be ambiguous.
+        private static func escape(_ value: String) -> String {
+            value
+                .replacingOccurrences(of: "%", with: "%25")
+                .replacingOccurrences(of: "=", with: "%3D")
+        }
+
+        private static func unescape(_ value: String) -> String {
+            value
+                .replacingOccurrences(of: "%3D", with: "=")
+                .replacingOccurrences(of: "%25", with: "%")
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            if let kernel, !kernel.isEmpty { try c.encode(kernel, forKey: .kernel) }
+            if !kernelArgs.isEmpty { try c.encode(kernelArgs, forKey: .kernelArgs) }
+        }
     }
 
     /// An empty JSON object `{}`, used for the exposed-ports set values.
