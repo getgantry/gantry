@@ -289,9 +289,12 @@ struct ContentView: View {
     }
 
     /// Checks the apple/container CLI at launch. Prompts when it is missing or
-    /// outdated, but only once per Gantry version (so it re-surfaces after an
-    /// update and stays quiet otherwise).
+    /// outdated, but only once per Gantry version and only if the user has an
+    /// Apple Container host configured.
     private func checkContainerToolingAtLaunch() async {
+        let hasAppleHost = model.sessions.contains { $0.host.isAppleContainer }
+        guard hasAppleHost else { return }
+
         let key = "containerCheckDismissedVersion"
         if UserDefaults.standard.string(forKey: key) == appVersion { return }
         let status = await ContainerTooling.check()
