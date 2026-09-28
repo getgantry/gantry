@@ -65,6 +65,14 @@ struct DockerfileBuildRequest: Identifiable {
     let url: URL
 }
 
+/// One atomic value drives the setup sheet and supplies all of its content.
+/// A Boolean presentation flag can outlive a separate optional status value,
+/// causing SwiftUI to present an empty sheet when the status is absent.
+private struct ContainerSetupRequest: Identifiable {
+    let id = UUID()
+    let status: ContainerTooling.Status
+}
+
 /// A sidebar selection identifies both the host and the section within it.
 struct SidebarSelection: Hashable {
     var hostID: UUID
@@ -110,9 +118,11 @@ struct ContentView: View {
     @State private var buildRequest: DockerfileBuildRequest?
     /// Whether a drag is currently hovering a valid drop over the window.
     @State private var isDropTargeted = false
-    /// apple/container tooling status, when it needs the user's attention.
-    @State private var containerStatus: ContainerTooling.Status?
-    @State private var showContainerSetup = false
+    /// apple/container setup is presented only with a status payload.
+    @State private var containerSetupRequest: ContainerSetupRequest?
+    #if DEBUG
+    @State private var testPromptSession: HostSession?
+    #endif
 
     /// Hosts whose sidebar section is collapsed; persisted across launches.
     @State private var collapsedHosts: Set<UUID> = ContentView.loadCollapsedHosts()
@@ -134,12 +144,22 @@ struct ContentView: View {
 
     /// The first session currently awaiting a host-key trust decision, if any.
     private var hostKeySession: HostSession? {
-        model.sessions.first { $0.pendingHostKeyPrompt != nil }
+        #if DEBUG
+        if let testPromptSession, testPromptSession.pendingHostKeyPrompt != nil {
+            return testPromptSession
+        }
+        #endif
+        return model.sessions.first { $0.pendingHostKeyPrompt != nil }
     }
 
     /// The first session currently awaiting a credential, if any.
     private var credentialSession: HostSession? {
-        model.sessions.first { $0.pendingCredentialRequest != nil }
+        #if DEBUG
+        if let testPromptSession, testPromptSession.pendingCredentialRequest != nil {
+            return testPromptSession
+        }
+        #endif
+        return model.sessions.first { $0.pendingCredentialRequest != nil }
     }
 
     var body: some View {
@@ -217,16 +237,17 @@ struct ContentView: View {
             for url in PendingComposeOpens.drain() { composeRequest = ComposeFileRequest(url: url) }
             for url in PendingDockerfileOpens.drain() { buildRequest = DockerfileBuildRequest(url: url) }
         }
-        .sheet(isPresented: $showContainerSetup) {
-            if let containerStatus {
-                ContainerSetupSheet(status: containerStatus) { snoozeContainerCheck() }
-            }
+        .sheet(item: $containerSetupRequest) { request in
+            ContainerSetupSheet(status: request.status) { snoozeContainerCheck() }
         }
         .task { await checkContainerToolingAtLaunch() }
+        #if DEBUG
+        .task { await runTestPromptScenario() }
+        #endif
         .onReceive(NotificationCenter.default.publisher(for: .gantryShowContainerSetup)) { _ in
             Task {
-                containerStatus = await ContainerTooling.check()
-                showContainerSetup = true
+                let status = await containerToolingStatus()
+                containerSetupRequest = ContainerSetupRequest(status: status)
             }
         }
         .sheet(isPresented: hostKeySheetBinding) {
@@ -283,6 +304,31 @@ struct ContentView: View {
 
     // MARK: - apple/container tooling
 
+    #if DEBUG
+    private func runTestPromptScenario() async {
+        let args = ProcessInfo.processInfo.arguments
+        guard let scenario = args.first(where: {
+            $0.hasPrefix("--gantry-test-clear-host-key") ||
+            $0.hasPrefix("--gantry-test-clear-credential")
+        }) else { return }
+        let session = HostSession(host: DockerHost(name: "Prompt fixture", kind: .local))
+        testPromptSession = session
+        if scenario.contains("host-key") {
+            Task { await session.testRequestHostKey() }
+        } else {
+            Task { await session.testRequestCredential() }
+        }
+        try? await Task.sleep(for: .seconds(5))
+        if scenario.contains("disconnect") {
+            await session.disconnect()
+        } else if scenario.contains("host-key") {
+            session.submitHostKeyDecision(trust: false)
+        } else {
+            session.cancelCredential()
+        }
+    }
+    #endif
+
     /// The current app version, used to re-prompt once per Gantry update.
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
@@ -292,20 +338,61 @@ struct ContentView: View {
     /// outdated, but only once per Gantry version (so it re-surfaces after an
     /// update and stays quiet otherwise).
     private func checkContainerToolingAtLaunch() async {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        // A populated request becoming absent used to leave the old Boolean
+        // presenter true and display the observed empty modal.
+        if args.contains("--gantry-test-clear-container-setup") {
+            containerSetupRequest = ContainerSetupRequest(status: await containerToolingStatus())
+            try? await Task.sleep(for: .seconds(8))
+            containerSetupRequest = nil
+            return
+        }
+        if args.contains("--gantry-test-no-container-check") { return }
+        if args.contains(where: { $0.hasPrefix("--gantry-test-container-") }) {
+            let status = await containerToolingStatus()
+            if status.needsAttention {
+                containerSetupRequest = ContainerSetupRequest(status: status)
+            }
+            return
+        }
+        #endif
         let key = "containerCheckDismissedVersion"
         if UserDefaults.standard.string(forKey: key) == appVersion { return }
-        let status = await ContainerTooling.check()
+        let status = await containerToolingStatus()
         if status.needsAttention {
-            containerStatus = status
-            showContainerSetup = true
+            containerSetupRequest = ContainerSetupRequest(status: status)
         } else {
             // Up to date — record so we don't re-check until the next update.
             UserDefaults.standard.set(appVersion, forKey: key)
         }
     }
 
+    private func containerToolingStatus() async -> ContainerTooling.Status {
+        var status = await ContainerTooling.check()
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        // UI tests use a nonexistent override path, so the check never invokes
+        // the user's container CLI. Override only the resulting state.
+        if args.contains("--gantry-test-container-outdated") {
+            status.state = .outdated(current: "0.12.0")
+            status.brewAvailable = false
+        } else if args.contains("--gantry-test-container-current") {
+            status.state = .ok(version: ContainerTooling.minimumVersion)
+            status.brewAvailable = false
+        } else if args.contains(where: { $0.hasPrefix("--gantry-test-") }) {
+            status.state = .notInstalled
+            status.brewAvailable = false
+        }
+        #endif
+        return status
+    }
+
     /// Records that the prompt was handled for this Gantry version.
     private func snoozeContainerCheck() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("--gantry-test-") }) { return }
+        #endif
         UserDefaults.standard.set(appVersion, forKey: "containerCheckDismissedVersion")
     }
 
@@ -708,4 +795,3 @@ private struct HostSectionHeader: View {
         }
     }
 }
-

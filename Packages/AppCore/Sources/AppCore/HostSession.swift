@@ -496,6 +496,25 @@ public final class HostSession: Identifiable {
         return trusted ? .trust : .reject
     }
 
+    #if DEBUG
+    /// Exercises the production prompt plumbing without opening a connection
+    /// or consulting the user's trust store. Used only by the UI test fixture.
+    public func testRequestHostKey() async {
+        _ = await promptHostKey(
+            host: "fixture.invalid",
+            candidate: HostKeyCandidate(keyType: "ssh-ed25519", base64: "AQID")
+        )
+    }
+
+    /// Exercises the production credential continuation without a secret or
+    /// a Keychain lookup. Tests cancel or disconnect before supplying one.
+    public func testRequestCredential() async {
+        _ = try? await requestCredential(
+            CredentialRequest(kind: .password, hostName: "fixture.invalid")
+        )
+    }
+    #endif
+
     /// UI entry point: accept or reject the pending host key.
     public func submitHostKeyDecision(trust: Bool) {
         pendingHostKeyPrompt = nil
