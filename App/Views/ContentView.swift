@@ -186,10 +186,16 @@ struct ContentView: View {
                 .environment(model)
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantryOpenComposeFile)) { note in
-            if let url = note.object as? URL { composeRequest = ComposeFileRequest(url: url) }
+            if let url = note.object as? URL {
+                _ = PendingComposeOpens.drain()
+                composeRequest = ComposeFileRequest(url: url)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantryOpenDockerfile)) { note in
-            if let url = note.object as? URL { buildRequest = DockerfileBuildRequest(url: url) }
+            if let url = note.object as? URL {
+                _ = PendingDockerfileOpens.drain()
+                buildRequest = DockerfileBuildRequest(url: url)
+            }
         }
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
             handleDrop(providers)
@@ -204,11 +210,7 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { note in
             if let jump = note.object as? ContainerJump {
-                navigate(
-                    to: jump.hostID,
-                    section: .containers,
-                    detail: .container(jump.containerID)
-                )
+                selectContainer(jump)
             }
         }
         .onAppear {
@@ -216,6 +218,7 @@ struct ContentView: View {
             // via Finder).
             for url in PendingComposeOpens.drain() { composeRequest = ComposeFileRequest(url: url) }
             for url in PendingDockerfileOpens.drain() { buildRequest = DockerfileBuildRequest(url: url) }
+            if let jump = PendingContainerJump.take() { selectContainer(jump) }
         }
         .sheet(isPresented: $showContainerSetup) {
             if let containerStatus {
@@ -415,6 +418,11 @@ struct ContentView: View {
 
     /// Programmatic jump from the dashboard into a host's section, optionally
     /// landing on a specific detail item (e.g. an unhealthy container).
+    private func selectContainer(_ jump: ContainerJump) {
+        PendingContainerJump.clear(jump)
+        navigate(to: jump.hostID, section: .containers, detail: .container(jump.containerID))
+    }
+
     private func navigate(to hostID: UUID, section: HostSection, detail: DetailSelection?) {
         let target = SidebarItem.host(SidebarSelection(hostID: hostID, section: section))
         if selection == target {
@@ -708,4 +716,3 @@ private struct HostSectionHeader: View {
         }
     }
 }
-

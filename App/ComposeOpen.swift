@@ -1,6 +1,26 @@
 import AppKit
 import Foundation
 
+/// Reopens the primary SwiftUI scene for app-wide callbacks that do not have
+/// SwiftUI's `openWindow` environment (Finder and notification delegates).
+@MainActor
+enum MainWindowActivation {
+    static func activate() {
+        NSApp.activate(ignoringOtherApps: true)
+        guard !NSApp.windows.contains(where: {
+            $0.identifier?.rawValue.hasPrefix("main-AppWindow-") == true && $0.isVisible
+        }) else { return }
+
+        Task {
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = true
+            _ = try? await NSWorkspace.shared.openApplication(
+                at: Bundle.main.bundleURL, configuration: configuration
+            )
+        }
+    }
+}
+
 /// Buffers Compose files opened before the main window is ready to receive the
 /// `gantryOpenComposeFile` notification (cold launch via Finder). `ContentView`
 /// drains it on first appear; live opens go straight through the notification.
@@ -44,7 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     static func openCompose(_ url: URL) {
         PendingComposeOpens.add(url)
         NotificationCenter.default.post(name: .gantryOpenComposeFile, object: url)
-        NSApp.activate(ignoringOtherApps: true)
+        MainWindowActivation.activate()
     }
 
     /// Routes a Dockerfile to the Build Image flow, buffering it for cold launch.
@@ -52,7 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     static func openDockerfile(_ url: URL) {
         PendingDockerfileOpens.add(url)
         NotificationCenter.default.post(name: .gantryOpenDockerfile, object: url)
-        NSApp.activate(ignoringOtherApps: true)
+        MainWindowActivation.activate()
     }
 }
 

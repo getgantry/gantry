@@ -22,6 +22,15 @@ public final class AppModel {
     }
 
     public init() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--gantry-test-in-memory-containers") {
+            let host = DockerHost(name: "Gantry Fixture Host", kind: .local)
+            let session = HostSession(host: host)
+            session.installWindowRouteFixtureContainers()
+            sessions = [session]
+            return
+        }
+#endif
         let hosts = Self.loadHosts()
         sessions = hosts.map(HostSession.init)
     }

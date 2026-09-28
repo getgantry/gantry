@@ -4,6 +4,12 @@ import AppCore
 import Sparkle
 import UniformTypeIdentifiers
 
+/// All requests for the primary interface use the same scene value. SwiftUI
+/// brings the existing window for that value forward instead of making another.
+enum MainWindowID: String, Codable, Hashable {
+    case main
+}
+
 @main
 struct GantryApp: App {
     @State private var model = AppModel()
@@ -31,7 +37,7 @@ struct GantryApp: App {
     @State private var notificationsConfigured = false
 
     var body: some Scene {
-        WindowGroup(id: "main") {
+        WindowGroup(id: "main", for: MainWindowID.self, content: { _ in
             ContentView()
                 // Keep the window at least as wide as the sum of the split
                 // view's column minimums (220 + 300 + 640). Below that,
@@ -56,7 +62,7 @@ struct GantryApp: App {
                 .onChange(of: showMenuBarExtra) {
                     if !showMenuBarExtra { showDockIcon = true }
                 }
-        }
+        }, defaultValue: { .main })
         .defaultSize(width: 1180, height: 740)
         .commands {
             // Gantry is not a document-based app; drop "New" from the File menu.
@@ -186,4 +192,3 @@ private struct CheckForUpdatesView: View {
         .onReceive(updater.publisher(for: \.canCheckForUpdates)) { canCheck = $0 }
     }
 }
-
