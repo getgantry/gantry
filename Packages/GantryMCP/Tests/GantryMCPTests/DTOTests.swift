@@ -68,7 +68,7 @@ struct DTOTests {
         }
         """
         let summary = try decodeJSON(ContainerSummary.self, json)
-        let dto = ContainerDTO(summary)
+        let dto = ContainerDTO(summary, imageArchitecture: "amd64")
         #expect(dto.id == "abcdef012345")
         #expect(dto.name == "web")
         #expect(dto.image == "nginx:latest")
@@ -77,6 +77,7 @@ struct DTOTests {
         #expect(dto.ports.count == 1)
         #expect(dto.ports[0].contains("8080"))
         #expect(dto.composeProject == "myproj")
+        #expect(dto.imageArchitecture == "amd64")
     }
 
     @Test func containerDTONoComposeProject() throws {
@@ -84,9 +85,10 @@ struct DTOTests {
         {"Id": "deadbeefcafebabe", "Names": ["/x"], "Image": "busybox", "State": "exited", "Status": "Exited (0)"}
         """
         let summary = try decodeJSON(ContainerSummary.self, json)
-        let dto = ContainerDTO(summary)
+        let dto = ContainerDTO(summary, imageArchitecture: "")
         #expect(dto.composeProject == nil)
         #expect(dto.ports.isEmpty)
+        #expect(dto.imageArchitecture.isEmpty)
     }
 
     @Test func containerListDTOEncodesError() throws {
