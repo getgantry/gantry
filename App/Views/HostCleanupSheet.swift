@@ -21,18 +21,18 @@ struct HostCleanupSheet: View {
 
         var title: String {
             switch self {
-            case .danglingImages: "Dangling images"
-            case .stoppedContainers: "Stopped containers"
-            case .unusedVolumes: "Unused volumes"
-            case .buildCache: "Build cache"
+            case .danglingImages: String(localized: "Dangling images")
+            case .stoppedContainers: String(localized: "Stopped containers")
+            case .unusedVolumes: String(localized: "Unused volumes")
+            case .buildCache: String(localized: "Build cache")
             }
         }
         var detail: String {
             switch self {
-            case .danglingImages: "Untagged image layers left over from rebuilds."
-            case .stoppedContainers: "Containers that have exited and aren't coming back on their own."
-            case .unusedVolumes: "Named volumes not referenced by any container."
-            case .buildCache: "Cached build layers from docker build."
+            case .danglingImages: String(localized: "Untagged image layers left over from rebuilds.")
+            case .stoppedContainers: String(localized: "Containers that have exited and aren't coming back on their own.")
+            case .unusedVolumes: String(localized: "Named volumes not referenced by any container.")
+            case .buildCache: String(localized: "Cached build layers from docker build.")
             }
         }
         var icon: String {

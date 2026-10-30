@@ -15,19 +15,19 @@ struct CredentialSheet: View {
     }
 
     private var title: String {
-        isPassphrase ? "Key Passphrase" : "SSH Password"
+        isPassphrase ? String(localized: "Key Passphrase") : String(localized: "SSH Password")
     }
 
     private var fieldLabel: String {
-        isPassphrase ? "Passphrase" : "Password"
+        isPassphrase ? String(localized: "Passphrase") : String(localized: "Password")
     }
 
     private var subtitle: String {
         switch request.kind {
         case .password:
-            return "Enter the password for \(request.hostName)."
+            return String(localized: "Enter the password for \(request.hostName).")
         case .keyPassphrase(let file):
-            return "Unlock \((file as NSString).lastPathComponent) for \(request.hostName)."
+            return String(localized: "Unlock \((file as NSString).lastPathComponent) for \(request.hostName).")
         }
     }
 

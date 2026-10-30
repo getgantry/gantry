@@ -23,8 +23,8 @@ struct ImageListView: View {
         var title: String { self == .dangling ? "Prune Dangling Images?" : "Prune All Unused Images?" }
         var message: String {
             self == .dangling
-                ? "Removes untagged (dangling) image layers. This cannot be undone."
-                : "Removes all images not referenced by any container. This cannot be undone."
+                ? String(localized: "Removes untagged (dangling) image layers. This cannot be undone.")
+                : String(localized: "Removes all images not referenced by any container. This cannot be undone.")
         }
     }
 
@@ -101,7 +101,7 @@ struct ImageListView: View {
         ) { scope in
             Button("Prune", role: .destructive) {
                 let dangling = scope == .dangling
-                let title = dangling ? "Dangling Images Pruned" : "Unused Images Pruned"
+                let title = dangling ? String(localized: "Dangling Images Pruned") : String(localized: "Unused Images Pruned")
                 pruneConfirm = nil
                 Task {
                     if let result = await session.pruneImages(dangling: dangling) {
