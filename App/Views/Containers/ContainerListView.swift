@@ -163,7 +163,7 @@ struct ContainerListView: View {
             Text("Removed \(result.deletedCount) container(s), reclaiming \(Formatters.bytes(result.spaceReclaimed)).")
         }
         .confirmationDialog(
-            "Remove \(removeTarget?.displayName ?? "container")?",
+            "Remove \(removeTarget?.displayName ?? String(localized: "container"))?",
             isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget

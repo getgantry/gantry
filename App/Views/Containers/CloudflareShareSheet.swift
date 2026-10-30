@@ -107,7 +107,7 @@ struct CloudflareShareSheet: View {
     private enum ModeChoice: String, CaseIterable, Identifiable {
         case quick, named
         var id: String { rawValue }
-        var title: String { self == .quick ? "Quick" : "Named" }
+        var title: String { self == .quick ? String(localized: "Quick") : String(localized: "Named") }
     }
 
     private var startedTunnel: CloudflareTunnel? {
