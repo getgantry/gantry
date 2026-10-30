@@ -157,7 +157,7 @@ struct VolumeListView: View {
                 pruneConfirm = false
                 Task {
                     if let result = await session.pruneVolumes() {
-                        pruneOutcome = PruneOutcome(title: "Volumes Pruned", result: result)
+                        pruneOutcome = PruneOutcome(title: String(localized: "Volumes Pruned"), result: result)
                     }
                 }
             }
@@ -167,7 +167,7 @@ struct VolumeListView: View {
         }
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
-            "Remove \(removeTarget?.name ?? "volume")?",
+            "Remove \(removeTarget?.name ?? String(localized: "volume"))?",
             isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget

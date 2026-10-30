@@ -94,11 +94,11 @@ struct HostOverviewView: View {
         let capacity = Double(max(info.ncpu, 1)) * 100.0
         let percentOfHost = min((load?.cpuPercent ?? 0) / capacity, 1.0)
         return gaugeCard(
-            title: "CPU",
+            title: String(localized: "CPU"),
             systemImage: "cpu",
             fraction: percentOfHost,
             centerText: (load?.cpuPercent ?? 0).formatted(.number.precision(.fractionLength(0))) + "%",
-            caption: "of \(info.ncpu) CPUs · \(load?.sampled ?? 0) running",
+            caption: String(localized: "of \(info.ncpu) CPUs · \(load?.sampled ?? 0) running"),
             tint: .blue
         )
     }
@@ -107,11 +107,11 @@ struct HostOverviewView: View {
         let used = load?.memBytes ?? 0
         let total = max(info.memTotal, 1)
         return gaugeCard(
-            title: "Memory",
+            title: String(localized: "Memory"),
             systemImage: "memorychip",
             fraction: min(Double(used) / Double(total), 1.0),
             centerText: Formatters.bytes(used),
-            caption: "of \(Formatters.bytes(info.memTotal)) · containers",
+            caption: String(localized: "of \(Formatters.bytes(info.memTotal)) · containers"),
             tint: .green
         )
     }
@@ -153,10 +153,10 @@ struct HostOverviewView: View {
 
     private func countsCard(info: SystemInfo) -> some View {
         HStack(spacing: 0) {
-            countCell(value: info.containersRunning, label: "Running", tint: .green)
-            countCell(value: info.containersPaused, label: "Paused", tint: .yellow)
-            countCell(value: info.containersStopped, label: "Stopped", tint: .gray)
-            countCell(value: info.images, label: "Images", tint: .blue)
+            countCell(value: info.containersRunning, label: String(localized: "Running"), tint: .green)
+            countCell(value: info.containersPaused, label: String(localized: "Paused"), tint: .yellow)
+            countCell(value: info.containersStopped, label: String(localized: "Stopped"), tint: .gray)
+            countCell(value: info.images, label: String(localized: "Images"), tint: .blue)
         }
         .padding(.vertical, 12)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -234,9 +234,9 @@ struct HostOverviewView: View {
 
     private func diskSegments(_ usage: SystemDiskUsage) -> [DiskSegment] {
         [
-            DiskSegment(label: "Images", size: usage.layersSize, tint: .blue),
-            DiskSegment(label: "Containers", size: usage.containersSize, tint: .green),
-            DiskSegment(label: "Volumes", size: usage.volumesSize, tint: .orange)
+            DiskSegment(label: String(localized: "Images"), size: usage.layersSize, tint: .blue),
+            DiskSegment(label: String(localized: "Containers"), size: usage.containersSize, tint: .green),
+            DiskSegment(label: String(localized: "Volumes"), size: usage.volumesSize, tint: .orange)
         ]
     }
 

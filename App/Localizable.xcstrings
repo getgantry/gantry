@@ -34,6 +34,38 @@
         }
       }
     },
+    "%@ connection failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ connection failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个连接失败"
+          }
+        }
+      }
+    },
+    "%@ containers need attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ containers need attention"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个容器需要关注"
+          }
+        }
+      }
+    },
     "%@ containers running across %@ connected hosts.": {
       "localizations": {
         "en": {
@@ -66,6 +98,22 @@
         }
       }
     },
+    "%@ CPU · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ CPU · %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ CPU · %@"
+          }
+        }
+      }
+    },
     "%@ GB": {
       "localizations": {
         "en": {
@@ -78,6 +126,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ GB"
+          }
+        }
+      }
+    },
+    "%@ hosts unreachable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hosts unreachable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 台主机不可达"
           }
         }
       }
@@ -162,6 +226,22 @@
         }
       }
     },
+    "%@ paused": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ paused"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个已暂停"
+          }
+        }
+      }
+    },
     "%@ PIDs": {
       "localizations": {
         "en": {
@@ -174,6 +254,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 个 PID"
+          }
+        }
+      }
+    },
+    "%@ running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个运行中"
           }
         }
       }
@@ -222,6 +318,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 个运行中，%@ 个已停止（%@）"
+          }
+        }
+      }
+    },
+    "%@ stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ stopped"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个已停止"
+          }
+        }
+      }
+    },
+    "%@ unhealthy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ unhealthy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个不健康"
           }
         }
       }
@@ -318,6 +446,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 台主机不可达"
+          }
+        }
+      }
+    },
+    "1s sampling": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1s sampling"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 秒采样"
           }
         }
       }
@@ -1042,6 +1186,22 @@
         }
       }
     },
+    "Bytes/s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bytes/s"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字节/秒"
+          }
+        }
+      }
+    },
     "Cached build layers from docker build.": {
       "localizations": {
         "en": {
@@ -1618,6 +1778,22 @@
         }
       }
     },
+    "Connected (%@, API %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected (%@, API %@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接（%@，API %@）"
+          }
+        }
+      }
+    },
     "Connected Containers": {
       "localizations": {
         "en": {
@@ -1656,6 +1832,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Connection Failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接失败"
+          }
+        }
+      }
+    },
+    "Connection failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection failed"
           }
         },
         "zh-Hans": {
@@ -2002,6 +2194,22 @@
         }
       }
     },
+    "CPU": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        }
+      }
+    },
     "CPUs": {
       "localizations": {
         "en": {
@@ -2130,6 +2338,22 @@
         }
       }
     },
+    "Created": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Created"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已创建"
+          }
+        }
+      }
+    },
     "Creating %@…": {
       "localizations": {
         "en": {
@@ -2222,6 +2446,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "概览"
+          }
+        }
+      }
+    },
+    "Dead": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dead"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已死亡"
+          }
+        }
+      }
+    },
+    "debug shell": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "debug shell"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调试 shell"
           }
         }
       }
@@ -2418,6 +2674,22 @@
         }
       }
     },
+    "Disk I/O": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk I/O"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘 I/O"
+          }
+        }
+      }
+    },
     "DNS domain": {
       "localizations": {
         "en": {
@@ -2478,22 +2750,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Docker 数据：%@"
-          }
-        }
-      }
-    },
-    "Docker data: %@, style: .file))": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Docker data: %@, style: .file))"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Docker data: %@, style: .file))"
           }
         }
       }
@@ -2802,6 +3058,22 @@
         }
       }
     },
+    "Exited": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exited"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已退出"
+          }
+        }
+      }
+    },
     "Export Filesystem…": {
       "localizations": {
         "en": {
@@ -2850,6 +3122,22 @@
         }
       }
     },
+    "Failed: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败：%@"
+          }
+        }
+      }
+    },
     "Filter": {
       "localizations": {
         "en": {
@@ -2878,6 +3166,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "按级别筛选"
+          }
+        }
+      }
+    },
+    "Filter by name or driver": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by name or driver"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称或驱动筛选"
+          }
+        }
+      }
+    },
+    "Filter by name, image, or ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by name, image, or ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称、镜像或 ID 筛选"
+          }
+        }
+      }
+    },
+    "Filter by tag or ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by tag or ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按标签或 ID 筛选"
           }
         }
       }
@@ -2994,6 +3330,22 @@
         }
       }
     },
+    "Freed %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freed %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已释放 %@"
+          }
+        }
+      }
+    },
     "Gantry can manage Linux containers natively on your Mac with Apple's `container` runtime — but it isn't installed yet.": {
       "localizations": {
         "en": {
@@ -3010,6 +3362,22 @@
         }
       }
     },
+    "Gantry includes a stdio MCP server, gantry-mcp, that exposes your Docker hosts as tools an AI agent can call: list containers, view logs and stats, run lifecycle actions, exec commands, and inspect images, volumes, networks and disk usage. Register it with an MCP client like Claude:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry includes a stdio MCP server, gantry-mcp, that exposes your Docker hosts as tools an AI agent can call: list containers, view logs and stats, run lifecycle actions, exec commands, and inspect images, volumes, networks and disk usage. Register it with an MCP client like Claude:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 内置 stdio MCP 服务器 gantry-mcp，可将你的 Docker 主机暴露为 AI 代理可调用的工具：列出容器、查看日志与统计、执行生命周期操作、exec 命令，以及检查镜像、卷、网络与磁盘占用。可在 Claude 等 MCP 客户端中注册："
+          }
+        }
+      }
+    },
     "Gantry resolves keys from your SSH config and the usual default identities.": {
       "localizations": {
         "en": {
@@ -3022,6 +3390,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gantry 会从 SSH 配置与常见默认身份解析密钥。"
+          }
+        }
+      }
+    },
+    "Gantry ships App Intents, so common Docker actions are available system-wide. Run them from the Shortcuts app, ask Siri, or search for them in Spotlight — for example \"List Containers\", \"Start Container\", or \"Get Container Logs\".": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ships App Intents, so common Docker actions are available system-wide. Run them from the Shortcuts app, ask Siri, or search for them in Spotlight — for example \"List Containers\", \"Start Container\", or \"Get Container Logs\"."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 提供 App Intents，因此常用 Docker 操作可在系统范围内使用。可从“快捷指令”应用运行、向 Siri 提问，或在聚焦中搜索 — 例如“列出容器”、“启动容器”或“获取容器日志”。"
           }
         }
       }
@@ -3138,18 +3522,18 @@
         }
       }
     },
-    "gw \\(entry.gateway ?? ": {
+    "Headless agent access uses only hosts you have already trusted in Gantry: the local daemon, and SSH remotes whose host key is trusted with any required secret saved to the Keychain. Unknown SSH hosts are rejected — there is no prompt in a headless context.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "gw \\(entry.gateway ?? "
+            "value": "Headless agent access uses only hosts you have already trusted in Gantry: the local daemon, and SSH remotes whose host key is trusted with any required secret saved to the Keychain. Unknown SSH hosts are rejected — there is no prompt in a headless context."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "gw \\(entry.gateway ?? "
+            "value": "无界面代理访问仅使用你已在 Gantry 中信任的主机：本地守护进程，以及主机密钥已信任且所需密钥已存入钥匙串的 SSH 远程。未知 SSH 主机会被拒绝 — 无界面场景下不会弹出提示。"
           }
         }
       }
@@ -3362,6 +3746,22 @@
         }
       }
     },
+    "hosts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hosts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机"
+          }
+        }
+      }
+    },
     "Hosts from ~/.ssh/config. Picking one fills the fields below.": {
       "localizations": {
         "en": {
@@ -3438,22 +3838,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "镜像 %@"
-          }
-        }
-      }
-    },
-    "Image %@))": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image %@))"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image %@))"
           }
         }
       }
@@ -3773,7 +4157,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "结束进程"
+            "value": "强制结束"
           }
         }
       }
@@ -3870,6 +4254,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "列出 Docker 主机上的容器，并汇总运行中与已停止的数量。"
+          }
+        }
+      }
+    },
+    "Loading host info…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading host info…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载主机信息…"
           }
         }
       }
@@ -4114,6 +4514,22 @@
         }
       }
     },
+    "Model Context Protocol (MCP)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model Context Protocol (MCP)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型上下文协议（MCP）"
+          }
+        }
+      }
+    },
     "More": {
       "localizations": {
         "en": {
@@ -4290,6 +4706,22 @@
         }
       }
     },
+    "Network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络"
+          }
+        }
+      }
+    },
     "Networking": {
       "localizations": {
         "en": {
@@ -4318,6 +4750,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "网络"
+          }
+        }
+      }
+    },
+    "Networks Pruned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Networks Pruned"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络已清理"
           }
         }
       }
@@ -4370,6 +4818,22 @@
         }
       }
     },
+    "New Network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Network"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建网络"
+          }
+        }
+      }
+    },
     "New Network…": {
       "localizations": {
         "en": {
@@ -4398,6 +4862,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "新密码（留空则保持不变）"
+          }
+        }
+      }
+    },
+    "New Volume": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Volume"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建卷"
           }
         }
       }
@@ -4706,6 +5186,22 @@
         }
       }
     },
+    "Nothing to clean or not permitted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to clean or not permitted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可清理的内容，或没有权限。"
+          }
+        }
+      }
+    },
     "Notifications": {
       "localizations": {
         "en": {
@@ -4734,6 +5230,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "容器失败时通知"
+          }
+        }
+      }
+    },
+    "of %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %@"
+          }
+        }
+      }
+    },
+    "of %@ CPUs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "of %@ CPUs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %@ 个 CPU"
+          }
+        }
+      }
+    },
+    "of %@ CPUs · %@ running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "of %@ CPUs · %@ running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %@ 个 CPU · %@ 个运行中"
+          }
+        }
+      }
+    },
+    "of %@ · containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "of %@ · containers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %@ · 容器"
           }
         }
       }
@@ -5150,6 +5710,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂停"
+          }
+        }
+      }
+    },
+    "Paused": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停"
           }
         }
       }
@@ -5746,6 +6322,22 @@
         }
       }
     },
+    "Read": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读取"
+          }
+        }
+      }
+    },
     "Recently exited": {
       "localizations": {
         "en": {
@@ -6242,6 +6834,22 @@
         }
       }
     },
+    "Removing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在移除"
+          }
+        }
+      }
+    },
     "Removing a volume permanently deletes its data. Volumes in use by a container cannot be removed.": {
       "localizations": {
         "en": {
@@ -6482,6 +7090,22 @@
         }
       }
     },
+    "Restarting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restarting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重启"
+          }
+        }
+      }
+    },
     "Restarts a container on a Docker host.": {
       "localizations": {
         "en": {
@@ -6594,6 +7218,22 @@
         }
       }
     },
+    "Running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行中"
+          }
+        }
+      }
+    },
     "Runs the container's own shell.": {
       "localizations": {
         "en": {
@@ -6606,6 +7246,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "运行容器自带的 Shell。"
+          }
+        }
+      }
+    },
+    "RX": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RX"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RX"
           }
         }
       }
@@ -6702,6 +7358,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "当任意主机上的容器崩溃、内存耗尽或健康检查失败时发送 macOS 通知。手动停止与重启不会报告。点击通知可跳转到该容器。"
+          }
+        }
+      }
+    },
+    "Series": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系列"
           }
         }
       }
@@ -6974,6 +7646,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shell"
+          }
+        }
+      }
+    },
+    "shell": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "shell"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "shell"
+          }
+        }
+      }
+    },
+    "Shortcuts, Siri & Spotlight": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcuts, Siri & Spotlight"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷指令、Siri 与聚焦"
           }
         }
       }
@@ -7394,6 +8098,22 @@
         }
       }
     },
+    "Still running on the daemon — check back in a moment.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still running on the daemon — check back in a moment."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍在守护进程上运行 — 请稍后再查看。"
+          }
+        }
+      }
+    },
     "Stop": {
       "localizations": {
         "en": {
@@ -7454,6 +8174,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止共享"
+          }
+        }
+      }
+    },
+    "Stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已停止"
           }
         }
       }
@@ -7890,6 +8626,22 @@
         }
       }
     },
+    "Time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时间"
+          }
+        }
+      }
+    },
     "Trust": {
       "localizations": {
         "en": {
@@ -7922,6 +8674,22 @@
         }
       }
     },
+    "TX": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TX"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TX"
+          }
+        }
+      }
+    },
     "Type": {
       "localizations": {
         "en": {
@@ -7934,6 +8702,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "类型"
+          }
+        }
+      }
+    },
+    "Unhealthy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unhealthy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不健康"
           }
         }
       }
@@ -7970,6 +8754,22 @@
         }
       }
     },
+    "Unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知"
+          }
+        }
+      }
+    },
     "Unlock %@ for %@.": {
       "localizations": {
         "en": {
@@ -7982,22 +8782,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "解锁 %@（用于 %@）。"
-          }
-        }
-      }
-    },
-    "Unlock %@.lastPathComponent) for %@.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unlock %@.lastPathComponent) for %@."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unlock %@.lastPathComponent) for %@."
           }
         }
       }
@@ -8130,6 +8914,22 @@
         }
       }
     },
+    "Usage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用量"
+          }
+        }
+      }
+    },
     "Use as the default domain — new containers resolve as name.": {
       "localizations": {
         "en": {
@@ -8238,6 +9038,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "卷"
+          }
+        }
+      }
+    },
+    "Volumes Pruned": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes Pruned"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卷已清理"
+          }
+        }
+      }
+    },
+    "Write": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "写入"
           }
         }
       }

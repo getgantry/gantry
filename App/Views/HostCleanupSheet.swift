@@ -186,7 +186,7 @@ struct HostCleanupSheet: View {
         case .timedOut:
             // Build-cache prunes on a busy BuildKit daemon can take a while; let
             // the user move on rather than watching an endless spinner.
-            results[category] = "Still running on the daemon — check back in a moment."
+            results[category] = String(localized: "Still running on the daemon — check back in a moment.")
         }
         usage = await session.systemDF()
     }
@@ -226,11 +226,11 @@ struct HostCleanupSheet: View {
 
     private func record(_ category: Category, _ result: PruneResult?) {
         guard let result else {
-            results[category] = "Nothing to clean or not permitted."
+            results[category] = String(localized: "Nothing to clean or not permitted.")
             return
         }
         reclaimedTotal += result.spaceReclaimed
-        results[category] = "Freed \(Formatters.bytes(result.spaceReclaimed, style: .file))"
+        results[category] = String(localized: "Freed \(Formatters.bytes(result.spaceReclaimed, style: .file))")
             + (result.deletedCount > 0 ? " · \(result.deletedCount) removed" : "")
     }
 }

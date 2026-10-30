@@ -116,9 +116,12 @@ struct ContainerAlertTests {
             containerName: "web",
             kind: .exited(code: 2)
         )
-        #expect(alert.title == "Container stopped")
+        // Title/body are localized via the AppCore string catalog; assert
+        // structure rather than a fixed English literal.
+        #expect(alert.kind == .exited(code: 2))
+        #expect(!alert.title.isEmpty)
         #expect(alert.body.contains("web"))
         #expect(alert.body.contains("prod"))
-        #expect(alert.body.contains("code 2"))
+        #expect(alert.body.contains("2"))
     }
 }

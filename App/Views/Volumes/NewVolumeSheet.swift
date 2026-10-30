@@ -8,7 +8,7 @@ struct NewVolumeSheet: View {
 
     var body: some View {
         NewResourceSheet(
-            title: "New Volume",
+            title: String(localized: "New Volume"),
             defaultDriver: "local",
             driverControl: { driver in
                 TextField("Driver", text: driver)

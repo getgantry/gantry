@@ -38,9 +38,12 @@ public struct ContainerAlert: Sendable, Hashable {
     /// Short notification title.
     public var title: String {
         switch kind {
-        case .exited: "Container stopped"
-        case .outOfMemory: "Container out of memory"
-        case .unhealthy: "Container unhealthy"
+        case .exited:
+            String(localized: "Container stopped", bundle: .module)
+        case .outOfMemory:
+            String(localized: "Container out of memory", bundle: .module)
+        case .unhealthy:
+            String(localized: "Container unhealthy", bundle: .module)
         }
     }
 
@@ -48,11 +51,20 @@ public struct ContainerAlert: Sendable, Hashable {
     public var body: String {
         switch kind {
         case .exited(let code):
-            "\(containerName) on \(hostName) exited with code \(code)."
+            String(
+                localized: "\(containerName) on \(hostName) exited with code \(code).",
+                bundle: .module
+            )
         case .outOfMemory:
-            "\(containerName) on \(hostName) was killed after running out of memory."
+            String(
+                localized: "\(containerName) on \(hostName) was killed after running out of memory.",
+                bundle: .module
+            )
         case .unhealthy:
-            "\(containerName) on \(hostName) failed its health check."
+            String(
+                localized: "\(containerName) on \(hostName) failed its health check.",
+                bundle: .module
+            )
         }
     }
 }

@@ -142,9 +142,9 @@ struct MenuBarView: View {
     }
 
     private var countsSummary: String {
-        guard totalHosts > 0 else { return "No hosts connected" }
-        let hostWord = totalHosts == 1 ? "host" : "hosts"
-        return "\(totalRunning) running · \(totalHosts) \(hostWord)"
+        guard totalHosts > 0 else { return String(localized: "No hosts connected") }
+        let hostWord = totalHosts == 1 ? String(localized: "host") : String(localized: "hosts")
+        return String(localized: "\(totalRunning) running · \(totalHosts) \(hostWord)")
     }
 
     /// Estimated height for the host/container list, so the ScrollView never

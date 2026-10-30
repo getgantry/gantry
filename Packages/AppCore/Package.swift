@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "AppCore",
+    defaultLocalization: "en",
     platforms: [.macOS("26.0")],
     products: [
         .library(name: "AppCore", targets: ["AppCore"])
@@ -15,7 +16,8 @@ let package = Package(
     targets: [
         .target(
             name: "AppCore",
-            dependencies: ["DockerKit", "SSHKit", "Yams"]
+            dependencies: ["DockerKit", "SSHKit", "Yams"],
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "AppCoreTests",

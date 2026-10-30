@@ -116,7 +116,7 @@ struct ImageListView: View {
         }
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
-            "Remove \(removeTarget?.displayName ?? "image")?",
+            "Remove \(removeTarget?.displayName ?? String(localized: "image"))?",
             isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget
