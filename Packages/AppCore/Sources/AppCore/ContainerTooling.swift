@@ -33,6 +33,13 @@ public enum ContainerTooling {
     /// The first CLI release with `container clean` (disk TRIM for running
     /// containers). 1.4.0 was never published; 1.4.1 is the first release.
     public static let containerCleanVersion = "1.4.0"
+    /// The first CLI release with the Kubernetes plugin as `container k8s`
+    /// with `--cni` (1.5.0 also removed `k8s start`).
+    public static let clustersVersion = "1.5.0"
+    /// Multi-worker clusters (`--workers`) and `--cni NONE`.
+    public static let clusterWorkersVersion = "1.6.0"
+    /// `container k8s` was renamed to `container cluster`.
+    public static let clusterCommandRenameVersion = "1.6.1"
 
     /// CLI features Gantry gates its UI on. Everything here is derived from the
     /// detected version — the CLI has no capability query.
@@ -45,17 +52,29 @@ public enum ContainerTooling {
         public var kernelArguments: Bool
         /// `container clean` (disk TRIM).
         public var containerClean: Bool
+        /// The Kubernetes cluster subcommand: `cluster` (1.6.1+), `k8s`
+        /// (1.5.0 to 1.6.0), or nil when the CLI has no usable one.
+        public var clusterCommand: String?
+        /// `cluster create --workers` and `--cni NONE`.
+        public var clusterWorkers: Bool
+
+        /// Local Kubernetes clusters.
+        public var clusters: Bool { clusterCommand != nil }
 
         public init(
             nestedVirtualization: Bool,
             nonRootSocketMounts: Bool,
             kernelArguments: Bool,
-            containerClean: Bool = false
+            containerClean: Bool = false,
+            clusterCommand: String? = nil,
+            clusterWorkers: Bool = false
         ) {
             self.nestedVirtualization = nestedVirtualization
             self.nonRootSocketMounts = nonRootSocketMounts
             self.kernelArguments = kernelArguments
             self.containerClean = containerClean
+            self.clusterCommand = clusterCommand
+            self.clusterWorkers = clusterWorkers
         }
     }
 
@@ -68,15 +87,25 @@ public enum ContainerTooling {
                 nestedVirtualization: true,
                 nonRootSocketMounts: true,
                 kernelArguments: true,
-                containerClean: true
+                containerClean: true,
+                clusterCommand: "cluster",
+                clusterWorkers: true
             )
         }
         return Features(
             nestedVirtualization: isVersion(version, atLeast: nestedVirtualizationVersion),
             nonRootSocketMounts: isVersion(version, atLeast: socketMountVersion),
             kernelArguments: isVersion(version, atLeast: kernelArgumentsVersion),
-            containerClean: isVersion(version, atLeast: containerCleanVersion)
+            containerClean: isVersion(version, atLeast: containerCleanVersion),
+            clusterCommand: clusterCommand(for: version),
+            clusterWorkers: isVersion(version, atLeast: clusterWorkersVersion)
         )
+    }
+
+    private static func clusterCommand(for version: String) -> String? {
+        if isVersion(version, atLeast: clusterCommandRenameVersion) { return "cluster" }
+        if isVersion(version, atLeast: clustersVersion) { return "k8s" }
+        return nil
     }
 
     /// The official signed installer releases page. Preferred over Homebrew:

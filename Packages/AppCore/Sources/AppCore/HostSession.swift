@@ -34,6 +34,18 @@ public final class HostSession: Identifiable {
     /// Whether this host exposes `container machine` (apple/container only).
     public var supportsMachines: Bool { host.isAppleContainer }
 
+    /// Local Kubernetes clusters (`container cluster`, apple/container 1.5+).
+    public private(set) var clusters: [ContainerCluster] = []
+    /// Cluster creations that run or that failed, in start order.
+    public private(set) var clusterCreations: [ClusterCreation] = []
+    /// The CLI features for clusters; nil until ``loadClusterSupport()`` runs.
+    public private(set) var clusterFeatures: ContainerTooling.Features?
+
+    /// Whether this host's CLI has `container cluster` (or `container k8s`).
+    public var supportsClusters: Bool {
+        host.isAppleContainer && (clusterFeatures?.clusters ?? false)
+    }
+
     /// Last error surfaced to the UI; settable so a view can dismiss it.
     public var lastError: String?
 
@@ -826,6 +838,10 @@ public final class HostSession: Identifiable {
         if let value = await infoResult { info = value }
 
         if supportsMachines { await refreshMachines() }
+        if host.isAppleContainer {
+            await loadClusterSupport()
+            await refreshClusters()
+        }
     }
 
     public func refreshContainers() async {
@@ -984,6 +1000,149 @@ public final class HostSession: Identifiable {
         guard !settings.isEmpty else { return true }
         return await machineAction {
             try await AppleContainerControl.setMachine(name, settings: settings, cliOverride: machineCLIOverride)
+        }
+    }
+
+    // MARK: - Kubernetes clusters (apple/container 1.5+)
+
+    /// A `container cluster create` that runs in the background. Creation
+    /// pulls the node image and boots each node, which takes minutes.
+    public struct ClusterCreation: Identifiable, Sendable, Equatable {
+        public var id: String { options.name }
+        public var options: AppleContainerControl.ClusterCreateOptions
+        public var progress: ClusterCreateProgress?
+        /// The output lines without the repeated status lines, capped.
+        public var log: [String] = []
+        /// Set when the CLI failed; the creation then stays until dismissed.
+        public var failure: String?
+
+        public var isRunning: Bool { failure == nil }
+    }
+
+    private var clusterCreationTasks: [String: Task<Void, Never>] = [:]
+
+    /// Reads the CLI version once to decide whether clusters are available.
+    public func loadClusterSupport() async {
+        guard host.isAppleContainer, clusterFeatures == nil else { return }
+        clusterFeatures = await ContainerTooling.currentFeatures()
+    }
+
+    /// Reloads the cluster list. No-op when the CLI has no clusters.
+    public func refreshClusters() async {
+        guard supportsClusters, let command = clusterFeatures?.clusterCommand else { return }
+        if let value = try? await AppleContainerControl.listClusters(command: command, cliOverride: machineCLIOverride) {
+            clusters = value
+        }
+    }
+
+    private func clusterAction(_ body: (String) async throws -> Void) async -> Bool {
+        guard supportsClusters, let command = clusterFeatures?.clusterCommand else { return false }
+        do {
+            try await body(command)
+            await refreshClusters()
+            return true
+        } catch {
+            surface(error)
+            await refreshClusters()
+            return false
+        }
+    }
+
+    /// Starts `container cluster create` in the background and returns at
+    /// once. Follow ``clusterCreations`` for progress. Returns false when a
+    /// creation with the same name already runs.
+    @discardableResult
+    public func startClusterCreation(_ options: AppleContainerControl.ClusterCreateOptions) -> Bool {
+        guard supportsClusters, let command = clusterFeatures?.clusterCommand else { return false }
+        let name = options.name
+        if clusterCreations.contains(where: { $0.id == name && $0.isRunning }) { return false }
+        clusterCreations.removeAll { $0.id == name }
+        clusterCreations.append(ClusterCreation(options: options))
+        let cli = machineCLIOverride
+        clusterCreationTasks[name] = Task { [weak self] in
+            let output: @Sendable (String) -> Void = { [weak self] line in
+                Task { @MainActor in self?.recordClusterOutput(name, line) }
+            }
+            var failure: Error?
+            do {
+                try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli, output: output)
+            } catch {
+                failure = error
+            }
+            await self?.finishClusterCreation(name, error: failure)
+        }
+        Task { await refreshClusters() }
+        return true
+    }
+
+    private func recordClusterOutput(_ name: String, _ line: String) {
+        guard let index = clusterCreations.firstIndex(where: { $0.id == name }) else { return }
+        if let progress = ClusterCreateProgress.parse(line) {
+            clusterCreations[index].progress = progress
+            return
+        }
+        clusterCreations[index].log.append(line)
+        if clusterCreations[index].log.count > 200 {
+            clusterCreations[index].log.removeFirst(clusterCreations[index].log.count - 200)
+        }
+    }
+
+    private func finishClusterCreation(_ name: String, error: Error?) async {
+        clusterCreationTasks[name] = nil
+        if let error, !(error is CancellationError) {
+            if let index = clusterCreations.firstIndex(where: { $0.id == name }) {
+                clusterCreations[index].failure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        } else {
+            clusterCreations.removeAll { $0.id == name }
+        }
+        await refreshClusters()
+    }
+
+    /// Stops a running creation and deletes the nodes it already made.
+    public func cancelClusterCreation(_ name: String) async {
+        guard let task = clusterCreationTasks[name] else { return }
+        let kubeconfig = clusterCreations.first { $0.id == name }?.options.kubeconfigPath
+        task.cancel()
+        await task.value
+        clusterCreations.removeAll { $0.id == name }
+        _ = await clusterAction { command in
+            try await AppleContainerControl.deleteCluster(
+                name, kubeconfigPath: kubeconfig, command: command, cliOverride: machineCLIOverride
+            )
+        }
+    }
+
+    /// Removes a failed creation from ``clusterCreations``.
+    public func dismissClusterCreation(_ name: String) {
+        guard clusterCreationTasks[name] == nil else { return }
+        clusterCreations.removeAll { $0.id == name }
+    }
+
+    @discardableResult
+    public func deleteCluster(_ name: String) async -> Bool {
+        await clusterAction { command in
+            try await AppleContainerControl.deleteCluster(name, command: command, cliOverride: machineCLIOverride)
+        }
+    }
+
+    /// Writes (merges) the cluster context into the kubeconfig at `path`.
+    @discardableResult
+    public func writeClusterKubeconfig(_ name: String, to path: String) async -> Bool {
+        await clusterAction { command in
+            try await AppleContainerControl.writeClusterConfig(
+                name, kubeconfigPath: path, command: command, cliOverride: machineCLIOverride
+            )
+        }
+    }
+
+    /// Copies a local image into the containerd of every node of `cluster`.
+    @discardableResult
+    public func loadImageIntoCluster(_ image: String, cluster: String) async -> Bool {
+        await clusterAction { command in
+            try await AppleContainerControl.loadImageIntoCluster(
+                image, cluster: cluster, command: command, cliOverride: machineCLIOverride
+            )
         }
     }
 

@@ -139,6 +139,23 @@ struct ContainerToolingFeatureTests {
         #expect(ContainerTooling.features(for: nil).containerClean)
     }
 
+    @Test func clustersNeed1_5AndUseTheRenamedCommandFrom1_6_1() {
+        #expect(!ContainerTooling.features(for: "1.4.1").clusters)
+        #expect(ContainerTooling.features(for: "1.4.1").clusterCommand == nil)
+        #expect(ContainerTooling.features(for: "1.5.0").clusterCommand == "k8s")
+        #expect(ContainerTooling.features(for: "1.6.0").clusterCommand == "k8s")
+        #expect(ContainerTooling.features(for: "1.6.1").clusterCommand == "cluster")
+        #expect(ContainerTooling.features(for: "2.0.0").clusterCommand == "cluster")
+        #expect(ContainerTooling.features(for: nil).clusterCommand == "cluster")
+    }
+
+    @Test func clusterWorkersNeed1_6() {
+        #expect(!ContainerTooling.features(for: "1.5.0").clusterWorkers)
+        #expect(ContainerTooling.features(for: "1.6.0").clusterWorkers)
+        #expect(ContainerTooling.features(for: "1.6.1").clusterWorkers)
+        #expect(ContainerTooling.features(for: "unknown").clusterWorkers)
+    }
+
     @Test func unknownVersionsAreTreatedOptimistically() {
         // A CLI we can't version-parse shouldn't have its options hidden.
         #expect(ContainerTooling.features(for: nil).nestedVirtualization)

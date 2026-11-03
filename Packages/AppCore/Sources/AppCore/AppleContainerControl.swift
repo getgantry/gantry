@@ -256,13 +256,18 @@ public enum AppleContainerControl {
         var stderr: String
     }
 
-    static func run(_ executable: String, _ arguments: [String]) async -> RunResult {
+    static func run(
+        _ executable: String,
+        _ arguments: [String],
+        environment extraEnvironment: [String: String] = [:]
+    ) async -> RunResult {
         await withCheckedContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executable)
             process.arguments = arguments
             var environment = ProcessInfo.processInfo.environment
             environment["NO_COLOR"] = "1"
+            environment.merge(extraEnvironment) { _, new in new }
             process.environment = environment
             let outPipe = Pipe()
             let errPipe = Pipe()
