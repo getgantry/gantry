@@ -11,6 +11,26 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.25.0](https://github.com/getgantry/gantry/compare/v0.24.0...v0.25.0) (2026-11-03)
+
+
+### Features
+
+* **apple:** add a system section for apple container hosts ([#33](https://github.com/getgantry/gantry/issues/33)) ([8fe4b22](https://github.com/getgantry/gantry/commit/8fe4b22e7fe0888bb824b207f26403863c21f6f6))
+* **apple:** manage kubernetes clusters on apple container hosts ([#32](https://github.com/getgantry/gantry/issues/32)) ([27559f8](https://github.com/getgantry/gantry/commit/27559f818e6f25991f157ccb2de2cc8c3a1ec9ea))
+* **apple:** support container cli 1.6 features ([#31](https://github.com/getgantry/gantry/issues/31)) ([7f9cb83](https://github.com/getgantry/gantry/commit/7f9cb837c4461d884531de35c23d520bd53f2232))
+* **i18n:** add simplified chinese localization ([#27](https://github.com/getgantry/gantry/issues/27)) ([00fadb2](https://github.com/getgantry/gantry/commit/00fadb2d64689798ee27414059155209554ead8f))
+* **images:** badge foreign-arch images ([#24](https://github.com/getgantry/gantry/issues/24)) ([4bd42df](https://github.com/getgantry/gantry/commit/4bd42df00c68d9c26e7f46bc2472eecade08f1ad))
+
+
+### Fixes
+
+* **app:** keep one main window across open routes ([#22](https://github.com/getgantry/gantry/issues/22)) ([01c1491](https://github.com/getgantry/gantry/commit/01c1491989ae199b3f697cbfab513f5e2f735375))
+* **apple:** keep label values containing '=' on apple container hosts ([#30](https://github.com/getgantry/gantry/issues/30)) ([5ae958a](https://github.com/getgantry/gantry/commit/5ae958a56f451f41426afc046f780b438eae421d))
+* **setup:** prevent empty container setup sheet on launch ([#21](https://github.com/getgantry/gantry/issues/21)) ([31c0246](https://github.com/getgantry/gantry/commit/31c0246fdd0056a1bd6581ec562bbc6f1aecf521))
+* **setup:** show the container setup prompt only for apple container hosts ([#17](https://github.com/getgantry/gantry/issues/17)) ([fd7e34f](https://github.com/getgantry/gantry/commit/fd7e34fa91ef827e99499599d40ac7a5225981ad))
+* **ssh:** load openssh keys encrypted with many bcrypt rounds ([#29](https://github.com/getgantry/gantry/issues/29)) ([24913f3](https://github.com/getgantry/gantry/commit/24913f39fd35087d496405e5924bfc67f2d1c3bb))
+
 ## [0.24.0](https://github.com/getgantry/gantry/compare/v0.23.0...v0.24.0) (2026-08-01)
 
 
