@@ -40,7 +40,7 @@ struct ImageListView: View {
     var body: some View {
         List(selection: $selection) {
             ForEach(filtered) { image in
-                ImageRow(image: image)
+                ImageRow(image: image, hostArchitecture: session.info?.architecture ?? "")
                     .tag(image.id)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .contextMenu {
@@ -171,6 +171,7 @@ private struct DiskUsageFooter: View {
 
 private struct ImageRow: View {
     let image: ImageSummary
+    let hostArchitecture: String
 
     var body: some View {
         HStack(spacing: 10) {
@@ -185,6 +186,7 @@ private struct ImageRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            ArchBadge(architecture: image.architecture, hostArchitecture: hostArchitecture)
             if image.containers > 0 {
                 Text("\(image.containers) in use")
                     .font(.caption)
@@ -264,6 +266,9 @@ struct ImageDetailView: View {
                     Fact("Size", image.sizeDisplay)
                     Fact("Created", image.createdDate.formatted(date: .abbreviated, time: .shortened))
                     Fact("Containers", image.containers >= 0 ? "\(image.containers)" : "—")
+                    if !image.architecture.isEmpty {
+                        Fact("Platform", image.platformDisplay)
+                    }
                 }
                 if !image.repoTags.isEmpty {
                     SectionTitle("Tags")

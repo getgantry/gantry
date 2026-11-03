@@ -212,10 +212,21 @@ actor GantryTools {
         let results = try await forEachHost(
             args,
             body: { host, client in
-                ContainerListDTO(
+                let containers = try await client.listContainers(all: all)
+                // Architectures only for images the listed containers actually
+                // run: a full enriched list inspects every platform-less image
+                // in the library, which no container-list caller wants to pay.
+                let referencedIDs = Set(containers.map(\.imageID))
+                let images = referencedIDs.isEmpty
+                    ? []
+                    : ((try? await client.listImages(platformsFor: referencedIDs)) ?? [])
+                let archByImageID = images.architectureByImageID
+                return ContainerListDTO(
                     hostID: host.id.uuidString,
                     hostName: host.name,
-                    containers: try await client.listContainers(all: all).map(ContainerDTO.init),
+                    containers: containers.map { c in
+                        ContainerDTO(c, imageArchitecture: archByImageID[c.imageID] ?? "")
+                    },
                     error: nil
                 )
             },

@@ -250,8 +250,59 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     #expect(!images[0].sizeDisplay.isEmpty)
     // Untagged image falls back to "<short> <none>".
     #expect(images[1].displayName == "zzzz <none>")
-    let request = await transport.last
-    #expect(request?.path == "/v1.47/images/json")
+    // listImages asks for manifest descriptors, then inspects images whose
+    // platform the fixture did not report; the list is the first request.
+    let list = await transport.request(at: 0)
+    #expect(list.path == "/v1.47/images/json")
+    #expect(list.query == [URLQueryItem(name: "manifests", value: "true")])
+}
+
+@Test func listImagesFillsPlatformFromInspect() async throws {
+    // The list reports no Descriptor, so listImages inspects each image for
+    // its platform; the inspect body uses image-inspect key spelling.
+    let listJSON = """
+    [{"Id":"sha256:aa","RepoTags":["a:1"],"Created":0,"Size":1},
+     {"Id":"sha256:bb","RepoTags":["b:1"],"Created":0,"Size":1,"Containers":-1}]
+    """
+    let transport = MockTransport(responder: { request in
+        if request.path.hasSuffix("/images/json") {
+            jsonResponse(listJSON)
+        } else {
+            jsonResponse(#"{"Architecture":"arm64","Os":"linux"}"#)
+        }
+    })
+    let client = DockerClient(transport: transport)
+    let images = try await client.listImages()
+    #expect(images[0].architecture == "arm64")
+    #expect(images[0].os == "linux")
+    #expect(images[0].platformDisplay == "linux/arm64")
+    #expect(images[1].architecture == "arm64")
+    let list = await transport.request(at: 0)
+    #expect(list.query == [URLQueryItem(name: "manifests", value: "true")])
+    #expect(await transport.request(at: 1).path == "/v1.47/images/sha256:aa/json")
+    #expect(await transport.request(at: 2).path == "/v1.47/images/sha256:bb/json")
+}
+
+@Test func listImagesPlatformsForRestrictsInspectsToRequestedIDs() async throws {
+    let listJSON = """
+    [{"Id":"sha256:aa","RepoTags":["a:1"],"Created":0,"Size":1},
+     {"Id":"sha256:bb","RepoTags":["b:1"],"Created":0,"Size":1},
+     {"Id":"sha256:cc","RepoTags":["c:1"],"Created":0,"Size":1}]
+    """
+    let transport = MockTransport(responder: { request in
+        if request.path.hasSuffix("/images/json") {
+            jsonResponse(listJSON)
+        } else {
+            jsonResponse(#"{"Architecture":"amd64","Os":"linux"}"#)
+        }
+    })
+    let client = DockerClient(transport: transport)
+    // Only bb's platform is wanted; aa and cc stay un-inspected.
+    let images = try await client.listImages(platformsFor: ["sha256:bb"])
+    #expect(images[0].architecture == "")
+    #expect(images[1].architecture == "amd64")
+    #expect(images[2].architecture.isEmpty)
+    #expect(await transport.requests.count == 2)
 }
 
 @Test func removeImageEncodesForce() async throws {

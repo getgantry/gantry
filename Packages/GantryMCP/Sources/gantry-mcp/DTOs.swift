@@ -37,8 +37,12 @@ struct ContainerDTO: Encodable {
     var status: String
     var ports: [String]
     var composeProject: String?
+    /// Architecture of the container's image (empty when unknown) — the
+    /// container's own inspect `Platform` field is a different thing, hence
+    /// the explicit name.
+    var imageArchitecture: String
 
-    init(_ c: ContainerSummary) {
+    init(_ c: ContainerSummary, imageArchitecture: String) {
         id = c.shortID
         name = c.displayName
         image = c.image
@@ -46,6 +50,7 @@ struct ContainerDTO: Encodable {
         status = c.status
         ports = c.ports.map(\.display)
         composeProject = c.composeProject
+        self.imageArchitecture = imageArchitecture
     }
 }
 
@@ -61,12 +66,14 @@ struct ImageDTO: Encodable {
     var tags: [String]
     var sizeBytes: Int64
     var created: Int64
+    var architecture: String
 
     init(_ i: ImageSummary) {
         id = i.shortID
         tags = i.repoTags
         sizeBytes = i.size
         created = i.created
+        architecture = i.architecture
     }
 }
 

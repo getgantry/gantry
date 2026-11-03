@@ -92,26 +92,29 @@ struct ContainerListView: View {
     }
 
     var body: some View {
-        List(selection: $selection) {
+        // Derived once per render for every row below: image architectures by
+        // id, keyed from the session's cached image list.
+        let archByImageID = session.images.architectureByImageID
+        return List(selection: $selection) {
             if hasProjects {
                 ForEach(groups) { group in
                     if let name = group.name {
                         Section(isExpanded: expansionBinding(for: name)) {
-                            ForEach(group.containers) { row($0) }
+                            ForEach(group.containers) { row($0, archByImageID: archByImageID) }
                         } header: {
                             groupHeader(group)
                         }
                     } else {
                         // Standalone bucket stays a plain, always-open section.
                         Section {
-                            ForEach(group.containers) { row($0) }
+                            ForEach(group.containers) { row($0, archByImageID: archByImageID) }
                         } header: {
                             groupHeader(group)
                         }
                     }
                 }
             } else {
-                ForEach(filtered) { row($0) }
+                ForEach(filtered) { row($0, archByImageID: archByImageID) }
             }
         }
         // The sidebar style is what gives `Section(isExpanded:)` its animated
@@ -193,9 +196,13 @@ struct ContainerListView: View {
     // MARK: - Rows
 
     @ViewBuilder
-    private func row(_ container: ContainerSummary) -> some View {
-        ContainerRow(container: container)
-            .tag(container.id)
+    private func row(_ container: ContainerSummary, archByImageID: [String: String]) -> some View {
+        ContainerRow(
+            container: container,
+            imageArchitecture: archByImageID[container.imageID] ?? "",
+            hostArchitecture: session.info?.architecture ?? ""
+        )
+        .tag(container.id)
             .contextMenu {
                 ContainerActionsMenu(
                     container: container,
@@ -355,6 +362,8 @@ struct StackLogsTarget: Identifiable {
 
 private struct ContainerRow: View {
     let container: ContainerSummary
+    let imageArchitecture: String
+    let hostArchitecture: String
 
     var body: some View {
         HStack(spacing: 10) {
@@ -371,6 +380,8 @@ private struct ContainerRow: View {
             }
 
             Spacer()
+
+            ArchBadge(architecture: imageArchitecture, hostArchitecture: hostArchitecture)
 
             if let health = container.health {
                 HealthBadge(health: health)

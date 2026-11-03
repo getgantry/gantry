@@ -95,4 +95,15 @@ public struct SystemInfo: Hashable, Codable, Sendable {
         memTotal = try c.decodeIfPresent(Int64.self, forKey: .memTotal) ?? 0
         ncpu = try c.decodeIfPresent(Int.self, forKey: .ncpu) ?? 0
     }
+
+    /// Whether two architecture names from different Docker endpoints spell
+    /// the same platform: `/info` reports the uname spelling ("x86_64",
+    /// "aarch64") while image manifests report Go's ("amd64", "arm64"). Empty
+    /// means unknown and never matches.
+    public static func architecturesEquivalent(_ a: String, _ b: String) -> Bool {
+        if a.isEmpty || b.isEmpty { return false }
+        let aliases: [[String]] = [["amd64", "x86_64"], ["arm64", "aarch64"]]
+        for group in aliases where group.contains(a) && group.contains(b) { return true }
+        return a == b
+    }
 }
