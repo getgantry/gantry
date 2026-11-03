@@ -86,7 +86,7 @@ struct NetworkListView: View {
                 pruneConfirm = false
                 Task {
                     if let result = await session.pruneNetworks() {
-                        pruneOutcome = PruneOutcome(title: "Networks Pruned", result: result)
+                        pruneOutcome = PruneOutcome(title: String(localized: "Networks Pruned"), result: result)
                     }
                 }
             }
@@ -96,7 +96,7 @@ struct NetworkListView: View {
         }
         .pruneResultAlert($pruneOutcome)
         .confirmationDialog(
-            "Remove \(removeTarget?.name ?? "network")?",
+            "Remove \(removeTarget?.name ?? String(localized: "network"))?",
             isPresented: Binding(presence: $removeTarget),
             titleVisibility: .visible,
             presenting: removeTarget

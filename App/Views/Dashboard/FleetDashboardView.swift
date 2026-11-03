@@ -98,10 +98,10 @@ struct FleetDashboardView: View {
             Spacer(minLength: 16)
 
             HStack(spacing: 0) {
-                bannerStat(value: "\(c.hostsUp)/\(c.hostsTotal)", label: "Hosts", tint: c.hostsUp == c.hostsTotal ? .green : .orange)
-                bannerStat(value: "\(c.running)", label: "Running", tint: .green)
-                bannerStat(value: "\(c.unhealthy)", label: "Unhealthy", tint: c.unhealthy > 0 ? .red : .secondary)
-                bannerStat(value: "\(c.stopped)", label: "Stopped", tint: .secondary)
+                bannerStat(value: "\(c.hostsUp)/\(c.hostsTotal)", label: String(localized: "Hosts"), tint: c.hostsUp == c.hostsTotal ? .green : .orange)
+                bannerStat(value: "\(c.running)", label: String(localized: "Running"), tint: .green)
+                bannerStat(value: "\(c.unhealthy)", label: String(localized: "Unhealthy"), tint: c.unhealthy > 0 ? .red : .secondary)
+                bannerStat(value: "\(c.stopped)", label: String(localized: "Stopped"), tint: .secondary)
             }
             .fixedSize()
         }
@@ -115,22 +115,26 @@ struct FleetDashboardView: View {
     }
 
     private func bannerTitle(counts c: FleetCounts, allClear: Bool) -> String {
-        if allClear { return "All Systems Running" }
+        if allClear { return String(localized: "All Systems Running") }
         if c.hostsFailed > 0 {
-            return c.hostsFailed == 1 ? "1 host unreachable" : "\(c.hostsFailed) hosts unreachable"
+            return c.hostsFailed == 1
+                ? String(localized: "1 host unreachable")
+                : String(localized: "\(c.hostsFailed) hosts unreachable")
         }
         if c.attention > 0 {
-            return c.attention == 1 ? "1 container needs attention" : "\(c.attention) containers need attention"
+            return c.attention == 1
+                ? String(localized: "1 container needs attention")
+                : String(localized: "\(c.attention) containers need attention")
         }
-        return "Connecting…"
+        return String(localized: "Connecting…")
     }
 
     private func bannerSubtitle(counts c: FleetCounts) -> String {
         var parts: [String] = []
-        if c.hostsFailed > 0 { parts.append("\(c.hostsFailed) connection failed") }
-        if c.unhealthy > 0 { parts.append("\(c.unhealthy) unhealthy") }
+        if c.hostsFailed > 0 { parts.append(String(localized: "\(c.hostsFailed) connection failed")) }
+        if c.unhealthy > 0 { parts.append(String(localized: "\(c.unhealthy) unhealthy")) }
         if parts.isEmpty {
-            return "\(c.running) containers running across \(c.hostsUp) hosts."
+            return String(localized: "\(c.running) containers running across \(c.hostsUp) hosts.")
         }
         return parts.joined(separator: " · ")
     }
@@ -173,10 +177,10 @@ private struct HostCard: View {
                     containersSection
                     footer
                 } else {
-                    loadingRow("Loading host info…")
+                    loadingRow(String(localized: "Loading host info…"))
                 }
             case .connecting:
-                loadingRow("Connecting…")
+                loadingRow(String(localized: "Connecting…"))
             case .failed(let message):
                 failedSection(message)
             case .disconnected:
@@ -229,7 +233,7 @@ private struct HostCard: View {
             }
             Spacer()
             if unhealthyCount > 0 {
-                badge("\(unhealthyCount) unhealthy", tint: .red)
+                badge(String(localized: "\(unhealthyCount) unhealthy"), tint: .red)
             } else if restartingCount > 0 {
                 badge("\(restartingCount) restarting", tint: .orange)
             }
@@ -251,16 +255,16 @@ private struct HostCard: View {
     private var metricsRow: some View {
         HStack(alignment: .top, spacing: 12) {
             metricCell(
-                title: "CPU",
+                title: String(localized: "CPU"),
                 value: latest.map { $0.cpuPercent.formatted(.number.precision(.fractionLength(0))) + "%" } ?? "—",
-                caption: session.info.map { "of \($0.ncpu) CPUs" } ?? "",
+                caption: session.info.map { String(localized: "of \($0.ncpu) CPUs") } ?? "",
                 series: samples.map { ($0.date, $0.cpuFraction) },
                 tint: .blue
             )
             metricCell(
-                title: "Memory",
+                title: String(localized: "Memory"),
                 value: latest.map { Formatters.bytes($0.memBytes) } ?? "—",
-                caption: session.info.map { "of \(Formatters.bytes($0.memTotal))" } ?? "",
+                caption: session.info.map { String(localized: "of \(Formatters.bytes($0.memTotal))") } ?? "",
                 series: samples.map { ($0.date, $0.memFraction) },
                 tint: .green
             )
@@ -390,10 +394,10 @@ private struct HostCard: View {
     }
 
     private func containersLegend(_ counts: (healthy: Int, unhealthy: Int, paused: Int, stopped: Int)) -> String {
-        var parts = ["\(counts.healthy + counts.unhealthy) running"]
-        if counts.unhealthy > 0 { parts.append("\(counts.unhealthy) unhealthy") }
-        if counts.paused > 0 { parts.append("\(counts.paused) paused") }
-        parts.append("\(counts.stopped) stopped")
+        var parts = [String(localized: "\(counts.healthy + counts.unhealthy) running")]
+        if counts.unhealthy > 0 { parts.append(String(localized: "\(counts.unhealthy) unhealthy")) }
+        if counts.paused > 0 { parts.append(String(localized: "\(counts.paused) paused")) }
+        parts.append(String(localized: "\(counts.stopped) stopped"))
         return parts.joined(separator: " · ")
     }
 
@@ -413,7 +417,7 @@ private struct HostCard: View {
         var parts: [String] = []
         if !info.serverVersion.isEmpty { parts.append("Docker \(info.serverVersion)") }
         if !info.operatingSystem.isEmpty { parts.append(info.operatingSystem) }
-        parts.append("\(info.ncpu) CPU · \(Formatters.bytes(info.memTotal))")
+        parts.append(String(localized: "\(info.ncpu) CPU · \(Formatters.bytes(info.memTotal))"))
         return parts.joined(separator: " · ")
     }
 

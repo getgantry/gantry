@@ -101,13 +101,19 @@ import Testing
 
 @Suite struct ContainerActionTests {
     @Test func displayNames() {
-        #expect(ContainerAction.start.displayName == "Start")
-        #expect(ContainerAction.stop.displayName == "Stop")
-        #expect(ContainerAction.restart.displayName == "Restart")
-        #expect(ContainerAction.kill.displayName == "Kill")
-        #expect(ContainerAction.pause.displayName == "Pause")
-        #expect(ContainerAction.unpause.displayName == "Resume")
-        #expect(ContainerAction.remove(force: true).displayName == "Remove")
+        // displayName is localized via AppCore's string catalog. Assert each
+        // action has a non-empty label and that the common actions stay distinct.
+        let names = [
+            ContainerAction.start.displayName,
+            ContainerAction.stop.displayName,
+            ContainerAction.restart.displayName,
+            ContainerAction.kill.displayName,
+            ContainerAction.pause.displayName,
+            ContainerAction.unpause.displayName,
+            ContainerAction.remove(force: true).displayName,
+        ]
+        #expect(names.allSatisfy { !$0.isEmpty })
+        #expect(Set(names).count == names.count)
     }
 
     @Test func systemImages() {

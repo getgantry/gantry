@@ -10,7 +10,7 @@ struct NewNetworkSheet: View {
 
     var body: some View {
         NewResourceSheet(
-            title: "New Network",
+            title: String(localized: "New Network"),
             defaultDriver: "bridge",
             driverControl: { driver in
                 Picker("Driver", selection: driver) {

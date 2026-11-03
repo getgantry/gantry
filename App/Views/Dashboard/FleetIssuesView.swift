@@ -70,7 +70,7 @@ struct FleetIssuesView: View {
                 FleetIssue(
                     id: "host-\(session.id)",
                     severity: .error,
-                    title: "Connection failed",
+                    title: String(localized: "Connection failed"),
                     detail: message,
                     section: .overview,
                     target: nil
@@ -80,11 +80,11 @@ struct FleetIssuesView: View {
 
         for container in session.containers {
             if container.state.isRunning, container.health == .unhealthy {
-                result.append(containerIssue(container, severity: .error, title: "Unhealthy"))
+                result.append(containerIssue(container, severity: .error, title: String(localized: "Unhealthy")))
             } else if container.state == .restarting {
-                result.append(containerIssue(container, severity: .warning, title: "Restarting"))
+                result.append(containerIssue(container, severity: .warning, title: String(localized: "Restarting")))
             } else if container.state == .dead {
-                result.append(containerIssue(container, severity: .error, title: "Dead"))
+                result.append(containerIssue(container, severity: .error, title: String(localized: "Dead")))
             }
         }
 

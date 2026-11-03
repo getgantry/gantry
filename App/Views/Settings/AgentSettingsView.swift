@@ -46,7 +46,7 @@ struct AgentSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(
                 icon: "app.connected.to.app.below.fill",
-                title: "Shortcuts, Siri & Spotlight"
+                title: String(localized: "Shortcuts, Siri & Spotlight")
             )
 
             Text("""
@@ -73,7 +73,7 @@ struct AgentSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(
                 icon: "terminal.fill",
-                title: "Model Context Protocol (MCP)"
+                title: String(localized: "Model Context Protocol (MCP)")
             )
 
             Text("""

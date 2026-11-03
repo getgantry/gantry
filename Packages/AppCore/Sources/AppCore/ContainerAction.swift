@@ -12,13 +12,13 @@ public enum ContainerAction: Sendable, Hashable {
 
     public var displayName: String {
         switch self {
-        case .start: "Start"
-        case .stop: "Stop"
-        case .restart: "Restart"
-        case .kill: "Kill"
-        case .pause: "Pause"
-        case .unpause: "Resume"
-        case .remove: "Remove"
+        case .start: String(localized: "Start", bundle: .module)
+        case .stop: String(localized: "Stop", bundle: .module)
+        case .restart: String(localized: "Restart", bundle: .module)
+        case .kill: String(localized: "Kill", bundle: .module)
+        case .pause: String(localized: "Pause", bundle: .module)
+        case .unpause: String(localized: "Resume", bundle: .module)
+        case .remove: String(localized: "Remove", bundle: .module)
         }
     }
 

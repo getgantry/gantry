@@ -65,7 +65,16 @@ extension ContainerState {
     }
 
     var label: String {
-        rawValue.prefix(1).uppercased() + rawValue.dropFirst()
+        switch self {
+        case .created: String(localized: "Created")
+        case .running: String(localized: "Running")
+        case .paused: String(localized: "Paused")
+        case .restarting: String(localized: "Restarting")
+        case .removing: String(localized: "Removing")
+        case .exited: String(localized: "Exited")
+        case .dead: String(localized: "Dead")
+        case .unknown: String(localized: "Unknown")
+        }
     }
 }
 

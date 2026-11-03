@@ -44,9 +44,9 @@ struct ContainerSetupSheet: View {
 
     private var title: String {
         switch status.state {
-        case .notInstalled: "Install apple/container"
-        case .outdated: "Update apple/container"
-        case .ok: "apple/container"
+        case .notInstalled: String(localized: "Install apple/container")
+        case .outdated: String(localized: "Update apple/container")
+        case .ok: String(localized: "apple/container")
         }
     }
 

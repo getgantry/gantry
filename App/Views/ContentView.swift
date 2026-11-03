@@ -16,13 +16,13 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .overview: "Overview"
-        case .containers: "Containers"
-        case .images: "Images"
-        case .volumes: "Volumes"
-        case .networks: "Networks"
-        case .machines: "Machines"
-        case .hostFiles: "Host Files"
+        case .overview: String(localized: "Overview")
+        case .containers: String(localized: "Containers")
+        case .images: String(localized: "Images")
+        case .volumes: String(localized: "Volumes")
+        case .networks: String(localized: "Networks")
+        case .machines: String(localized: "Machines")
+        case .hostFiles: String(localized: "Host Files")
         }
     }
 

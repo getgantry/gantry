@@ -16,13 +16,16 @@ public enum ConnectionStatus: Sendable, Equatable {
     public var shortDescription: String {
         switch self {
         case .disconnected:
-            "Disconnected"
+            String(localized: "Disconnected", bundle: .module)
         case .connecting:
-            "Connecting…"
+            String(localized: "Connecting…", bundle: .module)
         case .connected(let version):
-            "Connected (\(version.version), API \(version.apiVersion))"
+            String(
+                localized: "Connected (\(version.version), API \(version.apiVersion))",
+                bundle: .module
+            )
         case .failed(let message):
-            "Failed: \(message)"
+            String(localized: "Failed: \(message)", bundle: .module)
         }
     }
 }

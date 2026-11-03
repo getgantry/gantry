@@ -96,7 +96,7 @@ struct StatsView: View {
     private var cpuCard: some View {
         let peak = samples.map(\.cpuPercent).max() ?? 0
         let upper = max(100, peak)
-        return card("CPU", systemImage: "cpu") {
+        return card(String(localized: "CPU"), systemImage: "cpu") {
             Text(cpuValue)
                 .font(.title2.monospacedDigit())
                 .contentTransition(.numericText())
@@ -142,7 +142,7 @@ struct StatsView: View {
     private var memoryCard: some View {
         let peak = samples.map(\.memoryUsageBytes).max() ?? 0
         let upper = max(Double(peak), 1)
-        return card("Memory", systemImage: "memorychip") {
+        return card(String(localized: "Memory"), systemImage: "memorychip") {
             Text(memoryValue)
                 .font(.title2.monospacedDigit())
                 .contentTransition(.numericText())
@@ -194,8 +194,8 @@ struct StatsView: View {
 
     private var networkCard: some View {
         dualSeriesCard(
-            title: "Network", systemImage: "network",
-            labels: ("RX", "TX"), colors: (.blue, .orange),
+            title: String(localized: "Network"), systemImage: "network",
+            labels: (String(localized: "RX"), String(localized: "TX")), colors: (.blue, .orange),
             extract: { ($0.networkRxBytes, $0.networkTxBytes) }
         )
     }
@@ -204,8 +204,8 @@ struct StatsView: View {
 
     private var diskCard: some View {
         dualSeriesCard(
-            title: "Disk I/O", systemImage: "internaldrive",
-            labels: ("Read", "Write"), colors: (.purple, .pink),
+            title: String(localized: "Disk I/O"), systemImage: "internaldrive",
+            labels: (String(localized: "Read"), String(localized: "Write")), colors: (.purple, .pink),
             extract: { ($0.blockReadBytes, $0.blockWriteBytes) }
         )
     }
