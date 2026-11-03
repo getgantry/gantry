@@ -262,7 +262,7 @@ extension AppleContainerControl {
         process.standardOutput = pipe
         process.standardError = pipe
 
-        let splitter = LineSplitter(output: output)
+        let splitter = ClusterLineSplitter(output: output)
         let status: Int32 = try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int32, Error>) in
                 pipe.fileHandleForReading.readabilityHandler = { handle in
@@ -296,7 +296,7 @@ extension AppleContainerControl {
 
 /// Splits streamed process output into lines and keeps a short transcript for
 /// the error message.
-private final class LineSplitter: @unchecked Sendable {
+private final class ClusterLineSplitter: @unchecked Sendable {
     private let lock = NSLock()
     private var buffer = Data()
     private var tail: [String] = []
