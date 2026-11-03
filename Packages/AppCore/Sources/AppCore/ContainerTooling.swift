@@ -30,6 +30,9 @@ public enum ContainerTooling {
     /// per-container `--kernel` it pairs with has been there since 1.0, so only
     /// the arguments need gating.
     public static let kernelArgumentsVersion = "1.2.0"
+    /// The first CLI release with `container clean` (disk TRIM for running
+    /// containers). 1.4.0 was never published; 1.4.1 is the first release.
+    public static let containerCleanVersion = "1.4.0"
 
     /// CLI features Gantry gates its UI on. Everything here is derived from the
     /// detected version — the CLI has no capability query.
@@ -40,15 +43,19 @@ public enum ContainerTooling {
         public var nonRootSocketMounts: Bool
         /// `container run/create --kernel-arg`.
         public var kernelArguments: Bool
+        /// `container clean` (disk TRIM).
+        public var containerClean: Bool
 
         public init(
             nestedVirtualization: Bool,
             nonRootSocketMounts: Bool,
-            kernelArguments: Bool
+            kernelArguments: Bool,
+            containerClean: Bool = false
         ) {
             self.nestedVirtualization = nestedVirtualization
             self.nonRootSocketMounts = nonRootSocketMounts
             self.kernelArguments = kernelArguments
+            self.containerClean = containerClean
         }
     }
 
@@ -60,13 +67,15 @@ public enum ContainerTooling {
             return Features(
                 nestedVirtualization: true,
                 nonRootSocketMounts: true,
-                kernelArguments: true
+                kernelArguments: true,
+                containerClean: true
             )
         }
         return Features(
             nestedVirtualization: isVersion(version, atLeast: nestedVirtualizationVersion),
             nonRootSocketMounts: isVersion(version, atLeast: socketMountVersion),
-            kernelArguments: isVersion(version, atLeast: kernelArgumentsVersion)
+            kernelArguments: isVersion(version, atLeast: kernelArgumentsVersion),
+            containerClean: isVersion(version, atLeast: containerCleanVersion)
         )
     }
 

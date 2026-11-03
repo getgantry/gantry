@@ -2,6 +2,22 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
+    " · freed %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · freed %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · 释放了 %@"
+          }
+        }
+      }
+    },
     "%@ %@ deleted, %@ freed": {
       "localizations": {
         "en": {
@@ -398,6 +414,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@:latest"
+          }
+        }
+      }
+    },
+    "%lld running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个运行中"
           }
         }
       }
@@ -5106,6 +5138,22 @@
         }
       }
     },
+    "No running containers to trim.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No running containers to trim."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可修剪的运行中容器。"
+          }
+        }
+      }
+    },
     "None": {
       "localizations": {
         "en": {
@@ -7154,6 +7202,22 @@
         }
       }
     },
+    "Return blocks freed inside running containers and their volumes to macOS.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return blocks freed inside running containers and their volumes to macOS."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将运行中容器及其卷内已释放的磁盘块归还给 macOS。"
+          }
+        }
+      }
+    },
     "Returns the last lines of a container's logs as text (does not follow).": {
       "localizations": {
         "en": {
@@ -7230,6 +7294,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "运行中"
+          }
+        }
+      }
+    },
+    "Running container disks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running container disks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行中容器的磁盘"
           }
         }
       }
@@ -8638,6 +8718,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "时间"
+          }
+        }
+      }
+    },
+    "Trim Disk": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim Disk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修剪磁盘"
+          }
+        }
+      }
+    },
+    "Trim failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim failed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修剪失败。"
+          }
+        }
+      }
+    },
+    "Trimmed %lld container(s)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trimmed %lld container(s)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已修剪 %lld 个容器"
           }
         }
       }

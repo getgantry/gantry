@@ -132,6 +132,13 @@ struct ContainerToolingFeatureTests {
         #expect(ContainerTooling.features(for: "2.0.0").kernelArguments)
     }
 
+    @Test func containerCleanNeeds1_4() {
+        #expect(!ContainerTooling.features(for: "1.3.1").containerClean)
+        #expect(ContainerTooling.features(for: "1.4.1").containerClean)
+        #expect(ContainerTooling.features(for: "1.6.1").containerClean)
+        #expect(ContainerTooling.features(for: nil).containerClean)
+    }
+
     @Test func unknownVersionsAreTreatedOptimistically() {
         // A CLI we can't version-parse shouldn't have its options hidden.
         #expect(ContainerTooling.features(for: nil).nestedVirtualization)
