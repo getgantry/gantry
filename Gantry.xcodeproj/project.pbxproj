@@ -16,12 +16,18 @@
 
 /* Begin PBXFileReference section */
 		GA000000000000000000F001 /* Gantry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gantry.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		GA000000000000000000F002 /* GantryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GantryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		GA000000000000000000G001 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
+			sourceTree = "<group>";
+		};
+		GA000000000000000000G002 /* GantryUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = GantryUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -46,6 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				GA000000000000000000G001 /* App */,
+				GA000000000000000000G002 /* GantryUITests */,
 				GA000000000000000000R001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				GA000000000000000000F001 /* Gantry.app */,
+				GA000000000000000000F002 /* GantryUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -88,7 +96,38 @@
 			productReference = GA000000000000000000F001 /* Gantry.app */;
 			productType = "com.apple.product-type.application";
 		};
+		GA000000000000000000T002 /* GantryUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = GA000000000000000000C003 /* Build configuration list for PBXNativeTarget "GantryUITests" */;
+			buildPhases = (
+				GA000000000000000000W004 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				GA000000000000000000Y001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				GA000000000000000000G002 /* GantryUITests */,
+			);
+			name = GantryUITests;
+			packageProductDependencies = (
+			);
+			productName = GantryUITests;
+			productReference = GA000000000000000000F002 /* GantryUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		GA000000000000000000X001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = GA000000000000000000J001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = GA000000000000000000T001;
+			remoteInfo = Gantry;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXProject section */
 		GA000000000000000000J001 /* Project object */ = {
@@ -100,6 +139,10 @@
 				TargetAttributes = {
 					GA000000000000000000T001 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					GA000000000000000000T002 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = GA000000000000000000T001;
 					};
 				};
 			};
@@ -125,6 +168,7 @@
 			projectRoot = "";
 			targets = (
 				GA000000000000000000T001 /* Gantry */,
+				GA000000000000000000T002 /* GantryUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -147,7 +191,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		GA000000000000000000W004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		GA000000000000000000Y001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = GA000000000000000000T001 /* Gantry */;
+			targetProxy = GA000000000000000000X001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		GA000000000000000000D001 /* Debug */ = {
@@ -260,6 +319,34 @@
 			};
 			name = Release;
 		};
+		GA000000000000000000D005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewkomkov.GantryUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = Gantry;
+			};
+			name = Debug;
+		};
+		GA000000000000000000D006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewkomkov.GantryUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = Gantry;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -277,6 +364,15 @@
 			buildConfigurations = (
 				GA000000000000000000D003 /* Debug */,
 				GA000000000000000000D004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		GA000000000000000000C003 /* Build configuration list for PBXNativeTarget "GantryUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				GA000000000000000000D005 /* Debug */,
+				GA000000000000000000D006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
