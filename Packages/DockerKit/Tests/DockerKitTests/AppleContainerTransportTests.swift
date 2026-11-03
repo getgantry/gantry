@@ -366,6 +366,36 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     #expect(!create.contains("--kernel-arg"))
 }
 
+@Test func appleTransportCreateContainerEscapesLabelValuesWithEquals() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "web-1\n")
+
+    let config = ContainerCreateRequest(
+        image: "nginx:latest",
+        labels: ["origin": "a=b", "com.docker.compose.project": "shop"],
+        name: "web-1"
+    )
+    _ = try await client.createContainer(config: config, name: "web-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    #expect(create.contains("origin=a%3Db"))
+    #expect(create.contains("com.docker.compose.project=shop"))
+    #expect(create.contains("\(AppleLabelEscaping.markerKey)=\(AppleLabelEscaping.markerValue)"))
+    #expect(!create.contains("origin=a=b"))
+}
+
+@Test func appleTransportVolumeAndNetworkLabelsAreNotEscaped() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["volume", "create"])
+    runner.stub(["volume", "inspect", "data"], stdout: "[]")
+    runner.stub(["network", "create"])
+
+    _ = try await client.createVolume(name: "data", driver: "local", labels: ["origin": "a=b"])
+    _ = try await client.createNetwork(name: "backend", driver: "bridge", labels: ["origin": "a=b"])
+    #expect(runner.recordedCalls().contains(["volume", "create", "--label", "origin=a=b", "data"]))
+    #expect(runner.recordedCalls().contains(["network", "create", "--label", "origin=a=b", "backend"]))
+}
+
 @Test func appleOptionsRoundTripThroughLabels() {
     // Recreate rebuilds its request from labels, since inspect reports no
     // kernel fields at all — so what is stamped has to come back verbatim.

@@ -181,6 +181,44 @@ func liveAppleKernelBootArguments() async throws {
     try await client.removeContainer(id: id, force: true)
 }
 
+/// The CLI rejects `=` in a container label value; Gantry escapes it, and the
+/// value has to read back unchanged, alongside the Compose identity labels.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(2)))
+func liveAppleLabelValueWithEquals() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+    _ = try await client.negotiate()
+
+    let name = "gantry-apple-live-labels"
+    _ = try? await client.removeContainer(id: name, force: true)
+
+    let labels = [
+        "origin": "a=b=c",
+        "padding": "dGVzdA==",
+        "pct": "100%",
+        "com.docker.compose.project": "gantry-live",
+        "com.docker.compose.project.config_files": "/tmp/x=y/compose.yaml"
+    ]
+    let config = ContainerCreateRequest(
+        image: "alpine:latest",
+        cmd: ["sleep", "60"],
+        labels: labels,
+        name: name
+    )
+    let id = try await client.createContainer(config: config, name: name)
+
+    do {
+        let details = try await client.inspectContainer(id: id)
+        #expect(details.config.labels == labels)
+        let summary = try #require(try await client.listContainers(all: true).first { $0.id == name })
+        #expect(summary.labels == labels)
+    } catch {
+        try? await client.removeContainer(id: id, force: true)
+        throw error
+    }
+    try await client.removeContainer(id: id, force: true)
+}
+
 @Test(.enabled(if: liveEnabled), .timeLimit(.minutes(1)))
 func liveAppleVolumeLifecycle() async throws {
     let client = try makeLiveClient()

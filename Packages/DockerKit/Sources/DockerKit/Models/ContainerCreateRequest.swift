@@ -193,21 +193,15 @@ public struct ContainerCreateRequest: Encodable, Sendable {
                 .filter { !$0.isEmpty }
         }
 
-        /// Boot arguments are `key=value` and apple/container parses a label as
-        /// `key=value` too, rejecting outright any label whose value contains a
-        /// second `=` (`Parser.parseLabels`, checked against CLI 1.2). So the
-        /// `=` is percent-escaped on the way into a label — `%` first, or
-        /// unescaping would be ambiguous.
+        /// Boot arguments are `key=value`, which apple/container rejects in a
+        /// label value. Always escaped (no marker) since Gantry 0.24.0, and
+        /// containers created then must keep decoding the same way.
         private static func escape(_ value: String) -> String {
-            value
-                .replacingOccurrences(of: "%", with: "%25")
-                .replacingOccurrences(of: "=", with: "%3D")
+            AppleLabelEscaping.escape(value)
         }
 
         private static func unescape(_ value: String) -> String {
-            value
-                .replacingOccurrences(of: "%3D", with: "=")
-                .replacingOccurrences(of: "%25", with: "%")
+            AppleLabelEscaping.unescape(value)
         }
 
         public func encode(to encoder: Encoder) throws {
