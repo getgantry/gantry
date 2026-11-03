@@ -875,6 +875,25 @@ public final class HostSession: Identifiable {
     /// `container` path, if any).
     private var machineCLIOverride: String? { host.socketPathOverride }
 
+    /// Trims the disks of running apple/container containers (`container
+    /// clean`, CLI 1.4+), returning freed blocks to macOS. `ids` defaults to
+    /// every running container. Returns how many were trimmed, or nil when the
+    /// host is not apple/container or the CLI failed (the error lands in
+    /// `lastError`).
+    @discardableResult
+    public func trimContainerDisks(_ ids: [String]? = nil) async -> Int? {
+        guard host.isAppleContainer else { return nil }
+        let targets = ids ?? containers.filter { $0.state.isRunning }.map(\.id)
+        guard !targets.isEmpty else { return 0 }
+        do {
+            let cleaned = try await AppleContainerControl.cleanContainers(targets, cliOverride: machineCLIOverride)
+            return cleaned.count
+        } catch {
+            lastError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            return nil
+        }
+    }
+
     /// Reloads the `container machine` list. No-op on non-apple hosts.
     public func refreshMachines() async {
         guard supportsMachines else { return }

@@ -219,7 +219,6 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
         { try await $0.pauseContainer(id: "c") },
         { try await $0.unpauseContainer(id: "c") },
         { try await $0.renameContainer(id: "c", to: "x") },
-        { _ = try await $0.commitContainer(id: "c", repo: "r", tag: "t") },
         { try await $0.updateRestartPolicy(id: "c", policy: "always") },
         { _ = try await $0.imageHistory(id: "i") },
         { try await $0.connectContainer(networkID: "n", containerID: "c") },
@@ -793,4 +792,159 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     } else {
         Issue.record("expected apiError")
     }
+}
+
+// MARK: - apple/container 1.6
+
+/// `system status --format json` as 1.4+ prints it: the version moved under
+/// `server.version`.
+private let statusRunning16JSON = """
+{"client":{"appName":"container","build":"release","commit":"unspecified","version":"1.6.1"},\
+"host":{"architecture":"arm64","cpus":8,"operatingSystem":"Version 27.2 (Build 26B123)"},\
+"resources":{"containersRunning":0,"containersTotal":0,"images":2},\
+"server":{"appName":"container-apiserver","build":"release","commit":"unspecified","version":"1.6.1"},\
+"status":"running"}
+"""
+
+private func makeConnected16Client() async throws -> (DockerClient, ScriptedCLIRunner) {
+    let runner = ScriptedCLIRunner()
+    runner.stub(["system", "status"], stdout: statusRunning16JSON)
+    let client = DockerClient(transport: AppleContainerTransport(runner: runner))
+    let version = try await client.negotiate()
+    #expect(version.version == "1.6.1")
+    return (client, runner)
+}
+
+@Test func appleJSONReadsServerVersionFromBothStatusShapes() throws {
+    let new = try #require(try AppleContainerJSON.decode(Data(statusRunning16JSON.utf8)) as? [String: Any])
+    #expect(AppleContainerJSON.serverVersion(fromStatus: new) == "1.6.1")
+    let old: [String: Any] = ["apiServerVersion": "container-apiserver version 1.2.0 (build: release)"]
+    #expect(AppleContainerJSON.extractVersionNumber(from: AppleContainerJSON.serverVersion(fromStatus: old)) == "1.2.0")
+}
+
+@Test func appleJSONVersionComparison() {
+    #expect(AppleContainerJSON.isVersion("1.6.1", atLeast: "1.6.0"))
+    #expect(AppleContainerJSON.isVersion("1.10.0", atLeast: "1.6.0"))
+    #expect(AppleContainerJSON.isVersion("1.6", atLeast: "1.6.0"))
+    #expect(!AppleContainerJSON.isVersion("1.5.9", atLeast: "1.6.0"))
+    #expect(!AppleContainerJSON.isVersion("0.12.3", atLeast: "1.0.0"))
+}
+
+@Test func appleTransportInfoReportsNewStatusServerVersion() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    runner.stub(["list", "--all"], stdout: "[]")
+    runner.stub(["image", "list"], stdout: "[]")
+    let info = try await client.systemInfo()
+    #expect(info.serverVersion == "1.6.1")
+}
+
+@Test func appleTransportCommitRunsCLIAndReturnsImageID() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    runner.stub(["commit"], stdout: "docker.io/local/app:snap\n")
+    runner.stub(["image", "inspect", "local/app:snap"], stdout: #"[{"id":"abc123","configuration":{},"variants":[]}]"#)
+    let id = try await client.commitContainer(id: "web", repo: "local/app", tag: "snap", comment: "ignored")
+    #expect(id == "sha256:abc123")
+    #expect(runner.recordedCalls().contains(["commit", "web", "local/app:snap"]))
+}
+
+@Test func appleTransportCommitWithoutRepoIsRejected() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    await #expect(throws: DockerError.self) {
+        _ = try await client.commitContainer(id: "web", repo: "", tag: "")
+    }
+    #expect(!runner.recordedCalls().contains { $0.first == "commit" })
+}
+
+@Test func appleTransportCommitOnOldCLIIsUnsupported() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    do {
+        _ = try await client.commitContainer(id: "web", repo: "local/app", tag: "snap")
+        Issue.record("expected an unsupported-operation error")
+    } catch let DockerError.apiError(status, message) {
+        #expect(status == 501)
+        #expect(message.contains(AppleContainerTransport.commitMinimumVersion))
+    }
+    #expect(!runner.recordedCalls().contains { $0.first == "commit" })
+}
+
+@Test func appleTransportQualifiedAliasesFilter() {
+    let aliases = AppleContainerTransport.qualifiedAliases(
+        ["web", "web.example.test", "api.local", "web.example.test", "bad..name", "x,y.test", "a=b.test", ".lead"]
+    )
+    #expect(aliases == ["web.example.test", "api.local"])
+}
+
+private func aliasRequest(_ aliases: [String]) -> ContainerCreateRequest {
+    ContainerCreateRequest(
+        image: "alpine:latest",
+        networkingConfig: .init(endpointsConfig: ["backend": .init(aliases: aliases)]),
+        name: "svc"
+    )
+}
+
+@Test func appleTransportCreatePassesQualifiedAliasesOn16() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    runner.stub(["create"], stdout: "svc\n")
+    _ = try await client.createContainer(config: aliasRequest(["svc", "svc.app.test"]), name: "svc")
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let index = try #require(create.firstIndex(of: "--network"))
+    #expect(create[index + 1] == "backend,alias=svc.app.test")
+}
+
+@Test func appleTransportCreateOmitsAliasesBefore16() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "svc\n")
+    _ = try await client.createContainer(config: aliasRequest(["svc.app.test"]), name: "svc")
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let index = try #require(create.firstIndex(of: "--network"))
+    #expect(create[index + 1] == "backend")
+}
+
+@Test func appleArchiveEntryNameFollowsDocker() {
+    #expect(AppleContainerTransport.archiveEntryName(for: "/etc/hosts") == "hosts")
+    #expect(AppleContainerTransport.archiveEntryName(for: "/var/log/") == "log")
+    #expect(AppleContainerTransport.archiveEntryName(for: "/") == "root")
+    #expect(AppleContainerTransport.archiveEntryName(for: "relative/dir//") == "dir")
+}
+
+@Test func appleTransportArchiveDownloadUsesContainerCopy() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    // The scripted copy succeeds without staging a file, so the transport
+    // reports the path as missing instead of streaming an empty archive.
+    runner.stub(["copy"])
+    do {
+        _ = try await client.downloadArchive(containerID: "web", path: "/etc/hosts")
+        Issue.record("expected a missing-path error")
+    } catch let DockerError.apiError(status, _) {
+        #expect(status == 404)
+    }
+    let copy = try #require(runner.recordedCalls().first { $0.first == "copy" })
+    #expect(copy[1] == "web:/etc/hosts")
+    #expect(copy[2].hasSuffix("/hosts"))
+}
+
+@Test func appleSubtreeAliasesNeedTheirExactAlias() {
+    let noDomain = AppleContainerTransport.qualifiedAliases(
+        [".gw.example.test", "gw.example.test", ".other.example.test", ".gw"]
+    )
+    #expect(noDomain == ["gw.example.test", ".gw.example.test"])
+    let withDomain = AppleContainerTransport.qualifiedAliases(["web", ".gateway", "a,b"], hasDefaultDomain: true)
+    #expect(withDomain == ["web", ".gateway"])
+}
+
+@Test func appleParsesDefaultDNSDomainFromProperties() {
+    let set = "[build]\ncpus = 2\n\n[dns]\ndomain = \"test\"\n\n[kernel]\nbinaryPath = \"x\"\n"
+    #expect(AppleContainerTransport.parseDNSDomain(fromProperties: set) == "test")
+    let unset = "[dns]\n\n[kernel]\ndomain = \"nope\"\n"
+    #expect(AppleContainerTransport.parseDNSDomain(fromProperties: unset).isEmpty)
+}
+
+@Test func appleTransportCreatePassesShortAliasesWithDefaultDomain() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    runner.stub(["system", "property", "ls"], stdout: "[dns]\ndomain = \"test\"\n")
+    runner.stub(["create"], stdout: "svc\n")
+    _ = try await client.createContainer(config: aliasRequest(["svc", ".svc"]), name: "svc")
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let index = try #require(create.firstIndex(of: "--network"))
+    #expect(create[index + 1] == "backend,alias=svc,alias=.svc")
 }

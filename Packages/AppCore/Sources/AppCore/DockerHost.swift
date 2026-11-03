@@ -107,17 +107,21 @@ public struct HostCapabilities: Hashable, Sendable {
         debugShell: true
     )
 
-    /// apple/container: lifecycle, logs, exec, stats, images, volumes and
-    /// networks work; the rest has no CLI equivalent.
+    /// apple/container: lifecycle, logs, exec, stats, commit, images, volumes
+    /// and networks work; the rest has no CLI equivalent.
     public static let appleContainer = HostCapabilities(
         pauseResume: false,
         renameContainer: false,
-        commitContainer: false,
+        // `container commit` arrived in CLI 1.6; an older CLI answers the
+        // request with a clear "needs 1.6 or newer" error from the transport.
+        commitContainer: true,
         restartPolicy: false,
         networkAttach: false,
         buildCachePrune: false,
         imageHistory: false,
-        containerFileTransfer: false,
+        // Downloads go through `container copy`, which needs a running
+        // container; uploads use `tar` over exec.
+        containerFileTransfer: true,
         containerUpload: true,
         // Each apple/container container is its own lightweight VM and the CLI
         // exposes no namespace sharing, so a debug sidecar has nothing to

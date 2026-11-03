@@ -538,6 +538,16 @@ struct ContainerActionsMenu: View {
             Label("Export Filesystem…", systemImage: "square.and.arrow.up")
         }
 
+        if session.host.isAppleContainer {
+            // `container clean` (CLI 1.4+): TRIM inside the running VM.
+            Button {
+                Task { await session.trimContainerDisks([container.id]) }
+            } label: {
+                Label("Trim Disk", systemImage: "internaldrive")
+            }
+            .disabled(!isRunning)
+        }
+
         if caps.restartPolicy {
             Menu {
                 ForEach(RestartPolicyOption.allCases) { option in

@@ -69,9 +69,9 @@ import Testing
 
         let apple = DockerHost(name: "A", kind: .appleContainer).capabilities
         #expect(apple == .appleContainer)
-        #expect(!apple.pauseResume && !apple.renameContainer && !apple.commitContainer)
+        #expect(!apple.pauseResume && !apple.renameContainer && apple.commitContainer)
         #expect(!apple.restartPolicy && !apple.networkAttach && !apple.buildCachePrune)
-        #expect(!apple.imageHistory && !apple.containerFileTransfer)
+        #expect(!apple.imageHistory && apple.containerFileTransfer)
     }
 
     // MARK: Connect path

@@ -618,6 +618,31 @@ enum AppleContainerJSON {
         return try encode(body)
     }
 
+    /// The API server version from `system status --format json`. 1.4 moved it
+    /// from a flat `apiServerVersion` string ("container-apiserver version
+    /// 1.2.0 (build: …)") to `server.version` ("1.6.1"); both shapes are read.
+    static func serverVersion(fromStatus status: [String: Any]) -> String {
+        let nested = string(object(status["server"])["version"])
+        return nested.isEmpty ? string(status["apiServerVersion"]) : nested
+    }
+
+    /// Numeric dotted-version comparison ("1.10.0" ≥ "1.6.0"). Missing
+    /// components count as zero; non-numeric suffixes are ignored.
+    static func isVersion(_ version: String, atLeast minimum: String) -> Bool {
+        func parts(_ text: String) -> [Int] {
+            extractVersionNumber(from: text).split(separator: ".").map {
+                Int($0.prefix { $0.isNumber }) ?? 0
+            }
+        }
+        let lhs = parts(version), rhs = parts(minimum)
+        for index in 0..<max(lhs.count, rhs.count) {
+            let a = index < lhs.count ? lhs[index] : 0
+            let b = index < rhs.count ? rhs[index] : 0
+            if a != b { return a > b }
+        }
+        return true
+    }
+
     /// Synthesizes `GET /version` from the CLI's `system status --format json`.
     static func versionBody(appServerVersion: String) throws -> Data {
         try encode([

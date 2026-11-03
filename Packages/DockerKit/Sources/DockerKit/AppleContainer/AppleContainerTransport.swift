@@ -26,6 +26,15 @@ public actor AppleContainerTransport: DockerTransport {
 
     private var execs: [String: ExecState] = [:]
 
+    /// API server version seen at the connect handshake ("1.6.1"); empty
+    /// until then. Gates CLI features that arrived after the 1.0 baseline.
+    private var serverVersion = ""
+
+    /// First CLI release with `container commit`.
+    public static let commitMinimumVersion = "1.6.0"
+    /// First CLI release with `--network <name>,alias=<fqdn>`.
+    public static let networkAliasMinimumVersion = "1.6.0"
+
     /// Cache of the last `image list` JSON, for digest → reference resolution.
     private var lastImagesList: Data?
 
@@ -205,7 +214,7 @@ public actor AppleContainerTransport: DockerTransport {
         case (.post, 3, "containers", "update"):
             throw Self.unsupported("Restart policies")
         case (.post, 1, "commit", _):
-            throw Self.unsupported("Committing containers to images")
+            return try await commitContainer(request)
         case (.put, 3, "containers", "archive"):
             return try await uploadArchive(containerID: id, request: request)
         case (_, 3, "containers", "archive"):
@@ -344,7 +353,8 @@ public actor AppleContainerTransport: DockerTransport {
                 "apple/container services are not running (try `container system start`)"
             )
         }
-        let versionText = AppleContainerJSON.string(status["apiServerVersion"])
+        let versionText = AppleContainerJSON.serverVersion(fromStatus: status)
+        serverVersion = AppleContainerJSON.extractVersionNumber(from: versionText)
         return Self.ok(try AppleContainerJSON.versionBody(appServerVersion: versionText))
     }
 
@@ -371,7 +381,7 @@ public actor AppleContainerTransport: DockerTransport {
             containersTotal: containers.count,
             containersRunning: running,
             imagesCount: images.count,
-            serverVersion: AppleContainerJSON.string(status["apiServerVersion"]),
+            serverVersion: AppleContainerJSON.serverVersion(fromStatus: status),
             ncpu: Self.hostCPUCount(),
             memTotal: Self.hostMemoryBytes(),
             hostName: ProcessInfo.processInfo.hostName
@@ -401,6 +411,110 @@ public actor AppleContainerTransport: DockerTransport {
 
     private func inspectContainerBody(id: String) async throws -> Data {
         try AppleContainerJSON.containerInspectBody(fromAppleInspect: try await appleInspect(id: id))
+    }
+
+    /// Whether the connected API server is at least `minimum`. Read once from
+    /// `system status` when the handshake has not recorded it yet; an unknown
+    /// version is treated as too old, so a feature never breaks an old CLI.
+    private func supports(_ minimum: String) async -> Bool {
+        if serverVersion.isEmpty, let status = try? await systemStatusJSON() {
+            serverVersion = AppleContainerJSON.extractVersionNumber(
+                from: AppleContainerJSON.serverVersion(fromStatus: status)
+            )
+        }
+        return !serverVersion.isEmpty
+            && AppleContainerJSON.isVersion(serverVersion, atLeast: minimum)
+    }
+
+    /// Aliases the CLI accepts; one bad alias fails the whole `create`.
+    /// Without a default DNS domain only FQDNs pass, and a subtree alias
+    /// (".gw.example.test") needs the same name as an exact alias.
+    static func qualifiedAliases(_ any: Any?, hasDefaultDomain: Bool = false) -> [String] {
+        func labels(_ name: Substring) -> [Substring]? {
+            let parts = name.split(separator: ".", omittingEmptySubsequences: false)
+            guard !parts.isEmpty, parts.allSatisfy({ !$0.isEmpty }),
+                  !name.contains(","), !name.contains("=") else { return nil }
+            return parts
+        }
+        let aliases = (any as? [String]) ?? []
+        var exact: [String] = []
+        for alias in aliases where !alias.hasPrefix(".") {
+            guard let parts = labels(Substring(alias)), hasDefaultDomain || parts.count >= 2,
+                  !exact.contains(alias) else { continue }
+            exact.append(alias)
+        }
+        var subtree: [String] = []
+        for alias in aliases where alias.hasPrefix(".") {
+            let base = alias.dropFirst()
+            guard labels(base) != nil, !subtree.contains(alias),
+                  hasDefaultDomain || exact.contains(String(base)) else { continue }
+            subtree.append(alias)
+        }
+        return exact + subtree
+    }
+
+    /// Default DNS domain from `system property ls` (TOML, `[dns] domain`),
+    /// read once per transport. Empty when unset or unreadable.
+    private var defaultDNSDomain: String?
+
+    private func dnsDomain() async -> String {
+        if let defaultDNSDomain { return defaultDNSDomain }
+        let text = (try? await cli(["system", "property", "ls"]))?.stdoutText ?? ""
+        let domain = Self.parseDNSDomain(fromProperties: text)
+        defaultDNSDomain = domain
+        return domain
+    }
+
+    static func parseDNSDomain(fromProperties toml: String) -> String {
+        var inDNS = false
+        for raw in toml.split(whereSeparator: \.isNewline) {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("[") {
+                inDNS = line == "[dns]"
+                continue
+            }
+            guard inDNS, line.hasPrefix("domain") else { continue }
+            let parts = line.split(separator: "=", maxSplits: 1)
+            guard parts.count == 2, parts[0].trimmingCharacters(in: .whitespaces) == "domain" else { continue }
+            return parts[1].trimmingCharacters(in: .whitespaces)
+                .trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+        }
+        return ""
+    }
+
+    /// `POST /commit?container=&repo=&tag=` → `container commit <id> <ref>`
+    /// (CLI 1.6+). The CLI needs a reference, so an untagged commit is
+    /// rejected; `comment`, `author`, `changes` and `pause` have no CLI
+    /// equivalent and are ignored. The image id comes from `image inspect`.
+    private func commitContainer(_ request: DockerRequest) async throws -> DockerResponse {
+        guard await supports(Self.commitMinimumVersion) else {
+            throw Self.unsupported(
+                "Committing containers needs apple/container \(Self.commitMinimumVersion) or newer"
+            )
+        }
+        guard let container = Self.query(request, "container"), !container.isEmpty else {
+            throw DockerError.apiError(status: 400, message: "commit needs a container")
+        }
+        let repo = Self.query(request, "repo") ?? ""
+        guard !repo.isEmpty else {
+            throw DockerError.apiError(
+                status: 400,
+                message: "apple/container hosts need a repository name to commit a container"
+            )
+        }
+        let tag = Self.query(request, "tag") ?? ""
+        let reference = tag.isEmpty ? repo : "\(repo):\(tag)"
+        try await cli(["commit", container, reference])
+
+        var imageID = reference
+        if let data = try? await cli(["image", "inspect", reference]).stdout,
+           let decoded = try? AppleContainerJSON.decode(data) {
+            let image = (decoded as? [Any])?.first ?? decoded
+            let id = AppleContainerJSON.string(AppleContainerJSON.object(image)["id"])
+            if !id.isEmpty { imageID = id.hasPrefix("sha256:") ? id : "sha256:\(id)" }
+        }
+        lastImagesList = nil
+        return Self.ok(try AppleContainerJSON.encode(["Id": imageID]), status: 201)
     }
 
     /// Translates the Docker create body into `container create` arguments.
@@ -485,8 +599,20 @@ public actor AppleContainerTransport: DockerTransport {
         }
 
         let networking = AppleContainerJSON.object(json["NetworkingConfig"])
-        for network in AppleContainerJSON.object(networking["EndpointsConfig"]).keys.sorted() {
-            arguments += ["--network", network]
+        let endpoints = AppleContainerJSON.object(networking["EndpointsConfig"])
+        let aliasesSupported = await supports(Self.networkAliasMinimumVersion)
+        var hasDefaultDomain = false
+        if aliasesSupported, !endpoints.isEmpty {
+            hasDefaultDomain = !(await dnsDomain()).isEmpty
+        }
+        for network in endpoints.keys.sorted() {
+            let aliases = aliasesSupported
+                ? Self.qualifiedAliases(
+                    AppleContainerJSON.object(endpoints[network])["Aliases"],
+                    hasDefaultDomain: hasDefaultDomain
+                )
+                : []
+            arguments += ["--network", ([network] + aliases.map { "alias=\($0)" }).joined(separator: ",")]
         }
 
         // Entrypoint: the CLI takes a single override command; extra
@@ -761,6 +887,9 @@ public actor AppleContainerTransport: DockerTransport {
         case (.get, 3, "containers", "stats"):
             return statsStream(id: id)
 
+        case (.get, 3, "containers", "archive"):
+            return try await archiveStream(id: id, request: request)
+
         case (.get, 3, "containers", "export"):
             return DockerByteStream(
                 status: 200,
@@ -776,6 +905,84 @@ public actor AppleContainerTransport: DockerTransport {
                 status: 501,
                 message: "\(request.method.rawValue) \(request.path) (stream): \(Self.unsupportedMessage)"
             )
+        }
+    }
+
+    /// Emulates `GET /containers/{id}/archive?path=`: `container copy` stages
+    /// the path in a temporary folder, and the local `tar` streams it back in
+    /// the shape Docker returns (one entry named after the path's last
+    /// component). `copy` reads through the VM agent, so it needs no `tar`
+    /// in the image, but it needs a running container.
+    private func archiveStream(id: String, request: DockerRequest) async throws -> DockerByteStream {
+        guard let path = Self.query(request, "path"), !path.isEmpty else {
+            throw DockerError.apiError(status: 400, message: "archive download requires a path")
+        }
+        let name = Self.archiveEntryName(for: path)
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("gantry-copy-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
+        do {
+            try await cli(["copy", "\(id):\(path)", staging.appendingPathComponent(name).path])
+            guard FileManager.default.fileExists(atPath: staging.appendingPathComponent(name).path) else {
+                throw DockerError.apiError(status: 404, message: "Could not find the file \(path) in container \(id)")
+            }
+        } catch {
+            try? FileManager.default.removeItem(at: staging)
+            throw error
+        }
+        return DockerByteStream(status: 200, headers: [:], bytes: Self.tarStream(of: name, in: staging))
+    }
+
+    /// Docker names the archive's top entry after the last path component;
+    /// `/` has none, so it becomes `root`.
+    static func archiveEntryName(for path: String) -> String {
+        var trimmed = path
+        while trimmed.count > 1, trimmed.hasSuffix("/") { trimmed.removeLast() }
+        let name = (trimmed as NSString).lastPathComponent
+        return (name.isEmpty || name == "/" || name == "." || name == "..") ? "root" : name
+    }
+
+    /// Streams `tar -cf - -C <folder> <name>` and removes `folder` when the
+    /// stream ends or the consumer stops reading.
+    private static func tarStream(of name: String, in folder: URL) -> AsyncThrowingStream<Data, Error> {
+        AsyncThrowingStream { continuation in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
+            process.arguments = ["-cf", "-", "-C", folder.path, name]
+            let output = Pipe()
+            let errors = Pipe()
+            process.standardOutput = output
+            process.standardError = errors
+            let cleanup: @Sendable () -> Void = { try? FileManager.default.removeItem(at: folder) }
+            output.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if data.isEmpty {
+                    handle.readabilityHandler = nil
+                    process.waitUntilExit()
+                    cleanup()
+                    if process.terminationStatus == 0 {
+                        continuation.finish()
+                    } else {
+                        let message = String(decoding: errors.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+                        continuation.finish(throwing: DockerError.apiError(
+                            status: 500,
+                            message: "tar failed: \(message.trimmingCharacters(in: .whitespacesAndNewlines))"
+                        ))
+                    }
+                } else {
+                    continuation.yield(data)
+                }
+            }
+            continuation.onTermination = { termination in
+                if case .cancelled = termination, process.isRunning { process.terminate() }
+            }
+            do {
+                try process.run()
+            } catch {
+                output.fileHandleForReading.readabilityHandler = nil
+                cleanup()
+                continuation.finish(throwing: error)
+            }
         }
     }
 
