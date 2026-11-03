@@ -119,7 +119,9 @@ public struct HostCapabilities: Hashable, Sendable {
         networkAttach: false,
         buildCachePrune: false,
         imageHistory: false,
-        containerFileTransfer: false,
+        // Downloads go through `container copy`, which needs a running
+        // container; uploads use `tar` over exec.
+        containerFileTransfer: true,
         containerUpload: true,
         // Each apple/container container is its own lightweight VM and the CLI
         // exposes no namespace sharing, so a debug sidecar has nothing to

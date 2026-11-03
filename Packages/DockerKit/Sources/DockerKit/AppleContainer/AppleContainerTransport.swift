@@ -840,6 +840,9 @@ public actor AppleContainerTransport: DockerTransport {
         case (.get, 3, "containers", "stats"):
             return statsStream(id: id)
 
+        case (.get, 3, "containers", "archive"):
+            return try await archiveStream(id: id, request: request)
+
         case (.get, 3, "containers", "export"):
             return DockerByteStream(
                 status: 200,
@@ -855,6 +858,84 @@ public actor AppleContainerTransport: DockerTransport {
                 status: 501,
                 message: "\(request.method.rawValue) \(request.path) (stream): \(Self.unsupportedMessage)"
             )
+        }
+    }
+
+    /// Emulates `GET /containers/{id}/archive?path=`: `container copy` stages
+    /// the path in a temporary folder, and the local `tar` streams it back in
+    /// the shape Docker returns (one entry named after the path's last
+    /// component). `copy` reads through the VM agent, so it needs no `tar`
+    /// in the image, but it needs a running container.
+    private func archiveStream(id: String, request: DockerRequest) async throws -> DockerByteStream {
+        guard let path = Self.query(request, "path"), !path.isEmpty else {
+            throw DockerError.apiError(status: 400, message: "archive download requires a path")
+        }
+        let name = Self.archiveEntryName(for: path)
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("gantry-copy-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
+        do {
+            try await cli(["copy", "\(id):\(path)", staging.appendingPathComponent(name).path])
+            guard FileManager.default.fileExists(atPath: staging.appendingPathComponent(name).path) else {
+                throw DockerError.apiError(status: 404, message: "Could not find the file \(path) in container \(id)")
+            }
+        } catch {
+            try? FileManager.default.removeItem(at: staging)
+            throw error
+        }
+        return DockerByteStream(status: 200, headers: [:], bytes: Self.tarStream(of: name, in: staging))
+    }
+
+    /// Docker names the archive's top entry after the last path component;
+    /// `/` has none, so it becomes `root`.
+    static func archiveEntryName(for path: String) -> String {
+        var trimmed = path
+        while trimmed.count > 1, trimmed.hasSuffix("/") { trimmed.removeLast() }
+        let name = (trimmed as NSString).lastPathComponent
+        return (name.isEmpty || name == "/" || name == "." || name == "..") ? "root" : name
+    }
+
+    /// Streams `tar -cf - -C <folder> <name>` and removes `folder` when the
+    /// stream ends or the consumer stops reading.
+    private static func tarStream(of name: String, in folder: URL) -> AsyncThrowingStream<Data, Error> {
+        AsyncThrowingStream { continuation in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
+            process.arguments = ["-cf", "-", "-C", folder.path, name]
+            let output = Pipe()
+            let errors = Pipe()
+            process.standardOutput = output
+            process.standardError = errors
+            let cleanup: @Sendable () -> Void = { try? FileManager.default.removeItem(at: folder) }
+            output.fileHandleForReading.readabilityHandler = { handle in
+                let data = handle.availableData
+                if data.isEmpty {
+                    handle.readabilityHandler = nil
+                    process.waitUntilExit()
+                    cleanup()
+                    if process.terminationStatus == 0 {
+                        continuation.finish()
+                    } else {
+                        let message = String(decoding: errors.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+                        continuation.finish(throwing: DockerError.apiError(
+                            status: 500,
+                            message: "tar failed: \(message.trimmingCharacters(in: .whitespacesAndNewlines))"
+                        ))
+                    }
+                } else {
+                    continuation.yield(data)
+                }
+            }
+            continuation.onTermination = { termination in
+                if case .cancelled = termination, process.isRunning { process.terminate() }
+            }
+            do {
+                try process.run()
+            } catch {
+                output.fileHandleForReading.readabilityHandler = nil
+                cleanup()
+                continuation.finish(throwing: error)
+            }
         }
     }
 

@@ -899,3 +899,26 @@ private func aliasRequest(_ aliases: [String]) -> ContainerCreateRequest {
     let index = try #require(create.firstIndex(of: "--network"))
     #expect(create[index + 1] == "backend")
 }
+
+@Test func appleArchiveEntryNameFollowsDocker() {
+    #expect(AppleContainerTransport.archiveEntryName(for: "/etc/hosts") == "hosts")
+    #expect(AppleContainerTransport.archiveEntryName(for: "/var/log/") == "log")
+    #expect(AppleContainerTransport.archiveEntryName(for: "/") == "root")
+    #expect(AppleContainerTransport.archiveEntryName(for: "relative/dir//") == "dir")
+}
+
+@Test func appleTransportArchiveDownloadUsesContainerCopy() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    // The scripted copy succeeds without staging a file, so the transport
+    // reports the path as missing instead of streaming an empty archive.
+    runner.stub(["copy"])
+    do {
+        _ = try await client.downloadArchive(containerID: "web", path: "/etc/hosts")
+        Issue.record("expected a missing-path error")
+    } catch let DockerError.apiError(status, _) {
+        #expect(status == 404)
+    }
+    let copy = try #require(runner.recordedCalls().first { $0.first == "copy" })
+    #expect(copy[1] == "web:/etc/hosts")
+    #expect(copy[2].hasSuffix("/hosts"))
+}

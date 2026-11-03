@@ -288,3 +288,31 @@ func liveAppleCommitAndNetworkAliases() async throws {
     #expect(images.contains { $0.repoTags.contains { $0.hasSuffix("gantry-live-commit:test") } })
     #expect(cli(["run", "--rm", "--entrypoint", "cat", image, "/marker"]).contains("gantry"))
 }
+
+/// `GET /containers/{id}/archive` over `container copy`: a directory comes
+/// back as a tar whose top entry is the directory name.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(2)))
+func liveAppleArchiveDownload() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+    _ = try await client.negotiate()
+    let name = "gantry-apple-live-copy"
+    _ = try? await client.removeContainer(id: name, force: true)
+    let config = ContainerCreateRequest(
+        image: "alpine:latest",
+        cmd: ["sh", "-c", "mkdir -p /data/sub && echo one > /data/a.txt && echo two > /data/sub/b.txt && sleep 120"],
+        name: name
+    )
+    let id = try await client.createContainer(config: config, name: name)
+    defer { Task { try? await client.removeContainer(id: id, force: true) } }
+    try await client.startContainer(id: id)
+    try await Task.sleep(for: .seconds(2))
+
+    let stream = try await client.downloadArchive(containerID: id, path: "/data")
+    var tar = Data()
+    for try await chunk in stream.bytes { tar.append(chunk) }
+    let text = String(decoding: tar, as: UTF8.self)
+    #expect(text.contains("data/a.txt"))
+    #expect(text.contains("data/sub/b.txt"))
+    #expect(text.contains("one"))
+}
