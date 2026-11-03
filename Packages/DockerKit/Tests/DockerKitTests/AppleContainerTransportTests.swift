@@ -922,3 +922,29 @@ private func aliasRequest(_ aliases: [String]) -> ContainerCreateRequest {
     #expect(copy[1] == "web:/etc/hosts")
     #expect(copy[2].hasSuffix("/hosts"))
 }
+
+@Test func appleSubtreeAliasesNeedTheirExactAlias() {
+    let noDomain = AppleContainerTransport.qualifiedAliases(
+        [".gw.example.test", "gw.example.test", ".other.example.test", ".gw"]
+    )
+    #expect(noDomain == ["gw.example.test", ".gw.example.test"])
+    let withDomain = AppleContainerTransport.qualifiedAliases(["web", ".gateway", "a,b"], hasDefaultDomain: true)
+    #expect(withDomain == ["web", ".gateway"])
+}
+
+@Test func appleParsesDefaultDNSDomainFromProperties() {
+    let set = "[build]\ncpus = 2\n\n[dns]\ndomain = \"test\"\n\n[kernel]\nbinaryPath = \"x\"\n"
+    #expect(AppleContainerTransport.parseDNSDomain(fromProperties: set) == "test")
+    let unset = "[dns]\n\n[kernel]\ndomain = \"nope\"\n"
+    #expect(AppleContainerTransport.parseDNSDomain(fromProperties: unset).isEmpty)
+}
+
+@Test func appleTransportCreatePassesShortAliasesWithDefaultDomain() async throws {
+    let (client, runner) = try await makeConnected16Client()
+    runner.stub(["system", "property", "ls"], stdout: "[dns]\ndomain = \"test\"\n")
+    runner.stub(["create"], stdout: "svc\n")
+    _ = try await client.createContainer(config: aliasRequest(["svc", ".svc"]), name: "svc")
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let index = try #require(create.firstIndex(of: "--network"))
+    #expect(create[index + 1] == "backend,alias=svc,alias=.svc")
+}

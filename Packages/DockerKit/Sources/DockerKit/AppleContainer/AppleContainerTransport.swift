@@ -426,20 +426,60 @@ public actor AppleContainerTransport: DockerTransport {
             && AppleContainerJSON.isVersion(serverVersion, atLeast: minimum)
     }
 
-    /// Docker endpoint aliases the CLI accepts. apple/container only takes
-    /// fully qualified names ("web.example.test") unless a default DNS domain is
-    /// configured, and rejects the whole `create` otherwise — so single-label
-    /// aliases (Compose adds the bare service name) are left out rather than
-    /// failing the container.
-    static func qualifiedAliases(_ any: Any?) -> [String] {
-        let aliases = (any as? [String]) ?? []
-        var seen = Set<String>()
-        return aliases.filter { alias in
-            let labels = alias.split(separator: ".", omittingEmptySubsequences: false)
-            guard labels.count >= 2, labels.allSatisfy({ !$0.isEmpty }),
-                  !alias.contains(","), !alias.contains("=") else { return false }
-            return seen.insert(alias).inserted
+    /// Aliases the CLI accepts; one bad alias fails the whole `create`.
+    /// Without a default DNS domain only FQDNs pass, and a subtree alias
+    /// (".gw.example.test") needs the same name as an exact alias.
+    static func qualifiedAliases(_ any: Any?, hasDefaultDomain: Bool = false) -> [String] {
+        func labels(_ name: Substring) -> [Substring]? {
+            let parts = name.split(separator: ".", omittingEmptySubsequences: false)
+            guard !parts.isEmpty, parts.allSatisfy({ !$0.isEmpty }),
+                  !name.contains(","), !name.contains("=") else { return nil }
+            return parts
         }
+        let aliases = (any as? [String]) ?? []
+        var exact: [String] = []
+        for alias in aliases where !alias.hasPrefix(".") {
+            guard let parts = labels(Substring(alias)), hasDefaultDomain || parts.count >= 2,
+                  !exact.contains(alias) else { continue }
+            exact.append(alias)
+        }
+        var subtree: [String] = []
+        for alias in aliases where alias.hasPrefix(".") {
+            let base = alias.dropFirst()
+            guard labels(base) != nil, !subtree.contains(alias),
+                  hasDefaultDomain || exact.contains(String(base)) else { continue }
+            subtree.append(alias)
+        }
+        return exact + subtree
+    }
+
+    /// Default DNS domain from `system property ls` (TOML, `[dns] domain`),
+    /// read once per transport. Empty when unset or unreadable.
+    private var defaultDNSDomain: String?
+
+    private func dnsDomain() async -> String {
+        if let defaultDNSDomain { return defaultDNSDomain }
+        let text = (try? await cli(["system", "property", "ls"]))?.stdoutText ?? ""
+        let domain = Self.parseDNSDomain(fromProperties: text)
+        defaultDNSDomain = domain
+        return domain
+    }
+
+    static func parseDNSDomain(fromProperties toml: String) -> String {
+        var inDNS = false
+        for raw in toml.split(whereSeparator: \.isNewline) {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("[") {
+                inDNS = line == "[dns]"
+                continue
+            }
+            guard inDNS, line.hasPrefix("domain") else { continue }
+            let parts = line.split(separator: "=", maxSplits: 1)
+            guard parts.count == 2, parts[0].trimmingCharacters(in: .whitespaces) == "domain" else { continue }
+            return parts[1].trimmingCharacters(in: .whitespaces)
+                .trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+        }
+        return ""
     }
 
     /// `POST /commit?container=&repo=&tag=` → `container commit <id> <ref>`
@@ -561,9 +601,16 @@ public actor AppleContainerTransport: DockerTransport {
         let networking = AppleContainerJSON.object(json["NetworkingConfig"])
         let endpoints = AppleContainerJSON.object(networking["EndpointsConfig"])
         let aliasesSupported = await supports(Self.networkAliasMinimumVersion)
+        var hasDefaultDomain = false
+        if aliasesSupported, !endpoints.isEmpty {
+            hasDefaultDomain = !(await dnsDomain()).isEmpty
+        }
         for network in endpoints.keys.sorted() {
             let aliases = aliasesSupported
-                ? Self.qualifiedAliases(AppleContainerJSON.object(endpoints[network])["Aliases"])
+                ? Self.qualifiedAliases(
+                    AppleContainerJSON.object(endpoints[network])["Aliases"],
+                    hasDefaultDomain: hasDefaultDomain
+                )
                 : []
             arguments += ["--network", ([network] + aliases.map { "alias=\($0)" }).joined(separator: ",")]
         }
