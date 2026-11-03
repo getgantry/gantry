@@ -178,7 +178,7 @@ extension GantryTools {
                 ], required: ["host_id", "domain"]),
                 annotations: .init(readOnlyHint: false, destructiveHint: false, openWorldHint: false)
             )
-        ]
+        ] + appleSystemTools()
     }
 
     func handleSystemApple(_ name: String, _ args: Arguments) async throws -> CallTool.Result? {
@@ -203,7 +203,7 @@ extension GantryTools {
         case "create_dns_domain":     return try await dnsDomain(args, op: "create")
         case "delete_dns_domain":     return try await dnsDomain(args, op: "delete")
         case "set_default_dns_domain":return try await setDefaultDNSDomain(args)
-        default:                      return nil
+        default:                      return try await handleAppleSystem(name, args)
         }
     }
 
@@ -219,7 +219,7 @@ extension GantryTools {
     // MARK: - Apple host resolution
 
     /// The CLI override for an apple/container host, throwing if the host isn't apple.
-    private func appleCLIOverride(_ args: Arguments) throws -> String? {
+    func appleCLIOverride(_ args: Arguments) throws -> String? {
         let host = try requiredHost(args)
         guard host.isAppleContainer else {
             throw ToolError("\(host.name) is not an apple/container host.")

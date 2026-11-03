@@ -256,10 +256,14 @@ public enum AppleContainerControl {
         var stderr: String
     }
 
+    /// Runs `executable` to completion. `input`, when given, goes to stdin
+    /// and the pipe is closed, so a secret such as a registry password never
+    /// appears on argv.
     static func run(
         _ executable: String,
         _ arguments: [String],
-        environment extraEnvironment: [String: String] = [:]
+        environment extraEnvironment: [String: String] = [:],
+        input: Data? = nil
     ) async -> RunResult {
         await withCheckedContinuation { continuation in
             let process = Process()
@@ -273,6 +277,8 @@ public enum AppleContainerControl {
             let errPipe = Pipe()
             process.standardOutput = outPipe
             process.standardError = errPipe
+            let inPipe: Pipe? = input == nil ? nil : Pipe()
+            if let inPipe { process.standardInput = inPipe }
 
             // Drain stdout and stderr concurrently via readability handlers:
             // reading one pipe to EOF before the other can deadlock once the
@@ -305,6 +311,14 @@ public enum AppleContainerControl {
             }
             do {
                 try process.run()
+                if let inPipe, let input {
+                    let writer = inPipe.fileHandleForWriting
+                    // A CLI that exits before reading must not raise SIGPIPE
+                    // in Gantry: the write then fails with EPIPE instead.
+                    _ = fcntl(writer.fileDescriptor, F_SETNOSIGPIPE, 1)
+                    try? writer.write(contentsOf: input)
+                    try? writer.close()
+                }
             } catch {
                 process.terminationHandler = nil
                 continuation.resume(returning: RunResult(exitCode: -1, stdout: "", stderr: error.localizedDescription))

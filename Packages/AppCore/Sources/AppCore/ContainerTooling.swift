@@ -40,6 +40,16 @@ public enum ContainerTooling {
     public static let clusterWorkersVersion = "1.6.0"
     /// `container k8s` was renamed to `container cluster`.
     public static let clusterCommandRenameVersion = "1.6.1"
+    /// The first CLI release where `container system kernel set` verifies a
+    /// kernel archive against `--digest` (required for a remote `--tar` URL).
+    public static let kernelArchiveDigestVersion = "1.2.0"
+    /// The first CLI release whose `container system status` reports the
+    /// client, host, paths and resource counts (1.4.1 is the first release).
+    public static let systemStatusDetailsVersion = "1.4.0"
+    /// The first CLI release where `container build` and `container builder`
+    /// ship as CLI plugins. A package without the plugin answers the builder
+    /// commands with "unknown command"; Gantry reports that rather than gating.
+    public static let builderPluginVersion = "1.6.0"
 
     /// CLI features Gantry gates its UI on. Everything here is derived from the
     /// detected version — the CLI has no capability query.
@@ -60,6 +70,10 @@ public enum ContainerTooling {
 
         /// Local Kubernetes clusters.
         public var clusters: Bool { clusterCommand != nil }
+        /// `container system kernel set --digest`.
+        public var kernelArchiveDigest: Bool
+        /// Host, client, paths and resources in `container system status`.
+        public var systemStatusDetails: Bool
 
         public init(
             nestedVirtualization: Bool,
@@ -67,7 +81,9 @@ public enum ContainerTooling {
             kernelArguments: Bool,
             containerClean: Bool = false,
             clusterCommand: String? = nil,
-            clusterWorkers: Bool = false
+            clusterWorkers: Bool = false,
+            kernelArchiveDigest: Bool = false,
+            systemStatusDetails: Bool = false
         ) {
             self.nestedVirtualization = nestedVirtualization
             self.nonRootSocketMounts = nonRootSocketMounts
@@ -75,6 +91,8 @@ public enum ContainerTooling {
             self.containerClean = containerClean
             self.clusterCommand = clusterCommand
             self.clusterWorkers = clusterWorkers
+            self.kernelArchiveDigest = kernelArchiveDigest
+            self.systemStatusDetails = systemStatusDetails
         }
     }
 
@@ -89,7 +107,9 @@ public enum ContainerTooling {
                 kernelArguments: true,
                 containerClean: true,
                 clusterCommand: "cluster",
-                clusterWorkers: true
+                clusterWorkers: true,
+                kernelArchiveDigest: true,
+                systemStatusDetails: true
             )
         }
         return Features(
@@ -98,7 +118,9 @@ public enum ContainerTooling {
             kernelArguments: isVersion(version, atLeast: kernelArgumentsVersion),
             containerClean: isVersion(version, atLeast: containerCleanVersion),
             clusterCommand: clusterCommand(for: version),
-            clusterWorkers: isVersion(version, atLeast: clusterWorkersVersion)
+            clusterWorkers: isVersion(version, atLeast: clusterWorkersVersion),
+            kernelArchiveDigest: isVersion(version, atLeast: kernelArchiveDigestVersion),
+            systemStatusDetails: isVersion(version, atLeast: systemStatusDetailsVersion)
         )
     }
 
