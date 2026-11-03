@@ -13,6 +13,16 @@ struct ImageListView: View {
     @State private var pruneConfirm: PruneScope?
     @State private var pruneOutcome: PruneOutcome?
     @State private var diskUsage: SystemDiskUsage?
+    @State private var clusterLoad: ClusterImageLoad?
+
+    /// An image being copied into a cluster, and then the outcome.
+    private struct ClusterImageLoad: Identifiable {
+        let id = UUID()
+        let image: String
+        let cluster: String
+        var finished = false
+        var succeeded = false
+    }
 
     /// Which prune action the user is confirming.
     private enum PruneScope: Identifiable {
@@ -48,6 +58,15 @@ struct ImageListView: View {
                             copyToPasteboard(image.id)
                         } label: {
                             Label("Copy ID", systemImage: "doc.on.doc")
+                        }
+                        if session.supportsClusters, !session.clusters.isEmpty, let reference = clusterReference(image) {
+                            Menu {
+                                ForEach(session.clusters) { cluster in
+                                    Button(cluster.name) { loadIntoCluster(reference, cluster: cluster.name) }
+                                }
+                            } label: {
+                                Label("Load into Cluster", systemImage: "steeringwheel")
+                            }
                         }
                         Divider()
                         Button(role: .destructive) {
@@ -115,6 +134,30 @@ struct ImageListView: View {
             Text(scope.message)
         }
         .pruneResultAlert($pruneOutcome)
+        .alert(
+            "Image Loaded",
+            isPresented: Binding(
+                get: { clusterLoad?.finished == true && clusterLoad?.succeeded == true },
+                set: { if !$0 { clusterLoad = nil } }
+            ),
+            presenting: clusterLoad
+        ) { _ in
+            Button("OK", role: .cancel) { clusterLoad = nil }
+        } message: { load in
+            Text("\(load.image) is now in the nodes of the cluster “\(load.cluster)”. Use imagePullPolicy: Never or IfNotPresent in your pods.")
+        }
+        .overlay(alignment: .bottom) {
+            if let load = clusterLoad, !load.finished {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Loading \(load.image) into \(load.cluster)…").font(.caption)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(.regularMaterial, in: Capsule())
+                .padding(.bottom, 40)
+            }
+        }
         .confirmationDialog(
             "Remove \(removeTarget?.displayName ?? String(localized: "image"))?",
             isPresented: Binding(presence: $removeTarget),
@@ -134,6 +177,25 @@ struct ImageListView: View {
         }
         .task {
             await loadDiskUsage()
+            if session.supportsClusters { await session.refreshClusters() }
+        }
+    }
+
+    /// The tag to load into a cluster; untagged images have none.
+    private func clusterReference(_ image: ImageSummary) -> String? {
+        image.repoTags.first { $0 != "<none>:<none>" && !$0.isEmpty }
+    }
+
+    private func loadIntoCluster(_ reference: String, cluster: String) {
+        clusterLoad = ClusterImageLoad(image: reference, cluster: cluster)
+        Task {
+            let ok = await session.loadImageIntoCluster(reference, cluster: cluster)
+            if ok {
+                clusterLoad?.finished = true
+                clusterLoad?.succeeded = true
+            } else {
+                clusterLoad = nil
+            }
         }
     }
 

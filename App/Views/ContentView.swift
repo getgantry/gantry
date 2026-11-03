@@ -10,6 +10,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     case volumes
     case networks
     case machines
+    case clusters
     case hostFiles
 
     var id: String { rawValue }
@@ -22,6 +23,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .volumes: String(localized: "Volumes")
         case .networks: String(localized: "Networks")
         case .machines: String(localized: "Machines")
+        case .clusters: String(localized: "Clusters")
         case .hostFiles: String(localized: "Host Files")
         }
     }
@@ -34,17 +36,20 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .volumes: "externaldrive"
         case .networks: "network"
         case .machines: "cube.transparent"
+        case .clusters: "steeringwheel"
         case .hostFiles: "folder"
         }
     }
 
     /// Sections shown for a host: SFTP-backed host file browsing exists only
-    /// for SSH hosts; `container machine` exists only for apple/container.
-    static func sections(for host: DockerHost) -> [HostSection] {
+    /// for SSH hosts; `container machine` exists only for apple/container, and
+    /// `container cluster` only when its CLI is 1.5 or later.
+    static func sections(for host: DockerHost, clusters: Bool = false) -> [HostSection] {
         allCases.filter { section in
             switch section {
             case .hostFiles: host.isSSH
             case .machines: host.isAppleContainer
+            case .clusters: host.isAppleContainer && clusters
             default: true
             }
         }
@@ -98,6 +103,7 @@ enum DetailSelection: Hashable {
     case volume(String)
     case network(String)
     case machine(String)
+    case cluster(String)
 }
 
 struct ContentView: View {
@@ -411,7 +417,7 @@ struct ContentView: View {
 
             ForEach(model.sessions) { session in
                 Section(isExpanded: expansionBinding(for: session.host.id)) {
-                    ForEach(HostSection.sections(for: session.host)) { section in
+                    ForEach(HostSection.sections(for: session.host, clusters: session.supportsClusters)) { section in
                         Label(section.title, systemImage: section.systemImage)
                             .tag(SidebarItem.host(SidebarSelection(hostID: session.host.id, section: section)))
                     }
@@ -577,6 +583,8 @@ struct ContentView: View {
                 NetworkListView(session: session, selection: networkSelectionBinding)
             case .machines:
                 MachineListView(session: session, selection: machineSelectionBinding)
+            case .clusters:
+                ClusterListView(session: session, selection: clusterSelectionBinding)
             case .hostFiles:
                 HostFilesView(session: session)
             }
@@ -670,6 +678,12 @@ struct ContentView: View {
             } else {
                 detailGone("Machine")
             }
+        case .cluster(let name):
+            if let cluster = session.clusters.first(where: { $0.name == name }) {
+                ClusterDetailView(cluster: cluster, session: session)
+            } else {
+                detailGone("Cluster")
+            }
         }
     }
 
@@ -720,6 +734,13 @@ struct ContentView: View {
         Binding(
             get: { if case .machine(let id) = detailSelection { id } else { nil } },
             set: { detailSelection = $0.map(DetailSelection.machine) }
+        )
+    }
+
+    private var clusterSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .cluster(let name) = detailSelection { name } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.cluster) }
         )
     }
 }
