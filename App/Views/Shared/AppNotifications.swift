@@ -45,3 +45,19 @@ struct ContainerJump: Hashable {
     let hostID: UUID
     let containerID: String
 }
+
+/// A notification click or menu selection can arrive while no main content
+/// view exists. Keep the latest destination until the reopened view appears.
+@MainActor
+enum PendingContainerJump {
+    private(set) static var value: ContainerJump?
+
+    static func set(_ jump: ContainerJump) { value = jump }
+    static func clear(_ jump: ContainerJump) {
+        if value == jump { value = nil }
+    }
+    static func take() -> ContainerJump? {
+        defer { value = nil }
+        return value
+    }
+}

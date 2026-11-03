@@ -71,13 +71,22 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         let containerID = info["containerID"] as? String
         if let hostString, let hostID = UUID(uuidString: hostString), let containerID {
             Task { @MainActor in
-                NSApp.activate(ignoringOtherApps: true)
-                NotificationCenter.default.post(
-                    name: .gantrySelectContainer,
-                    object: ContainerJump(hostID: hostID, containerID: containerID)
-                )
+                ContainerNotifier.shared.openContainer(hostID: hostID, containerID: containerID)
             }
         }
         completionHandler()
     }
+
+    private func openContainer(hostID: UUID, containerID: String) {
+        let jump = ContainerJump(hostID: hostID, containerID: containerID)
+        PendingContainerJump.set(jump)
+        NotificationCenter.default.post(name: .gantrySelectContainer, object: jump)
+        MainWindowActivation.activate()
+    }
+
+#if DEBUG
+    func simulateClickForUITest(hostID: UUID, containerID: String) {
+        openContainer(hostID: hostID, containerID: containerID)
+    }
+#endif
 }

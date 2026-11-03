@@ -180,6 +180,22 @@ public final class HostSession: Identifiable {
         self.host = host
     }
 
+#if DEBUG
+    /// Two real in-memory ContainerSummary values for window-routing UI tests.
+    /// No client is created, and this session never connects or persists.
+    func installWindowRouteFixtureContainers() {
+        let payload = """
+        [
+          {"Id":"fixture-a","Names":["/Gantry Fixture A"],"Image":"fixture-a:1", "State":"running","Status":"Up"},
+          {"Id":"fixture-b","Names":["/Gantry Fixture B"],"Image":"fixture-b:1", "State":"running","Status":"Up"}
+        ]
+        """
+        containers = (try? JSONDecoder().decode([ContainerSummary].self, from: Data(payload.utf8))) ?? []
+        let version = (try? JSONDecoder().decode(SystemVersion.self, from: Data("{}".utf8)))
+        if let version { status = .connected(version) }
+    }
+#endif
+
     // MARK: - Connection
 
     public func connect() async {
@@ -1002,6 +1018,14 @@ public final class HostSession: Identifiable {
     }
 
     public func details(for containerID: String) async -> ContainerDetails? {
+#if DEBUG
+        // The in-memory UI fixture has real ContainerSummary values but no
+        // Docker client. Its automatic Overview inspection is intentionally
+        // unavailable inline; do not raise the production connection alert.
+        if ProcessInfo.processInfo.arguments.contains("--gantry-test-in-memory-containers") {
+            return detailsCache[containerID]
+        }
+#endif
         guard let client else {
             lastError = "Not connected"
             return nil

@@ -127,6 +127,19 @@ struct MenuBarView: View {
 
             Spacer()
 
+#if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--gantry-test-window-routes") {
+                Button("Open fixture terminal") {
+                    openWindow(id: "hostTerminal", value: UUID())
+                }
+                Button("Simulate fixture notification") {
+                    ContainerNotifier.shared.simulateClickForUITest(
+                        hostID: model.sessions.first?.host.id ?? UUID(), containerID: "fixture-b"
+                    )
+                }
+            }
+#endif
+
             Button("Open Gantry") {
                 openMainWindow()
             }
@@ -137,7 +150,7 @@ struct MenuBarView: View {
     }
 
     private func openMainWindow() {
-        openWindow(id: "main")
+        openWindow(id: "main", value: MainWindowID.main)
         NSApp.activate(ignoringOtherApps: true)
     }
 
@@ -360,13 +373,9 @@ private struct RunningRow: View {
 
     /// Opens the main window and selects this container in its detail view.
     private func openContainer() {
-        openWindow(id: "main")
-        NSApp.activate(ignoringOtherApps: true)
         let jump = ContainerJump(hostID: session.host.id, containerID: container.id)
-        // Give a freshly-opened window a beat to subscribe before posting.
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(150))
-            NotificationCenter.default.post(name: .gantrySelectContainer, object: jump)
+        openContainerInMain(jump) {
+            openWindow(id: "main", value: MainWindowID.main)
         }
     }
 
@@ -375,6 +384,16 @@ private struct RunningRow: View {
         _ = await session.perform(action, on: container.id)
         busy = false
     }
+}
+
+/// The pending value covers a closed main window; the notification covers an
+/// existing one.
+@MainActor
+private func openContainerInMain(_ jump: ContainerJump, open: () -> Void) {
+    PendingContainerJump.set(jump)
+    open()
+    NSApp.activate(ignoringOtherApps: true)
+    NotificationCenter.default.post(name: .gantrySelectContainer, object: jump)
 }
 
 /// One recently-exited container: state dot, name, start button.
