@@ -1890,6 +1890,22 @@
         }
       }
     },
+    "Connects with Remote-SSH. The machine image must run sshd.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connects with Remote-SSH. The machine image must run sshd."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过 Remote-SSH 连接。机器镜像必须运行 sshd。"
+          }
+        }
+      }
+    },
     "Container": {
       "localizations": {
         "en": {
@@ -5566,6 +5582,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "在 Gantry 中打开"
+          }
+        }
+      }
+    },
+    "Open in VS Code": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in VS Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 VS Code 中打开"
           }
         }
       }

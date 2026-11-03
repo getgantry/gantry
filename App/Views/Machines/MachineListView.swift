@@ -142,6 +142,7 @@ private struct MachineRow: View {
         .contextMenu {
             if machine.isRunning {
                 Button { onShell() } label: { Label("Open Shell", systemImage: "terminal") }
+                MachineVSCodeButton(machine: machine)
                 Button { onStop() } label: { Label("Stop", systemImage: "stop.fill") }
             } else {
                 Button { onStart() } label: { Label("Start", systemImage: "play.fill") }
@@ -335,6 +336,7 @@ struct MachineDetailView: View {
             }
             if machine.isRunning {
                 Button { openShell() } label: { Label("Shell", systemImage: "terminal") }
+                MachineVSCodeButton(machine: machine)
                 Button { act { await session.stopMachine(machine.id) } } label: {
                     Label("Stop", systemImage: "stop.fill")
                 }
