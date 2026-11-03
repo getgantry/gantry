@@ -417,7 +417,8 @@ public actor AppleContainerTransport: DockerTransport {
         for env in (json["Env"] as? [String]) ?? [] {
             arguments += ["--env", env]
         }
-        for (key, value) in (json["Labels"] as? [String: String]) ?? [:] {
+        let labels = AppleLabelEscaping.encodeForCreate((json["Labels"] as? [String: String]) ?? [:])
+        for (key, value) in labels.sorted(by: { $0.key < $1.key }) {
             arguments += ["--label", "\(key)=\(value)"]
         }
         if (json["Tty"] as? Bool) == true {

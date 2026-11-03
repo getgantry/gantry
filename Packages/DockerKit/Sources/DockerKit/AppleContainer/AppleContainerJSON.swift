@@ -252,7 +252,7 @@ enum AppleContainerJSON {
             "Command": command,
             "Created": unixSeconds(fromAppleDate: config["creationDate"] ?? runtime.startedDate),
             "Ports": ports,
-            "Labels": (config["labels"] as? [String: String]) ?? [:],
+            "Labels": AppleLabelEscaping.decodeContainerLabels((config["labels"] as? [String: String]) ?? [:]),
             "State": state,
             "Status": dockerStatusText(forDockerState: state),
             "Mounts": mounts
@@ -351,7 +351,7 @@ enum AppleContainerJSON {
                 "Env": (initProcess["environment"] as? [String]) ?? [],
                 "Cmd": ([executable] + arguments).filter { !$0.isEmpty },
                 "Image": string(image["reference"]),
-                "Labels": (config["labels"] as? [String: String]) ?? [:],
+                "Labels": AppleLabelEscaping.decodeContainerLabels((config["labels"] as? [String: String]) ?? [:]),
                 "Tty": (initProcess["terminal"] as? Bool) ?? false,
                 "WorkingDir": string(initProcess["workingDirectory"]),
                 "User": ""
