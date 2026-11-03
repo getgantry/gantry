@@ -186,6 +186,12 @@ extension AppleContainerControl {
         return args
     }
 
+    /// `container inspect <node>…`: the raw JSON of the node containers.
+    public static func rawInspectClusterNodes(_ nodes: [String], cliOverride: String? = nil) async throws -> String {
+        guard !nodes.isEmpty else { return "" }
+        return try await runCluster(["inspect"] + nodes, cliOverride: cliOverride)
+    }
+
     /// `kubectl config use-context <context>`, for the clipboard.
     public static func kubectlUseContextCommand(for cluster: String, kubeconfigPath: String? = nil) -> String {
         var command = "kubectl config use-context \(shellQuoted(cluster))"

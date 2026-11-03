@@ -93,6 +93,23 @@ public struct ContainerCluster: Identifiable, Hashable, Sendable {
         (home as NSString).appendingPathComponent(".kube/\(name).kubeconfig")
     }
 
+    /// The container networks in `container inspect` JSON of the nodes, in
+    /// first-seen order. Reads `status.networks`, then `configuration.networks`.
+    public static func networkNames(fromInspectJSON data: Data) -> [String] {
+        guard let items = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        var names: [String] = []
+        for item in items {
+            let status = (item["status"] as? [String: Any])?["networks"] as? [[String: Any]]
+            let configured = (item["configuration"] as? [String: Any])?["networks"] as? [[String: Any]]
+            for network in status ?? configured ?? [] {
+                if let name = network["network"] as? String, !name.isEmpty, !names.contains(name) {
+                    names.append(name)
+                }
+            }
+        }
+        return names
+    }
+
     // MARK: - Parsing
 
     /// Parses the `container cluster list` table. The CLI pads each column to

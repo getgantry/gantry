@@ -106,6 +106,15 @@ struct ContainerClusterTests {
         #expect(ContainerCluster.defaultKubeconfigPath(for: "dev", home: "/Users/me") == "/Users/me/.kube/dev.kubeconfig")
     }
 
+    @Test func networkNamesFromInspect() {
+        let data = Data("""
+        [{"configuration":{"id":"dev","networks":[{"network":"default"}]},"status":{"networks":[{"network":"k8s-net","ipv4Address":"192.168.65.2/24"}]}},
+         {"configuration":{"id":"dev-worker-1","networks":[{"network":"k8s-net"}]}}]
+        """.utf8)
+        #expect(ContainerCluster.networkNames(fromInspectJSON: data) == ["k8s-net"])
+        #expect(ContainerCluster.networkNames(fromInspectJSON: Data("oops".utf8)).isEmpty)
+    }
+
     // MARK: - Create progress
 
     @Test func parsesStatusLines() throws {

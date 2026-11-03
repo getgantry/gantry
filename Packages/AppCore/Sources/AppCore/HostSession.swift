@@ -1136,6 +1136,21 @@ public final class HostSession: Identifiable {
         }
     }
 
+    /// Pretty JSON for the node containers of a cluster; nil on failure.
+    public func rawInspectCluster(_ name: String) async -> String? {
+        guard let cluster = clusters.first(where: { $0.name == name }) else { return nil }
+        return try? await AppleContainerControl.rawInspectClusterNodes(
+            cluster.nodes.map(\.name), cliOverride: machineCLIOverride
+        )
+    }
+
+    /// The container networks of the cluster nodes. A gateway container on
+    /// the same network reaches the cluster services.
+    public func clusterNetworks(_ name: String) async -> [String] {
+        guard let raw = await rawInspectCluster(name) else { return [] }
+        return ContainerCluster.networkNames(fromInspectJSON: Data(raw.utf8))
+    }
+
     /// Copies a local image into the containerd of every node of `cluster`.
     @discardableResult
     public func loadImageIntoCluster(_ image: String, cluster: String) async -> Bool {
