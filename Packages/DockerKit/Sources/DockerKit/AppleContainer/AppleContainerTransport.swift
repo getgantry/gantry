@@ -26,6 +26,15 @@ public actor AppleContainerTransport: DockerTransport {
 
     private var execs: [String: ExecState] = [:]
 
+    /// API server version seen at the connect handshake ("1.6.1"); empty
+    /// until then. Gates CLI features that arrived after the 1.0 baseline.
+    private var serverVersion = ""
+
+    /// First CLI release with `container commit`.
+    public static let commitMinimumVersion = "1.6.0"
+    /// First CLI release with `--network <name>,alias=<fqdn>`.
+    public static let networkAliasMinimumVersion = "1.6.0"
+
     /// Cache of the last `image list` JSON, for digest → reference resolution.
     private var lastImagesList: Data?
 
@@ -205,7 +214,7 @@ public actor AppleContainerTransport: DockerTransport {
         case (.post, 3, "containers", "update"):
             throw Self.unsupported("Restart policies")
         case (.post, 1, "commit", _):
-            throw Self.unsupported("Committing containers to images")
+            return try await commitContainer(request)
         case (.put, 3, "containers", "archive"):
             return try await uploadArchive(containerID: id, request: request)
         case (_, 3, "containers", "archive"):
@@ -344,7 +353,8 @@ public actor AppleContainerTransport: DockerTransport {
                 "apple/container services are not running (try `container system start`)"
             )
         }
-        let versionText = AppleContainerJSON.string(status["apiServerVersion"])
+        let versionText = AppleContainerJSON.serverVersion(fromStatus: status)
+        serverVersion = AppleContainerJSON.extractVersionNumber(from: versionText)
         return Self.ok(try AppleContainerJSON.versionBody(appServerVersion: versionText))
     }
 
@@ -371,7 +381,7 @@ public actor AppleContainerTransport: DockerTransport {
             containersTotal: containers.count,
             containersRunning: running,
             imagesCount: images.count,
-            serverVersion: AppleContainerJSON.string(status["apiServerVersion"]),
+            serverVersion: AppleContainerJSON.serverVersion(fromStatus: status),
             ncpu: Self.hostCPUCount(),
             memTotal: Self.hostMemoryBytes(),
             hostName: ProcessInfo.processInfo.hostName
@@ -401,6 +411,70 @@ public actor AppleContainerTransport: DockerTransport {
 
     private func inspectContainerBody(id: String) async throws -> Data {
         try AppleContainerJSON.containerInspectBody(fromAppleInspect: try await appleInspect(id: id))
+    }
+
+    /// Whether the connected API server is at least `minimum`. Read once from
+    /// `system status` when the handshake has not recorded it yet; an unknown
+    /// version is treated as too old, so a feature never breaks an old CLI.
+    private func supports(_ minimum: String) async -> Bool {
+        if serverVersion.isEmpty, let status = try? await systemStatusJSON() {
+            serverVersion = AppleContainerJSON.extractVersionNumber(
+                from: AppleContainerJSON.serverVersion(fromStatus: status)
+            )
+        }
+        return !serverVersion.isEmpty
+            && AppleContainerJSON.isVersion(serverVersion, atLeast: minimum)
+    }
+
+    /// Docker endpoint aliases the CLI accepts. apple/container only takes
+    /// fully qualified names ("web.example.test") unless a default DNS domain is
+    /// configured, and rejects the whole `create` otherwise — so single-label
+    /// aliases (Compose adds the bare service name) are left out rather than
+    /// failing the container.
+    static func qualifiedAliases(_ any: Any?) -> [String] {
+        let aliases = (any as? [String]) ?? []
+        var seen = Set<String>()
+        return aliases.filter { alias in
+            let labels = alias.split(separator: ".", omittingEmptySubsequences: false)
+            guard labels.count >= 2, labels.allSatisfy({ !$0.isEmpty }),
+                  !alias.contains(","), !alias.contains("=") else { return false }
+            return seen.insert(alias).inserted
+        }
+    }
+
+    /// `POST /commit?container=&repo=&tag=` → `container commit <id> <ref>`
+    /// (CLI 1.6+). The CLI needs a reference, so an untagged commit is
+    /// rejected; `comment`, `author`, `changes` and `pause` have no CLI
+    /// equivalent and are ignored. The image id comes from `image inspect`.
+    private func commitContainer(_ request: DockerRequest) async throws -> DockerResponse {
+        guard await supports(Self.commitMinimumVersion) else {
+            throw Self.unsupported(
+                "Committing containers needs apple/container \(Self.commitMinimumVersion) or newer"
+            )
+        }
+        guard let container = Self.query(request, "container"), !container.isEmpty else {
+            throw DockerError.apiError(status: 400, message: "commit needs a container")
+        }
+        let repo = Self.query(request, "repo") ?? ""
+        guard !repo.isEmpty else {
+            throw DockerError.apiError(
+                status: 400,
+                message: "apple/container hosts need a repository name to commit a container"
+            )
+        }
+        let tag = Self.query(request, "tag") ?? ""
+        let reference = tag.isEmpty ? repo : "\(repo):\(tag)"
+        try await cli(["commit", container, reference])
+
+        var imageID = reference
+        if let data = try? await cli(["image", "inspect", reference]).stdout,
+           let decoded = try? AppleContainerJSON.decode(data) {
+            let image = (decoded as? [Any])?.first ?? decoded
+            let id = AppleContainerJSON.string(AppleContainerJSON.object(image)["id"])
+            if !id.isEmpty { imageID = id.hasPrefix("sha256:") ? id : "sha256:\(id)" }
+        }
+        lastImagesList = nil
+        return Self.ok(try AppleContainerJSON.encode(["Id": imageID]), status: 201)
     }
 
     /// Translates the Docker create body into `container create` arguments.
@@ -485,8 +559,13 @@ public actor AppleContainerTransport: DockerTransport {
         }
 
         let networking = AppleContainerJSON.object(json["NetworkingConfig"])
-        for network in AppleContainerJSON.object(networking["EndpointsConfig"]).keys.sorted() {
-            arguments += ["--network", network]
+        let endpoints = AppleContainerJSON.object(networking["EndpointsConfig"])
+        let aliasesSupported = await supports(Self.networkAliasMinimumVersion)
+        for network in endpoints.keys.sorted() {
+            let aliases = aliasesSupported
+                ? Self.qualifiedAliases(AppleContainerJSON.object(endpoints[network])["Aliases"])
+                : []
+            arguments += ["--network", ([network] + aliases.map { "alias=\($0)" }).joined(separator: ",")]
         }
 
         // Entrypoint: the CLI takes a single override command; extra

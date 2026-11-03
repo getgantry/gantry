@@ -15,7 +15,7 @@ public enum ContainerTooling {
     /// 0.12 shapes defensively, but 0.12 is no longer the supported target).
     public static let minimumVersion = "1.0.0"
     /// The version Gantry is tested against; offered on a fresh install.
-    public static let recommendedVersion = "1.2.0"
+    public static let recommendedVersion = "1.6.1"
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
 

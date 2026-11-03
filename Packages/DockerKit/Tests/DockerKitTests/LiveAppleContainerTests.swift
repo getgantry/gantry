@@ -236,3 +236,55 @@ func liveAppleVolumeLifecycle() async throws {
     let after = try await client.listVolumes()
     #expect(!after.contains { $0.name == name })
 }
+
+/// CLI 1.6: `POST /commit` maps to `container commit`, and fully qualified
+/// endpoint aliases reach `--network <name>,alias=`.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(3)))
+func liveAppleCommitAndNetworkAliases() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+    let version = try await client.negotiate()
+    guard version.version.compare("1.6.0", options: .numeric) != .orderedAscending else { return }
+
+    let path = try #require(AppleContainerCLIDiscovery.discover())
+    func cli(_ arguments: [String]) -> String {
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: path)
+        process.arguments = arguments
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+        try? process.run()
+        process.waitUntilExit()
+        return String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+    }
+    let name = "gantry-apple-live-commit"
+    let network = "gantry-apple-live-net"
+    let image = "local/gantry-live-commit:test"
+    func cleanup() {
+        _ = cli(["delete", "--force", name])
+        _ = cli(["image", "delete", image])
+        _ = cli(["network", "delete", network])
+    }
+    cleanup()
+    defer { cleanup() }
+    _ = cli(["network", "create", network])
+
+    let config = ContainerCreateRequest(
+        image: "alpine:latest",
+        cmd: ["sh", "-c", "echo gantry > /marker; sleep 120"],
+        networkingConfig: .init(endpointsConfig: [network: .init(aliases: ["svc", "svc.gantry.test"])]),
+        name: name
+    )
+    let id = try await client.createContainer(config: config, name: name)
+    try await client.startContainer(id: id)
+
+    let inspect = cli(["inspect", name])
+    #expect(inspect.contains("svc.gantry.test"))
+
+    let imageID = try await client.commitContainer(id: id, repo: "local/gantry-live-commit", tag: "test")
+    #expect(imageID.hasPrefix("sha256:"))
+    let images = try await client.listImages()
+    #expect(images.contains { $0.repoTags.contains { $0.hasSuffix("gantry-live-commit:test") } })
+    #expect(cli(["run", "--rm", "--entrypoint", "cat", image, "/marker"]).contains("gantry"))
+}
