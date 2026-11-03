@@ -47,34 +47,43 @@ struct ImageListView: View {
         }
     }
 
+    // Split out of `body`: the full row and menu in one expression exceeds the
+    // type checker's time budget on CI runners.
+    private func imageRow(_ image: ImageSummary) -> some View {
+        ImageRow(image: image, hostArchitecture: session.info?.architecture ?? "")
+            .tag(image.id)
+            .transition(.opacity.combined(with: .move(edge: .top)))
+            .contextMenu { imageMenu(image) }
+    }
+
+    @ViewBuilder
+    private func imageMenu(_ image: ImageSummary) -> some View {
+        Button {
+            copyToPasteboard(image.id)
+        } label: {
+            Label("Copy ID", systemImage: "doc.on.doc")
+        }
+        if session.supportsClusters, !session.clusters.isEmpty, let reference = clusterReference(image) {
+            Menu {
+                ForEach(session.clusters) { cluster in
+                    Button(cluster.name) { loadIntoCluster(reference, cluster: cluster.name) }
+                }
+            } label: {
+                Label("Load into Cluster", systemImage: "steeringwheel")
+            }
+        }
+        Divider()
+        Button(role: .destructive) {
+            removeTarget = image
+        } label: {
+            Label("Remove…", systemImage: "trash")
+        }
+    }
+
     var body: some View {
         List(selection: $selection) {
             ForEach(filtered) { image in
-                ImageRow(image: image, hostArchitecture: session.info?.architecture ?? "")
-                    .tag(image.id)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                    .contextMenu {
-                        Button {
-                            copyToPasteboard(image.id)
-                        } label: {
-                            Label("Copy ID", systemImage: "doc.on.doc")
-                        }
-                        if session.supportsClusters, !session.clusters.isEmpty, let reference = clusterReference(image) {
-                            Menu {
-                                ForEach(session.clusters) { cluster in
-                                    Button(cluster.name) { loadIntoCluster(reference, cluster: cluster.name) }
-                                }
-                            } label: {
-                                Label("Load into Cluster", systemImage: "steeringwheel")
-                            }
-                        }
-                        Divider()
-                        Button(role: .destructive) {
-                            removeTarget = image
-                        } label: {
-                            Label("Remove…", systemImage: "trash")
-                        }
-                    }
+                imageRow(image)
             }
         }
         .animation(.snappy, value: filtered)
