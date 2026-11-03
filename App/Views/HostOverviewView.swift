@@ -19,6 +19,9 @@ struct HostOverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                if session.host.isAppleContainer {
+                    AppleKernelOverviewBanner(session: session)
+                }
                 if let info = session.info {
                     gaugesRow(info: info)
                     countsCard(info: info)

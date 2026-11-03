@@ -45,6 +45,7 @@ struct AppleSettingsView: View {
     private var content: some View {
         Form {
             servicesSection
+            AppleSystemSettingsSection(cliOverride: cliOverride)
             domainsSection
             if needsRestart {
                 restartSection

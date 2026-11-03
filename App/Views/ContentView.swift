@@ -12,6 +12,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     case machines
     case clusters
     case hostFiles
+    case system
 
     var id: String { rawValue }
 
@@ -25,6 +26,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .machines: String(localized: "Machines")
         case .clusters: String(localized: "Clusters")
         case .hostFiles: String(localized: "Host Files")
+        case .system: String(localized: "System")
         }
     }
 
@@ -38,6 +40,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .machines: "cube.transparent"
         case .clusters: "steeringwheel"
         case .hostFiles: "folder"
+        case .system: "gearshape.2"
         }
     }
 
@@ -50,6 +53,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
             case .hostFiles: host.isSSH
             case .machines: host.isAppleContainer
             case .clusters: host.isAppleContainer && clusters
+            case .system: host.isAppleContainer
             default: true
             }
         }
@@ -104,6 +108,7 @@ enum DetailSelection: Hashable {
     case network(String)
     case machine(String)
     case cluster(String)
+    case appleSystem(String)
 }
 
 struct ContentView: View {
@@ -587,11 +592,14 @@ struct ContentView: View {
                 ClusterListView(session: session, selection: clusterSelectionBinding)
             case .hostFiles:
                 HostFilesView(session: session)
+            case .system:
+                AppleSystemView(session: session, selection: appleSystemSelectionBinding)
             }
         }
-        // Connection state overlays.
+        // Connection state overlays. The System section stays usable without a
+        // connection: it is where stopped services are started and diagnosed.
         .overlay {
-            switch session.status {
+            switch section == .system ? .disconnected : session.status {
             case .connecting:
                 ProgressView("Connecting to \(session.host.name)…")
                     .controlSize(.large)
@@ -613,7 +621,10 @@ struct ContentView: View {
         .alert(
             "Docker Error",
             isPresented: Binding(
-                get: { session.lastError != nil },
+                get: {
+                    session.lastError != nil
+                        && !(session.host.isAppleContainer && AppleMissingKernelAlert.isKernelError(session.lastError))
+                },
                 set: { if !$0 { session.lastError = nil } }
             )
         ) {
@@ -621,6 +632,7 @@ struct ContentView: View {
         } message: {
             Text(session.lastError ?? "")
         }
+        .modifier(AppleMissingKernelAlert(session: session))
     }
 
     // MARK: - Detail column
@@ -684,6 +696,8 @@ struct ContentView: View {
             } else {
                 detailGone("Cluster")
             }
+        case .appleSystem(let pane):
+            AppleSystemDetailView(paneID: pane, session: session)
         }
     }
 
@@ -741,6 +755,13 @@ struct ContentView: View {
         Binding(
             get: { if case .cluster(let name) = detailSelection { name } else { nil } },
             set: { detailSelection = $0.map(DetailSelection.cluster) }
+        )
+    }
+
+    private var appleSystemSelectionBinding: Binding<String?> {
+        Binding(
+            get: { if case .appleSystem(let pane) = detailSelection { pane } else { nil } },
+            set: { detailSelection = $0.map(DetailSelection.appleSystem) }
         )
     }
 }
