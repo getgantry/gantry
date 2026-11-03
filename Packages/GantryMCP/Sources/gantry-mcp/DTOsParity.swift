@@ -28,6 +28,37 @@ struct FileEntryDTO: Encodable {
     }
 }
 
+struct ClusterDTO: Encodable {
+    struct Node: Encodable {
+        var name: String
+        var roles: [String]
+        var state: String
+        var cpus: Int
+        var memoryBytes: Int64
+        var address: String
+        var ports: String
+    }
+
+    var name: String
+    var state: String
+    var kubectlContext: String
+    var apiServer: String?
+    var nodes: [Node]
+
+    init(_ c: ContainerCluster) {
+        name = c.name
+        state = c.state
+        kubectlContext = c.kubectlContext
+        apiServer = c.apiServerURL
+        nodes = c.nodes.map {
+            Node(
+                name: $0.name, roles: $0.roles, state: $0.state, cpus: $0.cpus,
+                memoryBytes: $0.memoryBytes, address: $0.address, ports: $0.ports
+            )
+        }
+    }
+}
+
 struct MachineDTO: Encodable {
     var name: String
     var status: String

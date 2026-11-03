@@ -178,6 +178,22 @@
         }
       }
     },
+    "%@ is now in the nodes of the cluster “%@”. Use imagePullPolicy: Never or IfNotPresent in your pods.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is now in the nodes of the cluster “%@”. Use imagePullPolicy: Never or IfNotPresent in your pods."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已载入集群“%@”的节点。请在 Pod 中使用 imagePullPolicy: Never 或 IfNotPresent。"
+          }
+        }
+      }
+    },
     "%@ lines": {
       "localizations": {
         "en": {
@@ -418,6 +434,38 @@
         }
       }
     },
+    "%lld GB per node": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld GB per node"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个节点 %lld GB"
+          }
+        }
+      }
+    },
+    "%lld per node": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld per node"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个节点 %lld 个"
+          }
+        }
+      }
+    },
     "%lld running": {
       "localizations": {
         "en": {
@@ -466,6 +514,38 @@
         }
       }
     },
+    "1 control plane · %lld workers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 control plane · %lld workers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个控制平面 · %lld 个工作节点"
+          }
+        }
+      }
+    },
+    "1 control plane · 1 worker": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 control plane · 1 worker"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个控制平面 · 1 个工作节点"
+          }
+        }
+      }
+    },
     "1 host unreachable": {
       "localizations": {
         "en": {
@@ -494,6 +574,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 秒采样"
+          }
+        }
+      }
+    },
+    "A cluster with this name already exists.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cluster with this name already exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存在同名集群。"
           }
         }
       }
@@ -718,6 +814,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "分配 TTY"
+          }
+        }
+      }
+    },
+    "API Server": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 服务器"
           }
         }
       }
@@ -1298,6 +1410,22 @@
         }
       }
     },
+    "Cancelling and removing the nodes…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelling and removing the nodes…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在取消并移除节点…"
+          }
+        }
+      }
+    },
     "Change DNS Name…": {
       "localizations": {
         "en": {
@@ -1390,6 +1518,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在检查…"
+          }
+        }
+      }
+    },
+    "Choose a CNI manifest (YAML).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a CNI manifest (YAML)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择 CNI 清单（YAML）。"
           }
         }
       }
@@ -1522,6 +1666,22 @@
         }
       }
     },
+    "CLI default (kindest/node)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLI default (kindest/node)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLI 默认值（kindest/node）"
+          }
+        }
+      }
+    },
     "CLI found at %@": {
       "localizations": {
         "en": {
@@ -1582,6 +1742,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cloudflare 会分配临时的 `https://….trycloudflare.com` 地址。隧道开启期间，任何持有链接的人都可以访问该端口。"
+          }
+        }
+      }
+    },
+    "Clusters": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clusters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集群"
+          }
+        }
+      }
+    },
+    "CNI": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CNI"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CNI"
           }
         }
       }
@@ -2002,6 +2194,38 @@
         }
       }
     },
+    "Control Plane": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control Plane"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "控制平面"
+          }
+        }
+      }
+    },
+    "control plane": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "control plane"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "控制平面"
+          }
+        }
+      }
+    },
     "Copied": {
       "localizations": {
         "en": {
@@ -2014,6 +2238,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已复制"
+          }
+        }
+      }
+    },
+    "Copies “kubectl config use-context %@”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies “kubectl config use-context %@”."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝“kubectl config use-context %@”。"
           }
         }
       }
@@ -2162,6 +2402,38 @@
         }
       }
     },
+    "Copy kubectl Command": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy kubectl Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝 kubectl 命令"
+          }
+        }
+      }
+    },
+    "Copy kubectl Context Command": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy kubectl Context Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝 kubectl 上下文命令"
+          }
+        }
+      }
+    },
     "Copy Name": {
       "localizations": {
         "en": {
@@ -2242,6 +2514,22 @@
         }
       }
     },
+    "Could not start the cluster creation.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start the cluster creation."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法开始创建集群。"
+          }
+        }
+      }
+    },
     "CPU": {
       "localizations": {
         "en": {
@@ -2306,6 +2594,22 @@
         }
       }
     },
+    "Create a local Kubernetes cluster. Each node runs in its own lightweight VM.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a local Kubernetes cluster. Each node runs in its own lightweight VM."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建本地 Kubernetes 集群。每个节点运行在自己的轻量虚拟机中。"
+          }
+        }
+      }
+    },
     "Create a long-lived Linux environment to develop in.": {
       "localizations": {
         "en": {
@@ -2334,6 +2638,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建新容器"
+          }
+        }
+      }
+    },
+    "Create Cluster": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Cluster"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建集群"
+          }
+        }
+      }
+    },
+    "Create Cluster…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Cluster…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建集群…"
           }
         }
       }
@@ -2402,6 +2738,22 @@
         }
       }
     },
+    "Creating": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在创建"
+          }
+        }
+      }
+    },
     "Creating %@…": {
       "localizations": {
         "en": {
@@ -2430,6 +2782,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建时会拉取镜像并启动长期运行的 Linux 环境。"
+          }
+        }
+      }
+    },
+    "Creating pulls the node image and can take several minutes. The progress shows in the cluster list. The cluster context is added to ~/.kube/config.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating pulls the node image and can take several minutes. The progress shows in the cluster list. The cluster context is added to ~/.kube/config."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建时会拉取节点镜像，可能需要几分钟。进度显示在集群列表中。集群上下文将添加到 ~/.kube/config。"
+          }
+        }
+      }
+    },
+    "Custom manifest…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom manifest…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义清单…"
           }
         }
       }
@@ -2546,6 +2930,22 @@
         }
       }
     },
+    "Default (kindnet)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (kindnet)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认（kindnet）"
+          }
+        }
+      }
+    },
     "Default kernel": {
       "localizations": {
         "en": {
@@ -2558,6 +2958,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "默认内核"
+          }
+        }
+      }
+    },
+    "Degraded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degraded"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分可用"
           }
         }
       }
@@ -2590,6 +3006,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除域名（需要管理员权限）"
+          }
+        }
+      }
+    },
+    "Delete this cluster?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this cluster?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此集群？"
           }
         }
       }
@@ -2734,6 +3166,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "磁盘 I/O"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
@@ -3890,6 +4338,22 @@
         }
       }
     },
+    "Image Loaded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Loaded"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像已载入"
+          }
+        }
+      }
+    },
     "Images": {
       "localizations": {
         "en": {
@@ -4210,6 +4674,38 @@
         }
       }
     },
+    "Kubeconfig Written": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kubeconfig Written"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已写入 Kubeconfig"
+          }
+        }
+      }
+    },
+    "kubectl Context": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kubectl Context"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kubectl 上下文"
+          }
+        }
+      }
+    },
     "Labels": {
       "localizations": {
         "en": {
@@ -4302,6 +4798,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "列出 Docker 主机上的容器，并汇总运行中与已停止的数量。"
+          }
+        }
+      }
+    },
+    "Load into Cluster": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load into Cluster"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入到集群"
+          }
+        }
+      }
+    },
+    "Loading %@ into %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading %@ into %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在将 %@ 载入 %@…"
           }
         }
       }
@@ -4994,6 +5522,22 @@
         }
       }
     },
+    "No Clusters": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Clusters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有集群"
+          }
+        }
+      }
+    },
     "No connected hosts": {
       "localizations": {
         "en": {
@@ -5166,6 +5710,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有可修剪的运行中容器。"
+          }
+        }
+      }
+    },
+    "Node": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点"
+          }
+        }
+      }
+    },
+    "Node image": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node image"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点镜像"
+          }
+        }
+      }
+    },
+    "Node Resources": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node Resources"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点资源"
+          }
+        }
+      }
+    },
+    "Nodes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点"
           }
         }
       }
@@ -5666,6 +6274,22 @@
         }
       }
     },
+    "Output": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输出"
+          }
+        }
+      }
+    },
     "Override the unix socket path for the local host. Leave empty to auto-detect. The override is stored on the Local host and applied on reconnect.": {
       "localizations": {
         "en": {
@@ -5774,6 +6398,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "路径"
+          }
+        }
+      }
+    },
+    "Path to a CNI manifest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Path to a CNI manifest"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CNI 清单的路径"
           }
         }
       }
@@ -6254,6 +6894,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "拉取镜像…"
+          }
+        }
+      }
+    },
+    "Pulling the node image. This can take several minutes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling the node image. This can take several minutes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取节点镜像。这可能需要几分钟。"
           }
         }
       }
@@ -7266,6 +7922,22 @@
         }
       }
     },
+    "Role": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Role"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "角色"
+          }
+        }
+      }
+    },
     "Route a hostname on a domain in your Cloudflare account to this port. Requires a one-time login.": {
       "localizations": {
         "en": {
@@ -7842,6 +8514,22 @@
         }
       }
     },
+    "Show in Finder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在访达中显示"
+          }
+        }
+      }
+    },
     "Show menu bar icon": {
       "localizations": {
         "en": {
@@ -8162,6 +8850,22 @@
         }
       }
     },
+    "Starting…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在启动…"
+          }
+        }
+      }
+    },
     "Starts a container on a Docker host.": {
       "localizations": {
         "en": {
@@ -8206,6 +8910,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "统计不可用"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step %lld of %lld%@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %lld 步，共 %lld 步%@"
           }
         }
       }
@@ -8578,6 +9314,22 @@
         }
       }
     },
+    "The cluster context is added to this file. An existing file keeps its other contexts.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cluster context is added to this file. An existing file keeps its other contexts."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集群上下文将添加到此文件。已有文件会保留其他上下文。"
+          }
+        }
+      }
+    },
     "The container CLI could not be located.": {
       "localizations": {
         "en": {
@@ -8606,6 +9358,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "容器未报告正在运行的进程。"
+          }
+        }
+      }
+    },
+    "The context “%@” is in %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The context “%@” is in %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上下文“%@”位于 %@。"
           }
         }
       }
@@ -8750,6 +9518,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "时间"
+          }
+        }
+      }
+    },
+    "To reach cluster services from macOS, run a gateway container on the same network, for example: container run -d --name gateway --network %@,alias=.gateway …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To reach cluster services from macOS, run a gateway container on the same network, for example: container run -d --name gateway --network %@,alias=.gateway …"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要从 macOS 访问集群服务，请在同一网络上运行网关容器，例如：container run -d --name gateway --network %@,alias=.gateway …"
           }
         }
       }
@@ -9106,6 +9890,22 @@
         }
       }
     },
+    "Use letters, digits, hyphens, dots and underscores.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use letters, digits, hyphens, dots and underscores."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请使用字母、数字、连字符、点和下划线。"
+          }
+        }
+      }
+    },
     "User": {
       "localizations": {
         "en": {
@@ -9218,6 +10018,54 @@
         }
       }
     },
+    "Without a CNI, the nodes stay NotReady until you apply one.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without a CNI, the nodes stay NotReady until you apply one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 CNI 时，节点会保持 NotReady，直到你应用一个 CNI。"
+          }
+        }
+      }
+    },
+    "worker": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "worker"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作节点"
+          }
+        }
+      }
+    },
+    "Workers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作节点"
+          }
+        }
+      }
+    },
     "Write": {
       "localizations": {
         "en": {
@@ -9230,6 +10078,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "写入"
+          }
+        }
+      }
+    },
+    "Write Kubeconfig": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write Kubeconfig"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "写入 Kubeconfig"
+          }
+        }
+      }
+    },
+    "Write Kubeconfig…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write Kubeconfig…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "写入 Kubeconfig…"
           }
         }
       }
@@ -9310,6 +10190,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@” 及其磁盘将被永久移除。"
+          }
+        }
+      }
+    },
+    "“%@” and its nodes will be removed permanently. Its context is removed from ~/.kube/config.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” and its nodes will be removed permanently. Its context is removed from ~/.kube/config."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”及其节点将被永久移除。其上下文将从 ~/.kube/config 中移除。"
           }
         }
       }
