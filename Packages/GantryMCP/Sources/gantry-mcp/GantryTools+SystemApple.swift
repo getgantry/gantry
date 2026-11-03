@@ -87,6 +87,41 @@ extension GantryTools {
                 inputSchema: Schema.object(properties: ["host_id": appleHostID, "name": machineName], required: ["host_id", "name"]),
                 annotations: .init(readOnlyHint: true, openWorldHint: false)
             ),
+            // Kubernetes clusters
+            Tool(
+                name: "list_clusters",
+                description: "List local Kubernetes clusters and their nodes on an apple/container host (container cluster, CLI 1.5+).",
+                inputSchema: Schema.object(properties: ["host_id": appleHostID], required: ["host_id"]),
+                annotations: .init(readOnlyHint: true, openWorldHint: false)
+            ),
+            Tool(
+                name: "create_cluster",
+                description: "Create and start a local Kubernetes cluster on an apple/container host. Pulls the kindest/node image and can take several minutes. The CLI merges the cluster context into the kubeconfig.",
+                inputSchema: Schema.object(properties: [
+                    "host_id": appleHostID,
+                    "name": Schema.string("Cluster name. It is also the kubectl context name."),
+                    "workers": Schema.integer("Number of worker nodes (optional; default 0; CLI 1.6+)."),
+                    "cpus": Schema.integer("CPUs per node (optional)."),
+                    "memory": Schema.string("Memory per node, e.g. 4G (optional)."),
+                    "node_image": Schema.string("Node image reference (optional; CLI default kindest/node)."),
+                    "cni": Schema.string(
+                        "CNI to install: 'default' (kindnet), 'none' (CLI 1.6+), or the path of a CNI manifest file (optional)."
+                    ),
+                    "remove_on_stop": Schema.boolean("Remove the node containers when they stop (optional)."),
+                    "kubeconfig": Schema.string("Kubeconfig file to merge the context into (optional; default ~/.kube/config).")
+                ], required: ["host_id", "name"]),
+                annotations: .init(readOnlyHint: false, destructiveHint: false, openWorldHint: true)
+            ),
+            Tool(
+                name: "delete_cluster",
+                description: "Delete a local Kubernetes cluster and its nodes, and remove its context from the kubeconfig.",
+                inputSchema: Schema.object(properties: [
+                    "host_id": appleHostID,
+                    "name": Schema.string("Cluster name."),
+                    "kubeconfig": Schema.string("Kubeconfig file to remove the context from (optional; default ~/.kube/config).")
+                ], required: ["host_id", "name"]),
+                annotations: .init(readOnlyHint: false, destructiveHint: true, openWorldHint: false)
+            ),
             // Services
             Tool(
                 name: "apple_service_status",
@@ -157,6 +192,9 @@ extension GantryTools {
         case "set_default_machine":   return try await machineSimple(args, op: "default")
         case "set_machine_resources": return try await setMachineResources(args)
         case "inspect_machine":       return try await inspectMachine(args)
+        case "list_clusters":         return try await listClusters(args)
+        case "create_cluster":        return try await createCluster(args)
+        case "delete_cluster":        return try await deleteCluster(args)
         case "apple_service_status":  return try await appleService(args, op: "status")
         case "apple_service_start":   return try await appleService(args, op: "start")
         case "apple_service_stop":    return try await appleService(args, op: "stop")
@@ -251,6 +289,43 @@ extension GantryTools {
         return .text(json)
     }
 
+    // MARK: - Kubernetes clusters
+
+    /// The cluster subcommand of the installed CLI and its feature gates.
+    private func clusterFeatures() async throws -> (command: String, features: ContainerTooling.Features) {
+        let features = await ContainerTooling.currentFeatures()
+        guard let command = features.clusterCommand else {
+            throw ToolError("Kubernetes clusters need apple/container CLI \(ContainerTooling.clustersVersion) or later.")
+        }
+        return (command, features)
+    }
+
+    private func listClusters(_ args: Arguments) async throws -> CallTool.Result {
+        let cli = try appleCLIOverride(args)
+        let (command, _) = try await clusterFeatures()
+        let clusters = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
+        return .text(try jsonText(clusters.map(ClusterDTO.init)))
+    }
+
+    private func createCluster(_ args: Arguments) async throws -> CallTool.Result {
+        let cli = try appleCLIOverride(args)
+        let (command, features) = try await clusterFeatures()
+        let options = try clusterCreateOptions(args, features: features)
+        try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli)
+        let config = options.kubeconfigPath ?? "~/.kube/config"
+        return .text("OK: created cluster \(options.name). kubectl context \(options.name) is in \(config).")
+    }
+
+    private func deleteCluster(_ args: Arguments) async throws -> CallTool.Result {
+        let cli = try appleCLIOverride(args)
+        let (command, _) = try await clusterFeatures()
+        let name = try args.requiredString("name")
+        try await AppleContainerControl.deleteCluster(
+            name, kubeconfigPath: args.string("kubeconfig"), command: command, cliOverride: cli
+        )
+        return .text("OK: deleted cluster \(name).")
+    }
+
     // MARK: - Services
 
     private func appleService(_ args: Arguments, op: String) async throws -> CallTool.Result {
@@ -292,4 +367,39 @@ extension GantryTools {
         try AppleContainerControl.setDefaultDNSDomain(domain)
         return .text("OK: default DNS domain set to \(domain).")
     }
+}
+
+/// Maps `create_cluster` arguments to CLI options and rejects options that
+/// the installed CLI does not have.
+func clusterCreateOptions(
+    _ args: Arguments,
+    features: ContainerTooling.Features
+) throws -> AppleContainerControl.ClusterCreateOptions {
+    let name = try args.requiredString("name")
+    let workers = args.intOrNil("workers")
+    if let workers, workers < 0 { throw ToolError("'workers' must be 0 or more.") }
+    let cni: AppleContainerControl.ClusterCNI
+    switch args.string("cni")?.trimmingCharacters(in: .whitespaces) {
+    case nil, "", "default": cni = .standard
+    case let value? where value.lowercased() == "none": cni = .none
+    case let path?: cni = .manifest(path)
+    }
+    if !features.clusterWorkers {
+        if (workers ?? 0) > 0 {
+            throw ToolError("Worker nodes need apple/container CLI \(ContainerTooling.clusterWorkersVersion) or later.")
+        }
+        if cni == .none {
+            throw ToolError("cni 'none' needs apple/container CLI \(ContainerTooling.clusterWorkersVersion) or later.")
+        }
+    }
+    return AppleContainerControl.ClusterCreateOptions(
+        name: name,
+        workers: workers,
+        cpus: args.intOrNil("cpus"),
+        memory: args.string("memory"),
+        nodeImage: args.string("node_image"),
+        cni: cni,
+        removeOnStop: args.bool("remove_on_stop", default: false),
+        kubeconfigPath: args.string("kubeconfig")
+    )
 }
