@@ -273,6 +273,9 @@ import Testing
         #expect(line.process == "container-runtime-linux")
         #expect(line.message == "[com.apple.container:RuntimeLinuxHelper] starting XPC server [uuid=x]")
         #expect(!line.isHeader)
+        #expect(line.level == .info)
+        #expect(AppleSystemLogLine(raw: raw.replacingOccurrences(of: "Info  ", with: "Fault ")).level == .error)
+        #expect(AppleSystemLogLine(raw: raw.replacingOccurrences(of: "Info  ", with: "Debug ")).level == .debug)
 
         let header = AppleSystemLogLine(raw: "Timestamp                       Thread     Type        Activity             PID    TTL")
         #expect(header.isHeader)

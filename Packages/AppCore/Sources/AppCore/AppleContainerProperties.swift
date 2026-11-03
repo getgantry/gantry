@@ -125,6 +125,9 @@ extension AppleContainerControl {
         ("machine.virtualization", .bool)
     ]
 
+    /// `~/.config/container/config.toml`, the file property edits go to.
+    public static var userConfigFileURL: URL { configFileURL() }
+
     public static func propertyKind(for key: String) -> AppleSystemPropertyKind {
         propertySchema.first { $0.key == key }?.kind ?? .unknown
     }

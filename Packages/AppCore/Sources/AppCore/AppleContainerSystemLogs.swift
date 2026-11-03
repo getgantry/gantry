@@ -29,6 +29,16 @@ public struct AppleSystemLogLine: Sendable, Equatable {
         }
     }
 
+    /// The unified-log type as a Gantry log level.
+    public var level: LogLevel? {
+        switch type?.lowercased() {
+        case "error", "fault": .error
+        case "default", "info": .info
+        case "debug": .debug
+        default: LogLevel.detect(message)
+        }
+    }
+
     /// True for the `log` tool's own header lines (column titles, filter note).
     public var isHeader: Bool {
         timestamp == nil && (raw.hasPrefix("Timestamp") || raw.hasPrefix("Filtering the log data"))
