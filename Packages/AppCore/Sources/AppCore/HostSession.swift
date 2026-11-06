@@ -137,6 +137,10 @@ public final class HostSession: Identifiable {
 
     private var client: DockerClient?
 
+    /// Recent container lifecycle events, for "Explain this failure".
+    @ObservationIgnored
+    public let containerEventLog = ContainerEventLog()
+
     /// Resolves registry credentials from `~/.docker/config.json` for private
     /// pulls (Docker/SSH hosts only). Stateless; safe to hold for the session.
     private let registryCredentials = RegistryCredentialStore()
@@ -772,6 +776,7 @@ public final class HostSession: Identifiable {
             if Task.isCancelled { break }
             switch event.type {
             case "container":
+                containerEventLog.record(event)
                 evaluateContainerAlert(event)
                 scheduleContainerRefresh()
             case "image":
@@ -1376,6 +1381,20 @@ public final class HostSession: Identifiable {
             timestamps: true,
             since: nil
         )
+    }
+
+    /// The last `tail` log lines of a container, without following.
+    public func recentLogLines(for containerID: String, tail: Int) async throws -> [String] {
+        guard let client else {
+            throw DockerError.connectionFailed("Not connected")
+        }
+        let details = try await client.inspectContainer(id: containerID)
+        let stream = try await client.containerLogs(
+            id: containerID, tty: details.config.tty, follow: false, tail: tail, timestamps: false
+        )
+        var lines: [String] = []
+        for try await entry in stream { lines.append(entry.text) }
+        return lines
     }
 
     /// Opens a streaming stats feed for a container.
