@@ -12,6 +12,10 @@ struct AppleServicesMenuSection: View {
     @State private var status: AppleServiceStatus = .unknown
     @State private var busy = false
     @State private var errorText: String?
+    /// A stop waiting for the inline confirmation (a dialog would close
+    /// the menu bar panel).
+    @State private var pendingStop: DestructiveAction?
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -30,11 +34,15 @@ struct AppleServicesMenuSection: View {
                 Spacer(minLength: 4)
                 control
             }
+            if let pendingStop {
+                stopConfirmation(pendingStop)
+            }
             if let errorText {
                 Text(errorText)
                     .font(.caption2)
                     .foregroundStyle(.red)
-                    .lineLimit(2)
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, 12)
@@ -49,8 +57,11 @@ struct AppleServicesMenuSection: View {
         } else {
             switch status {
             case .running:
-                Button("Stop") { act { try await AppleContainerControl.stopServices(cliOverride: cliOverride) } }
-                    .controlSize(.small)
+                Button("Stop…") {
+                    pendingStop = .services(.stopServices, runningContainers: model.appleRunningContainerCount)
+                }
+                .controlSize(.small)
+                .disabled(pendingStop != nil)
             case .stopped:
                 Button("Start") { act { try await AppleContainerControl.startServices(cliOverride: cliOverride) } }
                     .controlSize(.small)
@@ -79,6 +90,27 @@ struct AppleServicesMenuSection: View {
         case .stopped: "stopped"
         case .unavailable: "not installed"
         case .unknown: "checking…"
+        }
+    }
+
+    private func stopConfirmation(_ action: DestructiveAction) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(DestructiveActionText.title(action)).font(.caption.weight(.semibold))
+            Text(DestructiveActionText.message(action))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button(String(localized: "Cancel")) { pendingStop = nil }
+                Button(DestructiveActionText.confirmLabel(action), role: .destructive) {
+                    pendingStop = nil
+                    act { try await AppleContainerControl.stopServices(cliOverride: cliOverride) }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+            }
+            .controlSize(.small)
         }
     }
 

@@ -13,6 +13,8 @@ struct AppleSettingsView: View {
     @State private var newDomain = ""
     @State private var busy = false
     @State private var errorText: String?
+    /// A service stop/restart or a domain delete waiting for confirmation.
+    @State private var pendingAction: DestructiveAction?
     /// True after changing the default domain until the services are restarted
     /// (name resolution for new containers only applies after a restart).
     @State private var needsRestart = false
@@ -40,6 +42,7 @@ struct AppleSettingsView: View {
             }
         }
         .task { await reload() }
+        .destructiveConfirmation($pendingAction) { action, _ in perform(action) }
     }
 
     private var content: some View {
@@ -72,7 +75,9 @@ struct AppleSettingsView: View {
                 if busy {
                     ProgressView().controlSize(.small)
                 } else if status == .running {
-                    Button("Stop") { act { try await AppleContainerControl.stopServices(cliOverride: cliOverride) } }
+                    Button("Stop…") {
+                        pendingAction = .services(.stopServices, runningContainers: model.appleRunningContainerCount)
+                    }
                 } else {
                     Button("Start") { act { try await AppleContainerControl.startServices(cliOverride: cliOverride) } }
                         .buttonStyle(.borderedProminent)
@@ -118,11 +123,7 @@ struct AppleSettingsView: View {
                         .disabled(busy)
                         .help("Use as the default domain — new containers resolve as name." + domain)
                         Button(role: .destructive) {
-                            act {
-                                try await AppleContainerControl.deleteDomain(domain, cliOverride: cliOverride)
-                            } onSuccess: {
-                                if defaultDomain == domain { defaultDomain = "" }
-                            }
+                            pendingAction = DestructiveAction(kind: .deleteDomain, targets: [domain])
                         } label: {
                             Image(systemName: "trash")
                         }
@@ -156,12 +157,8 @@ struct AppleSettingsView: View {
                 Text("Restart services to apply name resolution for new containers.")
                     .font(.callout)
                 Spacer()
-                Button("Restart Services") {
-                    act {
-                        try await AppleContainerControl.restartServices(cliOverride: cliOverride)
-                    } onSuccess: {
-                        needsRestart = false
-                    }
+                Button("Restart Services…") {
+                    pendingAction = .services(.restartServices, runningContainers: model.appleRunningContainerCount)
                 }
                 .disabled(busy)
             }
@@ -185,6 +182,29 @@ struct AppleSettingsView: View {
         case .stopped: "Services stopped"
         case .unavailable: "CLI not found"
         case .unknown: "Checking…"
+        }
+    }
+
+    /// Runs a confirmed service or domain action.
+    private func perform(_ action: DestructiveAction) {
+        switch action.kind {
+        case .stopServices:
+            act { try await AppleContainerControl.stopServices(cliOverride: cliOverride) }
+        case .restartServices:
+            act {
+                try await AppleContainerControl.restartServices(cliOverride: cliOverride)
+            } onSuccess: {
+                needsRestart = false
+            }
+        case .deleteDomain:
+            guard let domain = action.targets.first else { return }
+            act {
+                try await AppleContainerControl.deleteDomain(domain, cliOverride: cliOverride)
+            } onSuccess: {
+                if defaultDomain == domain { defaultDomain = "" }
+            }
+        default:
+            break
         }
     }
 

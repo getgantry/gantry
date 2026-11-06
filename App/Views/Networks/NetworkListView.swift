@@ -8,7 +8,7 @@ struct NetworkListView: View {
     @Binding var selection: String?
 
     @State private var searchText = ""
-    @State private var removeTarget: NetworkResource?
+    @State private var removeAction: DestructiveAction?
     @State private var showingNew = false
     @State private var pruneConfirm = false
     @State private var pruneOutcome: PruneOutcome?
@@ -22,6 +22,17 @@ struct NetworkListView: View {
         return session.networks.filter {
             $0.name.lowercased().contains(needle) || $0.driver.lowercased().contains(needle)
         }
+    }
+
+    private static func removeAction(for network: NetworkResource) -> DestructiveAction {
+        DestructiveAction(kind: .removeNetwork, targets: [network.id], names: [network.name])
+    }
+
+    /// The Delete key removes the selected network (not a built-in one).
+    private func deleteSelected() -> DestructiveAction? {
+        guard let selection, let network = session.networks.first(where: { $0.id == selection }),
+              !Self.builtIns.contains(network.name) else { return nil }
+        return Self.removeAction(for: network)
     }
 
     var body: some View {
@@ -38,7 +49,7 @@ struct NetworkListView: View {
                         }
                         Divider()
                         Button(role: .destructive) {
-                            removeTarget = network
+                            removeAction = Self.removeAction(for: network)
                         } label: {
                             Label("Remove…", systemImage: "trash")
                         }
@@ -108,19 +119,8 @@ struct NetworkListView: View {
             Text("Removes all networks not used by at least one container.")
         }
         .pruneResultAlert($pruneOutcome)
-        .confirmationDialog(
-            "Remove \(removeTarget?.name ?? String(localized: "network"))?",
-            isPresented: Binding(presence: $removeTarget),
-            titleVisibility: .visible,
-            presenting: removeTarget
-        ) { network in
-            Button("Remove", role: .destructive) {
-                removeTarget = nil
-                Task { await session.removeNetwork(id: network.id) }
-            }
-            Button("Cancel", role: .cancel) { removeTarget = nil }
-        } message: { _ in
-            Text("This removes the network from the host. Networks with connected containers cannot be removed.")
+        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, _ in
+            for id in action.targets { await session.removeNetwork(id: id) }
         }
     }
 }
