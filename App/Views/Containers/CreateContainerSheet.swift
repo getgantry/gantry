@@ -37,6 +37,8 @@ struct CreateContainerSheet: View {
     /// Set when create failed with a 404; offers a pull-and-retry button.
     @State private var imageMissing = false
     @State private var pullStatus: String?
+    /// Which button started the create, so a pull-and-retry repeats it.
+    @State private var startAfterCreate = true
     /// Set when the daemon refused the name; shown under the Name field.
     @State private var nameError: String?
     /// Set when the new container stopped right after it started.
@@ -86,14 +88,14 @@ struct CreateContainerSheet: View {
             Divider()
 
             Form {
-                Section("Image") {
-                    TextField("Image", text: $image, prompt: Text("nginx:alpine"))
+                Section("General") {
+                    TextField("Image", text: $image, prompt: Text("Repository and tag"))
                         .textFieldStyle(.roundedBorder)
-                    TextField("Name (optional)", text: $name, prompt: Text("my-container"))
+                    TextField("Name (optional)", text: $name, prompt: Text("Generated if empty"))
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: name) { nameError = nil }
                     FieldError(message: nameIssue ?? nameError)
-                    TextField("Command (optional)", text: $command, prompt: Text("nginx -g 'daemon off;'"))
+                    TextField("Command (optional)", text: $command, prompt: Text("The image's default command"))
                         .textFieldStyle(.roundedBorder)
                     FieldError(message: commandError)
                 }
@@ -104,11 +106,11 @@ struct CreateContainerSheet: View {
                         addLabel: "Add Port",
                         empty: { PortRow() }
                     ) { $row in
-                        TextField("Host", text: $row.host, prompt: Text("8080"))
-                            .frame(width: 80)
+                        TextField("Host", text: $row.host, prompt: Text("Host port"))
+                            .frame(width: 90)
                         Text(":").foregroundStyle(.secondary)
-                        TextField("Container", text: $row.container, prompt: Text("80"))
-                            .frame(width: 80)
+                        TextField("Container", text: $row.container, prompt: Text("Container port"))
+                            .frame(width: 110)
                         Picker("", selection: $row.proto) {
                             Text("tcp").tag("tcp")
                             Text("udp").tag("udp")
@@ -207,23 +209,7 @@ struct CreateContainerSheet: View {
 
             Divider()
 
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
-                    .keyboardShortcut(.cancelAction)
-                Button {
-                    Task { await create() }
-                } label: {
-                    if isWorking {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Text("Create & Run")
-                    }
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(!canCreate)
-            }
-            .padding()
+            footer
         }
         .frame(width: 560, height: 640)
         .startedContainerExitAlert($earlyExit, session: session) { dismiss() }
@@ -241,16 +227,32 @@ struct CreateContainerSheet: View {
         }
     }
 
+    private var footer: some View {
+        HStack {
+            if isWorking { ProgressView().controlSize(.small) }
+            Spacer()
+            Button("Cancel", role: .cancel) { dismiss() }
+                .keyboardShortcut(.cancelAction)
+            Button("Create") {
+                Task { await create(run: false) }
+            }
+            .disabled(!canCreate)
+            .help("Create the container without starting it")
+            Button("Create and Run") {
+                Task { await create(run: true) }
+            }
+            .keyboardShortcut(.defaultAction)
+            .disabled(!canCreate)
+        }
+        .padding()
+    }
+
     /// DNS-domain picker for apple/container hosts: launch a container on a local
     /// domain so it resolves as `name.domain` across the Mac. Mirrors Quick Run.
     private var networkingSection: some View {
         Section {
             if availableDomains.isEmpty {
-                HStack(spacing: 6) {
-                    Image(systemName: "globe").foregroundStyle(.secondary)
-                    Text("No local domains. Add one in Settings → Apple to reach this container by name.")
-                        .font(.callout).foregroundStyle(.secondary)
-                }
+                NoLocalDomainsRow()
             } else {
                 Picker("DNS domain", selection: $domain) {
                     Text("None").tag("")
@@ -284,7 +286,7 @@ struct CreateContainerSheet: View {
                     addLabel: "Add Boot Argument",
                     empty: { KernelArgRow() }
                 ) { $row in
-                    TextField("Argument", text: $row.value, prompt: Text("lsm=lockdown,capability,bpf"))
+                    TextField("Argument", text: $row.value, prompt: Text("key=value"))
                         .textFieldStyle(.roundedBorder)
                 }
             } else {
@@ -439,16 +441,28 @@ struct CreateContainerSheet: View {
         )
     }
 
-    private func create() async {
+    private func create(run: Bool) async {
         errorText = nil
         nameError = nil
         imageMissing = false
+        startAfterCreate = run
         isWorking = true
         defer { isWorking = false }
         do {
-            try await runAndWatch()
+            try await createAndMaybeRun()
         } catch {
             show(error)
+        }
+    }
+
+    /// "Create" makes the container and closes; "Create and Run" also starts
+    /// it and watches for an early exit.
+    private func createAndMaybeRun() async throws {
+        if startAfterCreate {
+            try await runAndWatch()
+        } else {
+            _ = try await session.createContainer(buildRequest())
+            dismiss()
         }
     }
 
@@ -487,22 +501,34 @@ struct CreateContainerSheet: View {
         errorText = nil
         imageMissing = false
         isWorking = true
-        pullStatus = "Pulling \(image)…"
+        let reference = image.trimmingCharacters(in: .whitespaces)
+        pullStatus = String(localized: "Pulling \(reference)…")
         defer { isWorking = false; pullStatus = nil }
         do {
-            let stream = try await session.pullImage(reference: image.trimmingCharacters(in: .whitespaces))
+            let stream = try await session.pullImage(reference: reference)
             for try await progress in stream {
-                // PullProgress shape is owned by the resources layer; render a
-                // generic description so this stays decoupled from its fields.
-                pullStatus = "Pulling \(image)… \(String(describing: progress))"
+                pullStatus = PullStatusText.line(reference: reference, progress: progress)
             }
             // Retry the create now that the image should be present.
             pullStatus = nil
-            try await runAndWatch()
+            try await createAndMaybeRun()
         } catch {
             show(error)
             imageMissing = false
         }
+    }
+}
+
+/// One readable status line for a pull in progress.
+enum PullStatusText {
+    static func line(reference: String, progress: PullProgress) -> String {
+        if let current = progress.current, let total = progress.total, total > 0 {
+            let done = Formatters.bytes(current, style: .file)
+            let all = Formatters.bytes(total, style: .file)
+            return String(localized: "Pulling \(reference)… \(progress.status) \(done) of \(all)")
+        }
+        if progress.status.isEmpty { return String(localized: "Pulling \(reference)…") }
+        return String(localized: "Pulling \(reference)… \(progress.status)")
     }
 }
 

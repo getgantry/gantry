@@ -218,11 +218,7 @@ struct QuickRunSheet: View {
     private var domainSection: some View {
         Section {
             if availableDomains.isEmpty {
-                HStack(spacing: 6) {
-                    Image(systemName: "globe").foregroundStyle(.secondary)
-                    Text("No local domains. Add one in Settings → Apple to reach containers by name.")
-                        .font(.callout).foregroundStyle(.secondary)
-                }
+                NoLocalDomainsRow()
             } else {
                 Picker("DNS domain", selection: $domain) {
                     Text("None").tag("")
