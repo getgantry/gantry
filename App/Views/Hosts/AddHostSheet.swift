@@ -15,6 +15,7 @@ enum AuthChoice: Hashable {
 private enum HostTypeChoice: Hashable {
     case ssh
     case appleContainer
+    case localDocker
 }
 
 /// Sheet for adding a new host: an SSH Docker host (resolving ssh_config live
@@ -50,6 +51,11 @@ struct AddHostSheet: View {
     /// Where the apple/container CLI was found, if anywhere.
     private let appleCLIPath = AppleContainerCLIDiscovery.discover()
 
+    /// The Docker socket found at the usual places, if any.
+    private let dockerSocketPath = DockerSocketDiscovery.discover()
+    /// A custom socket path for Local Docker; empty means "find it".
+    @State private var socketPath = ""
+
     private var defaultUser: String { NSUserName() }
 
     private var trimmedHost: String {
@@ -59,14 +65,14 @@ struct AddHostSheet: View {
     private var canAdd: Bool {
         switch hostType {
         case .ssh: !trimmedHost.isEmpty
-        case .appleContainer: true
+        case .appleContainer, .localDocker: true
         }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 10) {
-                Image(systemName: hostType == .ssh ? "network" : "apple.logo")
+                Image(systemName: headerSymbol)
                     .font(.title2)
                     .foregroundStyle(.tint)
                 Text("Add Host")
@@ -76,6 +82,7 @@ struct AddHostSheet: View {
             Picker("Type", selection: $hostType) {
                 Text("SSH Docker Host").tag(HostTypeChoice.ssh)
                 Text("Apple Container").tag(HostTypeChoice.appleContainer)
+                Text("Local Docker").tag(HostTypeChoice.localDocker)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -85,6 +92,8 @@ struct AddHostSheet: View {
                 sshForm
             case .appleContainer:
                 appleContainerForm
+            case .localDocker:
+                localDockerForm
             }
 
             HStack {
@@ -107,6 +116,42 @@ struct AddHostSheet: View {
             }
         }
         .onDisappear { resolveTask?.cancel() }
+    }
+
+    private var headerSymbol: String {
+        switch hostType {
+        case .ssh: "network"
+        case .appleContainer: "apple.logo"
+        case .localDocker: "shippingbox"
+        }
+    }
+
+    // MARK: - Local Docker form
+
+    private var localDockerForm: some View {
+        Form {
+            Section {
+                TextField("Name", text: $name, prompt: Text(verbatim: LocalDockerPolicy.defaultName))
+                TextField("Socket path (optional)", text: $socketPath, prompt: Text("Find automatically"))
+            } footer: {
+                localDockerFooter
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private var localDockerFooter: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("The Docker engine on this Mac: Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman.")
+            if let dockerSocketPath {
+                Label("Socket found at \(dockerSocketPath)", systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+            } else {
+                Label("No Docker socket found yet. The host shows as not installed until one appears.", systemImage: "info.circle")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .font(.footnote)
     }
 
     // MARK: - Apple Container form
@@ -229,6 +274,17 @@ struct AddHostSheet: View {
     // MARK: - Actions
 
     private func add() {
+        if hostType == .localDocker {
+            let displayName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let path = socketPath.trimmingCharacters(in: .whitespacesAndNewlines)
+            model.addHost(DockerHost(
+                name: displayName.isEmpty ? LocalDockerPolicy.defaultName : displayName,
+                kind: .local,
+                socketPathOverride: path.isEmpty ? nil : path
+            ))
+            dismiss()
+            return
+        }
         if hostType == .appleContainer {
             let displayName = name.trimmingCharacters(in: .whitespacesAndNewlines)
             let resolvedName = displayName.isEmpty ? "Apple Container" : displayName

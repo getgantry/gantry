@@ -415,7 +415,9 @@ private struct HostCard: View {
 
     private func footerText(_ info: SystemInfo) -> String {
         var parts: [String] = []
-        if !info.serverVersion.isEmpty { parts.append("Docker \(info.serverVersion)") }
+        if !info.serverVersion.isEmpty {
+            parts.append(HostKindLabels.engineVersion(session.host, version: info.serverVersion))
+        }
         if !info.operatingSystem.isEmpty { parts.append(info.operatingSystem) }
         parts.append(String(localized: "\(info.ncpu) CPU · \(Formatters.bytes(info.memTotal))"))
         return parts.joined(separator: " · ")
@@ -455,10 +457,10 @@ private struct HostCard: View {
 
     private var disconnectedSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Disconnected")
+            Text(session.dockerNotInstalled ? LocalizedStringKey("Docker is not installed on this Mac.") : "Disconnected")
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Button("Connect") {
+            Button(session.dockerNotInstalled ? LocalizedStringKey("Check Again") : "Connect") {
                 Task { await session.connect() }
             }
             .controlSize(.small)

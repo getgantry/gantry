@@ -50,6 +50,11 @@ struct GantryApp: App {
                     applyActivationPolicy()
                     configureNotifications()
                 }
+                // Docker may have been installed or removed while Gantry was
+                // in the background: hide or restore the Local host to match.
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                    model.applyLocalDockerPolicy()
+                }
                 .onChange(of: appearance) { _, newValue in
                     applyAppearance(newValue)
                 }

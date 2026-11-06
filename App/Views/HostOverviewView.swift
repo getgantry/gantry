@@ -157,7 +157,10 @@ struct HostOverviewView: View {
     private func countsCard(info: SystemInfo) -> some View {
         HStack(spacing: 0) {
             countCell(value: info.containersRunning, label: String(localized: "Running"), tint: .green)
-            countCell(value: info.containersPaused, label: String(localized: "Paused"), tint: .yellow)
+            // apple/container cannot pause, so the tile would always read 0.
+            if session.host.capabilities.pauseResume {
+                countCell(value: info.containersPaused, label: String(localized: "Paused"), tint: .yellow)
+            }
             countCell(value: info.containersStopped, label: String(localized: "Stopped"), tint: .gray)
             countCell(value: info.images, label: String(localized: "Images"), tint: .blue)
         }
@@ -186,17 +189,18 @@ struct HostOverviewView: View {
                 Label("Disk", systemImage: "internaldrive")
                     .font(.headline)
                 Spacer()
-                if let diskUsage {
-                    Text("Docker data: \(Formatters.bytes(totalDisk(diskUsage), style: .file))")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
                 Button {
                     showCleanup = true
                 } label: {
                     Label("Reclaim Space…", systemImage: "sparkles")
                 }
                 .controlSize(.small)
+                .fixedSize()
+            }
+            if let diskUsage {
+                Text(diskTotalText(diskUsage))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
 
             if let diskUsage {
@@ -243,6 +247,14 @@ struct HostOverviewView: View {
         ]
     }
 
+    /// "Docker data: 2.8 GB", or "Storage: 2.8 GB" on apple/container.
+    private func diskTotalText(_ usage: SystemDiskUsage) -> String {
+        let size = Formatters.bytes(totalDisk(usage), style: .file)
+        return session.host.isAppleContainer
+            ? String(localized: "Storage: \(size)")
+            : String(localized: "Docker data: \(size)")
+    }
+
     private func totalDisk(_ usage: SystemDiskUsage) -> Int64 {
         usage.layersSize + usage.containersSize + usage.volumesSize
     }
@@ -274,7 +286,7 @@ struct HostOverviewView: View {
                 Fact("Name", info.name.isEmpty ? "—" : info.name)
                 Fact("Operating System", info.operatingSystem.isEmpty ? "—" : info.operatingSystem)
                 Fact("Architecture", info.architecture.isEmpty ? "—" : info.architecture)
-                Fact("Docker", info.serverVersion.isEmpty ? "—" : info.serverVersion)
+                Fact(HostKindLabels.engineName(session.host), info.serverVersion.isEmpty ? "—" : info.serverVersion)
                 Fact("CPUs", "\(info.ncpu)")
                 Fact("Memory", Formatters.bytes(info.memTotal))
             }

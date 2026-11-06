@@ -9,7 +9,8 @@ import Testing
     @Test func localHostFlags() {
         let host = DockerHost(name: "Local", kind: .local)
         #expect(host.isLocal)
-        #expect(!host.removable)
+        // Removable so that an apple/container-only Mac can drop it.
+        #expect(host.removable)
     }
 
     @Test func sshHostFlags() {

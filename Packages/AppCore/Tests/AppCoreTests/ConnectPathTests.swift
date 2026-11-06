@@ -23,20 +23,14 @@ import Testing
         await session.disconnect()
     }
 
-    @Test func connectLocalNoSocketReportsFailure() async {
-        // Force discovery to find nothing by pointing DOCKER_HOST at a bad unix
-        // path AND relying on no real socket. If a live daemon exists this may
-        // connect instead; in that case we just disconnect cleanly.
-        let host = DockerHost(name: "Local", kind: .local)
-        let session = HostSession(host: host)
-        if DockerSocketDiscovery.discover() == nil {
-            await session.connect()
-            if case .failed(let msg) = session.status {
-                #expect(msg.contains("socket"))
-            } else {
-                Issue.record("expected .failed when no socket present")
-            }
-        }
+    @Test func connectLocalNoSocketIsNotInstalledNotFailed() async {
+        // No Docker on the Mac is a neutral state (Gantry also runs on
+        // apple/container alone), so it must not read as a failure.
+        let session = HostSession(host: DockerHost(name: "Local", kind: .local))
+        session.discoverDockerSocket = { nil }
+        await session.connect()
+        #expect(session.status == .disconnected)
+        #expect(session.dockerNotInstalled)
         await session.disconnect()
     }
 

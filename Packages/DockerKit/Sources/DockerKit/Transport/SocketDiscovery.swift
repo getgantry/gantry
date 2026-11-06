@@ -1,7 +1,8 @@
 import Foundation
 
 /// Locates a usable local Docker unix socket across common installations
-/// (Docker Desktop, OrbStack, Colima, and the system default).
+/// (Docker Desktop, OrbStack, Colima, Rancher Desktop, Podman, and the
+/// system default).
 public enum DockerSocketDiscovery {
     /// Returns the first existing socket path, honoring `DOCKER_HOST` first.
     public static func discover(
@@ -30,6 +31,9 @@ public enum DockerSocketDiscovery {
             "\(home)/.docker/run/docker.sock",
             "\(home)/.orbstack/run/docker.sock",
             "\(home)/.colima/default/docker.sock",
+            "\(home)/.rd/docker.sock",
+            "\(home)/.local/share/containers/podman/machine/podman.sock",
+            "\(home)/.local/share/containers/podman/machine/qemu/podman.sock",
             "/var/run/docker.sock"
         ]
     }
