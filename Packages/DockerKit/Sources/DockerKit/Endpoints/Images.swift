@@ -33,6 +33,10 @@ extension DockerClient {
         try await rawJSON(path: "/images/\(id)/json")
     }
 
+    /// Upper bound on concurrent inspects: a large library over SSH must not
+    /// open hundreds of channels at once.
+    static let maxParallelInspects = 6
+
     /// Inspects the selected images in parallel and writes each platform back
     /// into its summary's descriptor. Failures leave the descriptor empty.
     private func fillMissingPlatforms(
@@ -42,13 +46,17 @@ extension DockerClient {
         let targets = images.enumerated().filter { shouldInspect($0.element) && $0.element.architecture.isEmpty }
         guard !targets.isEmpty else { return }
         try await withThrowingTaskGroup(of: (Int, ImagePlatform?).self) { group in
-            for (index, image) in targets {
+            var pending = targets.makeIterator()
+            func addNext() {
+                guard let (index, image) = pending.next() else { return }
                 group.addTask { (index, try? await self.imagePlatform(id: image.id)) }
             }
+            for _ in 0..<Self.maxParallelInspects { addNext() }
             for try await (index, platform) in group {
                 if let platform {
                     images[index].descriptor = ImageDescriptor(platform: platform)
                 }
+                addNext()
             }
         }
     }
