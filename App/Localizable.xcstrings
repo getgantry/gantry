@@ -15531,6 +15531,710 @@
           }
         }
       }
+    },
+    "This Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac"
+          }
+        }
+      }
+    },
+    "Suggested Command": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggested Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建议的命令"
+          }
+        }
+      }
+    },
+    "Connect the SSH host in the main window, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect the SSH host in the main window, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在主窗口中连接 SSH 主机，然后重试。"
+          }
+        }
+      }
+    },
+    "Nothing to Explain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to Explain"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可解释的内容"
+          }
+        }
+      }
+    },
+    "The container or operation is no longer there.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container or operation is no longer there."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该容器或操作已不存在。"
+          }
+        }
+      }
+    },
+    "Explain Failure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain Failure"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解释故障"
+          }
+        }
+      }
+    },
+    "Analysis runs on Apple Private Cloud Compute. Gantry hides environment values and secret-like text before it sends the logs.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysis runs on Apple Private Cloud Compute. Gantry hides environment values and secret-like text before it sends the logs."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分析在 Apple 私有云计算上运行。Gantry 在发送日志前会隐藏环境变量的值和类似密钥的文本。"
+          }
+        }
+      }
+    },
+    "Analysis runs on this Mac. Gantry hides environment values and secret-like text before it sends the logs to the model.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysis runs on this Mac. Gantry hides environment values and secret-like text before it sends the logs to the model."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分析在这台 Mac 上运行。Gantry 在把日志发送给模型前会隐藏环境变量的值和类似密钥的文本。"
+          }
+        }
+      }
+    },
+    "Copy a prompt for another AI assistant": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy a prompt for another AI assistant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制提示词，以便用于其他 AI 助手"
+          }
+        }
+      }
+    },
+    "Collecting logs and details…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collecting logs and details…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在收集日志和详细信息…"
+          }
+        }
+      }
+    },
+    "Analyzing the failure…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing the failure…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在分析故障…"
+          }
+        }
+      }
+    },
+    "The model could not explain this failure.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model could not explain this failure."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型无法解释此故障。"
+          }
+        }
+      }
+    },
+    "Try again, or copy a prompt for another AI assistant.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again, or copy a prompt for another AI assistant."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请重试，或复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开设置"
+          }
+        }
+      }
+    },
+    "Explain is turned off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain is turned off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“解释”功能已关闭"
+          }
+        }
+      }
+    },
+    "Apple Intelligence is not available": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence is not available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 智能不可用"
+          }
+        }
+      }
+    },
+    "Turn on Explain in Settings > Agents. You can copy a prompt for another AI assistant instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Explain in Settings > Agents. You can copy a prompt for another AI assistant instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“设置 > 代理”中打开“解释”。你也可以复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "This Mac does not support Apple Intelligence. You can copy a prompt for another AI assistant instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac does not support Apple Intelligence. You can copy a prompt for another AI assistant instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 不支持 Apple 智能。你可以复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in System Settings > Apple Intelligence & Siri, then try again. You can copy a prompt for another AI assistant instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Apple Intelligence in System Settings > Apple Intelligence & Siri, then try again. You can copy a prompt for another AI assistant instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“系统设置 > Apple 智能与 Siri”中打开 Apple 智能，然后重试。你也可以复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "The Apple Intelligence model is not ready yet. It can still be downloading. Try again later, or copy a prompt for another AI assistant.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Apple Intelligence model is not ready yet. It can still be downloading. Try again later, or copy a prompt for another AI assistant."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 智能模型尚未就绪，可能仍在下载。请稍后重试，或复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "Apple Intelligence does not support the language of Gantry. You can copy a prompt for another AI assistant instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence does not support the language of Gantry. You can copy a prompt for another AI assistant instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 智能不支持 Gantry 当前使用的语言。你可以复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "Apple Intelligence reports: %@. You can copy a prompt for another AI assistant instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence reports: %@. You can copy a prompt for another AI assistant instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 智能报告：%@。你可以复制提示词以用于其他 AI 助手。"
+          }
+        }
+      }
+    },
+    "Ready: on-device model": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready: on-device model"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就绪：设备端模型"
+          }
+        }
+      }
+    },
+    "Ready: Private Cloud Compute": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready: Private Cloud Compute"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就绪：私有云计算"
+          }
+        }
+      }
+    },
+    "The model can be wrong. Check the evidence before you act.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model can be wrong. Check the evidence before you act."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型可能出错。操作前请核对证据。"
+          }
+        }
+      }
+    },
+    "Likely Cause": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Likely Cause"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可能原因"
+          }
+        }
+      }
+    },
+    "Low confidence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "置信度低"
+          }
+        }
+      }
+    },
+    "Medium confidence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium confidence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "置信度中"
+          }
+        }
+      }
+    },
+    "High confidence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "置信度高"
+          }
+        }
+      }
+    },
+    "Evidence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evidence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "证据"
+          }
+        }
+      }
+    },
+    "Not found in the logs Gantry sent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not found in the logs Gantry sent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Gantry 发送的日志中未找到"
+          }
+        }
+      }
+    },
+    "Next Steps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Steps"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后续步骤"
+          }
+        }
+      }
+    },
+    "This command stops or deletes something. Read it before you run it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This command stops or deletes something. Read it before you run it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此命令会停止或删除内容。运行前请仔细阅读。"
+          }
+        }
+      }
+    },
+    "Run in Terminal…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run in Terminal…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在终端中运行…"
+          }
+        }
+      }
+    },
+    "Open a terminal with this command typed in. It does not run until you press Return.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a terminal with this command typed in. It does not run until you press Return."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开已输入此命令的终端。按下 Return 键之前命令不会运行。"
+          }
+        }
+      }
+    },
+    "What Gantry Sent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What Gantry Sent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 发送的内容"
+          }
+        }
+      }
+    },
+    "Explain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解释"
+          }
+        }
+      }
+    },
+    "Explain this failure with Apple Intelligence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain this failure with Apple Intelligence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 Apple 智能解释此故障"
+          }
+        }
+      }
+    },
+    "Explain Failure…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain Failure…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解释故障…"
+          }
+        }
+      }
+    },
+    "Explain Failures": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explain Failures"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解释故障"
+          }
+        }
+      }
+    },
+    "Gantry can explain why a container or a build failed with Apple Intelligence. It sends recent logs and container details to the model. Environment values and secret-like text are hidden first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry can explain why a container or a build failed with Apple Intelligence. It sends recent logs and container details to the model. Environment values and secret-like text are hidden first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 可以用 Apple 智能解释容器或构建失败的原因。它会把最近的日志和容器详细信息发送给模型，并先隐藏环境变量的值和类似密钥的文本。"
+          }
+        }
+      }
+    },
+    "Show Explain for failed containers and builds": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Explain for failed containers and builds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为失败的容器和构建显示“解释”"
+          }
+        }
+      }
+    },
+    "Use Private Cloud Compute for long logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Private Cloud Compute for long logs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对较长的日志使用私有云计算"
+          }
+        }
+      }
+    },
+    "The larger model can read more log lines. With this setting on, the redacted context leaves this Mac and goes to Apple Private Cloud Compute. With it off, everything stays on this Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The larger model can read more log lines. With this setting on, the redacted context leaves this Mac and goes to Apple Private Cloud Compute. With it off, everything stays on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更大的模型可以读取更多日志行。打开此设置后，已隐藏敏感信息的上下文会离开这台 Mac，发送到 Apple 私有云计算。关闭时，所有内容都留在这台 Mac 上。"
+          }
+        }
+      }
     }
   }
 }

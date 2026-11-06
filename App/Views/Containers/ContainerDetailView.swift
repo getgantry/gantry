@@ -151,6 +151,7 @@ struct ContainerDetailView: View {
                 Label("Copy as Prompt", systemImage: "text.badge.star")
             }
             .keyboardShortcut("p", modifiers: [.command, .option])
+            ExplainMenuItem(session: session, container: container)
         } label: {
             Label("More", systemImage: "ellipsis.circle")
         }
@@ -170,6 +171,7 @@ struct ContainerDetailView: View {
                     .textSelection(.enabled)
             }
             Spacer()
+            ExplainFailureButton(session: session, container: container)
             stateBadge
         }
     }
