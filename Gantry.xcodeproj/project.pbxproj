@@ -12,11 +12,15 @@
 		GA000000000000000000B003 /* AppCore in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P003 /* AppCore */; };
 		GA000000000000000000B004 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P004 /* SwiftTerm */; };
 		GA000000000000000000B005 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P005 /* Sparkle */; };
+		GA000000000000000000B006 /* GantryShared in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P006 /* GantryShared */; };
+		GA000000000000000000B007 /* GantryShared in Frameworks */ = {isa = PBXBuildFile; productRef = GA000000000000000000P007 /* GantryShared */; };
+		GA000000000000000000B008 /* GantryWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = GA000000000000000000F003 /* GantryWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		GA000000000000000000F001 /* Gantry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gantry.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		GA000000000000000000F002 /* GantryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GantryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		GA000000000000000000F003 /* GantryWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GantryWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,6 +32,16 @@
 		GA000000000000000000G002 /* GantryUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = GantryUITests;
+			sourceTree = "<group>";
+		};
+		GA000000000000000000G003 /* Widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Widgets;
+			sourceTree = "<group>";
+		};
+		GA000000000000000000G004 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -42,6 +56,15 @@
 				GA000000000000000000B003 /* AppCore in Frameworks */,
 				GA000000000000000000B004 /* SwiftTerm in Frameworks */,
 				GA000000000000000000B005 /* Sparkle in Frameworks */,
+				GA000000000000000000B006 /* GantryShared in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		GA000000000000000000W006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				GA000000000000000000B007 /* GantryShared in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +76,8 @@
 			children = (
 				GA000000000000000000G001 /* App */,
 				GA000000000000000000G002 /* GantryUITests */,
+				GA000000000000000000G003 /* Widgets */,
+				GA000000000000000000G004 /* Shared */,
 				GA000000000000000000R001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +87,7 @@
 			children = (
 				GA000000000000000000F001 /* Gantry.app */,
 				GA000000000000000000F002 /* GantryUITests.xctest */,
+				GA000000000000000000F003 /* GantryWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,13 +102,16 @@
 				GA000000000000000000W001 /* Sources */,
 				GA000000000000000000W002 /* Frameworks */,
 				GA000000000000000000W003 /* Resources */,
+				GA000000000000000000W008 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				GA000000000000000000Y002 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				GA000000000000000000G001 /* App */,
+				GA000000000000000000G004 /* Shared */,
 			);
 			name = Gantry;
 			packageProductDependencies = (
@@ -91,6 +120,7 @@
 				GA000000000000000000P003 /* AppCore */,
 				GA000000000000000000P004 /* SwiftTerm */,
 				GA000000000000000000P005 /* Sparkle */,
+				GA000000000000000000P006 /* GantryShared */,
 			);
 			productName = Gantry;
 			productReference = GA000000000000000000F001 /* Gantry.app */;
@@ -117,6 +147,30 @@
 			productReference = GA000000000000000000F002 /* GantryUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		GA000000000000000000T003 /* GantryWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = GA000000000000000000C004 /* Build configuration list for PBXNativeTarget "GantryWidgets" */;
+			buildPhases = (
+				GA000000000000000000W005 /* Sources */,
+				GA000000000000000000W006 /* Frameworks */,
+				GA000000000000000000W007 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				GA000000000000000000G003 /* Widgets */,
+				GA000000000000000000G004 /* Shared */,
+			);
+			name = GantryWidgets;
+			packageProductDependencies = (
+				GA000000000000000000P007 /* GantryShared */,
+			);
+			productName = GantryWidgets;
+			productReference = GA000000000000000000F003 /* GantryWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,7 +181,28 @@
 			remoteGlobalIDString = GA000000000000000000T001;
 			remoteInfo = Gantry;
 		};
+		GA000000000000000000X002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = GA000000000000000000J001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = GA000000000000000000T003;
+			remoteInfo = GantryWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		GA000000000000000000W008 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				GA000000000000000000B008 /* GantryWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXProject section */
 		GA000000000000000000J001 /* Project object */ = {
@@ -143,6 +218,9 @@
 					GA000000000000000000T002 = {
 						CreatedOnToolsVersion = 26.5;
 						TestTargetID = GA000000000000000000T001;
+					};
+					GA000000000000000000T003 = {
+						CreatedOnToolsVersion = 27.2;
 					};
 				};
 			};
@@ -162,6 +240,7 @@
 				GA000000000000000000K003 /* XCLocalSwiftPackageReference "Packages/AppCore" */,
 				GA000000000000000000K004 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
 				GA000000000000000000K005 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				GA000000000000000000K006 /* XCLocalSwiftPackageReference "Packages/GantryShared" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = GA000000000000000000R001 /* Products */;
@@ -170,12 +249,20 @@
 			targets = (
 				GA000000000000000000T001 /* Gantry */,
 				GA000000000000000000T002 /* GantryUITests */,
+				GA000000000000000000T003 /* GantryWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		GA000000000000000000W003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		GA000000000000000000W007 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -199,6 +286,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		GA000000000000000000W005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -206,6 +300,11 @@
 			isa = PBXTargetDependency;
 			target = GA000000000000000000T001 /* Gantry */;
 			targetProxy = GA000000000000000000X001 /* PBXContainerItemProxy */;
+		};
+		GA000000000000000000Y002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = GA000000000000000000T003 /* GantryWidgets */;
+			targetProxy = GA000000000000000000X002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -348,6 +447,62 @@
 			};
 			name = Release;
 		};
+		GA000000000000000000D007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GantryWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 42;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "GantryWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Gantry;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.25.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewkomkov.Gantry.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG GANTRY_WIDGET_EXTENSION $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		GA000000000000000000D008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GantryWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 42;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "GantryWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Gantry;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.25.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.andrewkomkov.Gantry.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "GANTRY_WIDGET_EXTENSION $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -378,6 +533,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		GA000000000000000000C004 /* Build configuration list for PBXNativeTarget "GantryWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				GA000000000000000000D007 /* Debug */,
+				GA000000000000000000D008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -392,6 +556,10 @@
 		GA000000000000000000K003 /* XCLocalSwiftPackageReference "Packages/AppCore" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/AppCore;
+		};
+		GA000000000000000000K006 /* XCLocalSwiftPackageReference "Packages/GantryShared" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/GantryShared;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -436,6 +604,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = GA000000000000000000K005 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		GA000000000000000000P006 /* GantryShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GantryShared;
+		};
+		GA000000000000000000P007 /* GantryShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GantryShared;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

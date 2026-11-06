@@ -131,6 +131,7 @@ struct GantryApp: App {
         guard !notificationsConfigured else { return }
         notificationsConfigured = true
         ContainerNotifier.shared.start()
+        SystemIntegration.shared.attach(model)
         model.containerAlertHandler = { alert in
             ContainerNotifier.shared.present(alert)
         }
