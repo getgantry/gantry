@@ -78,6 +78,12 @@ public final class HostSession: Identifiable {
         report(error.localizedDescription)
     }
 
+    /// A banner action that works makes the older banner error stale (#35).
+    /// Work inside ``attempt(_:)`` belongs to a sheet and leaves it alone.
+    func clearStaleError() {
+        if ErrorCaptureScope.current == nil { lastError = nil }
+    }
+
     /// Sends an action error to the sheet that runs it inside ``attempt(_:)``,
     /// or else to the content-area banner (``lastError``).
     func report(_ message: String) {
@@ -1432,6 +1438,7 @@ public final class HostSession: Identifiable {
         }
         do {
             try await body(client)
+            clearStaleError()
             await refresh()
             return true
         } catch {
@@ -1452,6 +1459,7 @@ public final class HostSession: Identifiable {
         }
         do {
             let value = try await body(client)
+            clearStaleError()
             await refresh()
             return value
         } catch {
