@@ -12,34 +12,53 @@ final class MockTransport: DockerTransport, @unchecked Sendable {
         var body: Data
     }
 
+    /// `HostSession.refreshAll` calls the transport from parallel tasks, so
+    /// all state is behind this lock. An unguarded append crashed with SIGSEGV.
+    private let lock = NSLock()
+
     /// Keyed by "METHOD path-without-version", e.g. "GET /containers/json".
     /// Matched by checking the request path *ends with* the route's path.
     private var routes: [String: Route] = [:]
     private var streamRoutes: [String: (status: Int, lines: [Data])] = [:]
-    private(set) var executed: [DockerRequest] = []
+    private var executedRequests: [DockerRequest] = []
     private var hijackHandler: (@Sendable (DockerRequest) -> DockerHijackedConnection)?
-    var shutdownCount = 0
+    private var shutdowns = 0
+    private var cliBuild = false
+
+    var executed: [DockerRequest] { lock.withLock { executedRequests } }
+    var shutdownCount: Int { lock.withLock { shutdowns } }
 
     /// Mirrors the transport's build mode. `true` makes `DockerClient` post the
     /// `ImageBuildSpec` JSON to `/build` (apple/container); `false` (default)
     /// takes the daemon tar-upload path.
-    var usesCLIBuild: Bool = false
+    var usesCLIBuild: Bool {
+        get { lock.withLock { cliBuild } }
+        set { lock.withLock { cliBuild = newValue } }
+    }
 
     /// Registers a buffered JSON response for a method/path-suffix.
     func on(_ method: DockerRequest.Method, _ path: String, status: Int = 200, json: String) {
-        routes["\(method.rawValue) \(path)"] = Route(status: status, body: Data(json.utf8))
+        lock.withLock { routes["\(method.rawValue) \(path)"] = Route(status: status, body: Data(json.utf8)) }
     }
 
     /// Registers a streaming (JSON-lines) response.
     func onStream(_ path: String, status: Int = 200, lines: [String]) {
-        streamRoutes[path] = (status, lines.map { Data(($0 + "\n").utf8) })
+        lock.withLock { streamRoutes[path] = (status, lines.map { Data(($0 + "\n").utf8) }) }
     }
 
     func onHijack(_ handler: @escaping @Sendable (DockerRequest) -> DockerHijackedConnection) {
-        hijackHandler = handler
+        lock.withLock { hijackHandler = handler }
     }
 
-    private func matchBuffered(_ request: DockerRequest) -> Route? {
+    /// Records the request and returns the routes, in one locked step.
+    private func record(_ request: DockerRequest) -> [String: Route] {
+        lock.withLock {
+            executedRequests.append(request)
+            return routes
+        }
+    }
+
+    private func matchBuffered(_ request: DockerRequest, in routes: [String: Route]) -> Route? {
         for (key, route) in routes {
             let parts = key.split(separator: " ", maxSplits: 1)
             guard parts.count == 2 else { continue }
@@ -53,16 +72,16 @@ final class MockTransport: DockerTransport, @unchecked Sendable {
     }
 
     func execute(_ request: DockerRequest) async throws -> DockerResponse {
-        executed.append(request)
-        guard let route = matchBuffered(request) else {
+        guard let route = matchBuffered(request, in: record(request)) else {
             throw DockerError.apiError(status: 599, message: "no mock route for \(request.method.rawValue) \(request.path)")
         }
         return DockerResponse(status: route.status, headers: [:], body: route.body)
     }
 
     func stream(_ request: DockerRequest) async throws -> DockerByteStream {
-        executed.append(request)
-        for (path, route) in streamRoutes where request.path.hasSuffix(path) {
+        _ = record(request)
+        let streams = lock.withLock { streamRoutes }
+        for (path, route) in streams where request.path.hasSuffix(path) {
             let lines = route.lines
             let bytes = AsyncThrowingStream<Data, Error> { continuation in
                 for line in lines { continuation.yield(line) }
@@ -74,15 +93,15 @@ final class MockTransport: DockerTransport, @unchecked Sendable {
     }
 
     func hijack(_ request: DockerRequest) async throws -> DockerHijackedConnection {
-        executed.append(request)
-        if let handler = hijackHandler {
+        _ = record(request)
+        if let handler = lock.withLock({ hijackHandler }) {
             return handler(request)
         }
         throw DockerError.apiError(status: 599, message: "no mock hijack for \(request.path)")
     }
 
     func shutdown() async {
-        shutdownCount += 1
+        lock.withLock { shutdowns += 1 }
     }
 }
 

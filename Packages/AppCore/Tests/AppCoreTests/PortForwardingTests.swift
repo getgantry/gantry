@@ -15,12 +15,13 @@ import Darwin
     }
 
     @Test func preferredFreePortIsHonored() {
-        // Pick a port the kernel just told us is free, then ask for it by name.
-        guard let preferred = LocalPort.free() else {
-            Issue.record("no free port available")
-            return
+        // Parallel tests can take the port between the two calls, so the
+        // test passes when any of a few attempts honors the preferred port.
+        let honored = (0..<5).contains { _ in
+            guard let preferred = LocalPort.free() else { return false }
+            return LocalPort.free(preferring: preferred) == preferred
         }
-        #expect(LocalPort.free(preferring: preferred) == preferred)
+        #expect(honored)
     }
 
     @Test func busyPortIsNotAvailableAndFallsBack() throws {
