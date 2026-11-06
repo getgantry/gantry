@@ -44,7 +44,7 @@ struct ListContainersIntent: AppIntent {
             return try IntentSupport.host(for: host)
         }
         guard let first = HeadlessDocker.loadHosts().first else {
-            throw HeadlessDockerError.hostNotFound("no hosts are configured")
+            throw HeadlessDockerError.hostNotFound(String(localized: "no hosts are configured"))
         }
         return first
     }
@@ -248,7 +248,7 @@ struct ComposeUpIntent: AppIntent {
         await session.connect()
         guard session.status.isConnected else {
             throw HeadlessDockerError.connectionFailed(
-                session.lastError ?? "Could not connect to \(dockerHost.name)."
+                session.lastError ?? String(localized: "Could not connect to \(dockerHost.name).")
             )
         }
         defer { Task { await session.disconnect() } }
@@ -258,7 +258,7 @@ struct ComposeUpIntent: AppIntent {
             .up { _ in }
 
         return .result(
-            dialog: IntentDialog("\(project.name) is up — \(started) service(s) running on \(dockerHost.name).")
+            dialog: IntentDialog("\(project.name) is up — \(started) services running on \(dockerHost.name).")
         )
     }
 
@@ -270,7 +270,7 @@ struct ComposeUpIntent: AppIntent {
             let resolved = try IntentSupport.host(for: host)
             guard resolved.isAppleContainer else {
                 throw HeadlessDockerError.connectionFailed(
-                    "\(resolved.name) isn't an Apple Container host. Compose Up runs on apple/container."
+                    String(localized: "\(resolved.name) isn't an Apple Container host. Compose Up runs on apple/container.")
                 )
             }
             return resolved
@@ -278,7 +278,9 @@ struct ComposeUpIntent: AppIntent {
         let apple = HeadlessDocker.loadHosts().filter(\.isAppleContainer)
         guard let only = apple.first, apple.count == 1 else {
             throw HeadlessDockerError.hostNotFound(
-                apple.isEmpty ? "no Apple Container host is configured" : "pick which Apple Container host to use"
+                apple.isEmpty
+                    ? String(localized: "no Apple Container host is configured")
+                    : String(localized: "pick which Apple Container host to use")
             )
         }
         return only

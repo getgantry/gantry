@@ -181,9 +181,11 @@ private struct ClusterNodeLine: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(node.isRunning ? Color.green : Color.secondary)
-                .frame(width: 6, height: 6)
+            StatusSymbol(
+                systemName: node.isRunning ? "circle.fill" : "stop.circle",
+                tint: node.isRunning ? .green : .secondary,
+                size: 7
+            )
             Text(node.name).font(.caption.monospaced())
             Text(ClusterText.role(node))
                 .font(.caption2)
@@ -194,6 +196,8 @@ private struct ClusterNodeLine: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(node.isRunning ? String(localized: "running") : String(localized: "stopped"))
     }
 }
 
@@ -458,12 +462,7 @@ enum ClusterText {
     }
 
     static func state(_ state: String) -> String {
-        switch state.lowercased() {
-        case "running": String(localized: "Running")
-        case "stopped": String(localized: "Stopped")
-        case "degraded": String(localized: "Degraded")
-        default: state.capitalized
-        }
+        RuntimeStateText.label(state)
     }
 
     static func role(_ node: ContainerClusterNode) -> String {

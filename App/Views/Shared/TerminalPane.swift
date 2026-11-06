@@ -150,7 +150,7 @@ struct TerminalPane: View {
             }
             // Only mark ended if we are still the active session.
             if session === opened {
-                phase = .ended("Session closed")
+                phase = .ended(String(localized: "Session closed"))
             }
         } catch {
             if session === opened {

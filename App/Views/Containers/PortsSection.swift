@@ -93,6 +93,7 @@ struct PortsSection: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Forward this port to localhost")
+                    .accessibilityLabel("Forward this port to localhost")
                 }
                 Button {
                     open(port)
@@ -101,6 +102,7 @@ struct PortsSection: View {
                 }
                 .buttonStyle(.borderless)
                 .help("Open in browser")
+                .accessibilityLabel("Open in browser")
                 if !sharesInAddressSection {
                     Button {
                         sharingPort = SharablePort(port: port)
@@ -109,6 +111,7 @@ struct PortsSection: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Share publicly via Cloudflare")
+                    .accessibilityLabel("Share publicly via Cloudflare")
                 }
             }
         }
@@ -141,6 +144,7 @@ struct PortsSection: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Open in browser")
+                        .accessibilityLabel("Open in browser")
                         Button {
                             if let url = forward.localURL { copyToPasteboard(url.absoluteString) }
                         } label: {
@@ -148,6 +152,7 @@ struct PortsSection: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Copy URL")
+                        .accessibilityLabel("Copy URL")
                         Button {
                             editPortText = String(forward.localPort)
                             editingForward = forward
@@ -156,6 +161,7 @@ struct PortsSection: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Change local port")
+                        .accessibilityLabel("Change local port")
                     }
                     Button {
                         let id = forward.id
@@ -165,6 +171,7 @@ struct PortsSection: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Stop forward")
+                    .accessibilityLabel("Stop forward")
                 }
             }
         }
@@ -176,9 +183,9 @@ struct PortsSection: View {
         case .starting:
             ProgressView().controlSize(.mini)
         case .active:
-            Circle().fill(.green).frame(width: 8, height: 8)
+            StatusSymbol(systemName: "circle.fill", tint: .green)
         case .failed:
-            Circle().fill(.red).frame(width: 8, height: 8)
+            StatusSymbol(systemName: "xmark.circle.fill", tint: .red)
         }
     }
 

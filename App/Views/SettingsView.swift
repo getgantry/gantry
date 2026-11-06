@@ -269,12 +269,12 @@ private struct HostRow: View {
     private var kindDescription: String {
         switch host.kind {
         case .local:
-            return "Local"
+            return String(localized: "Local")
         case .ssh(let endpoint):
             let user = endpoint.username.isEmpty ? "" : "\(endpoint.username)@"
             return "SSH \(user)\(endpoint.host):\(endpoint.port)"
         case .appleContainer:
-            return "Apple Container (local)"
+            return String(localized: "Apple Container (local)")
         }
     }
 
@@ -288,9 +288,9 @@ private struct HostRow: View {
             account: KeychainStore.keyPassphraseAccount(hostID: host.id)
         ) != nil
         switch (hasPassword, hasPassphrase) {
-        case (true, true): return "Password and key passphrase stored in Keychain"
-        case (true, false): return "Password stored in Keychain"
-        case (false, true): return "Key passphrase stored in Keychain"
+        case (true, true): return String(localized: "Password and key passphrase stored in Keychain")
+        case (true, false): return String(localized: "Password stored in Keychain")
+        case (false, true): return String(localized: "Key passphrase stored in Keychain")
         case (false, false): return nil
         }
     }
@@ -298,9 +298,7 @@ private struct HostRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Circle()
-                    .fill(session.status.dotColor)
-                    .frame(width: 8, height: 8)
+                HostStatusSymbol(session: session)
                     .help(session.status.shortDescription)
 
                 VStack(alignment: .leading, spacing: 1) {
@@ -326,6 +324,8 @@ private struct HostRow: View {
                         Image(systemName: "trash")
                     }
                     .controlSize(.small)
+                    .help("Remove Host…")
+                    .accessibilityLabel("Remove \(host.name)")
                 }
             }
 
@@ -469,7 +469,7 @@ private struct EditHostSheet: View {
                             .foregroundStyle(.secondary)
                     case .keyFile:
                         HStack {
-                            Text(keyFilePath.isEmpty ? "No key selected" : keyFilePath)
+                            Text(keyFilePath.isEmpty ? String(localized: "No key selected") : keyFilePath)
                                 .font(.system(.body, design: .monospaced))
                                 .lineLimit(1)
                                 .truncationMode(.middle)

@@ -21,7 +21,7 @@ enum BiometricGate {
         guard isEnabled else { return true }
 
         let context = LAContext()
-        context.localizedFallbackTitle = "Enter Password"
+        context.localizedFallbackTitle = String(localized: "Enter Password")
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
             return false

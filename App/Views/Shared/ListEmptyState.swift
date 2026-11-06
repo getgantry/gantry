@@ -38,7 +38,7 @@ extension View {
     /// toolbar `.searchable`, which gets ⌘F from the system.
     func findShortcut(_ focus: FocusState<Bool>.Binding) -> some View {
         background {
-            Button("") { focus.wrappedValue = true }
+            Button("Find") { focus.wrappedValue = true }
                 .keyboardShortcut("f", modifiers: .command)
                 .hidden()
                 .accessibilityHidden(true)

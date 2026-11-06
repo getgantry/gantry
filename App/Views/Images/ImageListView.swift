@@ -36,7 +36,9 @@ struct ImageListView: View {
         case allUnused
         var id: Int { self == .dangling ? 0 : 1 }
 
-        var title: String { self == .dangling ? "Prune Dangling Images?" : "Prune All Unused Images?" }
+        var title: String {
+            self == .dangling ? String(localized: "Prune Dangling Images?") : String(localized: "Prune All Unused Images?")
+        }
         var message: String {
             self == .dangling
                 ? String(localized: "Removes untagged (dangling) image layers. This cannot be undone.")
@@ -269,9 +271,7 @@ private struct DiskUsageFooter: View {
         Group {
             if let usage {
                 Text(
-                    "Storage: images \(Formatters.bytes(usage.imagesSize, style: .file)) · "
-                        + "containers \(usage.containersCount) · "
-                        + "volumes \(usage.volumesCount)"
+                    "Storage: images \(Formatters.bytes(usage.imagesSize, style: .file)) · containers \(usage.containersCount) · volumes \(usage.volumesCount)"
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)

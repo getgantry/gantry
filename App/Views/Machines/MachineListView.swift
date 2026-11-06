@@ -178,11 +178,14 @@ private struct MachineRow: View {
             if machine.isRunning {
                 Button { onShell() } label: { Image(systemName: "terminal") }
                     .help("Open Shell")
+                    .accessibilityLabel("Open Shell")
                 Button { onStop() } label: { Image(systemName: "stop.fill") }
                     .help("Stop")
+                    .accessibilityLabel("Stop")
             } else {
                 Button { onStart() } label: { Image(systemName: "play.fill") }
                     .help("Start")
+                    .accessibilityLabel("Start")
             }
         }
         .buttonStyle(.borderless)
@@ -190,7 +193,7 @@ private struct MachineRow: View {
 
     private var statusPill: some View {
         BadgePill(
-            text: machine.status.capitalized,
+            text: RuntimeStateText.label(machine.status),
             tint: machine.isRunning ? .green : .secondary,
             font: .caption2.weight(.medium),
             opacity: 0.18,
@@ -232,6 +235,15 @@ struct MachineDetailView: View {
         case terminal = "Terminal"
         case inspect = "Inspect"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .overview: String(localized: "Overview")
+            case .resources: String(localized: "Resources")
+            case .terminal: String(localized: "Terminal")
+            case .inspect: String(localized: "Inspect")
+            }
+        }
     }
 
     /// 1 GiB in bytes, for converting the model's byte counts to the GB the CLI
@@ -255,7 +267,7 @@ struct MachineDetailView: View {
             header
 
             Picker("Section", selection: $tab) {
-                ForEach(DetailTab.allCases) { Text($0.rawValue).tag($0) }
+                ForEach(DetailTab.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -302,7 +314,7 @@ struct MachineDetailView: View {
     private var overview: some View {
         ScrollView {
             FactGrid {
-                Fact("Status", machine.status.capitalized)
+                Fact("Status", RuntimeStateText.label(machine.status))
                 Fact("CPUs", "\(machine.cpus)")
                 Fact("Memory", Formatters.bytes(machine.memory))
                 Fact("Disk", Formatters.bytes(machine.diskSize))
@@ -313,7 +325,7 @@ struct MachineDetailView: View {
                 if let user = machine.username { Fact("User", user) }
                 if let home = machine.homeMount { Fact("Home Mount", home) }
                 if let nested = machine.nestedVirtualization {
-                    Fact("Nested Virtualization", nested ? "Enabled" : "Disabled")
+                    Fact("Nested Virtualization", nested ? String(localized: "Enabled") : String(localized: "Disabled"))
                 }
                 if let kernel = machine.kernelPath, !kernel.isEmpty { Fact("Kernel", kernel) }
                 if !machine.created.isEmpty { Fact("Created", machine.created) }
@@ -336,7 +348,7 @@ struct MachineDetailView: View {
                         .font(.largeTitle.weight(.bold))
                         .lineLimit(1)
                     if machine.isDefault { BadgePill(text: "default", tint: .blue) }
-                    BadgePill(text: machine.status.capitalized, tint: machine.isRunning ? .green : .secondary)
+                    BadgePill(text: RuntimeStateText.label(machine.status), tint: machine.isRunning ? .green : .secondary)
                 }
             }
             Spacer()
@@ -445,12 +457,14 @@ struct MachineDetailView: View {
                 } label: {
                     Image(systemName: "folder")
                 }
+                .help("Choose a kernel file")
+                .accessibilityLabel("Choose a kernel file")
                 .buttonStyle(.borderless)
             }
             .disabled(applying)
 
             Text(unsupported
-                 ?? "Nested virtualization needs a custom kernel built with CONFIG_KVM=y. The CLI doesn't report these back, so they show what will be applied.")
+                 ?? String(localized: "Nested virtualization needs a custom kernel built with CONFIG_KVM=y. The CLI doesn't report these back, so they show what will be applied."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -470,7 +484,7 @@ struct MachineDetailView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "Choose a kernel binary (e.g. vmlinux)."
+        panel.message = String(localized: "Choose a kernel binary (e.g. vmlinux).")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         editKernel = url.path
     }

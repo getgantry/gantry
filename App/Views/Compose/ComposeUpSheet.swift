@@ -150,7 +150,7 @@ struct ComposeUpSheet: View {
                         Text("Add a host first")
                             .foregroundStyle(.secondary)
                     } else {
-                        Picker("", selection: $selectedHostID) {
+                        Picker("Host", selection: $selectedHostID) {
                             ForEach(eligibleHosts) { session in
                                 Text(session.host.name).tag(Optional(session.id))
                             }
@@ -239,7 +239,7 @@ struct ComposeUpSheet: View {
         }
     }
 
-    private func labeled<V: View>(_ title: String, @ViewBuilder _ value: () -> V) -> some View {
+    private func labeled<V: View>(_ title: LocalizedStringKey, @ViewBuilder _ value: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(.headline).frame(minWidth: 70, alignment: .leading).fixedSize()
             value()
@@ -336,7 +336,7 @@ struct ComposeUpSheet: View {
         defer { running = false }
 
         if !session.status.isConnected {
-            append("Connecting to \(session.host.name)…", .info)
+            append(String(localized: "Connecting to \(session.host.name)…"), .info)
             await session.connect()
         }
         guard session.status.isConnected else {
@@ -384,13 +384,13 @@ struct ComposeUpSheet: View {
         switch event {
         case .info(let m): append(m, .info)
         case .warning(let m): append(m, .warning)
-        case .buildingImage(let s): append("Building image for \(s)…", .step)
-        case .pullingImage(let s, let ref): append("Pulling \(ref) for \(s)…", .step)
-        case .creatingNetwork(let n): append("Creating network \(n)", .step)
-        case .creatingVolume(let v): append("Creating volume \(v)", .step)
-        case .startingService(let s): append("Starting \(s)…", .step)
-        case .startedService(let s, _): append("Started \(s)", .success)
-        case .finished(let p, let n): append("\(p) is up — \(n) service(s) running.", .success)
+        case .buildingImage(let s): append(String(localized: "Building image for \(s)…"), .step)
+        case .pullingImage(let s, let ref): append(String(localized: "Pulling \(ref) for \(s)…"), .step)
+        case .creatingNetwork(let n): append(String(localized: "Creating network \(n)"), .step)
+        case .creatingVolume(let v): append(String(localized: "Creating volume \(v)"), .step)
+        case .startingService(let s): append(String(localized: "Starting \(s)…"), .step)
+        case .startedService(let s, _): append(String(localized: "Started \(s)"), .success)
+        case .finished(let p, let n): append(String(localized: "\(p) is up — \(n) services running."), .success)
         }
     }
 

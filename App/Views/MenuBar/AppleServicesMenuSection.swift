@@ -25,9 +25,7 @@ struct AppleServicesMenuSection: View {
                     .foregroundStyle(.secondary)
                 Text("apple/container")
                     .font(.subheadline.weight(.semibold))
-                Circle()
-                    .fill(dotColor)
-                    .frame(width: 7, height: 7)
+                StatusSymbol(systemName: dotSymbol, tint: dotColor, size: 7)
                 Text(statusText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -86,10 +84,19 @@ struct AppleServicesMenuSection: View {
 
     private var statusText: String {
         switch status {
-        case .running: "running"
-        case .stopped: "stopped"
-        case .unavailable: "not installed"
-        case .unknown: "checking…"
+        case .running: String(localized: "running")
+        case .stopped: String(localized: "stopped")
+        case .unavailable: String(localized: "not installed")
+        case .unknown: String(localized: "checking…")
+        }
+    }
+
+    private var dotSymbol: String {
+        switch status {
+        case .running: "circle.fill"
+        case .stopped: "stop.circle"
+        case .unavailable: "minus.circle"
+        case .unknown: "circle.dotted"
         }
     }
 

@@ -20,6 +20,7 @@ struct MachineVSCodeButton: View {
                 }
             }
             .help(String(localized: "Connects with Remote-SSH. The machine image must run sshd."))
+            .accessibilityLabel(String(localized: "Open in VS Code"))
         }
     }
 

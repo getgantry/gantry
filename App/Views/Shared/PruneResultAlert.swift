@@ -8,11 +8,10 @@ struct PruneOutcome: Identifiable {
     let title: String
     let result: PruneResult
 
-    /// "N deleted, X freed" with a byte-count formatted reclaimed size.
+    /// "N items deleted, X freed" with a byte-count formatted reclaimed size.
     var summary: String {
         let freed = Formatters.bytes(result.spaceReclaimed, style: .file)
-        let noun = result.deletedCount == 1 ? String(localized: "item") : String(localized: "items")
-        return String(localized: "\(result.deletedCount) \(noun) deleted, \(freed) freed")
+        return String(localized: "\(result.deletedCount) items deleted, \(freed) freed")
     }
 }
 

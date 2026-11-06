@@ -69,7 +69,7 @@ struct AppleSettingsView: View {
     private var servicesSection: some View {
         Section {
             HStack(spacing: 10) {
-                Circle().fill(statusColor).frame(width: 9, height: 9)
+                StatusSymbol(systemName: statusSymbol, tint: statusColor, size: 9)
                 Text(statusText).font(.body)
                 Spacer()
                 if busy {
@@ -121,7 +121,8 @@ struct AppleSettingsView: View {
                         }
                         .buttonStyle(.borderless)
                         .disabled(busy)
-                        .help("Use as the default domain — new containers resolve as name." + domain)
+                        .help(String(localized: "Use as the default domain — new containers resolve as name.\(domain)"))
+                        .accessibilityLabel(String(localized: "Use \(domain) as the default domain"))
                         Button(role: .destructive) {
                             pendingAction = DestructiveAction(kind: .deleteDomain, targets: [domain])
                         } label: {
@@ -130,6 +131,7 @@ struct AppleSettingsView: View {
                         .buttonStyle(.borderless)
                         .disabled(busy)
                         .help("Delete domain (requires admin)")
+                        .accessibilityLabel("Delete domain (requires admin)")
                     }
                 }
             }
@@ -178,10 +180,19 @@ struct AppleSettingsView: View {
 
     private var statusText: String {
         switch status {
-        case .running: "Services running"
-        case .stopped: "Services stopped"
-        case .unavailable: "CLI not found"
-        case .unknown: "Checking…"
+        case .running: String(localized: "Services running")
+        case .stopped: String(localized: "Services stopped")
+        case .unavailable: String(localized: "CLI not found")
+        case .unknown: String(localized: "Checking…")
+        }
+    }
+
+    private var statusSymbol: String {
+        switch status {
+        case .running: "circle.fill"
+        case .stopped: "stop.circle"
+        case .unavailable: "minus.circle"
+        case .unknown: "circle.dotted"
         }
     }
 

@@ -106,7 +106,7 @@ struct GantryApp: App {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.allowedContentTypes = [.yaml]
-        panel.message = "Choose a docker-compose file to run on any host"
+        panel.message = String(localized: "Choose a docker-compose file to run on any host")
         if panel.runModal() == .OK, let url = panel.url {
             AppDelegate.openCompose(url)
         }
@@ -119,7 +119,7 @@ struct GantryApp: App {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
-        panel.message = "Choose a Dockerfile to build into an image"
+        panel.message = String(localized: "Choose a Dockerfile to build into an image")
         if panel.runModal() == .OK, let url = panel.url {
             AppDelegate.openDockerfile(url)
         }

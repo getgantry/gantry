@@ -46,6 +46,7 @@ struct HostFilesView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help("Refresh")
+            .accessibilityLabel("Refresh")
         }
         .padding(8)
     }
@@ -158,7 +159,7 @@ struct HostFilesView: View {
 
         let remotePath = join(path, entry.name)
         Task {
-            transferStatus = "Downloading \(entry.name)…"
+            transferStatus = String(localized: "Downloading \(entry.name)…")
             defer { transferStatus = nil }
             do {
                 let fs = try session.hostFileSystem()
@@ -239,6 +240,7 @@ private struct HostFileRow: View {
                     .buttonStyle(.borderless)
                     .opacity(hovered ? 1 : 0.55)
                     .help("Download")
+                    .accessibilityLabel("Download")
                 }
             }
         }

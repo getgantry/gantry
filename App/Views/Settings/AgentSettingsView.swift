@@ -141,7 +141,8 @@ private struct CodeBlock: View {
                     .symbolRenderingMode(.hierarchical)
             }
             .buttonStyle(.borderless)
-            .help(copied ? "Copied" : "Copy")
+            .help(copied ? String(localized: "Copied") : String(localized: "Copy"))
+            .accessibilityLabel(copied ? String(localized: "Copied") : String(localized: "Copy"))
         }
         .padding(12)
         .background(

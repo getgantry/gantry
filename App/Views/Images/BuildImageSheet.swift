@@ -106,7 +106,7 @@ struct BuildImageSheet: View {
                     if model.sessions.isEmpty {
                         Text("Add a host first").foregroundStyle(.secondary)
                     } else {
-                        Picker("", selection: $selectedHostID) {
+                        Picker("Host", selection: $selectedHostID) {
                             ForEach(model.sessions) { session in
                                 Text(session.host.name).tag(Optional(session.id))
                             }
@@ -184,6 +184,8 @@ struct BuildImageSheet: View {
                             Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                         }
                         .buttonStyle(.borderless)
+                        .help("Remove row")
+                        .accessibilityLabel("Remove row")
                     }
                 }
             }
@@ -194,7 +196,7 @@ struct BuildImageSheet: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(logText.isEmpty ? "Starting build…" : logText)
+                    Text(logText.isEmpty ? String(localized: "Starting build…") : logText)
                         .font(.system(.caption, design: .monospaced))
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -216,7 +218,7 @@ struct BuildImageSheet: View {
         }
     }
 
-    private func statusBadge(_ text: String, _ icon: String, _ color: Color) -> some View {
+    private func statusBadge(_ text: LocalizedStringKey, _ icon: String, _ color: Color) -> some View {
         Label(text, systemImage: icon)
             .font(.caption.weight(.medium))
             .foregroundStyle(color)
@@ -262,9 +264,9 @@ struct BuildImageSheet: View {
 
     private var closeButtonTitle: String {
         switch phase {
-        case .done: "Done"
-        case .building: "Cancel"
-        default: "Cancel"
+        case .done: String(localized: "Done")
+        case .building: String(localized: "Cancel")
+        default: String(localized: "Cancel")
         }
     }
 
@@ -301,7 +303,7 @@ struct BuildImageSheet: View {
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.directoryURL = contextURL
-        panel.message = "Choose the build context directory (must contain the Dockerfile)"
+        panel.message = String(localized: "Choose the build context directory (must contain the Dockerfile)")
         if panel.runModal() == .OK, let url = panel.url {
             contextURL = url
         }
@@ -334,12 +336,12 @@ struct BuildImageSheet: View {
 
     private func runBuild(_ spec: ImageBuildSpec, session: HostSession, operation: LongOperation) async throws -> String? {
         if !session.status.isConnected {
-            append("Connecting to \(session.host.name)…\n")
+            append(String(localized: "Connecting to \(session.host.name)…") + "\n")
             await session.connect()
         }
         guard session.status.isConnected else {
-            phase = .failed("Not connected")
-            append("Could not connect to \(session.host.name).\n")
+            phase = .failed(String(localized: "Not connected"))
+            append(String(localized: "Could not connect to \(session.host.name).") + "\n")
             throw OperationFailure(String(localized: "Could not connect to \(session.host.name)."))
         }
         do {
@@ -357,14 +359,14 @@ struct BuildImageSheet: View {
             }
             try Task.checkCancellation()
             phase = .done
-            if logText.isEmpty { append("Build complete.\n") }
+            if logText.isEmpty { append(String(localized: "Build complete.") + "\n") }
             return builtImageID.map { String($0.prefix(19)) }
         } catch is CancellationError {
             phase = .failed(String(localized: "Cancelled."))
             throw CancellationError()
         } catch {
             let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            append("\nError: \(message)\n")
+            append("\n" + String(localized: "Error: \(message)") + "\n")
             phase = .failed(message)
             throw error
         }

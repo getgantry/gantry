@@ -874,71 +874,21 @@ private struct HostSectionHeader: View {
 
     @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var isHovered = false
+    @FocusState private var menuFocused: Bool
+
+    /// Hover shows the menu; keyboard focus and VoiceOver keep it shown.
+    private var showsMenu: Bool { isHovered || menuFocused || voiceOver }
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(session.status.dotColor)
-                .frame(width: 7, height: 7)
-            Text(session.host.name)
-            if let badge = session.host.badgeSystemImage {
-                Image(systemName: badge)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            title
             Spacer()
-
-            Menu {
-                Button {
-                    Task {
-                        await session.disconnect()
-                        await session.connect()
-                    }
-                } label: {
-                    Label("Reconnect", systemImage: "arrow.clockwise")
-                }
-
-                if session.supportsHostAccess {
-                    Button {
-                        openWindow(id: "hostTerminal", value: session.host.id)
-                    } label: {
-                        Label("Open Host Terminal", systemImage: "terminal")
-                    }
-                }
-
-                Divider()
-                Button {
-                    model.moveHost(id: session.host.id, by: -1)
-                } label: {
-                    Label("Move Up", systemImage: "arrow.up")
-                }
-                .disabled(model.sessions.first?.id == session.id)
-                Button {
-                    model.moveHost(id: session.host.id, by: 1)
-                } label: {
-                    Label("Move Down", systemImage: "arrow.down")
-                }
-                .disabled(model.sessions.last?.id == session.id)
-
-                if session.host.removable {
-                    Divider()
-                    Button(role: .destructive, action: onRemove) {
-                        Label("Remove Host…", systemImage: "trash")
-                    }
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .foregroundStyle(.secondary)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .opacity(isHovered ? 1 : 0)
-            .accessibilityLabel("Host actions for \(session.host.name)")
+            actionsMenu
         }
         .onHover { isHovered = $0 }
-        .animation(.easeInOut(duration: 0.15), value: isHovered)
+        .animation(.easeInOut(duration: 0.15), value: showsMenu)
         .help(session.dockerNotInstalled
               ? String(localized: "Docker is not installed on this Mac.")
               : session.status.shortDescription)
@@ -948,5 +898,73 @@ private struct HostSectionHeader: View {
                 await session.connect()
             }
         }
+    }
+
+    private var title: some View {
+        HStack(spacing: 6) {
+            HostStatusSymbol(session: session, size: 7)
+            Text(session.host.name)
+            if let badge = session.host.badgeSystemImage {
+                Image(systemName: badge)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(session.host.name)
+        .accessibilityValue(session.accessibilityStatus)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private var actionsMenu: some View {
+        Menu {
+            Button {
+                Task {
+                    await session.disconnect()
+                    await session.connect()
+                }
+            } label: {
+                Label("Reconnect", systemImage: "arrow.clockwise")
+            }
+
+            if session.supportsHostAccess {
+                Button {
+                    openWindow(id: "hostTerminal", value: session.host.id)
+                } label: {
+                    Label("Open Host Terminal", systemImage: "terminal")
+                }
+            }
+
+            Divider()
+            Button {
+                model.moveHost(id: session.host.id, by: -1)
+            } label: {
+                Label("Move Up", systemImage: "arrow.up")
+            }
+            .disabled(model.sessions.first?.id == session.id)
+            Button {
+                model.moveHost(id: session.host.id, by: 1)
+            } label: {
+                Label("Move Down", systemImage: "arrow.down")
+            }
+            .disabled(model.sessions.last?.id == session.id)
+
+            if session.host.removable {
+                Divider()
+                Button(role: .destructive, action: onRemove) {
+                    Label("Remove Host…", systemImage: "trash")
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundStyle(.secondary)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .focused($menuFocused)
+        // Near-zero, not zero: a view at opacity 0 leaves the accessibility tree.
+        .opacity(showsMenu ? 1 : 0.011)
+        .accessibilityLabel("Host actions for \(session.host.name)")
     }
 }

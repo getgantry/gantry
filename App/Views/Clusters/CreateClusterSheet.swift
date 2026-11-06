@@ -97,6 +97,8 @@ struct CreateClusterSheet: View {
                             Image(systemName: "folder")
                         }
                         .buttonStyle(.borderless)
+                        .help("Choose a CNI manifest")
+                        .accessibilityLabel("Choose a CNI manifest")
                     }
                 }
             }

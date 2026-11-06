@@ -109,10 +109,12 @@ struct CreateMachineSheet: View {
                 Image(systemName: "folder")
             }
             .buttonStyle(.borderless)
+            .help("Choose a kernel file")
+            .accessibilityLabel("Choose a kernel file")
             .disabled(creating)
         }
         Text(unsupported
-             ?? "Nested virtualization runs VMs inside the machine. It needs a custom kernel built with CONFIG_KVM=y.")
+             ?? String(localized: "Nested virtualization runs VMs inside the machine. It needs a custom kernel built with CONFIG_KVM=y."))
             .font(.caption)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,12 +125,12 @@ struct CreateMachineSheet: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "Choose a kernel binary (e.g. vmlinux)."
+        panel.message = String(localized: "Choose a kernel binary (e.g. vmlinux).")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         kernelPath = url.path
     }
 
-    private func field<V: View>(_ label: String, @ViewBuilder _ content: () -> V) -> some View {
+    private func field<V: View>(_ label: LocalizedStringKey, @ViewBuilder _ content: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(label).frame(minWidth: 60, alignment: .leading).fixedSize().foregroundStyle(.secondary)
             content()

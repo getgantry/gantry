@@ -90,6 +90,7 @@ struct AppleSystemLogsPane: View {
             }
             .toggleStyle(.button)
             .help(String(localized: "Scroll to new lines"))
+            .accessibilityLabel(String(localized: "Scroll to new lines"))
 
             Button {
                 setPaused(!paused)
@@ -97,6 +98,7 @@ struct AppleSystemLogsPane: View {
                 Image(systemName: paused ? "play.fill" : "pause.fill")
             }
             .help(paused ? String(localized: "Resume") : String(localized: "Pause"))
+            .accessibilityLabel(paused ? String(localized: "Resume") : String(localized: "Pause"))
 
             HeldLinesLabel(count: paused ? held.count : 0)
 
@@ -106,6 +108,7 @@ struct AppleSystemLogsPane: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help(String(localized: "Reload"))
+            .accessibilityLabel(String(localized: "Reload"))
 
             Button {
                 copyToPasteboard(visibleLines.map(\.parsed.raw).joined(separator: "\n"))
@@ -113,6 +116,7 @@ struct AppleSystemLogsPane: View {
                 Image(systemName: "doc.on.doc")
             }
             .help(String(localized: "Copy all"))
+            .accessibilityLabel(String(localized: "Copy all"))
 
             Menu {
                 Button(String(localized: "All levels")) { minLevel = nil }
@@ -128,6 +132,7 @@ struct AppleSystemLogsPane: View {
             .menuStyle(.borderlessButton)
             .fixedSize()
             .help(String(localized: "Filter by level"))
+            .accessibilityLabel(String(localized: "Filter by level"))
 
             Menu {
                 Button(String(localized: "All services")) { process = nil }
@@ -143,7 +148,7 @@ struct AppleSystemLogsPane: View {
             .fixedSize()
 
             if loading { ProgressView().controlSize(.small) }
-            Text(String(localized: "\(String(visibleLines.count)) lines"))
+            Text(String(localized: "\(visibleLines.count) lines"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()

@@ -86,7 +86,7 @@ final class ComposeServiceProvider: NSObject {
     ) {
         let options: [NSPasteboard.ReadingOptionKey: Any] = [.urlReadingFileURLsOnly: true]
         guard let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: options) as? [URL] else {
-            error?.pointee = "No files were provided." as NSString
+            error?.pointee = String(localized: "No files were provided.") as NSString
             return
         }
         Task { @MainActor in

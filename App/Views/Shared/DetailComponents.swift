@@ -3,11 +3,19 @@ import SwiftUI
 /// A single label/value fact rendered as one row inside a `FactGrid`.
 struct Fact: Identifiable {
     let id = UUID()
-    let label: String
+    let label: Text
     let value: String
 
-    init(_ label: String, _ value: String) {
-        self.label = label
+    /// A literal label is a catalog key.
+    init(_ label: LocalizedStringKey, _ value: String) {
+        self.label = Text(label)
+        self.value = value
+    }
+
+    /// A label that is already localized, for example from `String(localized:)`.
+    @_disfavoredOverload
+    init<S: StringProtocol>(_ label: S, _ value: String) {
+        self.label = Text(verbatim: String(label))
         self.value = value
     }
 }
@@ -24,7 +32,7 @@ struct FactGrid: View {
         Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 16, verticalSpacing: 8) {
             ForEach(facts) { fact in
                 GridRow {
-                    Text(fact.label)
+                    fact.label
                         .foregroundStyle(.secondary)
                         .gridColumnAlignment(.leading)
                     Text(fact.value)
@@ -66,11 +74,14 @@ enum FactBuilder {
 
 /// A consistent section title used above fact grids and lists in detail panes.
 struct SectionTitle: View {
-    let text: String
-    init(_ text: String) { self.text = text }
+    let text: Text
+    init(_ text: LocalizedStringKey) { self.text = Text(text) }
+    @_disfavoredOverload
+    init<S: StringProtocol>(_ text: S) { self.text = Text(verbatim: String(text)) }
+    init(text: Text) { self.text = text }
 
     var body: some View {
-        Text(text)
+        text
             .font(.headline)
             .padding(.bottom, 2)
     }
@@ -79,17 +90,23 @@ struct SectionTitle: View {
 /// A titled block for detail panes. Works in a plain `VStack`/`ScrollView`
 /// (unlike SwiftUI's `Section`, which requires a `List` or `Form`).
 struct DetailSection<Content: View>: View {
-    let title: String
+    let title: Text
     @ViewBuilder let content: Content
 
-    init(_ title: String, @ViewBuilder content: () -> Content) {
-        self.title = title
+    init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+        self.title = Text(title)
+        self.content = content()
+    }
+
+    @_disfavoredOverload
+    init<S: StringProtocol>(_ title: S, @ViewBuilder content: () -> Content) {
+        self.title = Text(verbatim: String(title))
         self.content = content()
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle(title)
+            SectionTitle(text: title)
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -101,15 +118,49 @@ struct DetailSection<Content: View>: View {
 /// a compact form while detail headers use a larger one, all sharing the single
 /// tinted-capsule rendering.
 struct BadgePill: View {
-    let text: String
+    let text: Text
     var tint: Color = .accentColor
     var font: Font = .caption.weight(.medium)
     var opacity: Double = 0.16
     var horizontalPadding: CGFloat = 8
     var verticalPadding: CGFloat = 3
 
+    init(
+        text: LocalizedStringKey, tint: Color = .accentColor, font: Font = .caption.weight(.medium),
+        opacity: Double = 0.16, horizontalPadding: CGFloat = 8, verticalPadding: CGFloat = 3
+    ) {
+        self.init(
+            text: Text(text), tint: tint, font: font, opacity: opacity,
+            horizontalPadding: horizontalPadding, verticalPadding: verticalPadding
+        )
+    }
+
+    /// A text that is already localized, or data such as a status from a CLI.
+    @_disfavoredOverload
+    init<S: StringProtocol>(
+        text: S, tint: Color = .accentColor, font: Font = .caption.weight(.medium),
+        opacity: Double = 0.16, horizontalPadding: CGFloat = 8, verticalPadding: CGFloat = 3
+    ) {
+        self.init(
+            text: Text(verbatim: String(text)), tint: tint, font: font, opacity: opacity,
+            horizontalPadding: horizontalPadding, verticalPadding: verticalPadding
+        )
+    }
+
+    init(
+        text: Text, tint: Color, font: Font, opacity: Double,
+        horizontalPadding: CGFloat, verticalPadding: CGFloat
+    ) {
+        self.text = text
+        self.tint = tint
+        self.font = font
+        self.opacity = opacity
+        self.horizontalPadding = horizontalPadding
+        self.verticalPadding = verticalPadding
+    }
+
     var body: some View {
-        Text(text)
+        text
             .font(font)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)

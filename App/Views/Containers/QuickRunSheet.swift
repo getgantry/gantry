@@ -148,6 +148,7 @@ struct QuickRunSheet: View {
                     .menuStyle(.borderlessButton)
                     .frame(width: 28)
                     .help("Pick a local image")
+                    .accessibilityLabel("Pick a local image")
                 }
             }
             TextField("Name (optional)", text: nameBinding, prompt: Text("my-app"))
@@ -168,6 +169,7 @@ struct QuickRunSheet: View {
                 }
                 .buttonStyle(.borderless)
                 .help("Choose a folder to share into the container")
+                .accessibilityLabel("Choose a folder to share into the container")
             }
             if !folder.isEmpty {
                 HStack(spacing: 6) {
@@ -189,11 +191,11 @@ struct QuickRunSheet: View {
         Section {
             editorRows($ports, addLabel: "Add Port", empty: { PortRow() }) { $row in
                 TextField("Host", text: $row.host, prompt: Text("8080")).frame(width: 80)
-                Text(":").foregroundStyle(.secondary)
+                Text(verbatim: ":").foregroundStyle(.secondary)
                 TextField("Container", text: $row.container, prompt: Text("80")).frame(width: 80)
-                Picker("", selection: $row.proto) {
-                    Text("tcp").tag("tcp")
-                    Text("udp").tag("udp")
+                Picker("Protocol", selection: $row.proto) {
+                    Text(verbatim: "tcp").tag("tcp")
+                    Text(verbatim: "udp").tag("udp")
                 }
                 .labelsHidden().frame(width: 70)
                 PortIssueIcon(issue: portIssues[row.id])
@@ -209,7 +211,7 @@ struct QuickRunSheet: View {
         Section("Environment") {
             editorRows($env, addLabel: "Add Variable", empty: { EnvRow() }) { $row in
                 TextField("KEY", text: $row.key)
-                Text("=").foregroundStyle(.secondary)
+                Text(verbatim: "=").foregroundStyle(.secondary)
                 TextField("VALUE", text: $row.value)
             }
         }
@@ -258,7 +260,7 @@ struct QuickRunSheet: View {
     @ViewBuilder
     private func editorRows<Element: Identifiable, RowContent: View>(
         _ rows: Binding<[Element]>,
-        addLabel: String,
+        addLabel: LocalizedStringKey,
         empty: @escaping () -> Element,
         @ViewBuilder content: @escaping (Binding<Element>) -> RowContent
     ) -> some View {
@@ -272,6 +274,8 @@ struct QuickRunSheet: View {
                     Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.borderless)
+                .help("Remove row")
+                .accessibilityLabel("Remove row")
             }
         }
         Button {
@@ -312,7 +316,7 @@ struct QuickRunSheet: View {
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-        panel.prompt = "Share"
+        panel.prompt = String(localized: "Share")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         folder = url.path
         if folderMountPath.isEmpty { folderMountPath = "/workspace" }
@@ -365,7 +369,7 @@ struct QuickRunSheet: View {
         defer { isWorking = false; statusText = nil }
         do {
             if pullFirst {
-                statusText = "Pulling \(trimmedImage)…"
+                statusText = String(localized: "Pulling \(trimmedImage)…")
                 let stream = try await session.pullImage(reference: trimmedImage)
                 for try await _ in stream {}
             }
@@ -408,7 +412,7 @@ struct QuickRunSheet: View {
     /// Resolves the container's IP and opens its first port in the browser. The
     /// IP can take a beat to appear after start, so it polls briefly.
     private func openWhenReady(containerID: String) async {
-        statusText = "Opening…"
+        statusText = String(localized: "Opening…")
         let targetPort = ports.compactMap { Int($0.container) }.first
         for _ in 0..<10 {
             if let details = await session.details(for: containerID),
