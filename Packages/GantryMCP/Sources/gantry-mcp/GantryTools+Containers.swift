@@ -210,7 +210,9 @@ extension GantryTools {
         let entries: [ContainerFileEntry]
         do {
             entries = try await client.listDirectoryFast(containerID: id, path: path)
-        } catch {
+        } catch let error as ExecListError {
+            entries = try await client.listDirectoryFallback(after: error, containerID: id, path: path)
+        } catch where client.supportsArchiveListing {
             entries = try await client.listDirectory(containerID: id, path: path)
         }
         return .text(try jsonText(entries.map(FileEntryDTO.init)))

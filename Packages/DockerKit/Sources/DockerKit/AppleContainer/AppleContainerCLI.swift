@@ -103,118 +103,60 @@ public struct AppleContainerProcessRunner: AppleContainerCLIRunning {
         self.executablePath = executablePath
     }
 
-    private func makeProcess(_ arguments: [String]) -> Process {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executablePath)
-        process.arguments = arguments
-        // The CLI talks XPC to container-apiserver; a clean environment plus
-        // HOME (for its app-root resolution) is all it needs.
-        var environment = ProcessInfo.processInfo.environment
-        environment["NO_COLOR"] = "1"
-        process.environment = environment
-        return process
-    }
+    /// The CLI talks XPC to container-apiserver; the inherited environment
+    /// (for HOME) plus `NO_COLOR` is all it needs.
+    private static let environment = ["NO_COLOR": "1"]
 
     public func run(_ arguments: [String]) async throws -> AppleCLIResult {
-        let process = makeProcess(arguments)
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-        process.standardInput = FileHandle.nullDevice
-
-        return try await withCheckedThrowingContinuation { continuation in
-            // Drain both pipes off the calling thread; readDataToEndOfFile on
-            // the termination handler can deadlock once the pipe buffer fills.
-            let collector = OutputCollector()
-            stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty { handle.readabilityHandler = nil }
-                collector.appendStdout(data)
-            }
-            stderrPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty { handle.readabilityHandler = nil }
-                collector.appendStderr(data)
-            }
-            process.terminationHandler = { process in
-                // Flush whatever the readability handlers have not seen yet.
-                let trailingOut = try? stdoutPipe.fileHandleForReading.readToEnd()
-                let trailingErr = try? stderrPipe.fileHandleForReading.readToEnd()
-                stdoutPipe.fileHandleForReading.readabilityHandler = nil
-                stderrPipe.fileHandleForReading.readabilityHandler = nil
-                let (stdout, stderr) = collector.snapshot(
-                    trailingStdout: trailingOut ?? Data(),
-                    trailingStderr: trailingErr ?? Data()
-                )
-                continuation.resume(returning: AppleCLIResult(
-                    exitCode: Int(process.terminationStatus),
-                    stdout: stdout,
-                    stderr: stderr
-                ))
-            }
-            do {
-                try process.run()
-            } catch {
-                process.terminationHandler = nil
-                continuation.resume(throwing: DockerError.connectionFailed(
-                    "Could not run \(executablePath): \(error.localizedDescription)"
-                ))
-            }
+        let result: ChildProcessResult
+        do {
+            result = try await ChildProcess.run(executablePath, arguments, environment: Self.environment)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw DockerError.connectionFailed(
+                "Could not run \(executablePath): \(error.localizedDescription)"
+            )
         }
+        return AppleCLIResult(
+            exitCode: Self.exitCode(result.exit),
+            stdout: result.stdout,
+            stderr: result.stderr
+        )
     }
 
     public func stream(_ arguments: [String]) -> AsyncThrowingStream<Data, Error> {
         AsyncThrowingStream { continuation in
-            let process = makeProcess(arguments)
-            let stdoutPipe = Pipe()
-            let stderrPipe = Pipe()
-            process.standardOutput = stdoutPipe
-            process.standardError = stderrPipe
-            process.standardInput = FileHandle.nullDevice
-
-            let collector = OutputCollector()
-            stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty {
-                    handle.readabilityHandler = nil
-                } else {
-                    continuation.yield(data)
-                }
-            }
-            stderrPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty { handle.readabilityHandler = nil }
-                collector.appendStderr(data)
-            }
-            process.terminationHandler = { process in
-                if let trailing = try? stdoutPipe.fileHandleForReading.readToEnd(), !trailing.isEmpty {
-                    continuation.yield(trailing)
-                }
-                stdoutPipe.fileHandleForReading.readabilityHandler = nil
-                stderrPipe.fileHandleForReading.readabilityHandler = nil
-                if process.terminationStatus == 0 {
-                    continuation.finish()
-                } else {
-                    let (_, stderr) = collector.snapshot(trailingStdout: Data(), trailingStderr: Data())
-                    continuation.finish(throwing: AppleContainerCLIError.fromStderr(
-                        String(decoding: stderr, as: UTF8.self),
-                        exitCode: Int(process.terminationStatus)
-                    ))
-                }
-            }
-            continuation.onTermination = { _ in
-                if process.isRunning { process.terminate() }
-            }
+            let child = ChildProcess(executable: executablePath, arguments: arguments, environment: Self.environment)
+            let stderr = StderrBuffer()
+            continuation.onTermination = { _ in child.terminate() }
             do {
-                try process.run()
+                try child.start(output: { chunk in
+                    switch chunk {
+                    case .stdout(let data): continuation.yield(data)
+                    case .stderr(let data): stderr.append(data)
+                    }
+                }, completion: { exit in
+                    if exit.succeeded {
+                        continuation.finish()
+                    } else {
+                        continuation.finish(throwing: AppleContainerCLIError.fromStderr(
+                            stderr.text,
+                            exitCode: Self.exitCode(exit)
+                        ))
+                    }
+                })
             } catch {
-                process.terminationHandler = nil
                 continuation.finish(throwing: DockerError.connectionFailed(
                     "Could not run \(executablePath): \(error.localizedDescription)"
                 ))
             }
         }
+    }
+
+    /// Shell convention: a death by signal N reports 128 + N, never 0.
+    static func exitCode(_ exit: ChildProcessExit) -> Int {
+        exit.signaled ? 128 + Int(exit.status) : Int(exit.status)
     }
 
     public func interactive(_ arguments: [String], tty: Bool) throws -> any AppleCLIInteractiveProcess {
@@ -225,27 +167,17 @@ public struct AppleContainerProcessRunner: AppleContainerCLIRunning {
     }
 }
 
-/// Thread-safe accumulator for process output read from readability handlers.
-private final class OutputCollector: @unchecked Sendable {
+/// Thread-safe stderr accumulator for a streamed CLI process.
+final class StderrBuffer: @unchecked Sendable {
     private let lock = NSLock()
-    private var stdout = Data()
-    private var stderr = Data()
+    private var data = Data()
 
-    func appendStdout(_ data: Data) {
-        lock.lock(); defer { lock.unlock() }
-        stdout.append(data)
+    func append(_ chunk: Data) {
+        lock.withLock { data.append(chunk) }
     }
 
-    func appendStderr(_ data: Data) {
-        lock.lock(); defer { lock.unlock() }
-        stderr.append(data)
-    }
-
-    func snapshot(trailingStdout: Data, trailingStderr: Data) -> (Data, Data) {
-        lock.lock(); defer { lock.unlock() }
-        stdout.append(trailingStdout)
-        stderr.append(trailingStderr)
-        return (stdout, stderr)
+    var text: String {
+        lock.withLock { String(decoding: data, as: UTF8.self) }
     }
 }
 

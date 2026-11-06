@@ -290,7 +290,8 @@ func liveAppleCommitAndNetworkAliases() async throws {
 }
 
 /// `GET /containers/{id}/archive` over `container copy`: a directory comes
-/// back as a tar whose top entry is the directory name.
+/// back as a tar whose top entry is the directory name, with no AppleDouble
+/// `._*` entries, and a single file comes back with its exact bytes.
 @Test(.enabled(if: liveEnabled), .timeLimit(.minutes(2)))
 func liveAppleArchiveDownload() async throws {
     let client = try makeLiveClient()
@@ -304,15 +305,44 @@ func liveAppleArchiveDownload() async throws {
         name: name
     )
     let id = try await client.createContainer(config: config, name: name)
-    defer { Task { try? await client.removeContainer(id: id, force: true) } }
-    try await client.startContainer(id: id)
-    try await Task.sleep(for: .seconds(2))
+    do {
+        try await client.startContainer(id: id)
+        try await Task.sleep(for: .seconds(2))
 
-    let stream = try await client.downloadArchive(containerID: id, path: "/data")
+        let directory = try await download(client, id, "/data")
+        let names = Set(TarReader.entries(in: directory).map(\.name))
+        #expect(names == ["data/", "data/a.txt", "data/sub/", "data/sub/b.txt"])
+
+        let file = try await download(client, id, "/data/a.txt")
+        #expect(TarReader.entries(in: file).map(\.name) == ["a.txt"])
+        #expect(TarReader.firstFilePayload(in: file) == Data("one\n".utf8))
+    } catch {
+        try? await client.removeContainer(id: id, force: true)
+        throw error
+    }
+    try await client.removeContainer(id: id, force: true)
+    let left = try await client.listContainers(all: true)
+    #expect(!left.contains { $0.names.contains { $0.hasSuffix(name) } })
+}
+
+private func download(_ client: DockerClient, _ id: String, _ path: String) async throws -> Data {
+    let stream = try await client.downloadArchive(containerID: id, path: path)
     var tar = Data()
     for try await chunk in stream.bytes { tar.append(chunk) }
-    let text = String(decoding: tar, as: UTF8.self)
-    #expect(text.contains("data/a.txt"))
-    #expect(text.contains("data/sub/b.txt"))
-    #expect(text.contains("one"))
+    return tar
+}
+
+/// The images list carries each image's platform, and image inspect works.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(1)))
+func liveAppleImagePlatform() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+    _ = try await client.negotiate()
+    let images = try await client.listImages()
+    let alpine = try #require(images.first { $0.repoTags.contains("alpine:latest") })
+    #expect(!alpine.architecture.isEmpty)
+    #expect(alpine.os == "linux")
+    let raw = try await client.rawInspectImage(id: alpine.id)
+    let body = try #require(try JSONSerialization.jsonObject(with: raw) as? [String: Any])
+    #expect(body["Architecture"] as? String == alpine.architecture)
 }

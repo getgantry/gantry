@@ -1,4 +1,5 @@
 import Foundation
+import DockerKit
 
 extension AppleContainerControl {
     // MARK: - Kubernetes clusters (apple/container 1.5+)
@@ -251,46 +252,36 @@ extension AppleContainerControl {
         output: @escaping @Sendable (String) -> Void
     ) async throws {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: cli)
-        process.arguments = arguments
-        var env = ProcessInfo.processInfo.environment
-        env["NO_COLOR"] = "1"
+        var env = ["NO_COLOR": "1"]
         env.merge(environment) { _, new in new }
-        process.environment = env
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-
+        let child = ChildProcess(executable: cli, arguments: arguments, environment: env, mergeOutput: true)
         let splitter = ClusterLineSplitter(output: output)
-        let status: Int32 = try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int32, Error>) in
-                pipe.fileHandleForReading.readabilityHandler = { handle in
-                    let data = handle.availableData
-                    if data.isEmpty {
-                        handle.readabilityHandler = nil
-                    } else {
-                        splitter.append(data)
-                    }
-                }
-                process.terminationHandler = { process in
-                    pipe.fileHandleForReading.readabilityHandler = nil
-                    if let rest = try? pipe.fileHandleForReading.readToEnd() { splitter.append(rest) }
-                    splitter.finish()
-                    continuation.resume(returning: process.terminationStatus)
-                }
+        // A cancel before the launch makes `start` throw, so the CLI never runs.
+        let exit: ChildProcessExit = try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ChildProcessExit, Error>) in
                 do {
-                    try process.run()
+                    try child.start(output: { chunk in
+                        if case .stdout(let data) = chunk { splitter.append(data) }
+                    }, completion: { exit in
+                        splitter.finish()
+                        continuation.resume(returning: exit)
+                    })
                 } catch {
-                    process.terminationHandler = nil
                     continuation.resume(throwing: error)
                 }
             }
         } onCancel: {
-            if process.isRunning { process.terminate() }
+            child.terminate()
         }
         if Task.isCancelled { throw CancellationError() }
-        guard status == 0 else { throw commandError(arguments, stderr: splitter.transcript) }
+        guard exit.succeeded else {
+            let transcript = splitter.transcript
+            if exit.signaled {
+                let last = transcript.split(whereSeparator: \.isNewline).last.map { " Last output: \($0)" } ?? ""
+                throw AppleControlError.command("container \(arguments.joined(separator: " ")) was \(exit.summary).\(last)")
+            }
+            throw commandError(arguments, stderr: transcript)
+        }
     }
 }
 

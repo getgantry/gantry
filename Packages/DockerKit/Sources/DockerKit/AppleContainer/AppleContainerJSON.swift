@@ -379,7 +379,7 @@ enum AppleContainerJSON {
         let apple = array(try decode(data))
         var rows: [[String: Any]] = []
         for element in apple {
-            rows.append([
+            var row: [String: Any] = [
                 "Id": imageDockerID(element),
                 "ParentId": "",
                 "RepoTags": imageReferenceString(element).isEmpty
@@ -390,9 +390,64 @@ enum AppleContainerJSON {
                 "SharedSize": -1,
                 "Containers": -1,
                 "Labels": [:]
-            ])
+            ]
+            if let platform = imagePlatform(element) {
+                row["Descriptor"] = ["platform": platform]
+            }
+            rows.append(row)
         }
         return try encode(rows)
+    }
+
+    /// `container image inspect` → `GET /images/{id}/json` body: the fields
+    /// the app reads (platform, size, config), plus the CLI object.
+    static func imageInspectBody(fromAppleInspect data: Data) throws -> Data {
+        guard let element = array(try decode(data)).first else {
+            throw DockerError.apiError(status: 404, message: "No such image")
+        }
+        let platform = imagePlatform(element) ?? [:]
+        let variant = imageVariant(element)
+        let config = object(object(variant?["config"])["config"])
+        let reference = imageReferenceString(element)
+        var body: [String: Any] = [
+            "Id": imageDockerID(element),
+            "RepoTags": reference.isEmpty ? [] : [displayReference(reference)],
+            "RepoDigests": [],
+            "Created": string(field(element, "creationDate")),
+            "Size": imageSizeBytes(element),
+            "Architecture": platform["architecture"] ?? "",
+            "Os": platform["os"] ?? "",
+            "Config": config,
+            "AppleContainer": element
+        ]
+        if let value = platform["variant"] { body["Variant"] = value }
+        return try encode(body)
+    }
+
+    /// The platform of the image variant this Mac runs, as a Docker
+    /// descriptor platform (`architecture`, `os`, optional `variant`).
+    static func imagePlatform(_ element: [String: Any]) -> [String: String]? {
+        guard let variant = imageVariant(element) else { return nil }
+        let platform = object(variant["platform"])
+        var result = ["architecture": string(platform["architecture"]), "os": string(platform["os"])]
+        let name = string(platform["variant"])
+        if !name.isEmpty { result["variant"] = name }
+        return result
+    }
+
+    /// The variant for the native architecture, else the first real one.
+    /// Attestation manifests report `unknown/unknown` and are skipped.
+    static func imageVariant(_ element: [String: Any]) -> [String: Any]? {
+        let real = array(element["variants"]).filter { variant in
+            let architecture = string(object(variant["platform"])["architecture"])
+            return !architecture.isEmpty && architecture != "unknown"
+        }
+        #if arch(arm64)
+        let native = "arm64"
+        #else
+        let native = "amd64"
+        #endif
+        return real.first { string(object($0["platform"])["architecture"]) == native } ?? real.first
     }
 
     /// The image's repository reference: `configuration.name` (1.0) or the flat

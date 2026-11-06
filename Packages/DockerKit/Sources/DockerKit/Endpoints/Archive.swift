@@ -50,6 +50,21 @@ extension DockerClient {
     /// one level, and the download is aborted.
     static let listArchiveByteCap = 64 * 1024 * 1024
 
+    /// Falls back to the archive listing after the shell listing failed
+    /// with `error`. Without the archive listing, only a missing shell
+    /// becomes `shellRequired`; other failures keep their own message.
+    public func listDirectoryFallback(
+        after error: ExecListError,
+        containerID: String,
+        path: String
+    ) async throws -> [ContainerFileEntry] {
+        guard supportsArchiveListing else {
+            if case .shellUnavailable = error { throw ExecListError.shellRequired }
+            throw error
+        }
+        return try await listDirectory(containerID: containerID, path: path)
+    }
+
     /// Lists the immediate contents of a directory inside a container.
     ///
     /// Downloads the directory archive, buffers it, and parses the tar headers
@@ -61,6 +76,7 @@ extension DockerClient {
     /// the stream) once the cap is exceeded without the archive completing,
     /// surfacing a clear error rather than transferring hundreds of MB.
     public func listDirectory(containerID: String, path: String) async throws -> [ContainerFileEntry] {
+        guard supportsArchiveListing else { throw ExecListError.shellRequired }
         let stream = try await downloadArchive(containerID: containerID, path: path)
         var buffer = Data()
         for try await chunk in stream.bytes {
