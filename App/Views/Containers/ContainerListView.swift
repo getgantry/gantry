@@ -684,6 +684,20 @@ enum ContainerExport {
     }
 }
 
+/// Rename checks shared by the list and the detail view.
+enum RenameRules {
+    static var hint: String {
+        String(localized: "Enter a new name: letters, digits, “_”, “.” and “-”, starting with a letter or digit. It must differ from the current name and from other containers.")
+    }
+
+    @MainActor
+    static func canRename(_ text: String, container: ContainerSummary, session: HostSession) -> Bool {
+        let name = text.trimmingCharacters(in: .whitespaces)
+        return ContainerForm.isValidRename(name, current: container.displayName)
+            && !ContainerForm.takenNames(session.containers).contains(name)
+    }
+}
+
 /// Rename alert driven by a bound target container.
 struct RenameAlert: ViewModifier {
     @Binding var target: ContainerSummary?
@@ -702,10 +716,10 @@ struct RenameAlert: ViewModifier {
                 Task { _ = await session.rename(containerID: container.id, to: newName) }
                 target = nil
             }
-            .disabled(!ContainerForm.isValidRename(text, current: container.displayName))
+            .disabled(!RenameRules.canRename(text, container: container, session: session))
             Button("Cancel", role: .cancel) { target = nil }
         } message: { _ in
-            Text("Enter a new name for the container.")
+            Text(RenameRules.hint)
         }
     }
 }
