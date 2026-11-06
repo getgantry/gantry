@@ -943,43 +943,38 @@ public actor AppleContainerTransport: DockerTransport {
     }
 
     /// Streams `tar -cf - -C <folder> <name>` and removes `folder` when the
-    /// stream ends or the consumer stops reading.
-    private static func tarStream(of name: String, in folder: URL) -> AsyncThrowingStream<Data, Error> {
+    /// stream ends or the consumer stops reading. macOS tar adds AppleDouble
+    /// `._name` entries for extended attributes (`com.apple.provenance` on
+    /// every copied file); `COPYFILE_DISABLE` and the flags keep them out.
+    static func tarStream(of name: String, in folder: URL) -> AsyncThrowingStream<Data, Error> {
         AsyncThrowingStream { continuation in
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
-            process.arguments = ["-cf", "-", "-C", folder.path, name]
-            let output = Pipe()
-            let errors = Pipe()
-            process.standardOutput = output
-            process.standardError = errors
+            let child = ChildProcess(
+                executable: "/usr/bin/tar",
+                arguments: ["--no-mac-metadata", "--no-xattrs", "-cf", "-", "-C", folder.path, name],
+                environment: ["COPYFILE_DISABLE": "1"]
+            )
+            let errors = StderrBuffer()
             let cleanup: @Sendable () -> Void = { try? FileManager.default.removeItem(at: folder) }
-            output.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty {
-                    handle.readabilityHandler = nil
-                    process.waitUntilExit()
+            continuation.onTermination = { _ in child.terminate() }
+            do {
+                try child.start(output: { chunk in
+                    switch chunk {
+                    case .stdout(let data): continuation.yield(data)
+                    case .stderr(let data): errors.append(data)
+                    }
+                }, completion: { exit in
                     cleanup()
-                    if process.terminationStatus == 0 {
+                    if exit.succeeded {
                         continuation.finish()
                     } else {
-                        let message = String(decoding: errors.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+                        let message = errors.text.trimmingCharacters(in: .whitespacesAndNewlines)
                         continuation.finish(throwing: DockerError.apiError(
                             status: 500,
-                            message: "tar failed: \(message.trimmingCharacters(in: .whitespacesAndNewlines))"
+                            message: "tar failed (\(exit.summary)): \(message)"
                         ))
                     }
-                } else {
-                    continuation.yield(data)
-                }
-            }
-            continuation.onTermination = { termination in
-                if case .cancelled = termination, process.isRunning { process.terminate() }
-            }
-            do {
-                try process.run()
+                })
             } catch {
-                output.fileHandleForReading.readabilityHandler = nil
                 cleanup()
                 continuation.finish(throwing: error)
             }
