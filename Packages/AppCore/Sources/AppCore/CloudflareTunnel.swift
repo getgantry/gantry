@@ -230,15 +230,15 @@ extension HostSession {
         onLine: (@Sendable (String) -> Void)? = nil
     ) async -> CloudflareTunnel? {
         guard let publicPort = port.publicPort, publicPort > 0 else {
-            lastError = "This port isn't published, so it can't be shared."
+            report("This port isn't published, so it can't be shared.")
             return nil
         }
         guard CloudflaredTooling.cliPath() != nil else {
-            lastError = "cloudflared isn't installed."
+            report("cloudflared isn't installed.")
             return nil
         }
         guard let target = await localTargetURL(for: port, containerID: containerID, label: label) else {
-            lastError = "Could not reach this port locally to tunnel it."
+            report("Could not reach this port locally to tunnel it.")
             return nil
         }
         return await startCloudflareTunnel(
@@ -266,7 +266,7 @@ extension HostSession {
         onLine: (@Sendable (String) -> Void)? = nil
     ) async -> CloudflareTunnel? {
         guard let cli = CloudflaredTooling.cliPath() else {
-            lastError = "cloudflared isn't installed."
+            report("cloudflared isn't installed.")
             return nil
         }
 
@@ -321,7 +321,7 @@ extension HostSession {
             updateCloudflareTunnel(id) { $0 = tunnel }
             cloudflaredServices[id] = nil
             await service.stop()
-            lastError = error.localizedDescription
+            report(error.localizedDescription)
             return tunnel
         }
     }
