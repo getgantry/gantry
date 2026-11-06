@@ -37,9 +37,41 @@ struct CreateContainerSheet: View {
     /// Set when create failed with a 404; offers a pull-and-retry button.
     @State private var imageMissing = false
     @State private var pullStatus: String?
+    /// Set when the daemon refused the name; shown under the Name field.
+    @State private var nameError: String?
+    /// Set when the new container stopped right after it started.
+    @State private var earlyExit: StartedContainerExit?
+
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+
+    /// The command split like a POSIX shell does it, or the parse error.
+    private var parsedCommand: Result<[String], Error> {
+        Result { try ShellWords.split(command) }
+    }
+
+    private var commandError: String? {
+        if case .failure(let error) = parsedCommand { return error.localizedDescription }
+        return nil
+    }
+
+    private var portEntries: [ContainerForm.PortEntry] {
+        ports.map { ContainerForm.PortEntry(host: $0.host, container: $0.container, proto: $0.proto) }
+    }
+
+    /// Port problems keyed by row id, so each row can show its own.
+    private var portIssues: [UUID: ContainerForm.PortIssue] {
+        let byIndex = ContainerForm.portIssues(portEntries)
+        return Dictionary(byIndex.map { (ports[$0.key].id, $0.value) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// An invalid name, or one that another container on this host uses.
+    private var nameIssue: String? {
+        ContainerForm.nameIssue(name, taken: ContainerForm.takenNames(session.containers))
+    }
 
     private var canCreate: Bool {
         !image.trimmingCharacters(in: .whitespaces).isEmpty && !isWorking
+            && commandError == nil && portIssues.isEmpty && nameIssue == nil
     }
 
     var body: some View {
@@ -59,8 +91,11 @@ struct CreateContainerSheet: View {
                         .textFieldStyle(.roundedBorder)
                     TextField("Name (optional)", text: $name, prompt: Text("my-container"))
                         .textFieldStyle(.roundedBorder)
+                        .onChange(of: name) { nameError = nil }
+                    FieldError(message: nameIssue ?? nameError)
                     TextField("Command (optional)", text: $command, prompt: Text("nginx -g 'daemon off;'"))
                         .textFieldStyle(.roundedBorder)
+                    FieldError(message: commandError)
                 }
 
                 Section {
@@ -80,9 +115,12 @@ struct CreateContainerSheet: View {
                         }
                         .labelsHidden()
                         .frame(width: 70)
+                        PortIssueIcon(issue: portIssues[row.id])
                     }
                 } header: {
                     Text("Ports")
+                } footer: {
+                    FieldError(message: portIssues.values.first?.message)
                 }
 
                 Section("Environment") {
@@ -188,6 +226,7 @@ struct CreateContainerSheet: View {
             .padding()
         }
         .frame(width: 560, height: 640)
+        .startedContainerExitAlert($earlyExit, session: session) { dismiss() }
         .task {
             if session.host.isAppleContainer {
                 appleFeatures = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride)
@@ -338,27 +377,20 @@ struct CreateContainerSheet: View {
     }
 
     private func buildRequest() -> ContainerCreateRequest {
-        let cmd: [String] = command
-            .split(separator: " ")
-            .map(String.init)
-            .filter { !$0.isEmpty }
+        // `canCreate` blocks a command that does not parse.
+        let cmd: [String] = (try? parsedCommand.get()) ?? []
 
         let envList: [String] = env
             .filter { !$0.key.trimmingCharacters(in: .whitespaces).isEmpty }
             .map { "\($0.key)=\($0.value)" }
 
-        let portMap: [String: String] = Dictionary(
-            uniqueKeysWithValues: ports
-                .filter { !$0.container.isEmpty }
-                .map { ("\($0.container)/\($0.proto)", $0.host) }
-        )
+        let portMap = ContainerForm.portMap(portEntries)
 
         let bindList: [String] = binds
             .filter { !$0.host.isEmpty && !$0.container.isEmpty }
             .map { $0.readOnly ? "\($0.host):\($0.container):ro" : "\($0.host):\($0.container)" }
 
         let trimmedImage = image.trimmingCharacters(in: .whitespaces)
-        let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
         // Record the domain as a label so the container's address view can show
         // the resolvable hostname reliably later (matches Quick Run).
@@ -409,16 +441,44 @@ struct CreateContainerSheet: View {
 
     private func create() async {
         errorText = nil
+        nameError = nil
         imageMissing = false
         isWorking = true
         defer { isWorking = false }
         do {
-            _ = try await session.createAndRun(buildRequest())
+            try await runAndWatch()
+        } catch {
+            show(error)
+        }
+    }
+
+    /// Creates and starts the container, then watches it for a few seconds:
+    /// a container that stops at once gets the exit alert, not a silent close.
+    private func runAndWatch() async throws {
+        let request = buildRequest()
+        let id = try await session.createAndRun(request)
+        pullStatus = String(localized: "Starting…")
+        defer { pullStatus = nil }
+        if let exit = await session.earlyExit(containerID: id) {
+            earlyExit = StartedContainerExit(
+                hostID: session.host.id,
+                containerID: id,
+                name: request.name ?? String(id.prefix(12)),
+                exitCode: exit.exitCode
+            )
+        } else {
             dismiss()
-        } catch let DockerError.apiError(status, message) {
+        }
+    }
+
+    /// Routes a create failure to the right inline place.
+    private func show(_ error: Error) {
+        if !trimmedName.isEmpty, ContainerForm.isNameConflict(error) {
+            nameError = ContainerForm.nameInUseMessage(trimmedName)
+        } else if case let DockerError.apiError(status, message) = error {
             errorText = message
             imageMissing = (status == 404)
-        } catch {
+        } else {
             errorText = error.localizedDescription
         }
     }
@@ -437,12 +497,11 @@ struct CreateContainerSheet: View {
                 pullStatus = "Pulling \(image)… \(String(describing: progress))"
             }
             // Retry the create now that the image should be present.
-            _ = try await session.createAndRun(buildRequest())
-            dismiss()
-        } catch let DockerError.apiError(_, message) {
-            errorText = message
+            pullStatus = nil
+            try await runAndWatch()
         } catch {
-            errorText = error.localizedDescription
+            show(error)
+            imageMissing = false
         }
     }
 }

@@ -25,9 +25,46 @@ struct QuickRunSheet: View {
     @State private var statusText: String?
     @State private var errorText: String?
     @State private var imageMissing = false
+    /// True once the user typed a name; until then it follows the image.
+    @State private var nameEdited = false
+    /// Set when the runtime refused the name; shown under the Name field.
+    @State private var nameError: String?
+    /// Set when the new container stopped right after it started.
+    @State private var earlyExit: StartedContainerExit?
 
     private var trimmedImage: String { image.trimmingCharacters(in: .whitespaces) }
-    private var canRun: Bool { !trimmedImage.isEmpty && !isWorking }
+
+    private var portEntries: [ContainerForm.PortEntry] {
+        ports.map { ContainerForm.PortEntry(host: $0.host, container: $0.container, proto: $0.proto) }
+    }
+
+    /// Port problems keyed by row id. Quick Run drops rows without a host port.
+    private var portIssues: [UUID: ContainerForm.PortIssue] {
+        let byIndex = ContainerForm.portIssues(portEntries, requireHost: true)
+        return Dictionary(byIndex.map { (ports[$0.key].id, $0.value) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    private var nameIssue: String? {
+        ContainerForm.nameIssue(name, taken: ContainerForm.takenNames(session.containers))
+    }
+
+    private var canRun: Bool {
+        !trimmedImage.isEmpty && !isWorking && portIssues.isEmpty && nameIssue == nil
+    }
+
+    /// The Name field: typing marks the name as the user's own, and clearing
+    /// it hands it back to the image-derived suggestion.
+    private var nameBinding: Binding<String> {
+        Binding(
+            get: { name },
+            set: { newValue in
+                name = newValue
+                nameEdited = !newValue.trimmingCharacters(in: .whitespaces).isEmpty
+                nameError = nil
+                if !nameEdited { suggestName() }
+            }
+        )
+    }
 
     private var cliOverride: String? { session.host.socketPathOverride }
 
@@ -48,6 +85,7 @@ struct QuickRunSheet: View {
             footer
         }
         .frame(width: 560, height: 640)
+        .startedContainerExitAlert($earlyExit, session: session) { dismiss() }
         .task {
             await loadDomains()
         }
@@ -98,11 +136,11 @@ struct QuickRunSheet: View {
             HStack(spacing: 6) {
                 TextField("Image", text: $image, prompt: Text("nginx:alpine"))
                     .textFieldStyle(.roundedBorder)
-                    .onChange(of: image) { _, _ in suggestNameIfNeeded() }
+                    .onChange(of: image) { _, _ in suggestName() }
                 if !localImages.isEmpty {
                     Menu {
                         ForEach(localImages, id: \.self) { tag in
-                            Button(tag) { image = tag; suggestNameIfNeeded(force: true) }
+                            Button(tag) { image = tag }
                         }
                     } label: {
                         Image(systemName: "square.stack.3d.up")
@@ -112,8 +150,9 @@ struct QuickRunSheet: View {
                     .help("Pick a local image")
                 }
             }
-            TextField("Name (optional)", text: $name, prompt: Text("my-app"))
+            TextField("Name (optional)", text: nameBinding, prompt: Text("my-app"))
                 .textFieldStyle(.roundedBorder)
+            FieldError(message: nameIssue ?? nameError)
         }
     }
 
@@ -147,7 +186,7 @@ struct QuickRunSheet: View {
     }
 
     private var portsSection: some View {
-        Section("Ports") {
+        Section {
             editorRows($ports, addLabel: "Add Port", empty: { PortRow() }) { $row in
                 TextField("Host", text: $row.host, prompt: Text("8080")).frame(width: 80)
                 Text(":").foregroundStyle(.secondary)
@@ -157,7 +196,12 @@ struct QuickRunSheet: View {
                     Text("udp").tag("udp")
                 }
                 .labelsHidden().frame(width: 70)
+                PortIssueIcon(issue: portIssues[row.id])
             }
+        } header: {
+            Text("Ports")
+        } footer: {
+            FieldError(message: portIssues.values.first?.message)
         }
     }
 
@@ -259,13 +303,12 @@ struct QuickRunSheet: View {
         }
     }
 
-    private func suggestNameIfNeeded(force: Bool = false) {
-        guard force || name.isEmpty else { return }
-        // Derive a friendly default from the image's repository segment.
-        let repo = trimmedImage
-            .split(separator: "/").last.map(String.init) ?? trimmedImage
-        let base = repo.split(separator: ":").first.map(String.init) ?? repo
-        if !base.isEmpty { name = base }
+    /// Follows the image with a free name (`nginx`, then `nginx-2`, …) until
+    /// the user types a name of their own.
+    private func suggestName() {
+        guard !nameEdited else { return }
+        let base = ContainerForm.baseName(forImage: trimmedImage)
+        name = base.isEmpty ? "" : session.uniqueContainerName(base: base)
     }
 
     private func pickFolder() {
@@ -286,10 +329,7 @@ struct QuickRunSheet: View {
             .filter { !$0.key.trimmingCharacters(in: .whitespaces).isEmpty }
             .map { "\($0.key)=\($0.value)" }
 
-        let portMap = Dictionary(uniqueKeysWithValues:
-            ports.filter { !$0.container.isEmpty && !$0.host.isEmpty }
-                .map { ("\($0.container)/\($0.proto)", $0.host) }
-        )
+        let portMap = ContainerForm.portMap(portEntries, requireHost: true)
 
         var binds: [String] = []
         let trimmedFolder = folder.trimmingCharacters(in: .whitespaces)
@@ -323,6 +363,7 @@ struct QuickRunSheet: View {
 
     private func run(pullFirst: Bool = false) async {
         errorText = nil
+        nameError = nil
         imageMissing = false
         isWorking = true
         defer { isWorking = false; statusText = nil }
@@ -332,16 +373,38 @@ struct QuickRunSheet: View {
                 let stream = try await session.pullImage(reference: trimmedImage)
                 for try await _ in stream {}
             }
-            statusText = "Creating…"
-            let id = try await session.createAndRun(buildRequest())
+            statusText = String(localized: "Creating…")
+            let request = buildRequest()
+            let id = try await session.createAndRun(request)
+            statusText = String(localized: "Starting…")
+            if let exit = await session.earlyExit(containerID: id) {
+                earlyExit = StartedContainerExit(
+                    hostID: session.host.id,
+                    containerID: id,
+                    name: request.name ?? String(id.prefix(12)),
+                    exitCode: exit.exitCode
+                )
+                return
+            }
             if openInBrowser {
                 await openWhenReady(containerID: id)
             }
             dismiss()
-        } catch let DockerError.apiError(status, message) {
+        } catch {
+            show(error)
+        }
+    }
+
+    /// Routes a run failure to the right inline place: a name conflict goes
+    /// under the Name field instead of the raw daemon text.
+    private func show(_ error: Error) {
+        let typed = name.trimmingCharacters(in: .whitespaces)
+        if !typed.isEmpty, ContainerForm.isNameConflict(error) {
+            nameError = ContainerForm.nameInUseMessage(typed)
+        } else if case let DockerError.apiError(status, message) = error {
             errorText = message
             imageMissing = (status == 404)
-        } catch {
+        } else {
             errorText = error.localizedDescription
         }
     }

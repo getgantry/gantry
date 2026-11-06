@@ -1,4 +1,16 @@
 import Foundation
+import DockerKit
+
+extension AppleBuilderStatus {
+    /// True for the apple/container BuildKit builder (`buildkit`). It is system
+    /// plumbing that `container builder` owns, so the container list hides it;
+    /// the System ▸ Builder pane manages it instead.
+    public static func isBuilderContainer(_ container: ContainerSummary) -> Bool {
+        if container.labels["com.apple.container.resource.role"] == "builder" { return true }
+        if container.labels["com.apple.container.plugin"] == "builder" { return true }
+        return container.displayName == "buildkit" && container.image.contains("container-builder-shim")
+    }
+}
 
 /// The BuildKit builder container (`buildkit`) that `container build` runs in,
 /// as `container builder status --format json` reports it.

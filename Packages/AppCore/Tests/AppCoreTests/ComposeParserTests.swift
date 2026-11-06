@@ -189,6 +189,16 @@ struct ComposeParserTests {
         #expect(p.services[0].entrypoint == ["/bin/sh", "-c"])
     }
 
+    @Test func commandStringHonoursQuotes() throws {
+        let p = try parse("""
+        services:
+          web:
+            image: nginx
+            command: nginx -g 'daemon off;'
+        """)
+        #expect(p.services[0].command == ["nginx", "-g", "daemon off;"])
+    }
+
     @Test func resourceLimits() throws {
         let p = try parse("""
         services:

@@ -138,7 +138,15 @@ struct ContainerTerminalView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .gantryOpenDebugShell)) { note in
                 if note.object as? String == container.id, session.supportsDebugShell {
+                    _ = ContainerTabRequest.take(container.id)
                     mode = .debug
+                }
+            }
+            .onAppear {
+                // The request can predate this pane (see ContainerTabRequest).
+                if ContainerTabRequest.peek(container.id) == .debugShell {
+                    _ = ContainerTabRequest.take(container.id)
+                    if session.supportsDebugShell { mode = .debug }
                 }
             }
             .onDisappear {
