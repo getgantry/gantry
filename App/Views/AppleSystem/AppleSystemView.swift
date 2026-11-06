@@ -47,40 +47,42 @@ enum AppleSystemPane: String, CaseIterable, Identifiable {
     }
 }
 
-/// The content column of the System section: the list of panes. The selected
-/// pane shows in the detail column.
+/// The System section: a pane switcher over the selected pane, full width
+/// next to the sidebar.
 struct AppleSystemView: View {
     let session: HostSession
     @Binding var selection: String?
 
+    private var pane: AppleSystemPane {
+        selection.flatMap(AppleSystemPane.init(rawValue:)) ?? .overview
+    }
+
     var body: some View {
-        List(selection: $selection) {
-            ForEach(AppleSystemPane.allCases) { pane in
-                HStack(spacing: 10) {
-                    Image(systemName: pane.systemImage)
-                        .font(.title3)
-                        .foregroundStyle(.tint)
-                        .frame(width: 26)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(pane.title)
-                        Text(pane.subtitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-                .padding(.vertical, 3)
-                .tag(pane.rawValue)
-            }
+        VStack(spacing: 0) {
+            paneSwitcher
+            Divider()
+            AppleSystemDetailView(paneID: pane.rawValue, session: session)
         }
         .navigationTitle(String(localized: "System"))
-        .task {
-            if selection == nil { selection = AppleSystemPane.overview.rawValue }
+    }
+
+    private var paneSwitcher: some View {
+        Picker(String(localized: "Pane"), selection: Binding(
+            get: { pane },
+            set: { selection = $0.rawValue }
+        )) {
+            ForEach(AppleSystemPane.allCases) { pane in
+                Label(pane.title, systemImage: pane.systemImage).tag(pane)
+            }
         }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal)
+        .padding(.vertical, 10)
     }
 }
 
-/// The detail column of the System section.
+/// The selected pane of the System section.
 struct AppleSystemDetailView: View {
     let paneID: String
     let session: HostSession
