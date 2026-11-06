@@ -5,9 +5,9 @@ import AppCore
 import DockerKit
 
 /// File browser for a container's filesystem. Lists a directory, lets you
-/// descend into folders, jump via an editable path bar, download a file (saved
-/// as a raw tar) and upload a local file into the current directory (packed
-/// into a single-entry ustar archive client-side).
+/// descend into folders, jump via an editable path bar, download a file (a
+/// folder downloads as a tar) and upload local files into the current
+/// directory (packed into a ustar archive client-side).
 struct FilesView: View {
     let session: HostSession
     let container: ContainerSummary
@@ -19,12 +19,37 @@ struct FilesView: View {
     @State private var isLoading = false
     @State private var errorText: String?
     @State private var transferStatus: String?
+    /// A failed download, upload or drag-out; shown under the listing.
+    @State private var transferError: String?
+    /// Uploads that would replace items, waiting for the user to confirm.
+    @State private var pendingUpload: PendingUpload?
+
+    private struct PendingUpload: Identifiable {
+        let id = UUID()
+        let urls: [URL]
+        let destination: String
+        let conflicts: [String]
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             breadcrumbBar
             Divider()
             content
+            if let transferError { transferErrorRow(transferError) }
+        }
+        .confirmationDialog(
+            replaceTitle,
+            isPresented: Binding(presence: $pendingUpload),
+            titleVisibility: .visible,
+            presenting: pendingUpload
+        ) { pending in
+            Button("Replace", role: .destructive) {
+                Task { await performUpload(pending.urls, into: pending.destination) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { pending in
+            Text("Items with the same name in \(pending.destination) are overwritten: \(pending.conflicts.joined(separator: ", ")).")
         }
         .task(id: container.id) {
             path = "/"
@@ -67,6 +92,8 @@ struct FilesView: View {
         if isLoading && entries.isEmpty {
             ProgressView().controlSize(.large)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if errorText != nil, !container.state.isRunning {
+            notRunning
         } else if let errorText {
             ContentUnavailableView(
                 "Cannot Read Directory",
@@ -75,6 +102,54 @@ struct FilesView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
+            listing
+        }
+    }
+
+    private var notRunning: some View {
+        ContentUnavailableView {
+            Label("Container Not Running", systemImage: "stop.circle")
+        } description: {
+            Text("Start the container to browse its files.")
+        } actions: {
+            Button("Start") {
+                Task {
+                    if await session.perform(.start, on: container.id) { await load() }
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func transferErrorRow(_ message: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            Text(message)
+                .font(.callout)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button {
+                transferError = nil
+            } label: {
+                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Dismiss")
+        }
+        .padding(8)
+        .background(.orange.opacity(0.08))
+    }
+
+    private var replaceTitle: String {
+        guard let pending = pendingUpload else { return "" }
+        return pending.conflicts.count == 1
+            ? String(localized: "Replace “\(pending.conflicts[0])”?")
+            : String(localized: "Replace \(pending.conflicts.count) items?")
+    }
+
+    private var listing: some View {
+        Group {
             List(selection: $selection) {
                 if path != "/" {
                     ParentRow {
@@ -89,7 +164,8 @@ struct FilesView: View {
                             containerID: container.id,
                             remotePath: join(path, entry.name),
                             name: entry.name,
-                            isDirectory: entry.isDirectory
+                            isDirectory: entry.isDirectory,
+                            onError: { transferError = $0 }
                         ),
                         fullPath: join(path, entry.name),
                         canTransfer: session.host.capabilities.containerFileTransfer,
@@ -102,7 +178,7 @@ struct FilesView: View {
                             download(entry)
                         },
                         onDropURLs: entry.isDirectory && session.host.capabilities.containerUpload ? { urls in
-                            Task { await uploadURLs(urls, into: join(path, entry.name)) }
+                            requestUpload(urls, into: join(path, entry.name))
                         } : nil
                     )
                     .tag(entry.name)
@@ -118,7 +194,7 @@ struct FilesView: View {
             }
             // Dropping onto empty list area uploads into the current directory.
             .dropDestination(for: URL.self) { urls, _ in
-                Task { await uploadURLs(urls, into: path) }
+                requestUpload(urls, into: path)
                 return true
             }
             .overlay(alignment: .bottom) {
@@ -130,6 +206,12 @@ struct FilesView: View {
                     .padding(8)
                     .background(.regularMaterial, in: .capsule)
                     .padding(.bottom, 12)
+                }
+            }
+            .overlay {
+                if entries.isEmpty, !isLoading {
+                    ContentUnavailableView("Empty Folder", systemImage: "folder", description: Text(path))
+                        .allowsHitTesting(false)
                 }
             }
         }
@@ -178,25 +260,28 @@ struct FilesView: View {
 
     private func download(_ entry: ContainerFileEntry) {
         let panel = NSSavePanel()
-        // The download endpoint returns a tar; hint that in the suggested name.
-        panel.nameFieldStringValue = entry.name + ".tar"
+        // A file saves as itself; a folder comes as the engine's tar archive.
+        panel.nameFieldStringValue = ContainerFileDownload.localName(for: entry.name, isDirectory: entry.isDirectory)
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
         let remotePath = join(path, entry.name)
         Task {
-            transferStatus = "Downloading \(entry.name)…"
+            transferStatus = String(localized: "Downloading \(entry.name)…")
+            transferError = nil
             defer { transferStatus = nil }
             do {
                 let stream = try await session.downloadArchive(containerID: container.id, path: remotePath)
-                FileManager.default.createFile(atPath: url.path, contents: nil)
-                let handle = try FileHandle(forWritingTo: url)
-                defer { try? handle.close() }
+                var archive = Data()
                 for try await chunk in stream.bytes {
-                    try handle.write(contentsOf: chunk)
+                    archive.append(chunk)
                 }
+                let contents = try ContainerFileDownload.contents(
+                    ofArchive: archive, name: entry.name, isDirectory: entry.isDirectory
+                )
+                try contents.write(to: url, options: .atomic)
             } catch {
-                errorText = error.localizedDescription
+                transferError = error.localizedDescription
             }
         }
     }
@@ -213,17 +298,38 @@ struct FilesView: View {
         panel.prompt = "Upload"
         guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
 
-        let urls = panel.urls
-        Task { await uploadURLs(urls, into: path) }
+        requestUpload(panel.urls, into: path)
+    }
+
+    /// Uploads at once, or asks first when an item of the same name exists in
+    /// the destination.
+    private func requestUpload(_ urls: [URL], into destination: String) {
+        guard !urls.isEmpty else { return }
+        Task {
+            let existing: [String]
+            if destination == path {
+                existing = entries.map(\.name)
+            } else {
+                existing = (try? await session.listDirectory(containerID: container.id, path: destination))?
+                    .map(\.name) ?? []
+            }
+            let conflicts = ContainerFileDownload.conflicts(uploading: urls.map(\.lastPathComponent), existing: existing)
+            if conflicts.isEmpty {
+                await performUpload(urls, into: destination)
+            } else {
+                pendingUpload = PendingUpload(urls: urls, destination: destination, conflicts: conflicts)
+            }
+        }
     }
 
     /// Packs each local URL (recursively for folders) and uploads it into
     /// `destination`. Shows an indeterminate progress overlay and refreshes the
     /// listing when the destination is the directory currently shown.
-    private func uploadURLs(_ urls: [URL], into destination: String) async {
+    private func performUpload(_ urls: [URL], into destination: String) async {
         guard !urls.isEmpty else { return }
-        let label = urls.count == 1 ? urls[0].lastPathComponent : "\(urls.count) items"
-        transferStatus = "Uploading \(label)…"
+        transferError = nil
+        let label = urls.count == 1 ? urls[0].lastPathComponent : String(localized: "\(urls.count) items")
+        transferStatus = String(localized: "Uploading \(label)…")
         defer { transferStatus = nil }
         do {
             for url in urls {
@@ -236,7 +342,7 @@ struct FilesView: View {
                 await load()
             }
         } catch {
-            errorText = error.localizedDescription
+            transferError = error.localizedDescription
         }
     }
 }
@@ -407,6 +513,8 @@ struct ContainerFileTransfer: Transferable {
     let remotePath: String
     let name: String
     let isDirectory: Bool
+    /// Shows a failed drag-out in the Files tab; Finder only drops the item.
+    let onError: @MainActor (String) -> Void
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .data) { transfer in
@@ -416,27 +524,26 @@ struct ContainerFileTransfer: Transferable {
     }
 
     /// Downloads the item and writes it to a temp file, returning its URL.
-    /// Files are unpacked from their single-entry tar; directories keep the tar.
+    /// Files are unpacked from their single-entry tar; directories keep the
+    /// tar. An unreadable file fails the drag instead of leaving an empty file.
     func export() async throws -> URL {
-        let stream = try await session.downloadArchive(containerID: containerID, path: remotePath)
-        var buffer = Data()
-        for try await chunk in stream.bytes {
-            buffer.append(chunk)
-        }
-
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString, isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-
-        if isDirectory {
-            let url = dir.appendingPathComponent(name + ".tar")
-            try buffer.write(to: url)
-            return url
-        } else {
-            let url = dir.appendingPathComponent(name)
-            let contents = TarReader.firstFilePayload(in: buffer) ?? Data()
+        do {
+            let stream = try await session.downloadArchive(containerID: containerID, path: remotePath)
+            var buffer = Data()
+            for try await chunk in stream.bytes {
+                buffer.append(chunk)
+            }
+            let contents = try ContainerFileDownload.contents(ofArchive: buffer, name: name, isDirectory: isDirectory)
+            let dir = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString, isDirectory: true)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let url = dir.appendingPathComponent(ContainerFileDownload.localName(for: name, isDirectory: isDirectory))
             try contents.write(to: url)
             return url
+        } catch {
+            let message = error.localizedDescription
+            await onError(message)
+            throw error
         }
     }
 
