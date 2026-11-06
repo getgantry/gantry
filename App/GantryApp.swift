@@ -134,6 +134,13 @@ struct GantryApp: App {
         model.containerAlertHandler = { alert in
             ContainerNotifier.shared.present(alert)
         }
+        model.operations.onFinish = { operation in
+            ContainerNotifier.shared.presentOperation(operation)
+            // A failure must not go unseen: open the activity list.
+            if case .failed = operation.state, NSApp.isActive {
+                NotificationCenter.default.post(name: .gantryShowActivity, object: nil)
+            }
+        }
     }
 
     /// Applies the Dock-visibility preference. `.accessory` removes the app

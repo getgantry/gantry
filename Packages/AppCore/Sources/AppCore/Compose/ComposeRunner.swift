@@ -69,12 +69,16 @@ public struct ComposeRunner {
             await removeExistingProjectContainers(emit: emit)
         }
 
+        try Task.checkCancellation()
         try await ensureNetworks(for: order, emit: emit)
         try await ensureVolumes(for: order, emit: emit)
 
         var started = 0
         for service in order {
+            // Cancel stops between services; a pull in flight stops with its stream.
+            try Task.checkCancellation()
             let image = try await resolveImage(for: service, emit: emit)
+            try Task.checkCancellation()
             let request = try buildCreateRequest(for: service, image: image, emit: emit)
             emit(.startingService(service.name))
             let id = try await session.createAndRun(request)

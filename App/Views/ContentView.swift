@@ -145,7 +145,7 @@ struct ContentView: View {
     /// `onChange(of: selection)` handler clears `detailSelection` otherwise).
     @State private var pendingDetailSelection: DetailSelection?
     @State private var showingAddHost = false
-    @State private var confirmRemoval: UUID?
+    @State private var hostRemoval: DestructiveAction?
     /// A Compose file opened from Finder/menu, awaiting the Compose Up sheet.
     @State private var composeRequest: ComposeFileRequest?
     /// A Dockerfile dropped/opened, awaiting the Build Image sheet.
@@ -296,22 +296,11 @@ struct ContentView: View {
                 CredentialSheet(session: session, request: request)
             }
         }
-        .confirmationDialog(
-            "Remove this host?",
-            isPresented: removalDialogBinding,
-            presenting: confirmRemoval
-        ) { hostID in
-            Button("Remove Host", role: .destructive) {
-                Task {
-                    guard await HostRemoval.remove(hostID, from: model) else { return }
-                    if selection?.hostSelection?.hostID == hostID { selection = .dashboard }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: { hostID in
-            let label = model.session(id: hostID)?.host.name ?? "this host"
-            Text("\(label) will be removed from Gantry. Stored credentials are not deleted.")
+        .destructiveConfirmation($hostRemoval) { action, _ in
+            guard let hostID = await HostRemoval.remove(action, from: model) else { return }
+            if selection?.hostSelection?.hostID == hostID { selection = .dashboard }
         }
+        .toolbar { ActivityToolbarItem() }
     }
 
     // MARK: - Refresh
@@ -403,10 +392,6 @@ struct ContentView: View {
         case .cluster: return session.clusters.map(\.name)
         case .appleSystem: return []
         }
-    }
-
-    private var removalDialogBinding: Binding<Bool> {
-        Binding(presence: $confirmRemoval)
     }
 
     private var hostKeySheetBinding: Binding<Bool> {
@@ -540,7 +525,7 @@ struct ContentView: View {
                     }
                 } header: {
                     HostSectionHeader(session: session) {
-                        confirmRemoval = session.host.id
+                        hostRemoval = HostRemoval.action(for: session)
                     }
                         .contextMenu {
                             Button {
@@ -577,7 +562,7 @@ struct ContentView: View {
                             if session.host.removable {
                                 Divider()
                                 Button(role: .destructive) {
-                                    confirmRemoval = session.host.id
+                                    hostRemoval = HostRemoval.action(for: session)
                                 } label: {
                                     Label("Remove Host…", systemImage: "trash")
                                 }
@@ -724,20 +709,12 @@ struct ContentView: View {
                 HostUnavailableView(session: session, section: section)
             }
         }
-        .alert(
-            "Docker Error",
-            isPresented: Binding(
-                get: {
-                    session.lastError != nil
-                        && !(session.host.isAppleContainer && AppleMissingKernelAlert.isKernelError(session.lastError))
-                },
-                set: { if !$0 { session.lastError = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) { session.lastError = nil }
-        } message: {
-            Text(session.lastError ?? "")
+        // Action errors: a non-modal banner titled by host kind, not a modal
+        // alert. Sheets show their own errors inline (HostSession.attempt).
+        .safeAreaInset(edge: .top, spacing: 0) {
+            ActionErrorBanner(session: session)
         }
+        .animation(.snappy, value: session.lastError)
         .modifier(AppleMissingKernelAlert(session: session))
     }
 

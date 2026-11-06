@@ -30,7 +30,9 @@ struct PullImageSheet: View {
     @State private var layers: [String: PullProgress] = [:]
     /// Non-layer status lines (e.g. "Pulling from library/nginx").
     @State private var statusLine = ""
-    @State private var pullTask: Task<Void, Never>?
+    /// The pull in the operation center; it keeps running when the sheet
+    /// closes with Continue in Background.
+    @State private var operation: LongOperation?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -65,17 +67,18 @@ struct PullImageSheet: View {
 
             HStack {
                 if case .failed(let message) = phase {
-                    Label(message, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .lineLimit(2)
+                    InlineErrorText(message: message)
                 }
                 Spacer()
                 Button("Cancel", role: .cancel) {
-                    pullTask?.cancel()
+                    if let operation { operation.cancelIn(session) }
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
+                if isBusy {
+                    Button("Continue in Background") { dismiss() }
+                        .help("The pull keeps running. Follow it in Activity.")
+                }
                 if phase == .done {
                     Button("Done") { dismiss() }
                         .keyboardShortcut(.defaultAction)
@@ -88,7 +91,6 @@ struct PullImageSheet: View {
         }
         .padding(20)
         .frame(width: 460)
-        .onDisappear { pullTask?.cancel() }
     }
 
     private var isBusy: Bool { phase == .pulling }
@@ -147,20 +149,35 @@ struct PullImageSheet: View {
             auth = nil
         }
 
-        pullTask = Task {
+        operation = LongOperationRunner.run(.pull, title: String(localized: "Pull \(ref)"), session: session) { op in
             do {
                 let stream = try await session.pullImage(reference: ref, auth: auth)
                 for try await update in stream {
                     apply(update)
+                    op.update(progress: update.status, fraction: overallFraction)
                 }
+                try Task.checkCancellation()
                 phase = .done
                 await session.refreshImages()
+                return nil
             } catch is CancellationError {
-                // Sheet is closing; nothing to surface.
+                throw CancellationError()
             } catch {
                 phase = .failed(error.localizedDescription)
+                throw error
             }
         }
+    }
+
+    /// Bytes done over bytes known, across the layers that report them.
+    private var overallFraction: Double? {
+        let sized = layers.values.compactMap { p -> (Int64, Int64)? in
+            guard let current = p.current, let total = p.total, total > 0 else { return nil }
+            return (Int64(current), Int64(total))
+        }
+        guard !sized.isEmpty else { return nil }
+        let total = sized.reduce(0) { $0 + $1.1 }
+        return Double(sized.reduce(0) { $0 + $1.0 }) / Double(total)
     }
 
     /// Folds one progress line into the per-layer state.

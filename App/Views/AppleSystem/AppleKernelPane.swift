@@ -249,114 +249,134 @@ struct AppleKernelInstallSheet: View {
     var supportsDigest = true
 
     @Environment(\.dismiss) private var dismiss
-    @State private var lines: [String] = []
-    @State private var fraction: Double?
-    @State private var phase: Phase = .running
-
-    private enum Phase: Equatable {
-        case running
-        case done
-        case failed(String)
-    }
+    @Environment(AppModel.self) private var model
+    /// The install runs in the operation center, so closing the sheet does
+    /// not stop it; Cancel does.
+    @State private var operation: LongOperation?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 10) {
-                Image(systemName: "cpu").font(.title).foregroundStyle(.tint)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(request.source == .recommended
-                         ? String(localized: "Installing the Recommended Kernel")
-                         : String(localized: "Installing a Kernel"))
-                        .font(.headline)
-                    Text(statusText)
-                        .font(.callout)
-                        .foregroundStyle(phaseColor)
-                }
-            }
-
-            switch phase {
-            case .running:
-                if let fraction {
-                    ProgressView(value: fraction)
-                } else {
-                    ProgressView().progressViewStyle(.linear)
-                }
-            case .done:
-                ProgressView(value: 1)
-            case .failed(let message):
-                AppleSystemErrorBanner(message: message)
-            }
-
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
-                            Text(line)
-                                .font(.system(size: 11, design: .monospaced))
-                                .textSelection(.enabled)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .id(index)
-                        }
-                    }
-                    .padding(8)
-                }
-                .frame(height: 160)
-                .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .onChange(of: lines.count) {
-                    proxy.scrollTo(lines.count - 1, anchor: .bottom)
-                }
-            }
-
-            HStack {
-                Spacer()
-                if phase == .running {
-                    Button(String(localized: "Cancel"), role: .cancel) { dismiss() }
-                        .keyboardShortcut(.cancelAction)
-                } else {
-                    Button(String(localized: "Done")) { dismiss() }
-                        .keyboardShortcut(.defaultAction)
-                        .buttonStyle(.borderedProminent)
-                }
-            }
+            header
+            phaseView
+            logView
+            footer
         }
         .padding(20)
         .frame(width: 520)
-        .task { await run() }
+        .task { if operation == nil { operation = start() } }
+    }
+
+    private var state: OperationState { operation?.state ?? .running }
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "cpu").font(.title).foregroundStyle(.tint)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                Text(statusText)
+                    .font(.callout)
+                    .foregroundStyle(phaseColor)
+            }
+        }
+    }
+
+    private var title: String {
+        request.source == .recommended
+            ? String(localized: "Installing the Recommended Kernel")
+            : String(localized: "Installing a Kernel")
+    }
+
+    @ViewBuilder
+    private var phaseView: some View {
+        switch state {
+        case .running:
+            if let fraction = operation?.fraction {
+                ProgressView(value: fraction)
+            } else {
+                ProgressView().progressViewStyle(.linear)
+            }
+        case .succeeded:
+            ProgressView(value: 1)
+        case .failed(let message):
+            AppleSystemErrorBanner(message: message)
+        case .cancelled:
+            AppleSystemErrorBanner(message: String(localized: "Cancelled."))
+        }
+    }
+
+    private var logView: some View {
+        let lines = operation?.log ?? []
+        return ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                        Text(line)
+                            .font(.system(size: 11, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id(index)
+                    }
+                }
+                .padding(8)
+            }
+            .frame(height: 160)
+            .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .onChange(of: lines.count) {
+                proxy.scrollTo(lines.count - 1, anchor: .bottom)
+            }
+        }
+    }
+
+    private var footer: some View {
+        HStack {
+            Spacer()
+            if state == .running {
+                Button(String(localized: "Cancel Install"), role: .destructive) {
+                    if let operation { model.operations.cancel(operation) }
+                }
+                Button(String(localized: "Continue in Background")) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                    .help(String(localized: "The install keeps running. Follow it in Activity."))
+            } else {
+                Button(String(localized: "Done")) { dismiss() }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
     }
 
     private var statusText: String {
-        switch phase {
+        switch state {
         case .running: String(localized: "Downloading and installing. This can take a few minutes.")
-        case .done: String(localized: "The kernel is installed. New containers boot with it.")
-        case .failed: String(localized: "The kernel could not be installed.")
+        case .succeeded: String(localized: "The kernel is installed. New containers boot with it.")
+        case .failed, .cancelled: String(localized: "The kernel could not be installed.")
         }
     }
 
     private var phaseColor: Color {
-        switch phase {
+        switch state {
         case .running: .secondary
-        case .done: .green
-        case .failed: .red
+        case .succeeded: .green
+        case .failed, .cancelled: .red
         }
     }
 
-    private func run() async {
-        do {
+    private func start() -> LongOperation {
+        let request = request, supportsDigest = supportsDigest, cliOverride = cliOverride
+        return model.operations.run(.kernelInstall, title: title, host: String(localized: "apple/container")) { op in
             let stream = try AppleContainerControl.installKernel(
                 request,
                 supportsDigest: supportsDigest,
                 cliOverride: cliOverride
             )
             for try await line in stream {
-                lines.append(line)
-                if lines.count > 500 { lines.removeFirst(lines.count - 500) }
-                if let value = AppleContainerControl.progressFraction(in: line) { fraction = value }
+                op.append(log: line)
+                if let value = AppleContainerControl.progressFraction(in: line) {
+                    op.update(progress: nil, fraction: value)
+                }
             }
-            phase = Task.isCancelled ? .failed(String(localized: "Cancelled.")) : .done
-        } catch is CancellationError {
-            phase = .failed(String(localized: "Cancelled."))
-        } catch {
-            phase = .failed(error.localizedDescription)
+            try Task.checkCancellation()
+            return String(localized: "The kernel is installed.")
         }
     }
 }

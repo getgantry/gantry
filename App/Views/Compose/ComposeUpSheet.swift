@@ -28,6 +28,9 @@ struct ComposeUpSheet: View {
     @State private var finished = false
     @State private var runError: String?
     @State private var log: [LogLine] = []
+    /// The deploy in the operation center: Stop cancels it, and closing
+    /// the sheet lets it go on in the background.
+    @State private var operation: LongOperation?
 
     private struct LogLine: Identifiable {
         let id = UUID()
@@ -102,7 +105,7 @@ struct ComposeUpSheet: View {
                 Label(yamlError, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
                     .foregroundStyle(.orange)
-                    .lineLimit(2)
+                        .textSelection(.enabled)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,12 +113,15 @@ struct ComposeUpSheet: View {
             Divider()
             HStack {
                 Spacer()
-                Button("Cancel") {
+                // No Esc shortcut here: a stray Esc must not drop the edits.
+                Button("Discard Changes") {
                     yamlError = nil
+                    yamlText = (try? String(contentsOf: fileURL, encoding: .utf8)) ?? yamlText
                     editingYAML = false
                 }
-                Button("Apply Changes") { applyYAMLEdits() }
+                Button("Save and Apply") { applyYAMLEdits() }
                     .buttonStyle(.borderedProminent)
+                    .help("Writes the YAML to the file, then uses it for Up.")
             }
             .padding(12)
         }
@@ -247,16 +253,36 @@ struct ComposeUpSheet: View {
         HStack {
             if running { ProgressView().controlSize(.small) }
             Spacer()
-            Button(finished || runError != nil ? "Close" : "Cancel") { dismiss() }
-                .keyboardShortcut(.cancelAction)
-            if !finished && runError == nil && !editingYAML {
-                Button("Up") { Task { await runUp() } }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(project == nil || parseError != nil || eligibleHosts.isEmpty || running)
+            if running {
+                runningButtons
+            } else if !editingYAML {
+                idleButtons
             }
         }
         .padding(16)
+    }
+
+    @ViewBuilder
+    private var runningButtons: some View {
+        Button("Stop", role: .destructive) {
+            if let operation { model.operations.cancel(operation) }
+        }
+        .disabled(operation?.canCancel != true)
+        Button("Continue in Background") { dismiss() }
+            .keyboardShortcut(.cancelAction)
+            .help("The deploy keeps running. Follow it in Activity.")
+    }
+
+    @ViewBuilder
+    private var idleButtons: some View {
+        Button(finished || runError != nil ? "Close" : "Cancel") { dismiss() }
+            .keyboardShortcut(.cancelAction)
+        if !finished && runError == nil {
+            Button("Up") { startUp() }
+                .keyboardShortcut(.defaultAction)
+                .buttonStyle(.borderedProminent)
+                .disabled(project == nil || parseError != nil || eligibleHosts.isEmpty)
+        }
     }
 
     // MARK: - Logic
@@ -282,32 +308,42 @@ struct ComposeUpSheet: View {
     private func applyYAMLEdits() {
         do {
             let parsed = try ComposeParser().parse(text: yamlText, fileURL: fileURL)
+            try yamlText.write(to: fileURL, atomically: true, encoding: .utf8)
             project = parsed
             parseError = nil
             yamlError = nil
-            try? yamlText.write(to: fileURL, atomically: true, encoding: .utf8)
             editingYAML = false
         } catch {
             yamlError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 
-    private func runUp() async {
+    private func startUp() {
         guard let project, let hostID = selectedHostID,
               let session = model.session(id: hostID) else { return }
         running = true
         runError = nil
         log.removeAll()
+        let title = String(localized: "Compose up \(project.name)")
+        operation = LongOperationRunner.run(.composeUp, title: title, session: session, center: model.operations) { op in
+            try await runUp(project: project, hostID: hostID, session: session, operation: op)
+        }
+    }
+
+    private func runUp(
+        project: ComposeProject, hostID: UUID, session: HostSession, operation: LongOperation
+    ) async throws -> String? {
+        defer { running = false }
 
         if !session.status.isConnected {
             append("Connecting to \(session.host.name)…", .info)
             await session.connect()
         }
         guard session.status.isConnected else {
-            running = false
-            runError = "Could not connect to \(session.host.name)."
-            append(runError!, .error)
-            return
+            let message = String(localized: "Could not connect to \(session.host.name).")
+            runError = message
+            append(message, .error)
+            throw OperationFailure(message)
         }
         await session.refreshAll()
 
@@ -317,14 +353,22 @@ struct ComposeUpSheet: View {
             options: .init(recreate: recreate, noCache: noCache)
         )
         do {
-            _ = try await runner.up { event in record(event) }
+            let started = try await runner.up { event in
+                record(event)
+                operation.append(log: log.last?.text ?? "")
+                operation.update(progress: log.last?.text)
+            }
             finished = true
             NotificationCenter.default.post(name: .gantrySelectHostContainers, object: hostID)
+            return String(localized: "\(started) services running")
         } catch {
-            runError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            append("Failed: \(runError!)", .error)
+            let message = error is CancellationError
+                ? String(localized: "Cancelled.")
+                : (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            runError = message
+            append(String(localized: "Failed: \(message)"), .error)
+            throw error
         }
-        running = false
     }
 
     private func record(_ event: ComposeUpEvent) {
