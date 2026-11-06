@@ -450,6 +450,22 @@
         }
       }
     },
+    "%lld new lines": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new lines"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 行新日志"
+          }
+        }
+      }
+    },
     "%lld per node": {
       "localizations": {
         "en": {
@@ -1474,6 +1490,22 @@
         }
       }
     },
+    "Check Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新检查"
+          }
+        }
+      }
+    },
     "Check for Updates…": {
       "localizations": {
         "en": {
@@ -1762,6 +1794,22 @@
         }
       }
     },
+    "Clusters Unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clusters Unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集群不可用"
+          }
+        }
+      }
+    },
     "CNI": {
       "localizations": {
         "en": {
@@ -1986,6 +2034,22 @@
         }
       }
     },
+    "Connect to the host to see this item.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the host to see this item."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接到主机后才能查看此项目。"
+          }
+        }
+      }
+    },
     "Connected": {
       "localizations": {
         "en": {
@@ -2030,6 +2094,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已连接的容器"
+          }
+        }
+      }
+    },
+    "Connecting to %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecting to %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接到 %@…"
           }
         }
       }
@@ -2126,6 +2206,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "容器"
+          }
+        }
+      }
+    },
+    "container CLI": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "container CLI"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "container CLI"
           }
         }
       }
@@ -2802,6 +2898,22 @@
         }
       }
     },
+    "Creating…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在创建…"
+          }
+        }
+      }
+    },
     "Custom manifest…": {
       "localizations": {
         "en": {
@@ -3266,6 +3378,38 @@
         }
       }
     },
+    "Docker is not installed on this Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker is not installed on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Mac 上未安装 Docker。"
+          }
+        }
+      }
+    },
+    "Docker Not Installed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker Not Installed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装 Docker"
+          }
+        }
+      }
+    },
     "Domain": {
       "localizations": {
         "en": {
@@ -3570,6 +3714,22 @@
         }
       }
     },
+    "Exited (code %lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exited (code %lld)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已退出（代码 %lld）"
+          }
+        }
+      }
+    },
     "Export Filesystem…": {
       "localizations": {
         "en": {
@@ -3710,6 +3870,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "按标签或 ID 筛选"
+          }
+        }
+      }
+    },
+    "Find automatically": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find automatically"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动查找"
           }
         }
       }
@@ -3858,6 +4034,22 @@
         }
       }
     },
+    "Gantry found no Docker socket (Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman). Install one of them, or remove this host from the sidebar if you only use apple/container.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry found no Docker socket (Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman). Install one of them, or remove this host from the sidebar if you only use apple/container."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 未找到 Docker 套接字（Docker Desktop、OrbStack、Colima、Rancher Desktop 或 Podman）。请安装其中之一；如果只使用 apple/container，可从边栏移除此主机。"
+          }
+        }
+      }
+    },
     "Gantry includes a stdio MCP server, gantry-mcp, that exposes your Docker hosts as tools an AI agent can call: list containers, view logs and stats, run lifecycle actions, exec commands, and inspect images, volumes, networks and disk usage. Register it with an MCP client like Claude:": {
       "localizations": {
         "en": {
@@ -3870,6 +4062,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gantry 内置 stdio MCP 服务器 gantry-mcp，可将你的 Docker 主机暴露为 AI 代理可调用的工具：列出容器、查看日志与统计、执行生命周期操作、exec 命令，以及检查镜像、卷、网络与磁盘占用。可在 Claude 等 MCP 客户端中注册："
+          }
+        }
+      }
+    },
+    "Gantry is not connected to this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry is not connected to this host."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 未连接到此主机。"
           }
         }
       }
@@ -4222,6 +4430,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "主机终端"
+          }
+        }
+      }
+    },
+    "Host Unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host Unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机不可用"
           }
         }
       }
@@ -4898,6 +5122,22 @@
         }
       }
     },
+    "Local Docker": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Docker"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地 Docker"
+          }
+        }
+      }
+    },
     "Local Docker Socket": {
       "localizations": {
         "en": {
@@ -5006,6 +5246,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "机器"
+          }
+        }
+      }
+    },
+    "Machines Unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machines Unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟机不可用"
+          }
+        }
+      }
+    },
+    "Make sure that the apple/container services are running (System ▸ Overview), then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make sure that the apple/container services are running (System ▸ Overview), then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请确认 apple/container 服务正在运行（系统 ▸ 概览），然后重试。"
           }
         }
       }
@@ -5566,6 +5838,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有已连接的容器。"
+          }
+        }
+      }
+    },
+    "No Docker socket found yet. The host shows as not installed until one appears.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Docker socket found yet. The host shows as not installed until one appears."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未找到 Docker 套接字。在找到之前，此主机显示为未安装。"
           }
         }
       }
@@ -8530,6 +8818,22 @@
         }
       }
     },
+    "Show Logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Logs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示日志"
+          }
+        }
+      }
+    },
     "Show menu bar icon": {
       "localizations": {
         "en": {
@@ -8594,6 +8898,22 @@
         }
       }
     },
+    "Socket found at %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Socket found at %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已在 %@ 找到套接字"
+          }
+        }
+      }
+    },
     "Socket Path": {
       "localizations": {
         "en": {
@@ -8606,6 +8926,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "套接字路径"
+          }
+        }
+      }
+    },
+    "Socket path (optional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Socket path (optional)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "套接字路径（可选）"
           }
         }
       }
@@ -9090,6 +9426,22 @@
         }
       }
     },
+    "Storage: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储：%@"
+          }
+        }
+      }
+    },
     "Storage: calculating…": {
       "localizations": {
         "en": {
@@ -9134,6 +9486,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储：镜像 %@ · 容器 %@ · 卷 %@ · 构建缓存 %@"
+          }
+        }
+      }
+    },
+    "Storage: unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage: unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储：不可用"
           }
         }
       }
@@ -9378,6 +9746,22 @@
         }
       }
     },
+    "The Docker engine on this Mac: Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Docker engine on this Mac: Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Mac 上的 Docker 引擎：Docker Desktop、OrbStack、Colima、Rancher Desktop 或 Podman。"
+          }
+        }
+      }
+    },
     "The Dockerfile must live inside the build context.": {
       "localizations": {
         "en": {
@@ -9390,6 +9774,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dockerfile 必须位于构建上下文内。"
+          }
+        }
+      }
+    },
+    "The Homebrew build of apple/container has no machine API server. Install the signed package from Apple to use machines.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Homebrew build of apple/container has no machine API server. Install the signed package from Apple to use machines."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 版本的 apple/container 不包含虚拟机 API 服务器。要使用虚拟机，请安装 Apple 签名的安装包。"
           }
         }
       }
@@ -9598,6 +9998,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "信任"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
           }
         }
       }
@@ -12622,6 +13038,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "未选择"
+          }
+        }
+      }
+    },
+    "“%@” stopped right after it started. Its logs usually show why.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” stopped right after it started. Its logs usually show why."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”启动后立即停止。日志通常会显示原因。"
           }
         }
       }
