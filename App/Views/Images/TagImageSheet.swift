@@ -12,6 +12,7 @@ struct TagImageSheet: View {
     @State private var repo = ""
     @State private var tag = "latest"
     @State private var working = false
+    @State private var errorText: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -30,6 +31,10 @@ struct TagImageSheet: View {
                     .textFieldStyle(.roundedBorder)
             }
             .disabled(working)
+
+            if let errorText {
+                InlineErrorText(message: errorText)
+            }
 
             HStack {
                 Spacer()
@@ -51,9 +56,11 @@ struct TagImageSheet: View {
         let repoValue = repo.trimmingCharacters(in: .whitespaces)
         let tagValue = tag.trimmingCharacters(in: .whitespaces)
         Task {
-            let ok = await session.tagImage(id: image.id, repo: repoValue, tag: tagValue)
+            errorText = await session.attempt(fallback: String(localized: "Could not tag the image.")) {
+                await session.tagImage(id: image.id, repo: repoValue, tag: tagValue)
+            }
             working = false
-            if ok { dismiss() }
+            if errorText == nil { dismiss() }
         }
     }
 }

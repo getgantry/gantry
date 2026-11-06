@@ -360,31 +360,32 @@ struct CloudflareShareSheet: View {
         case .quick: .quick
         case .named: .named(hostname: hostname.trimmingCharacters(in: .whitespaces))
         }
-        let tunnel: CloudflareTunnel?
-        switch source {
-        case .port(let binding):
-            tunnel = await session.startCloudflareTunnel(
-                containerID: containerID,
-                label: label,
-                port: binding,
-                mode: tunnelMode,
-                onLine: logSink
-            )
-        case .direct(let url, let port):
-            tunnel = await session.startCloudflareTunnel(
-                containerID: containerID,
-                label: label,
-                port: port,
-                targetURL: url,
-                mode: tunnelMode,
-                onLine: logSink
-            )
+        let (tunnel, error) = await session.attempt { () async -> CloudflareTunnel? in
+            switch source {
+            case .port(let binding):
+                await session.startCloudflareTunnel(
+                    containerID: containerID,
+                    label: label,
+                    port: binding,
+                    mode: tunnelMode,
+                    onLine: logSink
+                )
+            case .direct(let url, let port):
+                await session.startCloudflareTunnel(
+                    containerID: containerID,
+                    label: label,
+                    port: port,
+                    targetURL: url,
+                    mode: tunnelMode,
+                    onLine: logSink
+                )
+            }
         }
         busy = false
         if let tunnel {
             startedTunnelID = tunnel.id
         } else {
-            failure = session.lastError ?? "Could not start the tunnel."
+            failure = error ?? String(localized: "Could not start the tunnel.")
         }
     }
 
