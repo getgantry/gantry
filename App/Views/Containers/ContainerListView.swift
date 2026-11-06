@@ -128,9 +128,8 @@ struct ContainerListView: View {
         .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
         .toolbar { toolbarContent }
-        .onReceive(NotificationCenter.default.publisher(for: .gantryNewContainer)) { _ in
-            showCreateSheet = true
-        }
+        .onSectionCommand(.newItem, .containers) { showCreateSheet = true }
+        .onSectionCommand(.refresh, .containers) { Task { await session.refreshContainers() } }
         .sheet(isPresented: $showCreateSheet) {
             CreateContainerSheet(session: session)
         }
@@ -317,7 +316,6 @@ struct ContainerListView: View {
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
-            .keyboardShortcut("r", modifiers: .command)
         }
         ToolbarItem(placement: .primaryAction) {
             Menu {

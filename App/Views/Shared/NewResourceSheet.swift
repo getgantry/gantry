@@ -46,6 +46,7 @@ struct NewResourceSheet<DriverControl: View>: View {
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                 Button("Create") { submit() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || working)

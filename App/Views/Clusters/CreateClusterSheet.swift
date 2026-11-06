@@ -126,6 +126,7 @@ struct CreateClusterSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                 Button("Create") { create() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)

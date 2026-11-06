@@ -77,29 +77,7 @@ struct GantryApp: App {
                 CheckForUpdatesView(updater: updaterController.updater)
             }
 
-            CommandMenu("Docker") {
-                Button("Refresh All") {
-                    NotificationCenter.default.post(name: .gantryRefreshAll, object: nil)
-                }
-                .keyboardShortcut("r", modifiers: .command)
-
-                Button("New Container…") {
-                    NotificationCenter.default.post(name: .gantryNewContainer, object: nil)
-                }
-                .keyboardShortcut("n", modifiers: .command)
-
-                Divider()
-
-                Button("Open Compose File…") {
-                    openComposeFile()
-                }
-                .keyboardShortcut("o", modifiers: .command)
-
-                Button("Build Image from Dockerfile…") {
-                    openDockerfile()
-                }
-                .keyboardShortcut("b", modifiers: [.command, .shift])
-            }
+            SectionCommands(openComposeFile: openComposeFile, openDockerfile: openDockerfile)
         }
 
         // Standalone host shell windows (one per open request).

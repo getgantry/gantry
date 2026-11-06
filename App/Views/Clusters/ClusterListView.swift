@@ -35,7 +35,7 @@ struct ClusterListView: View {
                 } description: {
                     Text("Create a local Kubernetes cluster. Each node runs in its own lightweight VM.")
                 } actions: {
-                    Button("Create Cluster…") { showingCreate = true }
+                    Button("New Cluster…") { showingCreate = true }
                         .buttonStyle(.borderedProminent)
                 }
             } else {
@@ -60,9 +60,8 @@ struct ClusterListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingCreate = true } label: {
-                    Label("Create Cluster…", systemImage: "plus")
+                    Label("New Cluster…", systemImage: "plus")
                 }
-                .keyboardShortcut("n", modifiers: .command)
                 .disabled(clusters.isEmpty && session.clusterListError != nil)
             }
             ToolbarItem {
@@ -71,6 +70,10 @@ struct ClusterListView: View {
                 }
             }
         }
+        .onSectionCommand(.newItem, .clusters) {
+            if !(clusters.isEmpty && session.clusterListError != nil) { showingCreate = true }
+        }
+        .onSectionCommand(.refresh, .clusters) { Task { await session.refreshClusters() } }
         .sheet(isPresented: $showingCreate) {
             CreateClusterSheet(session: session)
         }
