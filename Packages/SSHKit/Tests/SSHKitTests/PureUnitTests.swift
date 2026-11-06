@@ -76,6 +76,13 @@ private func removeKey(_ path: String) {
     #expect(SSHConnectError.other("weird").errorDescription?.contains("weird") == true)
 }
 
+/// A tunnel error keeps the readable text of an SSH error, not the enum case.
+@Test func dialStdioDescribeUsesErrorDescription() {
+    let text = SSHDialStdioTransport.describe(SSHConnectError.unreachable("Connection refused"))
+    #expect(text == "Could not reach the SSH host: Connection refused")
+    #expect(!text.contains("unreachable("))
+}
+
 @Test func hostKeyMismatchErrorDescriptionMentionsHostAndFingerprints() {
     let error = HostKeyMismatchError(
         host: "h.example.com",
