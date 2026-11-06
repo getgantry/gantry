@@ -258,71 +258,26 @@ public enum AppleContainerControl {
 
     /// Runs `executable` to completion. `input`, when given, goes to stdin
     /// and the pipe is closed, so a secret such as a registry password never
-    /// appears on argv.
+    /// appears on argv. Cancelling the task terminates the process.
     static func run(
         _ executable: String,
         _ arguments: [String],
         environment extraEnvironment: [String: String] = [:],
         input: Data? = nil
     ) async -> RunResult {
-        await withCheckedContinuation { continuation in
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = arguments
-            var environment = ProcessInfo.processInfo.environment
-            environment["NO_COLOR"] = "1"
-            environment.merge(extraEnvironment) { _, new in new }
-            process.environment = environment
-            let outPipe = Pipe()
-            let errPipe = Pipe()
-            process.standardOutput = outPipe
-            process.standardError = errPipe
-            let inPipe: Pipe? = input == nil ? nil : Pipe()
-            if let inPipe { process.standardInput = inPipe }
-
-            // Drain stdout and stderr concurrently via readability handlers:
-            // reading one pipe to EOF before the other can deadlock once the
-            // process fills the second pipe's buffer.
-            let collector = ProcessOutputCollector()
-            outPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty { handle.readabilityHandler = nil }
-                collector.appendStdout(data)
-            }
-            errPipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty { handle.readabilityHandler = nil }
-                collector.appendStderr(data)
-            }
-            process.terminationHandler = { process in
-                let trailingOut = (try? outPipe.fileHandleForReading.readToEnd()) ?? Data()
-                let trailingErr = (try? errPipe.fileHandleForReading.readToEnd()) ?? Data()
-                outPipe.fileHandleForReading.readabilityHandler = nil
-                errPipe.fileHandleForReading.readabilityHandler = nil
-                let (outData, errData) = collector.snapshot(
-                    trailingStdout: trailingOut,
-                    trailingStderr: trailingErr
-                )
-                continuation.resume(returning: RunResult(
-                    exitCode: process.terminationStatus,
-                    stdout: String(decoding: outData, as: UTF8.self),
-                    stderr: String(decoding: errData, as: UTF8.self)
-                ))
-            }
-            do {
-                try process.run()
-                if let inPipe, let input {
-                    let writer = inPipe.fileHandleForWriting
-                    // A CLI that exits before reading must not raise SIGPIPE
-                    // in Gantry: the write then fails with EPIPE instead.
-                    _ = fcntl(writer.fileDescriptor, F_SETNOSIGPIPE, 1)
-                    try? writer.write(contentsOf: input)
-                    try? writer.close()
-                }
-            } catch {
-                process.terminationHandler = nil
-                continuation.resume(returning: RunResult(exitCode: -1, stdout: "", stderr: error.localizedDescription))
-            }
+        var environment = ["NO_COLOR": "1"]
+        environment.merge(extraEnvironment) { _, new in new }
+        do {
+            let result = try await ChildProcess.run(executable, arguments, environment: environment, input: input)
+            return RunResult(
+                exitCode: result.exit.signaled ? 128 + result.exit.status : result.exit.status,
+                stdout: String(decoding: result.stdout, as: UTF8.self),
+                stderr: String(decoding: result.stderr, as: UTF8.self)
+            )
+        } catch is CancellationError {
+            return RunResult(exitCode: -1, stdout: "", stderr: "Cancelled.")
+        } catch {
+            return RunResult(exitCode: -1, stdout: "", stderr: error.localizedDescription)
         }
     }
 
@@ -340,30 +295,5 @@ public enum AppleContainerControl {
             }
             throw AppleControlError.command(message.isEmpty ? "The privileged command failed." : message)
         }
-    }
-}
-
-/// Thread-safe accumulator for a process's stdout/stderr, fed from the pipe
-/// readability handlers that drain both streams concurrently.
-private final class ProcessOutputCollector: @unchecked Sendable {
-    private let lock = NSLock()
-    private var stdout = Data()
-    private var stderr = Data()
-
-    func appendStdout(_ data: Data) {
-        lock.lock(); defer { lock.unlock() }
-        stdout.append(data)
-    }
-
-    func appendStderr(_ data: Data) {
-        lock.lock(); defer { lock.unlock() }
-        stderr.append(data)
-    }
-
-    func snapshot(trailingStdout: Data, trailingStderr: Data) -> (Data, Data) {
-        lock.lock(); defer { lock.unlock() }
-        stdout.append(trailingStdout)
-        stderr.append(trailingStderr)
-        return (stdout, stderr)
     }
 }

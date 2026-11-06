@@ -1,4 +1,5 @@
 import Foundation
+import DockerKit
 
 /// Errors from the apple/container system-management commands (builder,
 /// registry logins, kernel, logs, properties).
@@ -190,7 +191,8 @@ extension AppleContainerControl {
     /// Runs `container <arguments>` and yields each output line (stdout and
     /// stderr merged; carriage returns from progress bars also end a line).
     /// The stream finishes when the process exits and throws on a non-zero
-    /// exit. Cancelling the consumer terminates the process.
+    /// exit or a death by signal. Cancelling the consumer terminates the
+    /// process and is the only case that ends without an error.
     public static func streamContainer(
         _ arguments: [String],
         cliOverride: String? = nil
@@ -200,51 +202,42 @@ extension AppleContainerControl {
                 continuation.finish(throwing: AppleControlError.cliNotFound)
                 return
             }
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: cli)
-            process.arguments = arguments
-            var environment = ProcessInfo.processInfo.environment
-            environment["NO_COLOR"] = "1"
-            process.environment = environment
-            let pipe = Pipe()
-            process.standardOutput = pipe
-            process.standardError = pipe
-            process.standardInput = FileHandle.nullDevice
-
+            let child = ChildProcess(
+                executable: cli,
+                arguments: arguments,
+                environment: ["NO_COLOR": "1"],
+                mergeOutput: true
+            )
             let splitter = LineSplitter()
-            pipe.fileHandleForReading.readabilityHandler = { handle in
-                let data = handle.availableData
-                if data.isEmpty {
-                    handle.readabilityHandler = nil
-                    return
-                }
-                for line in splitter.append(data) { continuation.yield(line) }
-            }
-            process.terminationHandler = { process in
-                let trailing = (try? pipe.fileHandleForReading.readToEnd()) ?? Data()
-                pipe.fileHandleForReading.readabilityHandler = nil
-                var lines = splitter.append(trailing)
-                lines += splitter.flush()
-                for line in lines { continuation.yield(line) }
-                if process.terminationReason == .uncaughtSignal {
-                    continuation.finish()
-                } else if process.terminationStatus == 0 {
-                    continuation.finish()
-                } else {
-                    let tail = splitter.recentLines.joined(separator: "\n")
-                    continuation.finish(throwing: commandError(arguments: arguments, stdout: "", stderr: tail))
-                }
-            }
-            continuation.onTermination = { _ in
-                if process.isRunning { process.terminate() }
-            }
+            continuation.onTermination = { _ in child.terminate() }
             do {
-                try process.run()
+                try child.start(output: { chunk in
+                    guard case .stdout(let data) = chunk else { return }
+                    for line in splitter.append(data) { continuation.yield(line) }
+                }, completion: { exit in
+                    for line in splitter.flush() { continuation.yield(line) }
+                    if exit.succeeded {
+                        continuation.finish()
+                    } else {
+                        continuation.finish(throwing: streamError(arguments: arguments, exit: exit, tail: splitter.recentLines))
+                    }
+                })
             } catch {
-                process.terminationHandler = nil
                 continuation.finish(throwing: error)
             }
         }
+    }
+
+    /// The error for a failed streamed command: the last output lines, or the
+    /// exit status or signal when the command printed nothing.
+    static func streamError(arguments: [String], exit: ChildProcessExit, tail: [String]) -> Error {
+        if exit.signaled {
+            let detail = tail.last.map { " Last output: \($0)" } ?? ""
+            return AppleControlError.command(
+                "container \(arguments.joined(separator: " ")) was \(exit.summary).\(detail)"
+            )
+        }
+        return commandError(arguments: arguments, stdout: "", stderr: tail.joined(separator: "\n"))
     }
 }
 
@@ -253,7 +246,12 @@ extension AppleContainerControl {
 final class LineSplitter: @unchecked Sendable {
     private let lock = NSLock()
     private var buffer = Data()
-    private(set) var recentLines: [String] = []
+    private var recent: [String] = []
+
+    var recentLines: [String] {
+        lock.lock(); defer { lock.unlock() }
+        return recent
+    }
 
     func append(_ data: Data) -> [String] {
         lock.lock(); defer { lock.unlock() }
@@ -278,8 +276,8 @@ final class LineSplitter: @unchecked Sendable {
         let text = AppleContainerControl.stripANSI(String(decoding: data, as: UTF8.self))
             .trimmingCharacters(in: .whitespaces)
         guard !text.isEmpty else { return nil }
-        recentLines.append(text)
-        if recentLines.count > 8 { recentLines.removeFirst(recentLines.count - 8) }
+        recent.append(text)
+        if recent.count > 8 { recent.removeFirst(recent.count - 8) }
         return text
     }
 }
