@@ -39,14 +39,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # macos-26 hosted image ships Xcode 26.x; pin to the stable default for
-  # reproducible builds. Update the path if the image default changes.
-  DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+  # The xcode-27 image (public preview) has the macOS 27 SDK that the macOS 27
+  # features need. Pin the stable Xcode for reproducible builds.
+  DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
 
 jobs:
   build:
     name: Build app
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -64,9 +64,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/SourcePackages
-          key: spm-xcode-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          key: spm-xcode27-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
-            spm-xcode-${{ runner.os }}-
+            spm-xcode27-${{ runner.os }}-
 
       - name: Build Gantry (Release)
         run: |
@@ -80,7 +80,7 @@ jobs:
 
   test:
     name: Unit tests
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -98,9 +98,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: Packages/${{ matrix.package }}/.build
-          key: spm-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
+          key: spm-xcode27-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
           restore-keys: |
-            spm-${{ matrix.package }}-${{ runner.os }}-
+            spm-xcode27-${{ matrix.package }}-${{ runner.os }}-
 
       - name: Test ${{ matrix.package }}
         # Live tests are gated with .enabled(if:) on the presence of a local
