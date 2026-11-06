@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [AppCore, DockerKit, GantryMCP, SSHKit]
+        package: [AppCore, DockerKit, GantryMCP, GantryShared, SSHKit]
     steps:
       - uses: actions/checkout@v7
 
