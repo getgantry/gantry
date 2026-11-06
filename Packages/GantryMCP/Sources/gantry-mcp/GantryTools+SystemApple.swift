@@ -118,7 +118,7 @@ extension GantryTools {
                 inputSchema: Schema.object(properties: [
                     "host_id": appleHostID,
                     "name": Schema.string("Cluster name."),
-                    "kubeconfig": Schema.string("Kubeconfig file to remove the context from (optional; default ~/.kube/config).")
+                    "kubeconfig": Schema.string("Kubeconfig file to remove the context from (optional; default: the file the cluster was created with, else ~/.kube/config).")
                 ], required: ["host_id", "name"]),
                 annotations: .init(readOnlyHint: false, destructiveHint: true, openWorldHint: false)
             ),
@@ -311,6 +311,12 @@ extension GantryTools {
         let cli = try appleCLIOverride(args)
         let (command, features) = try await clusterFeatures(cliOverride: cli)
         let options = try clusterCreateOptions(args, features: features)
+        let hostID = try requiredHost(args).id.uuidString
+        let existing = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
+        guard !existing.contains(where: { $0.name == options.name }) else {
+            throw ToolError("A cluster named '\(options.name)' already exists.")
+        }
+        ClusterKubeconfigStore.record(options.kubeconfigPath, host: hostID, cluster: options.name)
         try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli)
         let config = options.kubeconfigPath ?? "~/.kube/config"
         return .text("OK: created cluster \(options.name). kubectl context \(options.name) is in \(config).")
@@ -320,9 +326,13 @@ extension GantryTools {
         let cli = try appleCLIOverride(args)
         let (command, _) = try await clusterFeatures(cliOverride: cli)
         let name = try args.requiredString("name")
+        let hostID = try requiredHost(args).id.uuidString
+        // Without an explicit kubeconfig, use the one the cluster was created with.
+        let kubeconfig = args.string("kubeconfig") ?? ClusterKubeconfigStore.path(host: hostID, cluster: name)
         try await AppleContainerControl.deleteCluster(
-            name, kubeconfigPath: args.string("kubeconfig"), command: command, cliOverride: cli
+            name, kubeconfigPath: kubeconfig, command: command, cliOverride: cli
         )
+        ClusterKubeconfigStore.record(nil, host: hostID, cluster: name)
         return .text("OK: deleted cluster \(name).")
     }
 
