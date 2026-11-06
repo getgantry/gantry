@@ -4,21 +4,23 @@ import AppCore
 import SSHKit
 
 struct SettingsView: View {
+    @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general.rawValue
+
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") {
+        TabView(selection: $tab) {
+            Tab("General", systemImage: "gearshape", value: SettingsTab.general.rawValue) {
                 GeneralSettings()
             }
-            Tab("Hosts", systemImage: "server.rack") {
+            Tab("Hosts", systemImage: "server.rack", value: SettingsTab.hosts.rawValue) {
                 HostsSettings()
             }
-            Tab("Apple", systemImage: "apple.logo") {
+            Tab("Apple", systemImage: "apple.logo", value: SettingsTab.apple.rawValue) {
                 AppleSettingsView()
             }
-            Tab("Agents", systemImage: "sparkles") {
+            Tab("Agents", systemImage: "sparkles", value: SettingsTab.agents.rawValue) {
                 AgentSettingsView()
             }
-            Tab("About", systemImage: "info.circle") {
+            Tab("About", systemImage: "info.circle", value: SettingsTab.about.rawValue) {
                 AboutSettings()
             }
         }

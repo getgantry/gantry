@@ -2376,6 +2376,22 @@
         }
       }
     },
+    "Container port": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器端口"
+          }
+        }
+      }
+    },
     "Containers": {
       "localizations": {
         "en": {
@@ -2808,22 +2824,6 @@
         }
       }
     },
-    "Create & Run": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Create & Run"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "创建并运行"
-          }
-        }
-      }
-    },
     "Create a local Kubernetes cluster. Each node runs in its own lightweight VM.": {
       "localizations": {
         "en": {
@@ -2868,6 +2868,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建新容器"
+          }
+        }
+      }
+    },
+    "Create and Run": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create and Run"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建并运行"
           }
         }
       }
@@ -2932,6 +2948,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建机器…"
+          }
+        }
+      }
+    },
+    "Create the container without starting it": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create the container without starting it"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建容器但不启动"
           }
         }
       }
@@ -3800,18 +3832,18 @@
         }
       }
     },
-    "Enter a new name for the container.": {
+    "Enter a new name: letters, digits, “_”, “.” and “-”, starting with a letter or digit. It must differ from the current name and from other containers.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter a new name for the container."
+            "value": "Enter a new name: letters, digits, “_”, “.” and “-”, starting with a letter or digit. It must differ from the current name and from other containers."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "输入容器的新名称。"
+            "value": "输入新名称：可使用字母、数字、“_”、“.”和“-”，并以字母或数字开头。新名称必须与当前名称及其他容器的名称不同。"
           }
         }
       }
@@ -4184,18 +4216,18 @@
         }
       }
     },
-    "Forward to a different local port on 127.0.0.1.": {
+    "Forward to a different local port on 127.0.0.1. Enter a port from 1 to 65535.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forward to a different local port on 127.0.0.1."
+            "value": "Forward to a different local port on 127.0.0.1. Enter a port from 1 to 65535."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "转发到 127.0.0.1 上的其他本地端口。"
+            "value": "转发到 127.0.0.1 上的其他本地端口。请输入 1 到 65535 之间的端口。"
           }
         }
       }
@@ -4404,6 +4436,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "通用"
+          }
+        }
+      }
+    },
+    "Generated if empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generated if empty"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "留空则自动生成"
           }
         }
       }
@@ -4676,6 +4724,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "主机路径"
+          }
+        }
+      }
+    },
+    "Host port": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机端口"
           }
         }
       }
@@ -5156,6 +5220,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "密钥类型"
+          }
+        }
+      }
+    },
+    "key=value": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "key=value"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "key=value"
           }
         }
       }
@@ -6328,34 +6408,18 @@
         }
       }
     },
-    "No local domains. Add one in Settings → Apple to reach containers by name.": {
+    "No local domains. Add one to reach containers by name.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No local domains. Add one in Settings → Apple to reach containers by name."
+            "value": "No local domains. Add one to reach containers by name."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有本地域名。请在设置 → Apple 中添加，以便按名称访问容器。"
-          }
-        }
-      }
-    },
-    "No local domains. Add one in Settings → Apple to reach this container by name.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No local domains. Add one in Settings → Apple to reach this container by name."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有本地域名。请在设置 → Apple 中添加，以便按名称访问此容器。"
+            "value": "没有本地域名。添加一个本地域名后即可按名称访问容器。"
           }
         }
       }
@@ -6996,6 +7060,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "在 VS Code 中打开"
+          }
+        }
+      }
+    },
+    "Open Settings → Apple": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings → Apple"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开设置 → Apple"
           }
         }
       }
@@ -7732,6 +7812,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "拉取镜像…"
+          }
+        }
+      }
+    },
+    "Pulling %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取 %@…"
+          }
+        }
+      }
+    },
+    "Pulling %@… %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling %@… %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取 %1$@… %2$@"
+          }
+        }
+      }
+    },
+    "Pulling %@… %@ %@ of %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling %@… %@ %@ of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取 %1$@… %2$@ %3$@ / %4$@"
           }
         }
       }
@@ -8516,6 +8644,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "仓库（例如 myregistry/app）"
+          }
+        }
+      }
+    },
+    "Repository and tag": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repository and tag"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仓库和标签"
           }
         }
       }
@@ -10404,6 +10548,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Homebrew 版本的 apple/container 不包含虚拟机 API 服务器。要使用虚拟机，请安装 Apple 签名的安装包。"
+          }
+        }
+      }
+    },
+    "The image's default command": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image's default command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像的默认命令"
           }
         }
       }
