@@ -35,7 +35,7 @@ struct StatsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: container.id) {
+        .task(id: container.liveTaskKey) {
             await consume()
         }
     }

@@ -10,6 +10,13 @@ import AppCore
 /// loading, before any dial is attempted).
 @Suite("HeadlessDocker")
 struct HeadlessDockerTests {
+    /// Point host persistence at a missing temp file, so the suite never reads
+    /// the hosts.json of the Mac that runs it and always gets the Local host.
+    init() {
+        let path = FileManager.default.temporaryDirectory
+            .appendingPathComponent("gantry-mcp-tests-hosts-missing.json").path
+        setenv("GANTRY_HOSTS_PATH", path, 1)
+    }
 
     // MARK: - Host loading / lookup (no daemon)
 

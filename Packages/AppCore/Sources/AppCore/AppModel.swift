@@ -21,7 +21,14 @@ public final class AppModel {
         }
     }
 
-    public init() {
+    /// How the model looks for Docker and the apple CLI (a seam for tests).
+    @ObservationIgnored private let detection: LocalDockerDetection
+    /// Where the Local-host choice is stored.
+    @ObservationIgnored private let defaults: UserDefaults
+
+    public init(detection: LocalDockerDetection = .live, defaults: UserDefaults = .standard) {
+        self.detection = detection
+        self.defaults = defaults
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--gantry-test-in-memory-containers") {
             let host = DockerHost(name: "Gantry Fixture Host", kind: .local)
@@ -31,8 +38,45 @@ public final class AppModel {
             return
         }
 #endif
-        let hosts = Self.loadHosts()
+        let hosts = Self.loadHosts(detection: detection, defaults: defaults)
         sessions = hosts.map(HostSession.init)
+        applyLocalDockerPolicy()
+    }
+
+    // MARK: - Local Docker host
+
+    /// What the user did with the built-in Local host (see ``LocalDockerPolicy``).
+    public var localDockerChoice: LocalDockerPolicy.Choice {
+        get {
+            defaults.string(forKey: LocalDockerPolicy.choiceKey)
+                .flatMap(LocalDockerPolicy.Choice.init(rawValue:)) ?? .automatic
+        }
+        set { defaults.set(newValue.rawValue, forKey: LocalDockerPolicy.choiceKey) }
+    }
+
+    /// Hides the default Local host when Docker is missing and apple/container
+    /// is present, and restores it when Docker appears later. Call it at launch
+    /// and when the app becomes active. Explicit user choices always win.
+    public func applyLocalDockerPolicy() {
+        let choice = localDockerChoice
+        let action = LocalDockerPolicy.action(
+            hosts: sessions.map(\.host),
+            choice: choice,
+            socketFound: detection.socketFound(),
+            appleCLIFound: detection.appleCLIFound()
+        )
+        switch action {
+        case .none:
+            return
+        case .hide(let id):
+            sessions.removeAll { $0.id == id }
+        case .restore:
+            let session = HostSession(host: DockerHost(name: LocalDockerPolicy.defaultName, kind: .local))
+            session.onContainerAlert = containerAlertHandler
+            sessions.insert(session, at: 0)
+        }
+        localDockerChoice = LocalDockerPolicy.choice(after: action, from: choice)
+        persist()
     }
 
     public func session(id: UUID) -> HostSession? {
@@ -43,10 +87,14 @@ public final class AppModel {
         let session = HostSession(host: host)
         session.onContainerAlert = containerAlertHandler
         sessions.append(session)
+        // Adding a Local Docker host is an explicit choice: never auto-hide it.
+        if host.isLocal { localDockerChoice = .added }
         persist()
     }
 
     public func removeHost(id: UUID) {
+        // Removing the Local host is an explicit choice: never add it back.
+        if session(id: id)?.host.isLocal == true { localDockerChoice = .removed }
         sessions.removeAll { $0.id == id }
         persist()
     }
@@ -118,8 +166,10 @@ public final class AppModel {
         Self.saveHosts(hosts)
     }
 
-    /// Loads the persisted host list, seeding a default Local host on first run.
-    private static func loadHosts() -> [DockerHost] {
+    /// Loads the persisted host list. On first run it seeds the hosts that
+    /// fit this Mac: Local Docker when a socket exists, apple/container when
+    /// its CLI exists (see ``LocalDockerPolicy/seedHosts(socketFound:appleCLIFound:)``).
+    private static func loadHosts(detection: LocalDockerDetection, defaults: UserDefaults) -> [DockerHost] {
         let url = HostsStore.fileURL()
 
         if let url, let data = try? Data(contentsOf: url) {
@@ -129,9 +179,13 @@ public final class AppModel {
             }
         }
 
-        let defaults = [DockerHost(name: "Local", kind: .local)]
-        saveHosts(defaults)
-        return defaults
+        let seed = LocalDockerPolicy.seedHosts(
+            socketFound: detection.socketFound(),
+            appleCLIFound: detection.appleCLIFound()
+        )
+        defaults.set(seed.choice.rawValue, forKey: LocalDockerPolicy.choiceKey)
+        saveHosts(seed.hosts)
+        return seed.hosts
     }
 
     private static func saveHosts(_ hosts: [DockerHost]) {

@@ -74,18 +74,13 @@ extension HostSession {
     /// taken. Auto-naming makes a container's DNS name (`name.domain`) meaningful
     /// instead of a random Docker-assigned one.
     public func uniqueContainerName(forImage image: String) -> String {
-        let repo = image.split(separator: "/").last.map(String.init) ?? image
-        let base = repo.split(separator: ":").first.map(String.init) ?? repo
+        let base = ContainerForm.baseName(forImage: image)
         return uniqueContainerName(base: base.isEmpty ? "app" : base)
     }
 
     /// Returns `base` when no current container already uses it, else the first
     /// free `base-N`. Keeps auto-assigned names unique across the host.
     public func uniqueContainerName(base: String) -> String {
-        let taken = Set(containers.map(\.displayName))
-        guard taken.contains(base) else { return base }
-        var n = 2
-        while taken.contains("\(base)-\(n)") { n += 1 }
-        return "\(base)-\(n)"
+        ContainerForm.uniqueName(base: base, taken: ContainerForm.takenNames(containers))
     }
 }

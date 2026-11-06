@@ -324,6 +324,12 @@ private func tarAppend(_ buffer: inout [UInt8], name: String, payload: [UInt8], 
 
 // MARK: - ContainerCreateRequest encoding
 
+@Test func containerCreateRequestToleratesRepeatedExposedPorts() {
+    // Compose `8080:80` and `8081:80` both expose 80/tcp; that must not trap.
+    let config = ContainerCreateRequest(image: "nginx", exposedPorts: ["80/tcp", "80/tcp"])
+    #expect(config.exposedPorts?.keys.sorted() == ["80/tcp"])
+}
+
 @Test func containerCreateRequestEncodesExpectedKeys() throws {
     let config = ContainerCreateRequest(
         image: "nginx:latest",

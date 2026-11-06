@@ -194,6 +194,13 @@ struct ContentView: View {
             detailSelection = pendingDetailSelection
             pendingDetailSelection = nil
         }
+        .onChange(of: model.sessions.map(\.id)) { _, ids in
+            // A host can go away without the sidebar (the Local host is hidden
+            // when Docker is missing); do not stay on a section of it.
+            if let hostID = selection?.hostSelection?.hostID, !ids.contains(hostID) {
+                selection = .dashboard
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
             // Refresh the host currently in view; fall back to all connected hosts.
             if let hostSelection = selection?.hostSelection,
@@ -280,11 +287,10 @@ struct ContentView: View {
             presenting: confirmRemoval
         ) { hostID in
             Button("Remove Host", role: .destructive) {
-                if let session = model.session(id: hostID) {
-                    Task { await session.disconnect() }
+                Task {
+                    guard await HostRemoval.remove(hostID, from: model) else { return }
+                    if selection?.hostSelection?.hostID == hostID { selection = .dashboard }
                 }
-                if selection?.hostSelection?.hostID == hostID { selection = .dashboard }
-                model.removeHost(id: hostID)
             }
             Button("Cancel", role: .cancel) {}
         } message: { hostID in
@@ -573,49 +579,40 @@ struct ContentView: View {
     }
 
     @ViewBuilder
+    private func sectionView(for section: HostSection, session: HostSession) -> some View {
+        switch section {
+        case .overview:
+            HostOverviewView(session: session)
+        case .containers:
+            ContainerListView(session: session, selection: containerSelectionBinding)
+        case .images:
+            ImageListView(session: session, selection: imageSelectionBinding)
+        case .volumes:
+            VolumeListView(session: session, selection: volumeSelectionBinding)
+        case .networks:
+            NetworkListView(session: session, selection: networkSelectionBinding)
+        case .machines:
+            MachineListView(session: session, selection: machineSelectionBinding)
+        case .clusters:
+            ClusterListView(session: session, selection: clusterSelectionBinding)
+        case .hostFiles:
+            HostFilesView(session: session)
+        case .system:
+            AppleSystemView(session: session, selection: appleSystemSelectionBinding)
+        }
+    }
+
+    @ViewBuilder
     private func sectionContent(for section: HostSection, session: HostSession) -> some View {
         Group {
-            switch section {
-            case .overview:
-                HostOverviewView(session: session)
-            case .containers:
-                ContainerListView(session: session, selection: containerSelectionBinding)
-            case .images:
-                ImageListView(session: session, selection: imageSelectionBinding)
-            case .volumes:
-                VolumeListView(session: session, selection: volumeSelectionBinding)
-            case .networks:
-                NetworkListView(session: session, selection: networkSelectionBinding)
-            case .machines:
-                MachineListView(session: session, selection: machineSelectionBinding)
-            case .clusters:
-                ClusterListView(session: session, selection: clusterSelectionBinding)
-            case .hostFiles:
-                HostFilesView(session: session)
-            case .system:
-                AppleSystemView(session: session, selection: appleSystemSelectionBinding)
-            }
-        }
-        // Connection state overlays. The System section stays usable without a
-        // connection: it is where stopped services are started and diagnosed.
-        .overlay {
-            switch section == .system ? .disconnected : session.status {
-            case .connecting:
-                ProgressView("Connecting to \(session.host.name)…")
-                    .controlSize(.large)
-            case .failed(let message):
-                ContentUnavailableView {
-                    Label("Connection Failed", systemImage: "exclamationmark.triangle")
-                } description: {
-                    Text(message)
-                } actions: {
-                    Button("Retry") {
-                        Task { await session.connect() }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            default:
-                EmptyView()
+            // The System section stays usable without a connection: it is
+            // where stopped services are started and diagnosed. Every other
+            // section is replaced while the host is down, so its toolbar and
+            // background loads do not run against a missing client.
+            if section == .system || session.status.isConnected {
+                sectionView(for: section, session: session)
+            } else {
+                HostUnavailableView(session: session, section: section)
             }
         }
         .alert(
@@ -644,7 +641,11 @@ struct ContentView: View {
         } else if let hostSelection = selection?.hostSelection,
                   let session = model.session(id: hostSelection.hostID),
                   let detailSelection {
-            detailContent(detailSelection, session: session)
+            if session.status.isConnected || hostSelection.section == .system {
+                detailContent(detailSelection, session: session)
+            } else {
+                HostUnavailableDetailView()
+            }
         } else {
             ContentUnavailableView(
                 "Nothing Selected",
@@ -839,7 +840,9 @@ private struct HostSectionHeader: View {
         }
         .onHover { isHovered = $0 }
         .animation(.easeInOut(duration: 0.15), value: isHovered)
-        .help(session.status.shortDescription)
+        .help(session.dockerNotInstalled
+              ? String(localized: "Docker is not installed on this Mac.")
+              : session.status.shortDescription)
         .task(id: session.host.id) {
             // Connect once per visible host, guarding against re-entry.
             if case .disconnected = session.status {

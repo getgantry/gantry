@@ -13,6 +13,8 @@ struct LogsView: View {
 
     @State private var lines: [DisplayLine] = []
     @State private var paused = false
+    /// Lines that arrive while paused; Resume appends them.
+    @State private var held = PauseBuffer<DisplayLine>(capacity: LogsView.maxLines)
     @State private var autoScroll = true
     @State private var search = ""
     @State private var regexSearch = false
@@ -74,7 +76,7 @@ struct LogsView: View {
             }
             content
         }
-        .task(id: container.id) {
+        .task(id: container.liveTaskKey) {
             await consume()
         }
         .onChange(of: search) { recomputeMatches() }
@@ -100,7 +102,7 @@ struct LogsView: View {
             .help("Follow output")
 
             Button {
-                paused.toggle()
+                setPaused(!paused)
             } label: {
                 Image(systemName: paused ? "play.fill" : "pause.fill")
             }
@@ -108,6 +110,7 @@ struct LogsView: View {
 
             Button {
                 lines.removeAll()
+                held.reset()
             } label: {
                 Image(systemName: "trash")
             }
@@ -126,6 +129,8 @@ struct LogsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
+
+            HeldLinesLabel(count: paused ? held.count : 0)
 
             Spacer()
 
@@ -346,14 +351,16 @@ struct LogsView: View {
 
     private func consume() async {
         lines.removeAll()
+        held.reset()
         streamError = nil
         do {
             let stream = try await session.logStream(for: container.id)
             for try await entry in stream {
-                if paused { continue }
-                lines.append(DisplayLine(entry: entry))
-                if lines.count > Self.maxLines {
-                    lines.removeFirst(lines.count - Self.maxLines)
+                let line = DisplayLine(entry: entry)
+                if paused {
+                    held.hold(line)
+                } else {
+                    append([line])
                 }
             }
         } catch is CancellationError {
@@ -361,6 +368,19 @@ struct LogsView: View {
         } catch {
             streamError = error.localizedDescription
         }
+    }
+
+    private func append(_ newLines: [DisplayLine]) {
+        lines.append(contentsOf: newLines)
+        if lines.count > Self.maxLines {
+            lines.removeFirst(lines.count - Self.maxLines)
+        }
+    }
+
+    /// Pause keeps the stream open and holds new lines; Resume shows them.
+    private func setPaused(_ value: Bool) {
+        paused = value
+        if !value { append(held.drain()) }
     }
 
     // MARK: - Actions

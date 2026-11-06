@@ -39,11 +39,10 @@ public struct DockerHost: Identifiable, Hashable, Codable, Sendable {
         return false
     }
 
-    /// Whether the user is allowed to remove this host. The local daemon host
-    /// is permanent; SSH and apple/container hosts can be removed.
-    public var removable: Bool {
-        !isLocal
-    }
+    /// Whether the user is allowed to remove this host. Every host is: a Mac
+    /// without Docker must be able to drop the Local host, and Add Host can
+    /// add Local Docker back.
+    public var removable: Bool { true }
 
     /// What the host's engine supports. Docker-backed hosts (local and SSH)
     /// support everything; apple/container lacks several daemon features, and

@@ -7,6 +7,13 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct PersistenceTests {
+    /// A private defaults suite and fixed detection (Docker present, no apple
+    /// CLI), so the seeded host list does not depend on this Mac.
+    private static let defaults: UserDefaults = {
+        let suite = "gantry-fix-persistence"
+        UserDefaults().removePersistentDomain(forName: suite)
+        return UserDefaults(suiteName: suite)!
+    }()
     /// Points `HostsStore.fileURL()` at a fresh temp file for the duration of
     /// `body`, then restores the previous value. CRITICAL: this is why the
     /// machine's real `~/Library/Application Support/Gantry/hosts.json` is never
@@ -30,7 +37,7 @@ struct PersistenceTests {
     @Test func firstRunSeedsLocalHost() {
         withTempHostsFile { file in
             #expect(!FileManager.default.fileExists(atPath: file.path))
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             #expect(model.sessions.count == 1)
             #expect(model.sessions.first?.host.isLocal == true)
             // The default was persisted.
@@ -40,27 +47,27 @@ struct PersistenceTests {
 
     @Test func addRemovePersistAcrossReload() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let ssh = DockerHost(name: "Box", kind: .ssh(SSHEndpoint(host: "h")))
             model.addHost(ssh)
             #expect(model.sessions.count == 2)
 
             // A fresh model reads the same file.
-            let reloaded = AppModel()
+            let reloaded = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             #expect(reloaded.sessions.count == 2)
             #expect(reloaded.session(id: ssh.id) != nil)
 
             reloaded.removeHost(id: ssh.id)
             #expect(reloaded.sessions.count == 1)
 
-            let again = AppModel()
+            let again = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             #expect(again.sessions.count == 1)
         }
     }
 
     @Test func updateHostNameOnlyKeepsSession() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let ssh = DockerHost(name: "Box", kind: .ssh(SSHEndpoint(host: "h")))
             model.addHost(ssh)
             let original = model.session(id: ssh.id)
@@ -78,7 +85,7 @@ struct PersistenceTests {
 
     @Test func updateHostConnectionChangeReplacesSession() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let ssh = DockerHost(name: "Box", kind: .ssh(SSHEndpoint(host: "h")))
             model.addHost(ssh)
             let original = model.session(id: ssh.id)
@@ -94,7 +101,7 @@ struct PersistenceTests {
 
     @Test func updateHostUnknownIDReturnsNil() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let stray = DockerHost(name: "Nope", kind: .local)
             #expect(model.updateHost(stray) == nil)
         }
@@ -102,7 +109,7 @@ struct PersistenceTests {
 
     @Test func updateHostNoChangeKeepsSameInstance() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let ssh = DockerHost(name: "Box", kind: .ssh(SSHEndpoint(host: "h")))
             model.addHost(ssh)
             let original = model.session(id: ssh.id)
@@ -115,7 +122,7 @@ struct PersistenceTests {
     @Test func corruptFileFallsBackToDefault() {
         withTempHostsFile { file in
             try? Data("not json".utf8).write(to: file)
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             #expect(model.sessions.count == 1)
             #expect(model.sessions.first?.host.isLocal == true)
         }
@@ -125,7 +132,7 @@ struct PersistenceTests {
 
     @Test func headlessLoadHostsReadsSameFile() {
         withTempHostsFile { _ in
-            let model = AppModel()
+            let model = AppModel(detection: .fixed(socketFound: true, appleCLIFound: false), defaults: Self.defaults)
             let ssh = DockerHost(name: "Box", kind: .ssh(SSHEndpoint(host: "h")))
             model.addHost(ssh)
 

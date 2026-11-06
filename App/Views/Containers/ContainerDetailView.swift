@@ -52,6 +52,12 @@ struct ContainerDetailView: View {
             // picks the mode up from the same notification.
             if note.object as? String == container.id { tab = .terminal }
         }
+        // A tab request (Show Logs, Open Debug Shell) can come before this view
+        // exists, so it is read on appear too, not only from a notification.
+        .task(id: container.id) { applyPendingTab() }
+        .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { _ in
+            applyPendingTab()
+        }
         .navigationTitle(container.displayName)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -67,12 +73,27 @@ struct ContainerDetailView: View {
         .alert("Rename Container", isPresented: $showRename) {
             TextField("Name", text: $renameText)
             Button("Rename") {
-                let newName = renameText
+                let newName = renameText.trimmingCharacters(in: .whitespaces)
                 Task { _ = await session.rename(containerID: container.id, to: newName) }
             }
+            .disabled(!ContainerForm.isValidRename(renameText, current: container.displayName))
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Enter a new name for the container.")
+        }
+    }
+
+    /// Switches to the tab that a pending request asks for. The Terminal pane
+    /// takes the debug-shell request itself, to pick its mode.
+    private func applyPendingTab() {
+        switch ContainerTabRequest.peek(container.id) {
+        case .logs:
+            _ = ContainerTabRequest.take(container.id)
+            tab = .logs
+        case .debugShell:
+            tab = .terminal
+        case nil:
+            break
         }
     }
 

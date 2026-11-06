@@ -50,6 +50,22 @@
         }
       }
     },
+    "A container named “%@” already exists. Choose another name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A container named “%@” already exists. Choose another name."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名为“%@”的容器已存在。请换一个名称。"
+          }
+        }
+      }
+    },
     "Connected (%@, API %@)": {
       "localizations": {
         "en": {
@@ -270,6 +286,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止"
+          }
+        }
+      }
+    },
+    "The command ends with a backslash (\\).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The command ends with a backslash (\\)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令以反斜杠 (\\) 结尾。"
+          }
+        }
+      }
+    },
+    "The command has a double quote (\") without a closing quote.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The command has a double quote (\") without a closing quote."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令中的双引号 (\") 缺少闭合引号。"
+          }
+        }
+      }
+    },
+    "The command has a single quote (') without a closing quote.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The command has a single quote (') without a closing quote."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令中的单引号 (') 缺少闭合引号。"
+          }
+        }
+      }
+    },
+    "The container port must be a number from 1 to 65535.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container port must be a number from 1 to 65535."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器端口必须是 1 到 65535 之间的数字。"
+          }
+        }
+      }
+    },
+    "The host port must be a number from 1 to 65535.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The host port must be a number from 1 to 65535."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机端口必须是 1 到 65535 之间的数字。"
+          }
+        }
+      }
+    },
+    "This container port is already mapped in another row.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This container port is already mapped in another row."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此容器端口已在另一行中映射。"
+          }
+        }
+      }
+    },
+    "Use letters, digits, “_”, “.” and “-”, starting with a letter or digit.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use letters, digits, “_”, “.” and “-”, starting with a letter or digit."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只能使用字母、数字、“_”、“.”和“-”，并以字母或数字开头。"
           }
         }
       }

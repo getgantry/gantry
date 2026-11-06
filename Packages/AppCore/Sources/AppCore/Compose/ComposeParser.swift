@@ -122,15 +122,18 @@ public struct ComposeParser: Sendable {
 
     // MARK: - Field parsers
 
-    /// A `command:`/`entrypoint:` value: a list verbatim, or a string tokenized
-    /// on whitespace (Compose's shell-style splitting, sans full quote parsing).
+    /// A `command:`/`entrypoint:` value: a list verbatim, or a string split
+    /// into words like a shell does (quotes and backslashes, no expansion).
     private func parseStringOrList(_ value: Any?, env: Interpolator) -> [String]? {
         if let list = value as? [Any] {
             return list.map { env.string($0) ?? "" }
         }
         if let str = value as? String {
             let interpolated = env.interpolate(str)
-            let tokens = interpolated.split(whereSeparator: { $0 == " " || $0 == "\t" }).map(String.init)
+            // Compose splits a string form like a shell does; on a quote
+            // without its pair, fall back to plain whitespace splitting.
+            let tokens = (try? ShellWords.split(interpolated))
+                ?? interpolated.split(whereSeparator: { $0 == " " || $0 == "\t" }).map(String.init)
             return tokens.isEmpty ? nil : tokens
         }
         return nil

@@ -15,7 +15,15 @@ struct MachineListView: View {
 
     var body: some View {
         Group {
-            if session.machines.isEmpty {
+            if session.machines.isEmpty, let error = session.machineListError {
+                ListingUnavailableView(
+                    title: String(localized: "Machines Unavailable"),
+                    systemImage: "cube.transparent",
+                    reason: error,
+                    installerHint: MachineAvailability.isHomebrewCLI(cliOverride: session.host.socketPathOverride),
+                    retry: { await session.refreshMachines() }
+                )
+            } else if session.machines.isEmpty {
                 ContentUnavailableView {
                     Label("No Machines", systemImage: "cube.transparent")
                 } description: {
@@ -48,6 +56,7 @@ struct MachineListView: View {
                     Label("Create Machine…", systemImage: "plus")
                 }
                 .keyboardShortcut("n", modifiers: .command)
+                .disabled(session.machines.isEmpty && session.machineListError != nil)
             }
             ToolbarItem {
                 Button { Task { await session.refreshMachines() } } label: {

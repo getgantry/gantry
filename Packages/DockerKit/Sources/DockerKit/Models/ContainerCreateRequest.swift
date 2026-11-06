@@ -67,7 +67,8 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         self.domainname = domainname
         self.env = env
         if let exposedPorts {
-            self.exposedPorts = Dictionary(uniqueKeysWithValues: exposedPorts.map { ($0, EmptyObject()) })
+            // Two compose ports can expose the same container port (8080:80, 8081:80).
+            self.exposedPorts = Dictionary(exposedPorts.map { ($0, EmptyObject()) }, uniquingKeysWith: { first, _ in first })
         } else {
             self.exposedPorts = nil
         }
