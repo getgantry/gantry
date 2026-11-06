@@ -360,6 +360,22 @@
         }
       }
     },
+    "Create cluster %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create cluster %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建集群 %@"
+          }
+        }
+      }
+    },
     "Disconnected": {
       "localizations": {
         "en": {
@@ -660,6 +676,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "主机端口必须是 1 到 65535 之间的数字。"
+          }
+        }
+      }
+    },
+    "The nodes that this creation made so far are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The nodes that this creation made so far are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此次创建已生成的节点将被删除。"
           }
         }
       }
