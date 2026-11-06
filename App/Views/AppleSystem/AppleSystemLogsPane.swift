@@ -21,6 +21,8 @@ struct AppleSystemLogsPane: View {
     @State private var period = "5m"
     @State private var follow = true
     @State private var paused = false
+    /// Raw lines that arrive while paused; Resume appends them.
+    @State private var held = PauseBuffer<String>(capacity: AppleSystemLogsPane.maxLines)
     @State private var autoScroll = true
     @State private var search = ""
     @State private var minLevel: LogLevel?
@@ -44,7 +46,7 @@ struct AppleSystemLogsPane: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AppleSystemPaneHeader(pane: .logs, badge: follow ? (String(localized: "Live"), .green) : nil) {
+            AppleSystemPaneHeader(pane: .logs, badge: liveBadge) {
                 EmptyView()
             }
             toolbar
@@ -58,6 +60,12 @@ struct AppleSystemLogsPane: View {
         }
         .navigationTitle(AppleSystemPane.logs.title)
         .task(id: "\(period)|\(follow)|\(generation)") { await consume() }
+    }
+
+    /// "Live" only while new lines show; "Paused" while they are held.
+    private var liveBadge: (text: String, tint: Color)? {
+        guard follow else { return nil }
+        return paused ? (String(localized: "Paused"), .orange) : (String(localized: "Live"), .green)
     }
 
     private var toolbar: some View {
@@ -83,11 +91,13 @@ struct AppleSystemLogsPane: View {
             .help(String(localized: "Scroll to new lines"))
 
             Button {
-                paused.toggle()
+                setPaused(!paused)
             } label: {
                 Image(systemName: paused ? "play.fill" : "pause.fill")
             }
             .help(paused ? String(localized: "Resume") : String(localized: "Pause"))
+
+            HeldLinesLabel(count: paused ? held.count : 0)
 
             Button {
                 generation += 1
@@ -238,8 +248,17 @@ struct AppleSystemLogsPane: View {
         if lines.count > Self.maxLines { lines.removeFirst(lines.count - Self.maxLines) }
     }
 
+    /// Pause keeps the stream open and holds new lines; Resume shows them.
+    private func setPaused(_ value: Bool) {
+        paused = value
+        if !value {
+            for raw in held.drain() { append(raw) }
+        }
+    }
+
     private func consume() async {
         lines.removeAll()
+        held.reset()
         streamError = nil
         loading = true
         defer { loading = false }
@@ -249,8 +268,11 @@ struct AppleSystemLogsPane: View {
                 let stream = try AppleContainerControl.followSystemLogs(last: period, cliOverride: cli)
                 for try await raw in stream {
                     loading = false
-                    if paused { continue }
-                    append(raw)
+                    if paused {
+                        held.hold(raw)
+                    } else {
+                        append(raw)
+                    }
                 }
             } else {
                 for raw in try await AppleContainerControl.systemLogs(last: period, cliOverride: cli) {

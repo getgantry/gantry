@@ -42,7 +42,7 @@ struct ProcessesView: View {
                 )
             }
         }
-        .task(id: container.id) {
+        .task(id: container.liveTaskKey) {
             await refreshLoop()
         }
     }

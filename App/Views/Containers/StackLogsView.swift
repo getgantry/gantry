@@ -17,6 +17,8 @@ struct StackLogsView: View {
 
     @State private var lines: [StackLine] = []
     @State private var paused = false
+    /// Lines that arrive while paused; Resume appends them.
+    @State private var held = PauseBuffer<StackLine>(capacity: StackLogsView.maxLines)
     @State private var autoScroll = true
     @State private var search = ""
     @State private var regexSearch = false
@@ -88,11 +90,11 @@ struct StackLogsView: View {
                 Toggle(isOn: $autoScroll) { Image(systemName: "arrow.down.to.line") }
                     .toggleStyle(.button)
                     .help("Follow output")
-                Button { paused.toggle() } label: {
+                Button { setPaused(!paused) } label: {
                     Image(systemName: paused ? "play.fill" : "pause.fill")
                 }
                 .help(paused ? "Resume" : "Pause")
-                Button { lines.removeAll() } label: { Image(systemName: "trash") }
+                Button { lines.removeAll(); held.reset() } label: { Image(systemName: "trash") }
                     .help("Clear")
                 Button { copyAll() } label: { Image(systemName: "doc.on.doc") }
                     .help("Copy all")
@@ -103,6 +105,8 @@ struct StackLogsView: View {
                 Text("\(visibleLines.count) lines")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
+
+                HeldLinesLabel(count: paused ? held.count : 0)
 
                 Spacer()
                 searchBar
@@ -232,8 +236,22 @@ struct StackLogsView: View {
     /// Fans out one log stream per service into a merged feed. Each pump only
     /// touches Sendable values and the stream continuation, so nothing crosses
     /// actor boundaries unsafely; line ids are assigned here in arrival order.
+    /// Pause keeps the streams open and holds new lines; Resume shows them.
+    private func setPaused(_ value: Bool) {
+        paused = value
+        if !value { append(held.drain()) }
+    }
+
+    private func append(_ newLines: [StackLine]) {
+        lines.append(contentsOf: newLines)
+        if lines.count > Self.maxLines {
+            lines.removeFirst(lines.count - Self.maxLines)
+        }
+    }
+
     private func consumeAll() async {
         lines.removeAll()
+        held.reset()
         let members = containers.map { ($0.id, serviceName($0)) }
         let session = self.session
         let (merged, continuation) = AsyncStream<StackLine>.makeStream()
@@ -251,13 +269,13 @@ struct StackLogsView: View {
 
         var nextID: UInt64 = 0
         for await line in merged {
-            if paused { continue }
             nextID += 1
             var stamped = line
             stamped.id = nextID
-            lines.append(stamped)
-            if lines.count > Self.maxLines {
-                lines.removeFirst(lines.count - Self.maxLines)
+            if paused {
+                held.hold(stamped)
+            } else {
+                append([stamped])
             }
         }
         producer.cancel()
