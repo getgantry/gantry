@@ -46,6 +46,19 @@ struct NetworkListView: View {
                     }
             }
         }
+        .listEmptyState(
+            ListEmptyState(
+                title: "No Networks",
+                systemImage: "network",
+                description: "Networks connect containers to each other.",
+                actionTitle: "New Network…",
+                action: { showingNew = true }
+            ),
+            total: session.networks.count,
+            filtered: filtered.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: filtered)
         .navigationTitle("Networks")
         .searchable(text: $searchText, prompt: "Filter by name or driver")

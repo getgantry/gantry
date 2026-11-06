@@ -96,6 +96,19 @@ struct VolumeListView: View {
                     }
             }
         }
+        .listEmptyState(
+            ListEmptyState(
+                title: "No Volumes",
+                systemImage: "externaldrive",
+                description: "Volumes keep container data after the container is removed.",
+                actionTitle: "New Volume…",
+                action: { showingNew = true }
+            ),
+            total: session.volumes.count,
+            filtered: displayed.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: displayed)
         .task(id: session.id) { await session.refreshVolumeSizes(force: false) }
         .navigationTitle("Volumes")

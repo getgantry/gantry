@@ -12,11 +12,18 @@ struct ClusterListView: View {
     @State private var deleteTarget: ContainerCluster?
     @State private var busy: Set<String> = []
     @State private var kubeconfigResult: KubeconfigResult?
+    @State private var searchText = ""
 
     /// Clusters without the ones that a running creation still builds.
     private var clusters: [ContainerCluster] {
         let creating = Set(session.clusterCreations.filter(\.isRunning).map(\.id))
         return session.clusters.filter { !creating.contains($0.name) }
+    }
+
+    private var filteredClusters: [ContainerCluster] {
+        guard !searchText.isEmpty else { return clusters }
+        let needle = searchText.lowercased()
+        return clusters.filter { $0.name.lowercased().contains(needle) }
     }
 
     var body: some View {
@@ -48,7 +55,7 @@ struct ClusterListView: View {
                             }
                         }
                     }
-                    ForEach(clusters) { cluster in
+                    ForEach(filteredClusters) { cluster in
                         ClusterRow(cluster: cluster, busy: busy.contains(cluster.name))
                             .tag(cluster.name)
                             .contextMenu { menu(for: cluster) }
@@ -56,7 +63,13 @@ struct ClusterListView: View {
                 }
             }
         }
+        .overlay {
+            if !clusters.isEmpty, filteredClusters.isEmpty, session.clusterCreations.isEmpty {
+                ListNoResultsView(search: searchText)
+            }
+        }
         .navigationTitle("Clusters")
+        .searchable(text: $searchText, prompt: "Filter by name")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingCreate = true } label: {
