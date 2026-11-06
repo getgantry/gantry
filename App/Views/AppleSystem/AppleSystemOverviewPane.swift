@@ -153,7 +153,12 @@ struct AppleSystemOverviewPane: View {
     private var resourcesCard: some View {
         AppleSystemCard(title: String(localized: "Resources"), systemImage: "shippingbox") {
             FactGrid {
-                if let running = status?.containersRunning, let total = status?.containersTotal {
+                // The container list is the source while connected: the CLI's
+                // totals include the hidden image builder.
+                if session.status.isConnected {
+                    let counts = session.containerCounts
+                    Fact(String(localized: "Containers"), String(localized: "\(String(counts.running)) running of \(String(counts.total))"))
+                } else if let running = status?.containersRunning, let total = status?.containersTotal {
                     Fact(String(localized: "Containers"), String(localized: "\(String(running)) running of \(String(total))"))
                 }
                 if let images = status?.images { Fact(String(localized: "Images"), String(images)) }
