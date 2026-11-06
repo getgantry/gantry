@@ -695,6 +695,22 @@
           }
         }
       }
+    },
+    "“%@” could not be read as a regular file, so nothing was saved.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” could not be read as a regular file, so nothing was saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法将“%@”作为普通文件读取，因此未保存任何内容。"
+          }
+        }
+      }
     }
   }
 }

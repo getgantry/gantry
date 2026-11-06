@@ -440,6 +440,40 @@
         }
       }
     },
+    "%lld items": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld item"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld items"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个项目"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld new lines": {
       "localizations": {
         "en": {
@@ -2360,6 +2394,22 @@
         }
       }
     },
+    "Container Not Running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container Not Running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器未运行"
+          }
+        }
+      }
+    },
     "Container path": {
       "localizations": {
         "en": {
@@ -3704,6 +3754,22 @@
         }
       }
     },
+    "Downloading %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载 %@…"
+          }
+        }
+      }
+    },
     "Download…": {
       "localizations": {
         "en": {
@@ -3812,6 +3878,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "编辑…"
+          }
+        }
+      }
+    },
+    "Empty Folder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空文件夹"
           }
         }
       }
@@ -5124,6 +5206,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "项"
+          }
+        }
+      }
+    },
+    "Items with the same name in %@ are overwritten: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items with the same name in %@ are overwritten: %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 中同名的项目将被覆盖：%2$@。"
           }
         }
       }
@@ -8616,6 +8714,72 @@
         }
       }
     },
+    "Replace": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "替换"
+          }
+        }
+      }
+    },
+    "Replace %lld items?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Replace %lld item?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Replace %lld items?"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "替换 %lld 个项目？"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Replace “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "替换“%@”？"
+          }
+        }
+      }
+    },
     "Repository": {
       "localizations": {
         "en": {
@@ -9864,6 +10028,22 @@
         }
       }
     },
+    "Start the container to browse its files.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start the container to browse its files."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动容器后即可浏览其文件。"
+          }
+        }
+      }
+    },
     "Start the machine to open a shell.": {
       "localizations": {
         "en": {
@@ -11044,6 +11224,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "将文件或文件夹上传到此目录"
+          }
+        }
+      }
+    },
+    "Uploading %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploading %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在上传 %@…"
           }
         }
       }
