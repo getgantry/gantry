@@ -1060,19 +1060,32 @@ public final class HostSession: Identifiable {
         clusterCreations.append(ClusterCreation(options: options))
         let cli = machineCLIOverride
         clusterCreationTasks[name] = Task { [weak self] in
-            let output: @Sendable (String) -> Void = { [weak self] line in
-                Task { @MainActor in self?.recordClusterOutput(name, line) }
-            }
-            var failure: Error?
-            do {
-                try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli, output: output)
-            } catch {
-                failure = error
-            }
-            await self?.finishClusterCreation(name, error: failure)
+            // One stream, read here, keeps the lines in order and delivers
+            // the last one before the finish.
+            let (lines, sink) = AsyncStream<String>.makeStream()
+            async let failure = Self.runClusterCreation(options, command: command, cli: cli, sink: sink)
+            for await line in lines { self?.recordClusterOutput(name, line) }
+            let error = await failure
+            await self?.finishClusterCreation(name, error: error)
         }
         Task { await refreshClusters() }
         return true
+    }
+
+    /// Runs the creation, sends its output lines to `sink` and closes it.
+    nonisolated private static func runClusterCreation(
+        _ options: AppleContainerControl.ClusterCreateOptions,
+        command: String,
+        cli: String?,
+        sink: AsyncStream<String>.Continuation
+    ) async -> Error? {
+        defer { sink.finish() }
+        do {
+            try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli) { sink.yield($0) }
+            return nil
+        } catch {
+            return error
+        }
     }
 
     private func recordClusterOutput(_ name: String, _ line: String) {
