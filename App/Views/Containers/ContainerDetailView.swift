@@ -240,7 +240,11 @@ private struct ContainerOverview: View {
                 } else if let details {
                     stateSection(details)
                     AppleAddressSection(session: session, container: container, details: details)
-                    PortsSection(session: session, container: container)
+                    PortsSection(
+                        session: session,
+                        container: container,
+                        sharesInAddressSection: AppleAddressSection.offersShare(session: session, details: details)
+                    )
                     mountsSection(details)
                     networksSection(details)
                     configSection(details)
