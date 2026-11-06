@@ -118,8 +118,8 @@ extension GantryTools {
         case "apple_list_registries":            return try await appleListRegistries(args)
         case "apple_registry_logout":            return try await appleRegistryLogout(args)
         case "apple_get_properties":             return try await appleGetProperties(args)
-        case "apple_set_property":               return try appleSetProperty(args)
-        case "apple_clear_property":             return try appleClearProperty(args)
+        case "apple_set_property":               return try await appleSetProperty(args)
+        case "apple_clear_property":             return try await appleClearProperty(args)
         case "apple_system_logs":                return try await appleSystemLogs(args)
         case "apple_install_recommended_kernel": return try await appleInstallKernel(args)
         default:                                 return nil
@@ -198,18 +198,53 @@ extension GantryTools {
         return .text(try jsonText(properties.map(AppleSystemPropertyDTO.init)))
     }
 
-    private func appleSetProperty(_ args: Arguments) throws -> CallTool.Result {
-        _ = try appleCLIOverride(args)
+    private func appleSetProperty(_ args: Arguments) async throws -> CallTool.Result {
+        let cli = try appleCLIOverride(args)
         let key = try args.requiredString("key")
-        let value = try AppleContainerControl.setUserProperty(key, to: try args.requiredString("value"))
+        let raw = try args.requiredString("value")
+        let properties = try await AppleContainerControl.listProperties(cliOverride: cli)
+        let kind = try Self.editablePropertyKind(key, in: properties, clearing: false)
+        let value = try AppleContainerControl.setUserProperty(key, to: raw, kind: kind)
         return .text("OK: \(key) = \(value.tomlLiteral) in config.toml. Run apple_service_restart to apply it.")
     }
 
-    private func appleClearProperty(_ args: Arguments) throws -> CallTool.Result {
-        _ = try appleCLIOverride(args)
+    private func appleClearProperty(_ args: Arguments) async throws -> CallTool.Result {
+        let cli = try appleCLIOverride(args)
         let key = try args.requiredString("key")
+        let properties = try await AppleContainerControl.listProperties(cliOverride: cli)
+        _ = try Self.editablePropertyKind(key, in: properties, clearing: true)
         try AppleContainerControl.clearUserProperty(key)
         return .text("OK: removed \(key) from config.toml. Run apple_service_restart to apply the default.")
+    }
+
+    /// The type to validate a new value with. Only keys from the schema or
+    /// the effective list are accepted, and array or table values are not
+    /// overwritten (the System pane does not edit them either).
+    static func editablePropertyKind(
+        _ key: String,
+        in properties: [AppleSystemProperty],
+        clearing: Bool
+    ) throws -> AppleSystemPropertyKind {
+        guard AppleContainerControl.isValidPropertyKey(key) else {
+            throw ToolError("'\(key)' is not a valid property key. Use a dotted name such as build.cpus.")
+        }
+        guard let property = properties.first(where: { $0.key == key }) else {
+            throw ToolError("Unknown system property '\(key)'. Call apple_get_properties for the keys.")
+        }
+        if clearing { return property.kind }
+        for value in [property.effective, property.user].compactMap({ $0 }) {
+            if case .other = value {
+                throw ToolError("\(key) holds an array or a table. Edit ~/.config/container/config.toml by hand.")
+            }
+        }
+        guard property.kind == .unknown else { return property.kind }
+        // A key without a schema keeps the type the services report.
+        switch property.effective ?? property.user {
+        case .bool?: return .bool
+        case .integer?: return .integerValue
+        case .number?: return .numberValue
+        default: return .string
+        }
     }
 
     // MARK: - Logs and kernel
