@@ -20,9 +20,12 @@ struct ActivityButton: View {
         Button {
             showList.toggle()
         } label: {
-            Label(String(localized: "Activity"), systemImage: iconName(center))
+            Label {
+                Text("Activity")
+            } icon: {
+                ActivityIcon(systemName: iconName(center), count: center.runningCount)
+            }
         }
-        .badge(center.runningCount)
         .help(String(localized: "Long operations: pulls, builds, deploys and installs"))
         .accessibilityValue(String(localized: "\(center.runningCount) running"))
         .popover(isPresented: $showList, arrowEdge: .bottom) {
@@ -35,6 +38,28 @@ struct ActivityButton: View {
 
     private func iconName(_ center: OperationCenter) -> String {
         center.runningCount > 0 ? "arrow.triangle.2.circlepath.circle.fill" : "arrow.triangle.2.circlepath.circle"
+    }
+}
+
+/// The toolbar icon with a live count of the running operations.
+private struct ActivityIcon: View {
+    let systemName: String
+    let count: Int
+
+    var body: some View {
+        Image(systemName: systemName)
+            .overlay(alignment: .topTrailing) {
+                if count > 0 {
+                    Text(count, format: .number)
+                        .font(.system(size: 9, weight: .bold))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 3)
+                        .background(Color.accentColor, in: Capsule())
+                        .offset(x: 7, y: -6)
+                        .accessibilityHidden(true)
+                }
+            }
     }
 }
 
