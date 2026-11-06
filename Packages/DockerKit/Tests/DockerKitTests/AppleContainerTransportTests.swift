@@ -970,3 +970,38 @@ private func aliasRequest(_ aliases: [String]) -> ContainerCreateRequest {
     }
     #expect(!runner.recordedCalls().contains { $0.first == "copy" })
 }
+
+private let multiVariantImageJSON = """
+[{"configuration":{"creationDate":"2026-06-02T15:21:29Z","descriptor":{"digest":"sha256:be26","mediaType":"application/vnd.oci.image.index.v1+json","size":9},"name":"docker.io/library/alpine:latest"},"id":"be26","variants":[{"platform":{"architecture":"amd64","os":"linux"},"size":10,"config":{"config":{"Env":["A=1"]}}},{"platform":{"architecture":"unknown","os":"unknown"},"size":1},{"platform":{"architecture":"arm64","os":"linux","variant":"v8"},"size":20,"config":{"config":{"Env":["B=2"],"WorkingDir":"/w"}}}]}]
+"""
+
+@Test func appleImagesListCarriesThePlatform() throws {
+    let body = try AppleContainerJSON.imagesListBody(fromAppleList: Data(multiVariantImageJSON.utf8))
+    let image = try #require(try JSONDecoder().decode([ImageSummary].self, from: body).first)
+    #if arch(arm64)
+    #expect(image.architecture == "arm64")
+    #else
+    #expect(image.architecture == "amd64")
+    #endif
+    #expect(image.os == "linux")
+}
+
+@Test func appleImageWithOnlyAttestationsHasNoPlatform() {
+    let element: [String: Any] = ["variants": [["platform": ["architecture": "unknown", "os": "unknown"]]]]
+    #expect(AppleContainerJSON.imagePlatform(element) == nil)
+}
+
+@Test func appleTransportInspectsAnImage() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["image", "list"], stdout: multiVariantImageJSON)
+    runner.stub(["image", "inspect", "docker.io/library/alpine:latest"], stdout: multiVariantImageJSON)
+    _ = try await client.listImages()
+    let data = try await client.rawInspectImage(id: "sha256:be26")
+    let body = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+    #expect(body["Os"] as? String == "linux")
+    #expect(body["RepoTags"] as? [String] == ["alpine:latest"])
+    #expect((body["Architecture"] as? String)?.isEmpty == false)
+    // listImages has the platform from the list, so it needs no inspect.
+    let inspects = runner.recordedCalls().filter { $0.starts(with: ["image", "inspect"]) }
+    #expect(inspects.count == 1)
+}

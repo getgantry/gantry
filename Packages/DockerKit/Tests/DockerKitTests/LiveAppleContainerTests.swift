@@ -331,3 +331,18 @@ private func download(_ client: DockerClient, _ id: String, _ path: String) asyn
     for try await chunk in stream.bytes { tar.append(chunk) }
     return tar
 }
+
+/// The images list carries each image's platform, and image inspect works.
+@Test(.enabled(if: liveEnabled), .timeLimit(.minutes(1)))
+func liveAppleImagePlatform() async throws {
+    let client = try makeLiveClient()
+    defer { Task { await client.shutdown() } }
+    _ = try await client.negotiate()
+    let images = try await client.listImages()
+    let alpine = try #require(images.first { $0.repoTags.contains("alpine:latest") })
+    #expect(!alpine.architecture.isEmpty)
+    #expect(alpine.os == "linux")
+    let raw = try await client.rawInspectImage(id: alpine.id)
+    let body = try #require(try JSONSerialization.jsonObject(with: raw) as? [String: Any])
+    #expect(body["Architecture"] as? String == alpine.architecture)
+}

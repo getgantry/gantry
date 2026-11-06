@@ -226,6 +226,11 @@ public actor AppleContainerTransport: DockerTransport {
             lastImagesList = data
             return Self.ok(try AppleContainerJSON.imagesListBody(fromAppleList: data))
 
+        case (.get, 3, "images", "json"):
+            let reference = try await imageReference(forID: id)
+            let data = try await cli(["image", "inspect", reference]).stdout
+            return Self.ok(try AppleContainerJSON.imageInspectBody(fromAppleInspect: data))
+
         case (.delete, 2, "images", _):
             var arguments = ["image", "delete"]
             if Self.boolQuery(request, "force") { arguments.append("--force") }
