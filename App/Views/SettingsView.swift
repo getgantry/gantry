@@ -248,14 +248,7 @@ private struct HostsSettings: View {
             presenting: confirmRemoval
         ) { hostID in
             Button("Remove Host", role: .destructive) {
-                let name = model.session(id: hostID)?.host.name ?? "host"
-                Task {
-                    guard await BiometricGate.confirm("remove host \(name)") else { return }
-                    if let session = model.session(id: hostID) {
-                        await session.disconnect()
-                    }
-                    model.removeHost(id: hostID)
-                }
+                Task { _ = await HostRemoval.remove(hostID, from: model) }
             }
             Button("Cancel", role: .cancel) {}
         } message: { hostID in

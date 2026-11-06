@@ -139,10 +139,43 @@ import Testing
         #expect(session.lastError == nil)
     }
 
-    @Test func detailsNotConnected() async {
+    @Test func detailsNotConnectedIsSilent() async {
+        // A host that is down shows its own unavailable state; a background
+        // inspect must not raise the "Not connected" alert as well.
         let session = HostSession(host: DockerHost(name: "Local", kind: .local))
         #expect(await session.details(for: "c1") == nil)
-        #expect(session.lastError == "Not connected")
+        #expect(session.lastError == nil)
+    }
+
+    @Test func backgroundLoadsNotConnectedAreSilent() async {
+        let session = HostSession(host: DockerHost(name: "Local", kind: .local))
+        #expect(await session.systemDF() == nil)
+        #expect(await session.imageHistory(id: "i1") == nil)
+        #expect(session.lastError == nil)
+    }
+
+    @Test func systemDFFailureIsSilent() async {
+        let (session, _) = await connectedSession { _ in }
+        #expect(await session.systemDF() == nil)
+        #expect(session.lastError == nil)
+    }
+
+    // MARK: - earlyExit
+
+    @Test func earlyExitReportsTheExitCode() async {
+        let (session, _) = await connectedSession { t in
+            t.on(.get, "/containers/c1/json", json: #"{"Id":"c1","State":{"Status":"exited","Running":false,"ExitCode":2},"Config":{"Tty":false,"Image":"nginx"}}"#)
+        }
+        let exit = await session.earlyExit(containerID: "c1", window: .milliseconds(50), interval: .milliseconds(10))
+        #expect(exit == HostSession.EarlyExit(exitCode: 2))
+    }
+
+    @Test func earlyExitIsNilWhileRunning() async {
+        let (session, _) = await connectedSession { t in
+            t.on(.get, "/containers/c1/json", json: Fixtures.containerDetails)
+        }
+        let exit = await session.earlyExit(containerID: "c1", window: .milliseconds(50), interval: .milliseconds(10))
+        #expect(exit == nil)
     }
 
     // MARK: - rawInspect*

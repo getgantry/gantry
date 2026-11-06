@@ -21,7 +21,15 @@ struct ClusterListView: View {
 
     var body: some View {
         Group {
-            if clusters.isEmpty && session.clusterCreations.isEmpty {
+            if clusters.isEmpty, session.clusterCreations.isEmpty, let error = session.clusterListError {
+                ListingUnavailableView(
+                    title: String(localized: "Clusters Unavailable"),
+                    systemImage: "steeringwheel",
+                    reason: error,
+                    installerHint: false,
+                    retry: { await session.refreshClusters() }
+                )
+            } else if clusters.isEmpty && session.clusterCreations.isEmpty {
                 ContentUnavailableView {
                     Label("No Clusters", systemImage: "steeringwheel")
                 } description: {
@@ -55,6 +63,7 @@ struct ClusterListView: View {
                     Label("Create Cluster…", systemImage: "plus")
                 }
                 .keyboardShortcut("n", modifiers: .command)
+                .disabled(clusters.isEmpty && session.clusterListError != nil)
             }
             ToolbarItem {
                 Button { Task { await session.refreshClusters() } } label: {

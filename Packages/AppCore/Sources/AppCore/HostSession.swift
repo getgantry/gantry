@@ -31,11 +31,17 @@ public final class HostSession: Identifiable {
     public private(set) var machines: [ContainerMachine] = []
     public private(set) var info: SystemInfo?
 
+    /// Why the last machine listing failed; nil after a listing that worked.
+    /// Lets the Machines section tell "no machines" from "cannot list them".
+    public private(set) var machineListError: String?
+
     /// Whether this host exposes `container machine` (apple/container only).
     public var supportsMachines: Bool { host.isAppleContainer }
 
     /// Local Kubernetes clusters (`container cluster`, apple/container 1.5+).
     public private(set) var clusters: [ContainerCluster] = []
+    /// Why the last cluster listing failed; nil after a listing that worked.
+    public private(set) var clusterListError: String?
     /// Cluster creations that run or that failed, in start order.
     public private(set) var clusterCreations: [ClusterCreation] = []
     /// The CLI features for clusters; nil until ``loadClusterSupport()`` runs.
@@ -45,6 +51,16 @@ public final class HostSession: Identifiable {
     public var supportsClusters: Bool {
         host.isAppleContainer && (clusterFeatures?.clusters ?? false)
     }
+
+    /// True when this Local host found no Docker socket at all. That is not
+    /// an error (Gantry also runs on apple/container alone): the status stays
+    /// `.disconnected`, so the host is grey and not counted as unreachable.
+    public private(set) var dockerNotInstalled = false
+
+    /// Finds the local Docker socket. A seam so tests can simulate a Mac
+    /// without Docker.
+    @ObservationIgnored
+    var discoverDockerSocket: () -> String? = { DockerSocketDiscovery.discover() }
 
     /// Last error surfaced to the UI; settable so a view can dismiss it.
     public var lastError: String?
@@ -213,6 +229,7 @@ public final class HostSession: Identifiable {
     public func connect() async {
         status = .connecting
         lastError = nil
+        dockerNotInstalled = false
         let generation = connectionGeneration
 
         switch host.kind {
@@ -221,10 +238,13 @@ public final class HostSession: Identifiable {
             if let override = host.socketPathOverride {
                 socketPath = override
             } else {
-                socketPath = DockerSocketDiscovery.discover()
+                socketPath = discoverDockerSocket()
             }
             guard let socketPath else {
-                status = .failed("No Docker socket found")
+                // No Docker on this Mac: a neutral state, with no alert and no
+                // retry loop. A later connect() checks the sockets again.
+                dockerNotInstalled = true
+                status = .disconnected
                 return
             }
 
@@ -913,8 +933,12 @@ public final class HostSession: Identifiable {
     /// Reloads the `container machine` list. No-op on non-apple hosts.
     public func refreshMachines() async {
         guard supportsMachines else { return }
-        if let value = try? await AppleContainerControl.listMachines(cliOverride: machineCLIOverride) {
-            machines = value
+        do {
+            machines = try await AppleContainerControl.listMachines(cliOverride: machineCLIOverride)
+            machineListError = nil
+        } catch {
+            guard !(error is CancellationError) else { return }
+            machineListError = Self.message(for: error)
         }
     }
 
@@ -1034,8 +1058,12 @@ public final class HostSession: Identifiable {
     /// Reloads the cluster list. No-op when the CLI has no clusters.
     public func refreshClusters() async {
         guard supportsClusters, let command = clusterFeatures?.clusterCommand else { return }
-        if let value = try? await AppleContainerControl.listClusters(command: command, cliOverride: machineCLIOverride) {
-            clusters = value
+        do {
+            clusters = try await AppleContainerControl.listClusters(command: command, cliOverride: machineCLIOverride)
+            clusterListError = nil
+        } catch {
+            guard !(error is CancellationError) else { return }
+            clusterListError = Self.message(for: error)
         }
     }
 
@@ -1272,10 +1300,9 @@ public final class HostSession: Identifiable {
             return detailsCache[containerID]
         }
 #endif
-        guard let client else {
-            lastError = "Not connected"
-            return nil
-        }
+        // No client means the host is down: the section shows its own
+        // unavailable state, so a background inspect raises no alert.
+        guard let client else { return detailsCache[containerID] }
         // A failure here is not surfaced as the modal: the Overview tab renders
         // its own inline "Details Unavailable" placeholder when this returns
         // nil, and the inspect runs automatically when the tab appears, so a
@@ -1332,6 +1359,11 @@ public final class HostSession: Identifiable {
     }
 
     // MARK: - Helpers
+
+    /// The user-facing text of an error from a CLI or the daemon.
+    static func message(for error: Error) -> String {
+        (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+    }
 
     /// Runs a throwing client call for a background/periodic refresh, returning
     /// the value or nil on failure.
@@ -1480,6 +1512,35 @@ extension HostSession {
         try await client.startContainer(id: id)
         await refreshContainers()
         return id
+    }
+
+    /// A container that stopped soon after it was started.
+    public struct EarlyExit: Sendable, Equatable {
+        /// nil where the runtime does not report it (apple/container).
+        public var exitCode: Int?
+        public init(exitCode: Int?) { self.exitCode = exitCode }
+    }
+
+    /// Watches a container that was just started for `window`. Returns an
+    /// ``EarlyExit`` when it stopped in that time, so a create sheet can say
+    /// "Exited (code N)" instead of closing as if all went well. Returns nil
+    /// while it still runs, or when it can no longer be inspected.
+    public func earlyExit(
+        containerID: String,
+        window: Duration = .seconds(3),
+        interval: Duration = .milliseconds(500)
+    ) async -> EarlyExit? {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: window)
+        while !Task.isCancelled {
+            if let details = await details(for: containerID),
+               [.exited, .dead].contains(details.state.status) {
+                return EarlyExit(exitCode: host.isAppleContainer ? nil : details.state.exitCode)
+            }
+            guard clock.now < deadline else { return nil }
+            try? await Task.sleep(for: interval)
+        }
+        return nil
     }
 
     /// Creates a container from `config` without starting it.
@@ -1635,8 +1696,10 @@ extension HostSession {
     }
 
     /// Returns the layer history for an image (newest first), or nil on failure.
+    /// The detail view loads it on its own, so no connection gives nil quietly.
     public func imageHistory(id: String) async -> [ImageHistoryEntry]? {
-        await mutateValue { try await $0.imageHistory(id: id) }
+        guard client != nil else { return nil }
+        return await mutateValue { try await $0.imageHistory(id: id) }
     }
 
     /// Adds a `repo:tag` to an existing image. Refreshes images on success.
@@ -1738,9 +1801,11 @@ extension HostSession {
     // MARK: System
 
     /// Returns aggregate disk usage across images, containers and volumes,
-    /// or nil on failure (recorded in `lastError`).
+    /// or nil on failure. Views load this in the background (footers, gauges,
+    /// a 30 s poll), so a failure or no connection gives nil without an alert.
     public func systemDF() async -> SystemDiskUsage? {
-        await mutateValue { try await $0.systemDF() }
+        guard let client else { return nil }
+        return await fetch { try await client.systemDF() }
     }
 
     /// Live aggregate load across the host's running containers: total CPU

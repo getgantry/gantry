@@ -13,6 +13,9 @@ struct ImageListView: View {
     @State private var pruneConfirm: PruneScope?
     @State private var pruneOutcome: PruneOutcome?
     @State private var diskUsage: SystemDiskUsage?
+    /// True once a disk-usage load finished, so a failed load reads
+    /// "unavailable" instead of "calculating…" for ever.
+    @State private var diskUsageLoaded = false
     @State private var clusterLoad: ClusterImageLoad?
 
     /// An image being copied into a cluster, and then the outcome.
@@ -89,7 +92,7 @@ struct ImageListView: View {
         .animation(.snappy, value: filtered)
         .navigationTitle("Images")
         .safeAreaInset(edge: .bottom) {
-            DiskUsageFooter(usage: diskUsage)
+            DiskUsageFooter(usage: diskUsage, loaded: diskUsageLoaded)
         }
         .searchable(text: $searchText, prompt: "Filter by tag or ID")
         .toolbar {
@@ -210,12 +213,14 @@ struct ImageListView: View {
 
     private func loadDiskUsage() async {
         diskUsage = await session.systemDF()
+        diskUsageLoaded = true
     }
 }
 
 /// Footer line under the image list summarising daemon disk usage.
 private struct DiskUsageFooter: View {
     let usage: SystemDiskUsage?
+    let loaded: Bool
 
     var body: some View {
         Group {
@@ -227,6 +232,10 @@ private struct DiskUsageFooter: View {
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            } else if loaded {
+                Text("Storage: unavailable")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             } else {
                 Text("Storage: calculating…")
                     .font(.caption)
