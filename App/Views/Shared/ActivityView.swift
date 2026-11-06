@@ -127,6 +127,7 @@ struct ActivityRow: View {
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
+                ExplainOperationButton(operation: operation)
             }
             if !operation.log.isEmpty {
                 DisclosureGroup(String(localized: "Output"), isExpanded: $showLog) {
