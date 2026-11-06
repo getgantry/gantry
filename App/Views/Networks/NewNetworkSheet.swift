@@ -6,7 +6,10 @@ import DockerKit
 struct NewNetworkSheet: View {
     let session: HostSession
 
-    private static let drivers = ["bridge", "overlay", "macvlan"]
+    /// "overlay" needs swarm mode; offering it elsewhere only yields an error.
+    private var drivers: [String] {
+        session.info?.swarmActive == true ? ["bridge", "overlay", "macvlan"] : ["bridge", "macvlan"]
+    }
 
     var body: some View {
         NewResourceSheet(
@@ -14,7 +17,7 @@ struct NewNetworkSheet: View {
             defaultDriver: "bridge",
             driverControl: { driver in
                 Picker("Driver", selection: driver) {
-                    ForEach(Self.drivers, id: \.self) { Text($0).tag($0) }
+                    ForEach(drivers, id: \.self) { Text($0).tag($0) }
                 }
                 .pickerStyle(.menu)
             },

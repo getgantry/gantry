@@ -46,9 +46,13 @@ enum Formatters {
     }
 
     /// Byte count string. Defaults to memory (1024-based) style, e.g. "1.2 GB";
-    /// pass `.file` for on-disk sizes.
+    /// pass `.file` for on-disk sizes. Zero reads "0 KB", not "Zero kB".
     static func bytes<I: BinaryInteger>(_ value: I, style: ByteCountFormatStyle.Style = .memory) -> String {
-        Int64(value).formatted(.byteCount(style: style))
+        let bytes = Int64(value)
+        if bytes == 0 {
+            return bytes.formatted(.byteCount(style: style, allowedUnits: .kb, spellsOutZero: false))
+        }
+        return bytes.formatted(.byteCount(style: style))
     }
 }
 

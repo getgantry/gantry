@@ -33,22 +33,18 @@ private struct FleetIssue: Identifiable {
     let target: DetailSelection?
 }
 
-/// The dashboard's middle column: everything that needs attention across all
-/// hosts, grouped by host — or a green all-clear when the fleet is healthy.
+/// The dashboard's issue card: everything that needs attention across all
+/// hosts, grouped by host. Empty when the fleet is healthy (the banner above
+/// already says so).
 struct FleetIssuesView: View {
     @Environment(AppModel.self) private var model
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
 
     var body: some View {
-        Group {
-            let groups = issueGroups
-            if groups.isEmpty {
-                allClear
-            } else {
-                issuesList(groups)
-            }
+        let groups = issueGroups
+        if !groups.isEmpty {
+            issuesList(groups)
         }
-        .navigationTitle("Health")
     }
 
     // MARK: Issue discovery
@@ -78,7 +74,7 @@ struct FleetIssuesView: View {
             )
         }
 
-        for container in session.containers {
+        for container in session.visibleContainers {
             if container.state.isRunning, container.health == .unhealthy {
                 result.append(containerIssue(container, severity: .error, title: String(localized: "Unhealthy")))
             } else if container.state == .restarting {
@@ -109,21 +105,31 @@ struct FleetIssuesView: View {
     // MARK: Views
 
     private func issuesList(_ groups: [(session: HostSession, issues: [FleetIssue])]) -> some View {
-        List {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Needs Attention", systemImage: "exclamationmark.triangle")
+                .font(.headline)
             ForEach(groups, id: \.session.id) { group in
-                Section {
+                VStack(alignment: .leading, spacing: 4) {
+                    groupHeader(group.session)
                     ForEach(group.issues) { issue in
                         issueRow(issue, session: group.session)
                     }
-                } header: {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(group.session.status.dotColor)
-                            .frame(width: 7, height: 7)
-                        Text(group.session.host.name)
-                    }
                 }
             }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private func groupHeader(_ session: HostSession) -> some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(session.status.dotColor)
+                .frame(width: 7, height: 7)
+            Text(session.host.name)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -162,23 +168,6 @@ struct FleetIssuesView: View {
                     Label("Copy as Prompt", systemImage: "text.badge.star")
                 }
             }
-        }
-    }
-
-    private var allClear: some View {
-        let connected = model.sessions.filter(\.status.isConnected).count
-        let running = model.sessions.reduce(0) { sum, session in
-            sum + session.containers.filter(\.state.isRunning).count
-        }
-        return ContentUnavailableView {
-            Label {
-                Text("All Systems Running")
-            } icon: {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundStyle(.green)
-            }
-        } description: {
-            Text("\(running) containers running across \(connected) connected hosts.")
         }
     }
 }

@@ -34,6 +34,12 @@ struct AppleAddressSection: View {
     /// lives in `HostSession` so the tray menu and create sheets share it.
     static let domainLabelKey = HostSession.dnsDomainLabelKey
 
+    /// Whether this section shows for `details` with an IP to share on.
+    static func offersShare(session: HostSession, details: ContainerDetails) -> Bool {
+        let value = details.networkSettings.ipAddress?.trimmingCharacters(in: .whitespaces) ?? ""
+        return session.host.isAppleContainer && !value.isEmpty
+    }
+
     private var ip: String? {
         let value = details.networkSettings.ipAddress?.trimmingCharacters(in: .whitespaces)
         return (value?.isEmpty == false) ? value : nil

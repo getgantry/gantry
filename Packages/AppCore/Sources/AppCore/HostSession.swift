@@ -1818,7 +1818,8 @@ extension HostSession {
     /// is established then. Containers that vanish mid-sample are skipped.
     public func containerLoad() async -> ContainerLoad? {
         guard let client else { return nil }
-        let running = containers.filter { $0.state.isRunning }.map(\.id)
+        // The hidden builder and debug sidecars do not count, as in the lists.
+        let running = visibleContainers.filter { $0.state.isRunning }.map(\.id)
         guard !running.isEmpty else {
             loadCPUBaseline = [:]
             return ContainerLoad(cpuPercent: 0, memoryUsedBytes: 0, sampled: 0)

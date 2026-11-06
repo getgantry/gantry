@@ -58,8 +58,13 @@ struct HostOverviewView: View {
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
-                .keyboardShortcut("r", modifiers: .command)
                 .disabled(refreshing)
+            }
+        }
+        .onSectionCommand(.refresh, .overview) {
+            Task {
+                await session.refreshContainers()
+                await refresh()
             }
         }
         .task(id: session.id) {
@@ -101,7 +106,7 @@ struct HostOverviewView: View {
             systemImage: "cpu",
             fraction: percentOfHost,
             centerText: (load?.cpuPercent ?? 0).formatted(.number.precision(.fractionLength(0))) + "%",
-            caption: String(localized: "of \(info.ncpu) CPUs · \(load?.sampled ?? 0) running"),
+            caption: String(localized: "of \(info.ncpu) CPUs · \(session.containerCounts.running) running"),
             tint: .blue
         )
     }
@@ -155,13 +160,16 @@ struct HostOverviewView: View {
     // MARK: - Containers / images counts
 
     private func countsCard(info: SystemInfo) -> some View {
-        HStack(spacing: 0) {
-            countCell(value: info.containersRunning, label: String(localized: "Running"), tint: .green)
+        // The container list is the one source for these counts; the daemon's
+        // own totals include the hidden apple builder and lag behind events.
+        let counts = session.containerCounts
+        return HStack(spacing: 0) {
+            countCell(value: counts.running, label: String(localized: "Running"), tint: .green)
             // apple/container cannot pause, so the tile would always read 0.
             if session.host.capabilities.pauseResume {
-                countCell(value: info.containersPaused, label: String(localized: "Paused"), tint: .yellow)
+                countCell(value: counts.paused, label: String(localized: "Paused"), tint: .yellow)
             }
-            countCell(value: info.containersStopped, label: String(localized: "Stopped"), tint: .gray)
+            countCell(value: counts.stopped, label: String(localized: "Stopped"), tint: .gray)
             countCell(value: info.images, label: String(localized: "Images"), tint: .blue)
         }
         .padding(.vertical, 12)

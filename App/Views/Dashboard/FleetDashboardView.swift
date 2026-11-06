@@ -21,6 +21,7 @@ struct FleetDashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 fleetBanner
+                FleetIssuesView(navigate: navigate)
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: 300), spacing: 16, alignment: .top)],
                     spacing: 16
@@ -42,10 +43,12 @@ struct FleetDashboardView: View {
         var hostsUp = 0
         var hostsTotal = 0
         var hostsFailed = 0
-        var running = 0
-        var unhealthy = 0
-        var attention = 0   // unhealthy + restarting + dead containers
-        var stopped = 0
+        var containers = ContainerCounts()
+
+        var running: Int { containers.running }
+        var unhealthy: Int { containers.unhealthy }
+        var attention: Int { containers.attention }
+        var stopped: Int { containers.stopped }
     }
 
     private var counts: FleetCounts {
@@ -53,22 +56,7 @@ struct FleetDashboardView: View {
         for session in model.sessions {
             if session.status.isConnected { c.hostsUp += 1 }
             if case .failed = session.status { c.hostsFailed += 1 }
-            for container in session.containers {
-                switch container.state {
-                case .running:
-                    c.running += 1
-                    if container.health == .unhealthy {
-                        c.unhealthy += 1
-                        c.attention += 1
-                    }
-                case .restarting, .dead:
-                    c.attention += 1
-                case .exited, .created, .removing:
-                    c.stopped += 1
-                case .paused, .unknown:
-                    break
-                }
-            }
+            c.containers = c.containers + session.containerCounts
         }
         return c
     }
@@ -117,14 +105,10 @@ struct FleetDashboardView: View {
     private func bannerTitle(counts c: FleetCounts, allClear: Bool) -> String {
         if allClear { return String(localized: "All Systems Running") }
         if c.hostsFailed > 0 {
-            return c.hostsFailed == 1
-                ? String(localized: "1 host unreachable")
-                : String(localized: "\(c.hostsFailed) hosts unreachable")
+            return String(localized: "\(c.hostsFailed) hosts unreachable")
         }
         if c.attention > 0 {
-            return c.attention == 1
-                ? String(localized: "1 container needs attention")
-                : String(localized: "\(c.attention) containers need attention")
+            return String(localized: "\(c.attention) containers need attention")
         }
         return String(localized: "Connecting…")
     }
@@ -134,7 +118,7 @@ struct FleetDashboardView: View {
         if c.hostsFailed > 0 { parts.append(String(localized: "\(c.hostsFailed) connection failed")) }
         if c.unhealthy > 0 { parts.append(String(localized: "\(c.unhealthy) unhealthy")) }
         if parts.isEmpty {
-            return String(localized: "\(c.running) containers running across \(c.hostsUp) hosts.")
+            return CountPhrases.runningAcrossHosts(running: c.running, hosts: c.hostsUp)
         }
         return parts.joined(separator: " · ")
     }
@@ -235,7 +219,7 @@ private struct HostCard: View {
             if unhealthyCount > 0 {
                 badge(String(localized: "\(unhealthyCount) unhealthy"), tint: .red)
             } else if restartingCount > 0 {
-                badge("\(restartingCount) restarting", tint: .orange)
+                badge(String(localized: "\(restartingCount) restarting"), tint: .orange)
             }
         }
     }
@@ -338,31 +322,12 @@ private struct HostCard: View {
 
     // MARK: Containers breakdown
 
-    private var stateCounts: (healthy: Int, unhealthy: Int, paused: Int, stopped: Int) {
-        var healthy = 0, unhealthy = 0, paused = 0, stopped = 0
-        for container in session.containers {
-            switch container.state {
-            case .running:
-                if container.health == .unhealthy { unhealthy += 1 } else { healthy += 1 }
-            case .paused:
-                paused += 1
-            case .exited, .dead, .created, .removing, .restarting, .unknown:
-                stopped += 1
-            }
-        }
-        return (healthy, unhealthy, paused, stopped)
-    }
+    private var unhealthyCount: Int { session.containerCounts.unhealthy }
 
-    private var unhealthyCount: Int {
-        session.containers.filter { $0.state.isRunning && $0.health == .unhealthy }.count
-    }
-
-    private var restartingCount: Int {
-        session.containers.filter { $0.state == .restarting }.count
-    }
+    private var restartingCount: Int { session.containerCounts.restarting }
 
     private var containersSection: some View {
-        let counts = stateCounts
+        let counts = session.containerCounts
         let segments: [(Color, Int)] = [
             (.green, counts.healthy),
             (.red, counts.unhealthy),
@@ -393,8 +358,8 @@ private struct HostCard: View {
         }
     }
 
-    private func containersLegend(_ counts: (healthy: Int, unhealthy: Int, paused: Int, stopped: Int)) -> String {
-        var parts = [String(localized: "\(counts.healthy + counts.unhealthy) running")]
+    private func containersLegend(_ counts: ContainerCounts) -> String {
+        var parts = [String(localized: "\(counts.running) running")]
         if counts.unhealthy > 0 { parts.append(String(localized: "\(counts.unhealthy) unhealthy")) }
         if counts.paused > 0 { parts.append(String(localized: "\(counts.paused) paused")) }
         parts.append(String(localized: "\(counts.stopped) stopped"))

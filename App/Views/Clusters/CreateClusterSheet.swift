@@ -126,6 +126,7 @@ struct CreateClusterSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                 Button("Create") { create() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
@@ -147,7 +148,7 @@ struct CreateClusterSheet: View {
 
     private func field<V: View>(_ label: LocalizedStringKey, @ViewBuilder _ content: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label).frame(width: 80, alignment: .leading).foregroundStyle(.secondary)
+            Text(label).frame(minWidth: 80, alignment: .leading).fixedSize().foregroundStyle(.secondary)
             content()
         }
     }

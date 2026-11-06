@@ -13,6 +13,15 @@ struct AppleRegistriesPane: View {
     @State private var selection: String?
     @State private var showLogin = false
     @State private var logoutTarget: AppleRegistryLogin?
+    @State private var searchText = ""
+
+    private var filteredLogins: [AppleRegistryLogin] {
+        guard !searchText.isEmpty else { return logins }
+        let needle = searchText.lowercased()
+        return logins.filter {
+            $0.hostname.lowercased().contains(needle) || $0.username.lowercased().contains(needle)
+        }
+    }
 
     private var cli: String? { session.appleCLIOverride }
 
@@ -30,7 +39,7 @@ struct AppleRegistriesPane: View {
                     } label: {
                         Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
                     }
-                    .keyboardShortcut("r", modifiers: .command)
+                    .onSectionCommand(.refresh, .system) { Task { await reload() } }
                 }
                 .disabled(busy)
             }
@@ -42,6 +51,7 @@ struct AppleRegistriesPane: View {
             content
         }
         .navigationTitle(AppleSystemPane.registries.title)
+        .searchable(text: $searchText, prompt: Text("Filter by registry or user"))
         .task { await reload() }
         .sheet(isPresented: $showLogin, onDismiss: { Task { await reload() } }) {
             AppleRegistryLoginSheet(cliOverride: cli)
@@ -72,8 +82,11 @@ struct AppleRegistriesPane: View {
                     .buttonStyle(.borderedProminent)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if filteredLogins.isEmpty {
+            ListNoResultsView(search: searchText)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Table(logins, selection: $selection) {
+            Table(filteredLogins, selection: $selection) {
                 TableColumn(String(localized: "Registry")) { login in
                     Text(login.hostname).font(.system(.body, design: .monospaced))
                 }

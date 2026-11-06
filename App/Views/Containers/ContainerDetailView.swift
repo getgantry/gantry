@@ -76,10 +76,10 @@ struct ContainerDetailView: View {
                 let newName = renameText.trimmingCharacters(in: .whitespaces)
                 Task { _ = await session.rename(containerID: container.id, to: newName) }
             }
-            .disabled(!ContainerForm.isValidRename(renameText, current: container.displayName))
+            .disabled(!RenameRules.canRename(renameText, container: container, session: session))
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Enter a new name for the container.")
+            Text(RenameRules.hint)
         }
     }
 
@@ -240,7 +240,11 @@ private struct ContainerOverview: View {
                 } else if let details {
                     stateSection(details)
                     AppleAddressSection(session: session, container: container, details: details)
-                    PortsSection(session: session, container: container)
+                    PortsSection(
+                        session: session,
+                        container: container,
+                        sharesInAddressSection: AppleAddressSection.offersShare(session: session, details: details)
+                    )
                     mountsSection(details)
                     networksSection(details)
                     configSection(details)

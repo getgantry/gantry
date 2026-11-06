@@ -75,6 +75,7 @@ struct PullImageSheet: View {
                     pullTask?.cancel()
                     dismiss()
                 }
+                .keyboardShortcut(.cancelAction)
                 if phase == .done {
                     Button("Done") { dismiss() }
                         .keyboardShortcut(.defaultAction)

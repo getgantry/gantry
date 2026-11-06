@@ -17,7 +17,7 @@ struct MenuBarView: View {
 
     /// Total running containers across all connected hosts, for the footer line.
     private var totalRunning: Int {
-        connectedSessions.reduce(0) { $0 + $1.containers.filter { $0.state.isRunning }.count }
+        connectedSessions.reduce(0) { $0 + $1.containerCounts.running }
     }
 
     private var totalHosts: Int { connectedSessions.count }
@@ -155,9 +155,8 @@ struct MenuBarView: View {
     }
 
     private var countsSummary: String {
-        guard totalHosts > 0 else { return String(localized: "No hosts connected") }
-        let hostWord = totalHosts == 1 ? String(localized: "host") : String(localized: "hosts")
-        return String(localized: "\(totalRunning) running · \(totalHosts) \(hostWord)")
+        guard totalHosts > 0 else { return String(localized: "No connected hosts") }
+        return CountPhrases.runningOnHosts(running: totalRunning, hosts: totalHosts)
     }
 
     /// Estimated height for the host/container list, so the ScrollView never
@@ -169,14 +168,14 @@ struct MenuBarView: View {
         for (index, session) in connectedSessions.enumerated() {
             if index > 0 { h += 12 } // spacing between host blocks
             h += 24 // host header row
-            let running = session.containers.filter { $0.state.isRunning }.count
+            let running = session.containerCounts.running
             if running == 0 {
                 h += 20 // "No running containers"
             } else {
                 h += CGFloat(min(running, 8)) * 24
                 if running > 8 { h += 18 } // "N more…"
             }
-            let exited = session.containers.filter { $0.state == .exited }.count
+            let exited = session.visibleContainers.filter { $0.state == .exited }.count
             if exited > 0 {
                 h += 20 // "Recently exited" label
                 h += CGFloat(min(exited, 3)) * 22
@@ -196,14 +195,14 @@ private struct HostBlock: View {
     private static let exitedLimit = 3
 
     private var running: [ContainerSummary] {
-        session.containers
+        session.visibleContainers
             .filter { $0.state.isRunning }
             .sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
     }
 
     /// Recently exited containers, most recent first.
     private var recentlyExited: [ContainerSummary] {
-        session.containers
+        session.visibleContainers
             .filter { $0.state == .exited }
             .sorted { $0.created > $1.created }
     }
@@ -223,10 +222,10 @@ private struct HostBlock: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text(verbatim: "\(running.count)/\(session.containers.count)")
+                Text(verbatim: "\(running.count)/\(session.containerCounts.total)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
-                    .help("\(running.count) running of \(session.containers.count) containers")
+                    .help(String(localized: "\(running.count) running of \(CountPhrases.containers(session.containerCounts.total))"))
             }
 
             if running.isEmpty {

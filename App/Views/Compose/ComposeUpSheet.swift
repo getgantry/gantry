@@ -235,7 +235,7 @@ struct ComposeUpSheet: View {
 
     private func labeled<V: View>(_ title: String, @ViewBuilder _ value: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(.headline).frame(width: 70, alignment: .leading)
+            Text(title).font(.headline).frame(minWidth: 70, alignment: .leading).fixedSize()
             value()
             Spacer()
         }

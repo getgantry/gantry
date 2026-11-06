@@ -17,6 +17,9 @@ struct ImageListView: View {
     /// "unavailable" instead of "calculating…" for ever.
     @State private var diskUsageLoaded = false
     @State private var clusterLoad: ClusterImageLoad?
+    @State private var buildRequest: DockerfileBuildRequest?
+    @State private var rejectedDockerfile: RejectedDockerfile?
+    @Environment(AppModel.self) private var model
 
     /// An image being copied into a cluster, and then the outcome.
     private struct ClusterImageLoad: Identifiable {
@@ -89,6 +92,19 @@ struct ImageListView: View {
                 imageRow(image)
             }
         }
+        .listEmptyState(
+            ListEmptyState(
+                title: "No Images",
+                systemImage: "square.stack.3d.up",
+                description: "Pull an image from a registry or build one from a Dockerfile.",
+                actionTitle: "Pull Image…",
+                action: { showingPull = true }
+            ),
+            total: session.images.count,
+            filtered: filtered.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: filtered)
         .navigationTitle("Images")
         .safeAreaInset(edge: .bottom) {
@@ -102,15 +118,21 @@ struct ImageListView: View {
                 } label: {
                     Label("Pull Image…", systemImage: "arrow.down.circle")
                 }
-                .keyboardShortcut("p", modifiers: .command)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await session.refreshImages() }
+                    chooseDockerfile()
+                } label: {
+                    Label("Build Image…", systemImage: "hammer")
+                }
+                .help("Build an image from a Dockerfile on this host")
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Task { await refresh() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
-                .keyboardShortcut("r", modifiers: .command)
             }
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -121,6 +143,14 @@ struct ImageListView: View {
                 }
             }
         }
+        .onSectionCommand(.pullImage, .images) { showingPull = true }
+        .onSectionCommand(.newItem, .images) { chooseDockerfile() }
+        .sheet(item: $buildRequest, onDismiss: { Task { await refresh() } }) { request in
+            BuildImageSheet(dockerfileURL: request.url, preferredHostID: session.id)
+                .environment(model)
+        }
+        .rejectedDockerfileAlert($rejectedDockerfile)
+        .onSectionCommand(.refresh, .images) { Task { await refresh() } }
         .sheet(isPresented: $showingPull) {
             PullImageSheet(session: session)
         }
@@ -209,6 +239,20 @@ struct ImageListView: View {
                 clusterLoad = nil
             }
         }
+    }
+
+    private func chooseDockerfile() {
+        guard let url = DockerfilePicker.choose() else { return }
+        if let dockerfile = DockerfileDetector.resolveDockerfile(at: url) {
+            buildRequest = DockerfileBuildRequest(url: dockerfile)
+        } else {
+            rejectedDockerfile = RejectedDockerfile(url: url)
+        }
+    }
+
+    private func refresh() async {
+        await session.refreshImages()
+        await loadDiskUsage()
     }
 
     private func loadDiskUsage() async {

@@ -44,6 +44,15 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         }
     }
 
+    /// Sections without a master list: they fill the width next to the
+    /// sidebar instead of leaving an empty detail column.
+    var isFullWidth: Bool {
+        switch self {
+        case .overview, .hostFiles, .system: true
+        default: false
+        }
+    }
+
     /// Sections shown for a host: SFTP-backed host file browsing exists only
     /// for SSH hosts; `container machine` exists only for apple/container, and
     /// `container cluster` only when its CLI is 1.5 or later.
@@ -109,6 +118,17 @@ enum DetailSelection: Hashable {
     case machine(String)
     case cluster(String)
     case appleSystem(String)
+
+    /// The id of the selected list item; nil for a System pane.
+    var resourceID: String? {
+        switch self {
+        case .container(let id), .image(let id), .volume(let id), .network(let id),
+             .machine(let id), .cluster(let id):
+            id
+        case .appleSystem:
+            nil
+        }
+    }
 }
 
 struct ContentView: View {
@@ -118,6 +138,9 @@ struct ContentView: View {
     /// Land on the fleet dashboard at launch.
     @State private var selection: SidebarItem? = .dashboard
     @State private var detailSelection: DetailSelection?
+    /// Shared by the two- and three-column layouts so a hidden sidebar stays
+    /// hidden when the section changes.
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     /// Detail item to restore right after a programmatic sidebar jump (the
     /// `onChange(of: selection)` handler clears `detailSelection` otherwise).
     @State private var pendingDetailSelection: DetailSelection?
@@ -127,6 +150,7 @@ struct ContentView: View {
     @State private var composeRequest: ComposeFileRequest?
     /// A Dockerfile dropped/opened, awaiting the Build Image sheet.
     @State private var buildRequest: DockerfileBuildRequest?
+    @State private var rejectedDrop: RejectedDockerfile?
     /// Whether a drag is currently hovering a valid drop over the window.
     @State private var isDropTargeted = false
     /// apple/container setup is presented only with a status payload.
@@ -173,26 +197,27 @@ struct ContentView: View {
         return model.sessions.first { $0.pendingCredentialRequest != nil }
     }
 
+    // The modifier chain is split into helpers: as one expression it exceeds
+    // the type checker's time budget on CI runners.
     var body: some View {
-        NavigationSplitView {
-            sidebar
-                .navigationSplitViewColumnWidth(min: 220, ideal: 250)
-        } content: {
-            content
-                .navigationSplitViewColumnWidth(min: 300, ideal: 440)
-        } detail: {
-            // The detail column hosts the container tab strip and the log
-            // toolbar; below this width they overflow and SwiftUI clips them
-            // centered, cutting both edges. Keep the column at least this wide.
-            detail
-                .navigationSplitViewColumnWidth(min: 640, ideal: 820)
-        }
+        withHostPrompts(withSetupAndLaunchTasks(withRefreshAndFileOpening(withSelectionTracking(splitView))))
+    }
+
+    private func withSelectionTracking(_ content: some View) -> some View {
+        content
         .navigationTitle("Gantry")
+        .focusedSceneValue(\.gantrySection, focusedSection)
         .onChange(of: selection) {
             // Switching host or section clears the stale detail selection —
             // unless a programmatic jump staged a target to restore.
             detailSelection = pendingDetailSelection
             pendingDetailSelection = nil
+        }
+        .onChange(of: liveDetailIDs) { old, new in
+            // The selected item was removed: go back to no selection instead
+            // of a "… Unavailable" page.
+            guard let id = detailSelection?.resourceID, old.contains(id), !new.contains(id) else { return }
+            detailSelection = nil
         }
         .onChange(of: model.sessions.map(\.id)) { _, ids in
             // A host can go away without the sidebar (the Local host is hidden
@@ -201,16 +226,15 @@ struct ContentView: View {
                 selection = .dashboard
             }
         }
+    }
+
+    private func withRefreshAndFileOpening(_ content: some View) -> some View {
+        content
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
-            // Refresh the host currently in view; fall back to all connected hosts.
-            if let hostSelection = selection?.hostSelection,
-               let session = model.session(id: hostSelection.hostID) {
-                Task { await session.refreshAll() }
-            } else {
-                for session in model.sessions where session.status.isConnected {
-                    Task { await session.refreshAll() }
-                }
-            }
+            refreshAllHosts()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshSection)) { note in
+            refreshWithoutSectionView(note.object as? HostSection)
         }
         .sheet(isPresented: $showingAddHost) {
             AddHostSheet()
@@ -241,6 +265,7 @@ struct ContentView: View {
         .overlay {
             if isDropTargeted { dropOverlay }
         }
+        .rejectedDockerfileAlert($rejectedDrop)
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectHostContainers)) { note in
             if let hostID = note.object as? UUID {
                 selection = .host(SidebarSelection(hostID: hostID, section: .containers))
@@ -258,6 +283,10 @@ struct ContentView: View {
             for url in PendingDockerfileOpens.drain() { buildRequest = DockerfileBuildRequest(url: url) }
             if let jump = PendingContainerJump.take() { selectContainer(jump) }
         }
+    }
+
+    private func withSetupAndLaunchTasks(_ content: some View) -> some View {
+        content
         .sheet(item: $containerSetupRequest) { request in
             ContainerSetupSheet(status: request.status) { snoozeContainerCheck() }
         }
@@ -271,6 +300,10 @@ struct ContentView: View {
                 containerSetupRequest = ContainerSetupRequest(status: status)
             }
         }
+    }
+
+    private func withHostPrompts(_ content: some View) -> some View {
+        content
         .sheet(isPresented: hostKeySheetBinding) {
             if let session = hostKeySession, let prompt = session.pendingHostKeyPrompt {
                 HostKeySheet(session: session, prompt: prompt)
@@ -296,6 +329,98 @@ struct ContentView: View {
         } message: { hostID in
             let label = model.session(id: hostID)?.host.name ?? "this host"
             Text("\(label) will be removed from Gantry. Stored credentials are not deleted.")
+        }
+    }
+
+
+    // MARK: - Refresh
+
+    private func refreshAllHosts() {
+        for session in model.sessions where session.status.isConnected {
+            Task { await session.refreshAll() }
+        }
+    }
+
+    /// ⌘R where no section view handles it: the dashboard refreshes every
+    /// host, and a host that is down tries to connect again.
+    private func refreshWithoutSectionView(_ section: HostSection?) {
+        guard let section else {
+            refreshAllHosts()
+            return
+        }
+        guard section != .system,
+              let hostID = selection?.hostSelection?.hostID,
+              let session = model.session(id: hostID) else { return }
+        switch session.status {
+        case .failed, .disconnected: Task { await session.connect() }
+        case .connected, .connecting: break
+        }
+    }
+
+    // MARK: - Layout
+
+    /// Sections without a master list fill the width next to the sidebar; a
+    /// third column would only say "Nothing Selected".
+    private var usesFullWidth: Bool {
+        switch selection {
+        case .dashboard, nil: true
+        case .host(let hostSelection): hostSelection.section.isFullWidth
+        }
+    }
+
+    @ViewBuilder
+    private var splitView: some View {
+        if usesFullWidth {
+            NavigationSplitView(columnVisibility: $columnVisibility) {
+                sidebarColumn
+            } detail: {
+                content
+                    .navigationSplitViewColumnWidth(min: 640, ideal: 900)
+            }
+        } else {
+            NavigationSplitView(columnVisibility: $columnVisibility) {
+                sidebarColumn
+            } content: {
+                content
+                    .navigationSplitViewColumnWidth(min: 300, ideal: 440)
+            } detail: {
+                // The detail column hosts the container tab strip and the log
+                // toolbar; below this width they overflow and SwiftUI clips them
+                // centered, cutting both edges. Keep the column at least this wide.
+                detail
+                    .navigationSplitViewColumnWidth(min: 640, ideal: 820)
+            }
+        }
+    }
+
+    private var sidebarColumn: some View {
+        sidebar
+            .navigationSplitViewColumnWidth(min: 220, ideal: 250)
+    }
+
+    /// The section that the menu commands (⌘N, ⌘R) act on.
+    private var focusedSection: FocusedSection? {
+        switch selection {
+        case .dashboard: FocusedSection(section: nil)
+        case .host(let hostSelection): FocusedSection(section: hostSelection.section)
+        case nil: nil
+        }
+    }
+
+    /// Ids of the items in the list that owns the detail selection; used to
+    /// notice that the selected item was removed.
+    private var liveDetailIDs: [String] {
+        guard let hostID = selection?.hostSelection?.hostID,
+              let session = model.session(id: hostID),
+              let detailSelection else { return [] }
+        switch detailSelection {
+        case .container: return session.containers.map(\.id)
+        case .image: return session.images.map(\.id)
+        case .volume: return session.volumes.map(\.name)
+        case .network: return session.networks.map(\.id)
+        case .machine: return session.machines.map(\.id)
+        case .cluster: return session.clusters.map(\.name)
+        case .appleSystem: return []
         }
     }
 
@@ -503,7 +628,7 @@ struct ContentView: View {
     private var content: some View {
         switch selection {
         case .dashboard:
-            FleetIssuesView(navigate: navigate)
+            FleetDashboardView(navigate: navigate)
         case .host(let hostSelection):
             if let session = model.session(id: hostSelection.hostID) {
                 sectionContent(for: hostSelection.section, session: session)
@@ -568,11 +693,14 @@ struct ContentView: View {
             return false
         }
         _ = provider.loadObject(ofClass: URL.self) { url, _ in
-            guard let url, let dockerfile = DockerfileDetector.resolveDockerfile(at: url) else {
-                return
-            }
+            guard let url else { return }
+            let dockerfile = DockerfileDetector.resolveDockerfile(at: url)
             Task { @MainActor in
-                buildRequest = DockerfileBuildRequest(url: dockerfile)
+                if let dockerfile {
+                    buildRequest = DockerfileBuildRequest(url: dockerfile)
+                } else {
+                    rejectedDrop = RejectedDockerfile(url: url)
+                }
             }
         }
         return true
@@ -636,9 +764,7 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
-        if case .dashboard = selection {
-            FleetDashboardView(navigate: navigate)
-        } else if let hostSelection = selection?.hostSelection,
+        if let hostSelection = selection?.hostSelection,
                   let session = model.session(id: hostSelection.hostID),
                   let detailSelection {
             if session.status.isConnected || hostSelection.section == .system {
@@ -647,17 +773,21 @@ struct ContentView: View {
                 HostUnavailableDetailView()
             }
         } else {
-            ContentUnavailableView(
-                "Nothing Selected",
-                systemImage: "rectangle.righthalf.inset.filled",
-                description: Text("Pick an item to see its details.")
-            )
+            nothingSelected
         }
     }
 
+    private var nothingSelected: some View {
+        ContentUnavailableView(
+            "Nothing Selected",
+            systemImage: "rectangle.righthalf.inset.filled",
+            description: Text("Pick an item to see its details.")
+        )
+    }
+
     /// Resolves the selected id against the session's live arrays and renders
-    /// the matching detail view, degrading gracefully when the object is gone
-    /// (e.g. removed by a refresh while selected).
+    /// the matching detail view. A removed item clears the selection (see
+    /// `liveDetailIDs`); until then the column shows no selection.
     @ViewBuilder
     private func detailContent(_ selection: DetailSelection, session: HostSession) -> some View {
         switch selection {
@@ -665,49 +795,41 @@ struct ContentView: View {
             if let container = session.containers.first(where: { $0.id == id }) {
                 ContainerDetailView(container: container, session: session)
             } else {
-                detailGone("Container")
+                nothingSelected
             }
         case .image(let id):
             if let image = session.images.first(where: { $0.id == id }) {
                 ImageDetailView(image: image, session: session)
             } else {
-                detailGone("Image")
+                nothingSelected
             }
         case .volume(let name):
             if let volume = session.volumes.first(where: { $0.name == name }) {
                 VolumeDetailView(volume: volume, session: session)
             } else {
-                detailGone("Volume")
+                nothingSelected
             }
         case .network(let id):
             if let network = session.networks.first(where: { $0.id == id }) {
                 NetworkDetailView(network: network, session: session)
             } else {
-                detailGone("Network")
+                nothingSelected
             }
         case .machine(let id):
             if let machine = session.machines.first(where: { $0.id == id }) {
                 MachineDetailView(machine: machine, session: session)
             } else {
-                detailGone("Machine")
+                nothingSelected
             }
         case .cluster(let name):
             if let cluster = session.clusters.first(where: { $0.name == name }) {
                 ClusterDetailView(cluster: cluster, session: session)
             } else {
-                detailGone("Cluster")
+                nothingSelected
             }
         case .appleSystem(let pane):
             AppleSystemDetailView(paneID: pane, session: session)
         }
-    }
-
-    private func detailGone(_ kind: String) -> some View {
-        ContentUnavailableView(
-            "\(kind) Unavailable",
-            systemImage: "questionmark.square.dashed",
-            description: Text("This \(kind.lowercased()) is no longer available.")
-        )
     }
 
     // MARK: - Detail selection bindings

@@ -74,6 +74,17 @@ struct ContainerListView: View {
         filtered.contains { $0.composeProject != nil }
     }
 
+    private var emptyState: ListEmptyState {
+        let apple = session.host.isAppleContainer
+        return ListEmptyState(
+            title: "No Containers",
+            systemImage: "shippingbox",
+            description: "Run a container from an image to see it here.",
+            actionTitle: apple ? "Quick Run…" : "New Container…",
+            action: { if apple { showQuickRun = true } else { showCreateSheet = true } }
+        )
+    }
+
     // MARK: - Collapse persistence
 
     /// The set of collapsed project names decoded from scene storage.
@@ -124,13 +135,19 @@ struct ContainerListView: View {
         // disclosure chevron in the content column on macOS; the flat list keeps
         // the plain inset look.
         .modifier(ComposeListStyle(grouped: hasProjects))
+        .listEmptyState(
+            emptyState,
+            total: session.containerCounts.total,
+            filtered: filtered.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: filtered)
         .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
         .toolbar { toolbarContent }
-        .onReceive(NotificationCenter.default.publisher(for: .gantryNewContainer)) { _ in
-            showCreateSheet = true
-        }
+        .onSectionCommand(.newItem, .containers) { showCreateSheet = true }
+        .onSectionCommand(.refresh, .containers) { Task { await session.refreshContainers() } }
         .sheet(isPresented: $showCreateSheet) {
             CreateContainerSheet(session: session)
         }
@@ -317,7 +334,6 @@ struct ContainerListView: View {
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
-            .keyboardShortcut("r", modifiers: .command)
         }
         ToolbarItem(placement: .primaryAction) {
             Menu {
@@ -668,6 +684,20 @@ enum ContainerExport {
     }
 }
 
+/// Rename checks shared by the list and the detail view.
+enum RenameRules {
+    static var hint: String {
+        String(localized: "Enter a new name: letters, digits, “_”, “.” and “-”, starting with a letter or digit. It must differ from the current name and from other containers.")
+    }
+
+    @MainActor
+    static func canRename(_ text: String, container: ContainerSummary, session: HostSession) -> Bool {
+        let name = text.trimmingCharacters(in: .whitespaces)
+        return ContainerForm.isValidRename(name, current: container.displayName)
+            && !ContainerForm.takenNames(session.containers).contains(name)
+    }
+}
+
 /// Rename alert driven by a bound target container.
 struct RenameAlert: ViewModifier {
     @Binding var target: ContainerSummary?
@@ -686,10 +716,10 @@ struct RenameAlert: ViewModifier {
                 Task { _ = await session.rename(containerID: container.id, to: newName) }
                 target = nil
             }
-            .disabled(!ContainerForm.isValidRename(text, current: container.displayName))
+            .disabled(!RenameRules.canRename(text, container: container, session: session))
             Button("Cancel", role: .cancel) { target = nil }
         } message: { _ in
-            Text("Enter a new name for the container.")
+            Text(RenameRules.hint)
         }
     }
 }

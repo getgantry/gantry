@@ -21,6 +21,7 @@ struct StackLogsView: View {
     @State private var held = PauseBuffer<StackLine>(capacity: StackLogsView.maxLines)
     @State private var autoScroll = true
     @State private var search = ""
+    @FocusState private var searchFocused: Bool
     @State private var regexSearch = false
     @State private var minLevel: LogLevel?
     @State private var hiddenServices: Set<String> = []
@@ -78,12 +79,13 @@ struct StackLogsView: View {
                     .foregroundStyle(.tint)
                 Text(project)
                     .font(.headline)
-                Text("Stack logs · \(containers.count) services")
+                Text("Stack logs · \(CountPhrases.services(services.count))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
+                // Escape closes; Return stays with the search field.
                 Button("Done") { dismiss() }
-                    .keyboardShortcut(.defaultAction)
+                    .keyboardShortcut(.cancelAction)
             }
 
             HStack(spacing: 8) {
@@ -160,6 +162,8 @@ struct StackLogsView: View {
             Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
             TextField(regexSearch ? "Regex" : "Search", text: $search)
                 .textFieldStyle(.plain)
+                .focused($searchFocused)
+                .findShortcut($searchFocused)
             Button { regexSearch.toggle() } label: {
                 Text(".*")
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))

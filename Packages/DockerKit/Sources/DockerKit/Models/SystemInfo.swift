@@ -64,6 +64,13 @@ public struct SystemInfo: Hashable, Codable, Sendable {
     public var architecture: String
     public var memTotal: Int64
     public var ncpu: Int
+    /// True when the engine is an active swarm node; overlay networks need it.
+    public var swarmActive = false
+
+    private enum SwarmKeys: String, CodingKey {
+        case swarm = "Swarm"
+        case localNodeState = "LocalNodeState"
+    }
 
     enum CodingKeys: String, CodingKey {
         case containers = "Containers"
@@ -94,6 +101,10 @@ public struct SystemInfo: Hashable, Codable, Sendable {
         architecture = try c.decodeIfPresent(String.self, forKey: .architecture) ?? ""
         memTotal = try c.decodeIfPresent(Int64.self, forKey: .memTotal) ?? 0
         ncpu = try c.decodeIfPresent(Int.self, forKey: .ncpu) ?? 0
+        let outer = try decoder.container(keyedBy: SwarmKeys.self)
+        if let swarm = try? outer.nestedContainer(keyedBy: SwarmKeys.self, forKey: .swarm) {
+            swarmActive = (try? swarm.decodeIfPresent(String.self, forKey: .localNodeState)) == "active"
+        }
     }
 
     /// Whether two architecture names from different Docker endpoints spell

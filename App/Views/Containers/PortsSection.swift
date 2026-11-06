@@ -10,6 +10,9 @@ import DockerKit
 struct PortsSection: View {
     let session: HostSession
     let container: ContainerSummary
+    /// True when the Address section of an apple host already offers the
+    /// Cloudflare share, so this section does not show a second one.
+    var sharesInAddressSection = false
 
     /// The public port currently being acted on, for the inline spinner.
     @State private var busyPort: Int?
@@ -44,7 +47,7 @@ struct PortsSection: View {
                         Divider().padding(.vertical, 2)
                         forwardsList
                     }
-                    if !tunnels.isEmpty {
+                    if !tunnels.isEmpty, !sharesInAddressSection {
                         Divider().padding(.vertical, 2)
                         CloudflareTunnelsList(session: session, tunnels: tunnels)
                     }
@@ -53,9 +56,10 @@ struct PortsSection: View {
             .alert("Local Port", isPresented: editAlertBinding) {
                 TextField("Port", text: $editPortText)
                 Button("Apply") { applyEditedPort() }
+                    .disabled(PortInput(editPortText).value == nil)
                 Button("Cancel", role: .cancel) { editingForward = nil }
             } message: {
-                Text("Forward to a different local port on 127.0.0.1.")
+                Text("Forward to a different local port on 127.0.0.1. Enter a port from 1 to 65535.")
             }
             .sheet(item: $sharingPort) { item in
                 CloudflareShareSheet(
@@ -97,13 +101,15 @@ struct PortsSection: View {
                 }
                 .buttonStyle(.borderless)
                 .help("Open in browser")
-                Button {
-                    sharingPort = SharablePort(port: port)
-                } label: {
-                    Image(systemName: "cloud")
+                if !sharesInAddressSection {
+                    Button {
+                        sharingPort = SharablePort(port: port)
+                    } label: {
+                        Image(systemName: "cloud")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Share publicly via Cloudflare")
                 }
-                .buttonStyle(.borderless)
-                .help("Share publicly via Cloudflare")
             }
         }
     }
@@ -210,7 +216,7 @@ struct PortsSection: View {
     }
 
     private func applyEditedPort() {
-        guard let forward = editingForward, let port = Int(editPortText) else {
+        guard let forward = editingForward, let port = PortInput(editPortText).value else {
             editingForward = nil
             return
         }

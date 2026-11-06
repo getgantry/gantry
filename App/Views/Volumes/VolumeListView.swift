@@ -96,55 +96,26 @@ struct VolumeListView: View {
                     }
             }
         }
+        .listEmptyState(
+            ListEmptyState(
+                title: "No Volumes",
+                systemImage: "externaldrive",
+                description: "Volumes keep container data after the container is removed.",
+                actionTitle: "New Volume…",
+                action: { showingNew = true }
+            ),
+            total: session.volumes.count,
+            filtered: displayed.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: displayed)
         .task(id: session.id) { await session.refreshVolumeSizes(force: false) }
         .navigationTitle("Volumes")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingNew = true
-                } label: {
-                    Label("New Volume…", systemImage: "plus")
-                }
-                .keyboardShortcut("n", modifiers: .command)
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Picker("Sort By", selection: $sort) {
-                        ForEach(VolumeSort.allCases) { option in
-                            Label(option.rawValue, systemImage: option.systemImage).tag(option)
-                        }
-                    }
-                    Divider()
-                    Picker("Order", selection: $ascending) {
-                        Label("Ascending", systemImage: "arrow.up").tag(true)
-                        Label("Descending", systemImage: "arrow.down").tag(false)
-                    }
-                } label: {
-                    Label("Sort", systemImage: "arrow.up.arrow.down")
-                }
-                .menuIndicator(.hidden)
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    Task {
-                        await session.refreshVolumes()
-                        await session.refreshVolumeSizes()
-                    }
-                } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
-                }
-                .keyboardShortcut("r", modifiers: .command)
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button("Prune Unused Volumes…") { pruneConfirm = true }
-                } label: {
-                    Label("More", systemImage: "ellipsis.circle")
-                }
-            }
-        }
+        .toolbar { toolbarContent }
+        .onSectionCommand(.newItem, .volumes) { showingNew = true }
+        .onSectionCommand(.refresh, .volumes) { Task { await refresh() } }
         .sheet(isPresented: $showingNew) {
             NewVolumeSheet(session: session)
         }
@@ -180,6 +151,57 @@ struct VolumeListView: View {
         } message: { _ in
             Text("Removing a volume permanently deletes its data. Volumes in use by a container cannot be removed.")
         }
+    }
+
+    // Split out of `body`: one expression with the toolbar exceeds the
+    // type checker's time budget.
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                showingNew = true
+            } label: {
+                Label("New Volume…", systemImage: "plus")
+            }
+            .keyboardShortcut("n", modifiers: .command)
+        }
+        ToolbarItem(placement: .primaryAction) {
+            Menu {
+                Picker("Sort By", selection: $sort) {
+                    ForEach(VolumeSort.allCases) { option in
+                        Label(option.rawValue, systemImage: option.systemImage).tag(option)
+                    }
+                }
+                Divider()
+                Picker("Order", selection: $ascending) {
+                    Label("Ascending", systemImage: "arrow.up").tag(true)
+                    Label("Descending", systemImage: "arrow.down").tag(false)
+                }
+            } label: {
+                Label("Sort", systemImage: "arrow.up.arrow.down")
+            }
+            .menuIndicator(.hidden)
+        }
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                Task { await refresh() }
+            } label: {
+                Label("Refresh", systemImage: "arrow.clockwise")
+            }
+            .keyboardShortcut("r", modifiers: .command)
+        }
+        ToolbarItem(placement: .primaryAction) {
+            Menu {
+                Button("Prune Unused Volumes…") { pruneConfirm = true }
+            } label: {
+                Label("More", systemImage: "ellipsis.circle")
+            }
+        }
+    }
+
+    private func refresh() async {
+        await session.refreshVolumes()
+        await session.refreshVolumeSizes()
     }
 }
 

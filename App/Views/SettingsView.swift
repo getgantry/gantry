@@ -4,21 +4,23 @@ import AppCore
 import SSHKit
 
 struct SettingsView: View {
+    @AppStorage(SettingsTab.storageKey) private var tab = SettingsTab.general.rawValue
+
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") {
+        TabView(selection: $tab) {
+            Tab("General", systemImage: "gearshape", value: SettingsTab.general.rawValue) {
                 GeneralSettings()
             }
-            Tab("Hosts", systemImage: "server.rack") {
+            Tab("Hosts", systemImage: "server.rack", value: SettingsTab.hosts.rawValue) {
                 HostsSettings()
             }
-            Tab("Apple", systemImage: "apple.logo") {
+            Tab("Apple", systemImage: "apple.logo", value: SettingsTab.apple.rawValue) {
                 AppleSettingsView()
             }
-            Tab("Agents", systemImage: "sparkles") {
+            Tab("Agents", systemImage: "sparkles", value: SettingsTab.agents.rawValue) {
                 AgentSettingsView()
             }
-            Tab("About", systemImage: "info.circle") {
+            Tab("About", systemImage: "info.circle", value: SettingsTab.about.rawValue) {
                 AboutSettings()
             }
         }
@@ -428,7 +430,9 @@ private struct EditHostSheet: View {
         hostName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var canSave: Bool { !trimmedHost.isEmpty }
+    private var canSave: Bool {
+        !trimmedHost.isEmpty && SSHHostInput.message(for: hostName) == nil && PortInput(port) != .invalid
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -443,9 +447,19 @@ private struct EditHostSheet: View {
             Form {
                 Section {
                     TextField("Name", text: $name)
-                    TextField("Host", text: $hostName, prompt: Text("server.local or 192.168.1.10"))
-                    TextField("Port", text: $port, prompt: Text("22"))
-                    TextField("User", text: $user, prompt: Text(defaultUser))
+                    TextField("Host", text: $hostName, prompt: Text("Host name, IP address or ssh_config alias"))
+                    if let message = SSHHostInput.message(for: hostName) {
+                        Label(message, systemImage: "exclamationmark.circle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                    TextField("Port (optional)", text: $port, prompt: Text("From ssh_config, else 22"))
+                    if let message = PortInput(port).message {
+                        Label(message, systemImage: "exclamationmark.circle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                    TextField("User (optional)", text: $user, prompt: Text("From ssh_config, else \(defaultUser)"))
                 }
 
                 Section("Authentication") {
@@ -480,7 +494,9 @@ private struct EditHostSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                 Button("Save") { save() }
+                    .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .disabled(!canSave)
             }
@@ -499,7 +515,7 @@ private struct EditHostSheet: View {
     }
 
     private func save() {
-        let portValue = Int(port.trimmingCharacters(in: .whitespaces)) ?? 22
+        let portValue = PortInput(port).value ?? 22
         let trimmedUser = user.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let auth: SSHAuthMode

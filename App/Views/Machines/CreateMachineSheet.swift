@@ -86,6 +86,7 @@ struct CreateMachineSheet: View {
                 }
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                     .disabled(creating)
                 Button("Create") { create() }
                     .keyboardShortcut(.defaultAction)
@@ -141,7 +142,7 @@ struct CreateMachineSheet: View {
 
     private func field<V: View>(_ label: String, @ViewBuilder _ content: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label).frame(width: 60, alignment: .leading).foregroundStyle(.secondary)
+            Text(label).frame(minWidth: 60, alignment: .leading).fixedSize().foregroundStyle(.secondary)
             content()
         }
     }

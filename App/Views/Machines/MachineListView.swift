@@ -12,6 +12,13 @@ struct MachineListView: View {
     @State private var showingCreate = false
     @State private var deleteTarget: ContainerMachine?
     @State private var busy: Set<String> = []
+    @State private var searchText = ""
+
+    private var filtered: [ContainerMachine] {
+        guard !searchText.isEmpty else { return session.machines }
+        let needle = searchText.lowercased()
+        return session.machines.filter { $0.id.lowercased().contains(needle) }
+    }
 
     var body: some View {
         Group {
@@ -29,12 +36,12 @@ struct MachineListView: View {
                 } description: {
                     Text("Create a long-lived Linux environment to develop in.")
                 } actions: {
-                    Button("Create Machine…") { showingCreate = true }
+                    Button("New Machine…") { showingCreate = true }
                         .buttonStyle(.borderedProminent)
                 }
             } else {
                 List(selection: $selection) {
-                    ForEach(session.machines) { machine in
+                    ForEach(filtered) { machine in
                         MachineRow(
                             machine: machine,
                             busy: busy.contains(machine.id),
@@ -49,13 +56,16 @@ struct MachineListView: View {
                 }
             }
         }
+        .overlay {
+            if !session.machines.isEmpty, filtered.isEmpty { ListNoResultsView(search: searchText) }
+        }
         .navigationTitle("Machines")
+        .searchable(text: $searchText, prompt: "Filter by name")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingCreate = true } label: {
-                    Label("Create Machine…", systemImage: "plus")
+                    Label("New Machine…", systemImage: "plus")
                 }
-                .keyboardShortcut("n", modifiers: .command)
                 .disabled(session.machines.isEmpty && session.machineListError != nil)
             }
             ToolbarItem {
@@ -64,6 +74,10 @@ struct MachineListView: View {
                 }
             }
         }
+        .onSectionCommand(.newItem, .machines) {
+            if !(session.machines.isEmpty && session.machineListError != nil) { showingCreate = true }
+        }
+        .onSectionCommand(.refresh, .machines) { Task { await session.refreshMachines() } }
         .sheet(isPresented: $showingCreate) {
             CreateMachineSheet(session: session)
         }
