@@ -11,6 +11,15 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.25.1](https://github.com/getgantry/gantry/compare/v0.25.0...v0.25.1) (2026-11-06)
+
+
+### Fixes
+
+* **app:** fix create flow blockers and work without docker ([#36](https://github.com/getgantry/gantry/issues/36)) ([bace55e](https://github.com/getgantry/gantry/commit/bace55e19226e1e20787031e0e3d7fe643e97856))
+* **apple:** edit config.toml safely and protect clusters on cancel ([#35](https://github.com/getgantry/gantry/issues/35)) ([30fe080](https://github.com/getgantry/gantry/commit/30fe080dafd8533b54c339118e27995124e9de2c))
+* **apple:** make cli process handling and file download reliable ([#34](https://github.com/getgantry/gantry/issues/34)) ([52c2ab7](https://github.com/getgantry/gantry/commit/52c2ab7d0da55245dbaf1ede99464afb4355411d))
+
 ## [0.25.0](https://github.com/getgantry/gantry/compare/v0.24.0...v0.25.0) (2026-11-03)
 
 
