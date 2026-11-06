@@ -3960,6 +3960,22 @@
         }
       }
     },
+    "Filter by name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称筛选"
+          }
+        }
+      }
+    },
     "Filter by name or driver": {
       "localizations": {
         "en": {
@@ -3988,6 +4004,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "按名称、镜像或 ID 筛选"
+          }
+        }
+      }
+    },
+    "Filter by registry or user": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by registry or user"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按镜像仓库或用户筛选"
           }
         }
       }
@@ -5752,6 +5784,22 @@
         }
       }
     },
+    "Networks connect containers to each other.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Networks connect containers to each other."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络将容器彼此连接。"
+          }
+        }
+      }
+    },
     "Networks Pruned": {
       "localizations": {
         "en": {
@@ -6024,6 +6072,22 @@
         }
       }
     },
+    "No Containers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Containers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有容器"
+          }
+        }
+      }
+    },
     "No containers attached.": {
       "localizations": {
         "en": {
@@ -6052,6 +6116,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "尚未找到 Docker 套接字。在找到之前，此主机显示为未安装。"
+          }
+        }
+      }
+    },
+    "No Images": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Images"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有镜像"
           }
         }
       }
@@ -6216,6 +6296,22 @@
         }
       }
     },
+    "No Networks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Networks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有网络"
+          }
+        }
+      }
+    },
     "No running containers": {
       "localizations": {
         "en": {
@@ -6244,6 +6340,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有可修剪的运行中容器。"
+          }
+        }
+      }
+    },
+    "No Volumes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Volumes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有卷"
           }
         }
       }
@@ -7400,6 +7512,22 @@
         }
       }
     },
+    "Pull an image from a registry or build one from a Dockerfile.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pull an image from a registry or build one from a Dockerfile."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从镜像仓库拉取镜像，或从 Dockerfile 构建镜像。"
+          }
+        }
+      }
+    },
     "Pull complete": {
       "localizations": {
         "en": {
@@ -8548,6 +8676,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "运行"
+          }
+        }
+      }
+    },
+    "Run a container from an image to see it here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run a container from an image to see it here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从镜像运行一个容器后，它会显示在这里。"
           }
         }
       }
@@ -10692,6 +10836,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "卷"
+          }
+        }
+      }
+    },
+    "Volumes keep container data after the container is removed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes keep container data after the container is removed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卷会在容器移除后保留容器数据。"
           }
         }
       }

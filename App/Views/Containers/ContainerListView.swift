@@ -74,6 +74,17 @@ struct ContainerListView: View {
         filtered.contains { $0.composeProject != nil }
     }
 
+    private var emptyState: ListEmptyState {
+        let apple = session.host.isAppleContainer
+        return ListEmptyState(
+            title: "No Containers",
+            systemImage: "shippingbox",
+            description: "Run a container from an image to see it here.",
+            actionTitle: apple ? "Quick Run…" : "New Container…",
+            action: { if apple { showQuickRun = true } else { showCreateSheet = true } }
+        )
+    }
+
     // MARK: - Collapse persistence
 
     /// The set of collapsed project names decoded from scene storage.
@@ -124,6 +135,13 @@ struct ContainerListView: View {
         // disclosure chevron in the content column on macOS; the flat list keeps
         // the plain inset look.
         .modifier(ComposeListStyle(grouped: hasProjects))
+        .listEmptyState(
+            emptyState,
+            total: session.containerCounts.total,
+            filtered: filtered.count,
+            search: searchText,
+            loaded: session.info != nil
+        )
         .animation(.snappy, value: filtered)
         .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
