@@ -43,7 +43,7 @@ struct AppleSystemPropertiesPane: View {
                     } label: {
                         Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
                     }
-                    .keyboardShortcut("r", modifiers: .command)
+                    .onSectionCommand(.refresh, .system) { Task { await reload() } }
                 }
                 .disabled(busy)
             }

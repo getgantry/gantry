@@ -3,13 +3,15 @@ import Foundation
 /// App-wide notifications used to bridge global menu commands to the
 /// currently visible content views without tight coupling.
 extension Notification.Name {
-    /// Posted by the Docker > Refresh All command. ContentView observes it and
-    /// refreshes the selected session.
+    /// Posted by Docker > Refresh All Hosts. ContentView refreshes every
+    /// connected host.
     static let gantryRefreshAll = Notification.Name("gantryRefreshAll")
 
-    /// Posted by the Docker > New Container… command. ContainerListView observes
-    /// it and opens its create sheet when containers are in view.
-    static let gantryNewContainer = Notification.Name("gantryNewContainer")
+    /// Section commands from the Docker menu (see `SectionCommand`). The
+    /// `object` is the target `HostSection`, or nil for the dashboard.
+    static let gantryNewItem = Notification.Name("gantryNewItem")
+    static let gantryRefreshSection = Notification.Name("gantryRefreshSection")
+    static let gantryPullImage = Notification.Name("gantryPullImage")
 
     /// Posted when a Compose file is opened from Finder (Open With / Quick
     /// Action) or the File menu. ContentView observes it and presents the

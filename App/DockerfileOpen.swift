@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import Foundation
 import UniformTypeIdentifiers
 
@@ -66,5 +67,40 @@ enum PendingDockerfileOpens {
     static func drain() -> [URL] {
         defer { urls.removeAll() }
         return urls
+    }
+}
+
+/// A chosen or dropped item that is not a Dockerfile and holds none; drives
+/// the "Not a Dockerfile" alert.
+struct RejectedDockerfile: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
+extension View {
+    func rejectedDockerfileAlert(_ item: Binding<RejectedDockerfile?>) -> some View {
+        alert(
+            "Not a Dockerfile",
+            isPresented: Binding(presence: item),
+            presenting: item.wrappedValue
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { rejected in
+            Text("“\(rejected.url.lastPathComponent)” is not a Dockerfile and has no Dockerfile in it. Choose a Dockerfile or a folder that contains one.")
+        }
+    }
+}
+
+/// The open panel behind the Images section's Build… button.
+@MainActor
+enum DockerfilePicker {
+    /// Asks for a Dockerfile or a folder that holds one.
+    static func choose() -> URL? {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = true
+        panel.message = String(localized: "Choose a Dockerfile, or a folder that contains one")
+        return panel.runModal() == .OK ? panel.url : nil
     }
 }

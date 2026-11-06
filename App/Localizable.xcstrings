@@ -1288,6 +1288,22 @@
         }
       }
     },
+    "Build an image from a Dockerfile on this host": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build an image from a Dockerfile on this host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此主机上从 Dockerfile 构建镜像"
+          }
+        }
+      }
+    },
     "Build args": {
       "localizations": {
         "en": {
@@ -1348,6 +1364,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "从 Dockerfile 构建镜像…"
+          }
+        }
+      }
+    },
+    "Build Image…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build Image…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建镜像…"
           }
         }
       }
@@ -1620,6 +1652,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择上下文…"
+          }
+        }
+      }
+    },
+    "Choose a Dockerfile, or a folder that contains one": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a Dockerfile, or a folder that contains one"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择 Dockerfile 或包含 Dockerfile 的文件夹"
           }
         }
       }
@@ -2324,6 +2372,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已退出且不会自行恢复的容器。"
+          }
+        }
+      }
+    },
+    "Context": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Context"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上下文"
           }
         }
       }
@@ -3368,6 +3432,22 @@
         }
       }
     },
+    "Docker": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker"
+          }
+        }
+      }
+    },
     "Docker data": {
       "localizations": {
         "en": {
@@ -3588,6 +3668,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "拖放 Dockerfile 以构建镜像"
+          }
+        }
+      }
+    },
+    "Edit Options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Options"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑选项"
           }
         }
       }
@@ -5672,6 +5768,22 @@
         }
       }
     },
+    "New Cluster…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Cluster…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建集群…"
+          }
+        }
+      }
+    },
     "New Container": {
       "localizations": {
         "en": {
@@ -5716,6 +5828,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "新域名"
+          }
+        }
+      }
+    },
+    "New Machine…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Machine…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建机器…"
           }
         }
       }
@@ -5796,6 +5924,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建卷…"
+          }
+        }
+      }
+    },
+    "New…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建…"
           }
         }
       }
@@ -5912,6 +6056,22 @@
         }
       }
     },
+    "No item matches the current filter.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No item matches the current filter."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有项目符合当前筛选条件。"
+          }
+        }
+      }
+    },
     "No labels": {
       "localizations": {
         "en": {
@@ -5924,6 +6084,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有标签"
+          }
+        }
+      }
+    },
+    "No line matches the level and process filters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No line matches the level and process filters."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有行符合级别和进程筛选条件。"
           }
         }
       }
@@ -6004,6 +6180,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有机器"
+          }
+        }
+      }
+    },
+    "No Matches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Matches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配项"
+          }
+        }
+      }
+    },
+    "No Matching Lines": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Matching Lines"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的行"
           }
         }
       }
@@ -6116,6 +6324,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "无"
+          }
+        }
+      }
+    },
+    "Not a Dockerfile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a Dockerfile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不是 Dockerfile"
           }
         }
       }
@@ -7592,18 +7816,18 @@
         }
       }
     },
-    "Refresh All": {
+    "Refresh All Hosts": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Refresh All"
+            "value": "Refresh All Hosts"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "全部刷新"
+            "value": "刷新所有主机"
           }
         }
       }
@@ -9128,18 +9352,18 @@
         }
       }
     },
-    "Stack logs · %@ services": {
+    "Stack logs · %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stack logs · %@ services"
+            "value": "Stack logs · %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "堆栈日志 · %@ 个服务"
+            "value": "堆栈日志 · %@"
           }
         }
       }
@@ -13092,6 +13316,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "未选择"
+          }
+        }
+      }
+    },
+    "“%@” is not a Dockerfile and has no Dockerfile in it. Choose a Dockerfile or a folder that contains one.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a Dockerfile and has no Dockerfile in it. Choose a Dockerfile or a folder that contains one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是 Dockerfile，其中也没有 Dockerfile。请选择 Dockerfile 或包含 Dockerfile 的文件夹。"
           }
         }
       }

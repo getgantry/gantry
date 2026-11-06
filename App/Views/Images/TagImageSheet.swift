@@ -34,6 +34,7 @@ struct TagImageSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                 Button("Add Tag") { addTag() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(repo.trimmingCharacters(in: .whitespaces).isEmpty

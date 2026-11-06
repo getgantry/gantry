@@ -25,6 +25,7 @@ struct AppleSystemLogsPane: View {
     @State private var held = PauseBuffer<String>(capacity: AppleSystemLogsPane.maxLines)
     @State private var autoScroll = true
     @State private var search = ""
+    @FocusState private var searchFocused: Bool
     @State private var minLevel: LogLevel?
     @State private var process: String?
     @State private var streamError: String?
@@ -153,6 +154,8 @@ struct AppleSystemLogsPane: View {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                 TextField(String(localized: "Search"), text: $search)
                     .textFieldStyle(.plain)
+                    .focused($searchFocused)
+                    .findShortcut($searchFocused)
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
@@ -171,6 +174,8 @@ struct AppleSystemLogsPane: View {
                 systemImage: "text.alignleft"
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if visibleLines.isEmpty {
+            noMatches
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -191,6 +196,21 @@ struct AppleSystemLogsPane: View {
                     if autoScroll { proxy.scrollTo(bottomAnchor, anchor: .bottom) }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var noMatches: some View {
+        if search.isEmpty {
+            ContentUnavailableView(
+                String(localized: "No Matching Lines"),
+                systemImage: "line.3.horizontal.decrease.circle",
+                description: Text("No line matches the level and process filters.")
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ContentUnavailableView.search(text: search)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 

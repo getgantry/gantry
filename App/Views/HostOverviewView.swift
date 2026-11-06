@@ -58,8 +58,13 @@ struct HostOverviewView: View {
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
-                .keyboardShortcut("r", modifiers: .command)
                 .disabled(refreshing)
+            }
+        }
+        .onSectionCommand(.refresh, .overview) {
+            Task {
+                await session.refreshContainers()
+                await refresh()
             }
         }
         .task(id: session.id) {

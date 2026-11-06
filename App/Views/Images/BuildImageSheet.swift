@@ -8,6 +8,8 @@ import UniformTypeIdentifiers
 /// the build log live.
 struct BuildImageSheet: View {
     let dockerfileURL: URL
+    /// The host to build on when the sheet opens (the Images section's host).
+    var preferredHostID: UUID?
 
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
@@ -31,8 +33,9 @@ struct BuildImageSheet: View {
         case failed(String)
     }
 
-    init(dockerfileURL: URL) {
+    init(dockerfileURL: URL, preferredHostID: UUID? = nil) {
         self.dockerfileURL = dockerfileURL
+        self.preferredHostID = preferredHostID
         let context = dockerfileURL.deletingLastPathComponent()
         _contextURL = State(initialValue: context)
         _tag = State(initialValue: Self.defaultTag(forContext: context))
@@ -50,7 +53,8 @@ struct BuildImageSheet: View {
         .frame(width: 580, height: 600)
         .onAppear {
             if selectedHostID == nil {
-                selectedHostID = model.sessions.first { $0.status.isConnected }?.id
+                selectedHostID = preferredHostID
+                    ?? model.sessions.first { $0.status.isConnected }?.id
                     ?? model.sessions.first?.id
             }
         }
@@ -135,7 +139,7 @@ struct BuildImageSheet: View {
                 DisclosureGroup("Options") {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Text("Target stage").frame(width: 90, alignment: .leading)
+                            Text("Target stage").fixedSize()
                             TextField("(final stage)", text: $target)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(maxWidth: 200)
@@ -237,6 +241,10 @@ struct BuildImageSheet: View {
                 dismiss()
             }
             .keyboardShortcut(.cancelAction)
+            if case .failed = phase {
+                // Fix the options and build again without reopening the sheet.
+                Button("Edit Options") { phase = .idle }
+            }
             if phase != .done {
                 Button("Build") { startBuild() }
                     .keyboardShortcut(.defaultAction)
@@ -344,9 +352,9 @@ struct BuildImageSheet: View {
         logText += text
     }
 
-    private func labeled<V: View>(_ title: String, @ViewBuilder _ value: () -> V) -> some View {
+    private func labeled<V: View>(_ title: LocalizedStringKey, @ViewBuilder _ value: () -> V) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(.headline).frame(width: 70, alignment: .leading)
+            Text(title).font(.headline).frame(minWidth: 70, alignment: .leading).fixedSize()
             value()
             Spacer()
         }

@@ -23,6 +23,7 @@ struct HostFilesView: View {
             content
         }
         .navigationTitle("Host Files")
+        .onSectionCommand(.refresh, .hostFiles) { Task { await load() } }
         .task(id: session.id) {
             path = "/"
             pathField = "/"

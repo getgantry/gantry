@@ -150,6 +150,7 @@ struct ContentView: View {
     @State private var composeRequest: ComposeFileRequest?
     /// A Dockerfile dropped/opened, awaiting the Build Image sheet.
     @State private var buildRequest: DockerfileBuildRequest?
+    @State private var rejectedDrop: RejectedDockerfile?
     /// Whether a drag is currently hovering a valid drop over the window.
     @State private var isDropTargeted = false
     /// apple/container setup is presented only with a status payload.
@@ -199,6 +200,7 @@ struct ContentView: View {
     var body: some View {
         splitView
         .navigationTitle("Gantry")
+        .focusedSceneValue(\.gantrySection, focusedSection)
         .onChange(of: selection) {
             // Switching host or section clears the stale detail selection —
             // unless a programmatic jump staged a target to restore.
@@ -219,15 +221,10 @@ struct ContentView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
-            // Refresh the host currently in view; fall back to all connected hosts.
-            if let hostSelection = selection?.hostSelection,
-               let session = model.session(id: hostSelection.hostID) {
-                Task { await session.refreshAll() }
-            } else {
-                for session in model.sessions where session.status.isConnected {
-                    Task { await session.refreshAll() }
-                }
-            }
+            refreshAllHosts()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshSection)) { note in
+            refreshWithoutSectionView(note.object as? HostSection)
         }
         .sheet(isPresented: $showingAddHost) {
             AddHostSheet()
@@ -258,6 +255,7 @@ struct ContentView: View {
         .overlay {
             if isDropTargeted { dropOverlay }
         }
+        .rejectedDockerfileAlert($rejectedDrop)
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectHostContainers)) { note in
             if let hostID = note.object as? UUID {
                 selection = .host(SidebarSelection(hostID: hostID, section: .containers))
@@ -316,6 +314,30 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Refresh
+
+    private func refreshAllHosts() {
+        for session in model.sessions where session.status.isConnected {
+            Task { await session.refreshAll() }
+        }
+    }
+
+    /// ⌘R where no section view handles it: the dashboard refreshes every
+    /// host, and a host that is down tries to connect again.
+    private func refreshWithoutSectionView(_ section: HostSection?) {
+        guard let section else {
+            refreshAllHosts()
+            return
+        }
+        guard section != .system,
+              let hostID = selection?.hostSelection?.hostID,
+              let session = model.session(id: hostID) else { return }
+        switch session.status {
+        case .failed, .disconnected: Task { await session.connect() }
+        case .connected, .connecting: break
+        }
+    }
+
     // MARK: - Layout
 
     /// Sections without a master list fill the width next to the sidebar; a
@@ -355,6 +377,15 @@ struct ContentView: View {
     private var sidebarColumn: some View {
         sidebar
             .navigationSplitViewColumnWidth(min: 220, ideal: 250)
+    }
+
+    /// The section that the menu commands (⌘N, ⌘R) act on.
+    private var focusedSection: FocusedSection? {
+        switch selection {
+        case .dashboard: FocusedSection(section: nil)
+        case .host(let hostSelection): FocusedSection(section: hostSelection.section)
+        case nil: nil
+        }
     }
 
     /// Ids of the items in the list that owns the detail selection; used to
@@ -643,11 +674,14 @@ struct ContentView: View {
             return false
         }
         _ = provider.loadObject(ofClass: URL.self) { url, _ in
-            guard let url, let dockerfile = DockerfileDetector.resolveDockerfile(at: url) else {
-                return
-            }
+            guard let url else { return }
+            let dockerfile = DockerfileDetector.resolveDockerfile(at: url)
             Task { @MainActor in
-                buildRequest = DockerfileBuildRequest(url: dockerfile)
+                if let dockerfile {
+                    buildRequest = DockerfileBuildRequest(url: dockerfile)
+                } else {
+                    rejectedDrop = RejectedDockerfile(url: url)
+                }
             }
         }
         return true

@@ -56,7 +56,6 @@ struct NetworkListView: View {
                 } label: {
                     Label("New Network…", systemImage: "plus")
                 }
-                .keyboardShortcut("n", modifiers: .command)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -64,7 +63,6 @@ struct NetworkListView: View {
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
-                .keyboardShortcut("r", modifiers: .command)
             }
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -74,6 +72,8 @@ struct NetworkListView: View {
                 }
             }
         }
+        .onSectionCommand(.newItem, .networks) { showingNew = true }
+        .onSectionCommand(.refresh, .networks) { Task { await session.refreshNetworks() } }
         .sheet(isPresented: $showingNew) {
             NewNetworkSheet(session: session)
         }

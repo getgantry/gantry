@@ -86,6 +86,7 @@ struct CreateMachineSheet: View {
                 }
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
                     .disabled(creating)
                 Button("Create") { create() }
                     .keyboardShortcut(.defaultAction)

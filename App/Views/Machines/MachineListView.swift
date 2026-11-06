@@ -29,7 +29,7 @@ struct MachineListView: View {
                 } description: {
                     Text("Create a long-lived Linux environment to develop in.")
                 } actions: {
-                    Button("Create Machine…") { showingCreate = true }
+                    Button("New Machine…") { showingCreate = true }
                         .buttonStyle(.borderedProminent)
                 }
             } else {
@@ -53,9 +53,8 @@ struct MachineListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingCreate = true } label: {
-                    Label("Create Machine…", systemImage: "plus")
+                    Label("New Machine…", systemImage: "plus")
                 }
-                .keyboardShortcut("n", modifiers: .command)
                 .disabled(session.machines.isEmpty && session.machineListError != nil)
             }
             ToolbarItem {
@@ -64,6 +63,10 @@ struct MachineListView: View {
                 }
             }
         }
+        .onSectionCommand(.newItem, .machines) {
+            if !(session.machines.isEmpty && session.machineListError != nil) { showingCreate = true }
+        }
+        .onSectionCommand(.refresh, .machines) { Task { await session.refreshMachines() } }
         .sheet(isPresented: $showingCreate) {
             CreateMachineSheet(session: session)
         }
