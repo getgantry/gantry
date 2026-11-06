@@ -9,7 +9,7 @@ struct ClusterListView: View {
     @Binding var selection: String?
 
     @State private var showingCreate = false
-    @State private var deleteTarget: ContainerCluster?
+    @State private var deleteAction: DestructiveAction?
     @State private var busy: Set<String> = []
     @State private var kubeconfigResult: KubeconfigResult?
     @State private var searchText = ""
@@ -90,21 +90,18 @@ struct ClusterListView: View {
         .sheet(isPresented: $showingCreate) {
             CreateClusterSheet(session: session)
         }
-        .confirmationDialog(
-            "Delete this cluster?",
-            isPresented: Binding(presence: $deleteTarget),
-            presenting: deleteTarget
-        ) { cluster in
-            Button("Delete \(cluster.name)", role: .destructive) {
-                run(cluster.name) { _ = await session.deleteCluster(cluster.name) }
-                if selection == cluster.name { selection = nil }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: { cluster in
-            Text("“\(cluster.name)” and its nodes will be removed permanently. Its context is removed from ~/.kube/config.")
+        .destructiveConfirmation($deleteAction, onDelete: deleteSelected) { action, _ in
+            guard let name = action.targets.first else { return }
+            run(name) { _ = await session.deleteCluster(name) }
+            if selection == name { selection = nil }
         }
         .kubeconfigResultAlert($kubeconfigResult)
         .task { await session.refreshClusters() }
+    }
+
+    /// The Delete key deletes the selected cluster.
+    private func deleteSelected() -> DestructiveAction? {
+        selection.map(ClusterText.deleteAction)
     }
 
     @ViewBuilder
@@ -120,7 +117,7 @@ struct ClusterListView: View {
             Label("Copy kubectl Context Command", systemImage: "doc.on.doc")
         }
         Divider()
-        Button(role: .destructive) { deleteTarget = cluster } label: {
+        Button(role: .destructive) { deleteAction = ClusterText.deleteAction(cluster.name) } label: {
             Label("Delete…", systemImage: "trash")
         }
     }
@@ -222,6 +219,7 @@ private struct ClusterCreationRow: View {
 
     @State private var showingLog = false
     @State private var cancelling = false
+    @State private var cancelAction: DestructiveAction?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -231,9 +229,10 @@ private struct ClusterCreationRow: View {
                 Text(creation.id).fontWeight(.medium)
                 Spacer()
                 if creation.isRunning {
-                    Button("Cancel") {
-                        cancelling = true
-                        Task { await session.cancelClusterCreation(creation.id) }
+                    Button("Cancel…") {
+                        cancelAction = DestructiveAction(
+                            kind: .cancelClusterCreation, targets: [creation.id], impact: .partialNodesDeleted
+                        )
                     }
                     .disabled(cancelling)
                 } else {
@@ -245,7 +244,7 @@ private struct ClusterCreationRow: View {
                     .font(.caption)
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
-                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
             } else if cancelling {
                 ProgressView("Cancelling and removing the nodes…")
                     .controlSize(.small)
@@ -267,6 +266,10 @@ private struct ClusterCreationRow: View {
             }
         }
         .padding(.vertical, 4)
+        .destructiveConfirmation($cancelAction) { _, _ in
+            cancelling = true
+            await session.cancelClusterCreation(creation.id)
+        }
     }
 
     @ViewBuilder
@@ -300,7 +303,7 @@ struct ClusterDetailView: View {
 
     @State private var tab: DetailTab = .overview
     @State private var busy = false
-    @State private var confirmDelete = false
+    @State private var deleteAction: DestructiveAction?
     @State private var kubeconfigResult: KubeconfigResult?
     @State private var networks: [String] = []
 
@@ -343,13 +346,8 @@ struct ClusterDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle(cluster.name)
-        .confirmationDialog("Delete this cluster?", isPresented: $confirmDelete) {
-            Button("Delete \(cluster.name)", role: .destructive) {
-                act { _ = await session.deleteCluster(cluster.name) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("“\(cluster.name)” and its nodes will be removed permanently. Its context is removed from ~/.kube/config.")
+        .destructiveConfirmation($deleteAction) { _, _ in
+            act { _ = await session.deleteCluster(cluster.name) }
         }
         .kubeconfigResultAlert($kubeconfigResult)
         .task(id: cluster.nodes.map(\.name)) { networks = await session.clusterNetworks(cluster.name) }
@@ -383,7 +381,7 @@ struct ClusterDetailView: View {
                     Label("Copy kubectl Context Command", systemImage: "doc.on.doc")
                 }
                 .help("Copies “kubectl config use-context \(cluster.kubectlContext)”.")
-                Button(role: .destructive) { confirmDelete = true } label: {
+                Button(role: .destructive) { deleteAction = ClusterText.deleteAction(cluster.name) } label: {
                     Label("Delete…", systemImage: "trash")
                 }
             }
@@ -455,6 +453,10 @@ struct ClusterDetailView: View {
 
 /// Localized display text for cluster states, roles and summaries.
 enum ClusterText {
+    static func deleteAction(_ name: String) -> DestructiveAction {
+        DestructiveAction(kind: .deleteCluster, targets: [name])
+    }
+
     static func state(_ state: String) -> String {
         switch state.lowercased() {
         case "running": String(localized: "Running")

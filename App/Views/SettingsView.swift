@@ -210,7 +210,7 @@ private struct HostsSettings: View {
 
     @State private var showingAddHost = false
     @State private var editingHost: DockerHost?
-    @State private var confirmRemoval: UUID?
+    @State private var hostRemoval: DestructiveAction?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -220,7 +220,7 @@ private struct HostsSettings: View {
                         session: session,
                         onEdit: { editingHost = session.host },
                         onReconnect: { reconnect(session) },
-                        onRemove: { confirmRemoval = session.host.id }
+                        onRemove: { hostRemoval = HostRemoval.action(for: session) }
                     )
                 }
             }
@@ -244,23 +244,9 @@ private struct HostsSettings: View {
         .sheet(item: $editingHost) { host in
             EditHostSheet(host: host)
         }
-        .confirmationDialog(
-            "Remove this host?",
-            isPresented: removalDialogBinding,
-            presenting: confirmRemoval
-        ) { hostID in
-            Button("Remove Host", role: .destructive) {
-                Task { _ = await HostRemoval.remove(hostID, from: model) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: { hostID in
-            let label = model.session(id: hostID)?.host.name ?? "this host"
-            Text("\(label) will be removed from Gantry. Stored credentials are not deleted.")
+        .destructiveConfirmation($hostRemoval) { action, _ in
+            await HostRemoval.remove(action, from: model)
         }
-    }
-
-    private var removalDialogBinding: Binding<Bool> {
-        Binding(presence: $confirmRemoval)
     }
 
     private func reconnect(_ session: HostSession) {
@@ -351,7 +337,11 @@ private struct HostRow: View {
                     Text(storedCredentialHint)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    Button("Forget…") { forgetCredentials() }
+                    Button("Forget…") {
+                        forgetAction = DestructiveAction(
+                            kind: .forgetCredential, targets: [host.id.uuidString], names: [host.name]
+                        )
+                    }
                         .controlSize(.mini)
                         .buttonStyle(.link)
                 }
@@ -360,7 +350,10 @@ private struct HostRow: View {
         }
         .padding(.vertical, 4)
         .opacity(forgotten ? 0.6 : 1)
+        .destructiveConfirmation($forgetAction) { _, _ in forgetCredentials() }
     }
+
+    @State private var forgetAction: DestructiveAction?
 
     /// Local UI flag so the hint hides immediately after forgetting, since the
     /// Keychain reads are not observed.

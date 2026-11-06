@@ -8,7 +8,7 @@ struct ImageListView: View {
     @Binding var selection: String?
 
     @State private var searchText = ""
-    @State private var removeTarget: ImageSummary?
+    @State private var removeAction: DestructiveAction?
     @State private var showingPull = false
     @State private var pruneConfirm: PruneScope?
     @State private var pruneOutcome: PruneOutcome?
@@ -80,10 +80,22 @@ struct ImageListView: View {
         }
         Divider()
         Button(role: .destructive) {
-            removeTarget = image
+            removeAction = removeAction(for: image)
         } label: {
             Label("Remove…", systemImage: "trash")
         }
+    }
+
+    private func removeAction(for image: ImageSummary) -> DestructiveAction {
+        .removeImage(
+            id: image.id, name: image.displayName, containers: session.containers, engine: .init(session.host)
+        )
+    }
+
+    /// The Delete key removes the selected image.
+    private func deleteSelected() -> DestructiveAction? {
+        guard let selection, let image = session.images.first(where: { $0.id == selection }) else { return nil }
+        return removeAction(for: image)
     }
 
     var body: some View {
@@ -200,22 +212,9 @@ struct ImageListView: View {
                 .padding(.bottom, 40)
             }
         }
-        .confirmationDialog(
-            "Remove \(removeTarget?.displayName ?? String(localized: "image"))?",
-            isPresented: Binding(presence: $removeTarget),
-            titleVisibility: .visible,
-            presenting: removeTarget
-        ) { image in
-            Button("Remove", role: .destructive) {
-                removeTarget = nil
-                Task {
-                    await session.removeImage(id: image.id)
-                    await loadDiskUsage()
-                }
-            }
-            Button("Cancel", role: .cancel) { removeTarget = nil }
-        } message: { _ in
-            Text("This removes the image from the host. Images in use by a container cannot be removed.")
+        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
+            for id in action.targets { await session.removeImage(id: id, force: force) }
+            await loadDiskUsage()
         }
         .task {
             await loadDiskUsage()

@@ -10,7 +10,7 @@ struct MachineListView: View {
     @Binding var selection: String?
 
     @State private var showingCreate = false
-    @State private var deleteTarget: ContainerMachine?
+    @State private var deleteAction: DestructiveAction?
     @State private var busy: Set<String> = []
     @State private var searchText = ""
 
@@ -49,7 +49,7 @@ struct MachineListView: View {
                             onStop: { run(machine.id) { await session.stopMachine(machine.id) } },
                             onShell: { openShell(machine.id) },
                             onSetDefault: { run(machine.id) { await session.setDefaultMachine(machine.id) } },
-                            onDelete: { deleteTarget = machine }
+                            onDelete: { deleteAction = .deleteMachine(machine) }
                         )
                         .tag(machine.id)
                     }
@@ -81,24 +81,18 @@ struct MachineListView: View {
         .sheet(isPresented: $showingCreate) {
             CreateMachineSheet(session: session)
         }
-        .confirmationDialog(
-            "Delete this machine?",
-            isPresented: deleteDialogBinding,
-            presenting: deleteTarget
-        ) { machine in
-            Button("Delete \(machine.id)", role: .destructive) {
-                run(machine.id) { await session.deleteMachine(machine.id) }
-                if selection == machine.id { selection = nil }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: { machine in
-            Text("“\(machine.id)” and its disk will be removed permanently.")
+        .destructiveConfirmation($deleteAction, onDelete: deleteSelected) { action, _ in
+            guard let name = action.targets.first else { return }
+            run(name) { await session.deleteMachine(name) }
+            if selection == name { selection = nil }
         }
         .task { await session.refreshMachines() }
     }
 
-    private var deleteDialogBinding: Binding<Bool> {
-        Binding(presence: $deleteTarget)
+    /// The Delete key deletes the selected machine.
+    private func deleteSelected() -> DestructiveAction? {
+        guard let selection, let machine = session.machines.first(where: { $0.id == selection }) else { return nil }
+        return .deleteMachine(machine)
     }
 
     /// Marks a machine busy while an async action runs (disables its buttons).
