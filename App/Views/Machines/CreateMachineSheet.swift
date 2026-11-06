@@ -3,7 +3,8 @@ import AppKit
 import AppCore
 
 /// Creates a new `container machine` from an image. Creation pulls the image
-/// and boots the machine, so it streams a spinner until the CLI returns.
+/// and boots the machine, which takes minutes, so it runs in the background
+/// as a long operation (Activity) and the sheet closes at once.
 struct CreateMachineSheet: View {
     @Bindable var session: HostSession
     @Environment(\.dismiss) private var dismiss
@@ -15,7 +16,6 @@ struct CreateMachineSheet: View {
     @State private var nestedVirtualization = false
     @State private var kernelPath = ""
     @State private var creating = false
-    @State private var error: String?
     /// nil until the CLI version is known; gates the 1.1-only boot options.
     @State private var features: ContainerTooling.Features?
 
@@ -72,22 +72,10 @@ struct CreateMachineSheet: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            if let error {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .lineLimit(3)
-            }
-
             HStack {
-                if creating {
-                    ProgressView().controlSize(.small)
-                    Text("Creating \(name)…").font(.caption).foregroundStyle(.secondary)
-                }
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                    .disabled(creating)
                 Button("Create") { create() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
@@ -150,24 +138,28 @@ struct CreateMachineSheet: View {
     private func create() {
         let machineName = name.trimmingCharacters(in: .whitespaces)
         let machineImage = image.trimmingCharacters(in: .whitespaces)
+        let cpus = cpus, memory = "\(memoryGB)G", nested = nestedVirtualization
+        let kernel = kernelPath.trimmingCharacters(in: .whitespaces)
+        let session = session
         creating = true
-        error = nil
-        Task {
-            let ok = await session.createMachine(
-                image: machineImage,
-                name: machineName,
-                cpus: cpus,
-                memory: "\(memoryGB)G",
-                nestedVirtualization: nestedVirtualization,
-                kernelPath: kernelPath.trimmingCharacters(in: .whitespaces)
-            )
-            creating = false
-            if ok {
-                dismiss()
-            } else {
-                error = session.lastError ?? "Could not create the machine."
-                session.lastError = nil
+        LongOperationRunner.run(
+            .machineCreate, title: String(localized: "Create machine \(machineName)"), session: session
+        ) { operation in
+            operation.update(progress: String(localized: "Pulling \(machineImage) and booting…"))
+            let error = await session.attempt(fallback: String(localized: "Could not create the machine.")) {
+                await session.createMachine(
+                    image: machineImage,
+                    name: machineName,
+                    cpus: cpus,
+                    memory: memory,
+                    nestedVirtualization: nested,
+                    kernelPath: kernel
+                )
             }
+            if let error { throw OperationFailure(error) }
+            return nil
         }
+        NotificationCenter.default.post(name: .gantryShowActivity, object: nil)
+        dismiss()
     }
 }

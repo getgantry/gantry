@@ -9,7 +9,9 @@ struct ContainerListView: View {
 
     @State private var searchText = ""
     @State private var filter: StateFilter = .all
-    @State private var removeTarget: ContainerSummary?
+    @State private var removeAction: DestructiveAction?
+    /// Stop All / Restart All on a compose group, waiting for confirmation.
+    @State private var groupAction: DestructiveAction?
 
     /// Compose projects the user has collapsed, persisted per scene as a
     /// newline-joined string. Absence means expanded (the default).
@@ -185,31 +187,23 @@ struct ContainerListView: View {
         } message: { result in
             Text("Removed \(result.deletedCount) container(s), reclaiming \(Formatters.bytes(result.spaceReclaimed)).")
         }
-        .confirmationDialog(
-            "Remove \(removeTarget?.displayName ?? String(localized: "container"))?",
-            isPresented: Binding(presence: $removeTarget),
-            titleVisibility: .visible,
-            presenting: removeTarget
-        ) { container in
-            Button("Remove", role: .destructive) {
-                let id = container.id, name = container.displayName
-                Task {
-                    guard await BiometricGate.confirm("remove container \(name)") else { return }
-                    _ = await session.perform(.remove(force: false), on: id)
-                }
-                removeTarget = nil
-            }
-            Button("Force Remove", role: .destructive) {
-                let id = container.id, name = container.displayName
-                Task {
-                    guard await BiometricGate.confirm("force-remove container \(name)") else { return }
-                    _ = await session.perform(.remove(force: true), on: id)
-                }
-                removeTarget = nil
-            }
-            Button("Cancel", role: .cancel) { removeTarget = nil }
-        } message: { _ in
-            Text("This permanently removes the container. Force remove also stops it if running.")
+        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
+            await removeContainers(action, force: force)
+        }
+        .destructiveConfirmation($groupAction) { action, _ in
+            await runOnGroup(action)
+        }
+    }
+
+    /// The Delete key removes the selected container.
+    private func deleteSelected() -> DestructiveAction? {
+        guard let selection, let container = session.containers.first(where: { $0.id == selection }) else { return nil }
+        return .removeContainers([container], engine: .init(session.host))
+    }
+
+    private func removeContainers(_ action: DestructiveAction, force: Bool) async {
+        for id in action.targets {
+            _ = await session.perform(.remove(force: force), on: id)
         }
     }
 
@@ -227,7 +221,7 @@ struct ContainerListView: View {
                 ContainerActionsMenu(
                     container: container,
                     session: session,
-                    removeTarget: $removeTarget,
+                    removeAction: $removeAction,
                     renameTarget: $renameTarget,
                     renameText: $renameText,
                     commitTarget: $commitTarget
@@ -247,9 +241,9 @@ struct ContainerListView: View {
                     stackLogsTarget = StackLogsTarget(project: name, containers: group.containers)
                 }
             }
-            groupButton("play.fill", "Start All") { runOnGroup(group, .start) }
-            groupButton("stop.fill", "Stop All") { runOnGroup(group, .stop) }
-            groupButton("arrow.clockwise", "Restart All") { runOnGroup(group, .restart) }
+            groupButton("play.fill", "Start All") { Task { await runOnGroup(group.containers, .start) } }
+            groupButton("stop.fill", "Stop All") { confirmGroup(group, .stopGroup) }
+            groupButton("arrow.clockwise", "Restart All") { confirmGroup(group, .restartGroup) }
         }
         .padding(.vertical, 5)
     }
@@ -271,17 +265,33 @@ struct ContainerListView: View {
         .help(help)
     }
 
-    /// Runs an action across every container in a group concurrently.
-    private func runOnGroup(_ group: ContainerGroup, _ action: ContainerAction) {
-        Task {
-            await withTaskGroup(of: Void.self) { tasks in
-                for container in group.containers {
-                    tasks.addTask {
-                        _ = await session.perform(action, on: container.id)
-                    }
+    private func confirmGroup(_ group: ContainerGroup, _ kind: DestructiveAction.Kind) {
+        groupAction = .group(kind, project: group.name ?? String(localized: "Standalone"), containers: group.containers)
+    }
+
+    private func runOnGroup(_ action: DestructiveAction) async {
+        let containers = session.containers.filter { action.targets.contains($0.id) }
+        await runOnGroup(containers, action.kind == .stopGroup ? .stop : .restart)
+    }
+
+    /// Runs an action across every container of a group concurrently. Each
+    /// failure is collected, and one banner lists them all.
+    private func runOnGroup(_ containers: [ContainerSummary], _ action: ContainerAction) async {
+        let tasks = containers.map { container in
+            Task { @MainActor () -> String? in
+                let error = await session.attempt(fallback: String(localized: "The action failed.")) {
+                    await session.perform(action, on: container.id)
                 }
+                return error.map { "\(container.displayName): \($0)" }
             }
         }
+        var failures: [String] = []
+        for task in tasks {
+            if let failure = await task.value { failures.append(failure) }
+        }
+        guard !failures.isEmpty else { return }
+        let summary = String(localized: "\(action.displayName) failed for \(failures.count) of \(containers.count) containers.")
+        session.reportError(message: ([summary] + failures).joined(separator: "\n"))
     }
 
     // MARK: - Toolbar
@@ -510,7 +520,7 @@ private struct HealthBadge: View {
 struct ContainerActionsMenu: View {
     let container: ContainerSummary
     let session: HostSession
-    @Binding var removeTarget: ContainerSummary?
+    @Binding var removeAction: DestructiveAction?
     @Binding var renameTarget: ContainerSummary?
     @Binding var renameText: String
     @Binding var commitTarget: ContainerSummary?
@@ -560,7 +570,7 @@ struct ContainerActionsMenu: View {
         if session.host.isAppleContainer {
             // `container clean` (CLI 1.4+): TRIM inside the running VM.
             Button {
-                Task { await session.trimContainerDisks([container.id]) }
+                ContainerTrim.run(session: session, containers: [container])
             } label: {
                 Label("Trim Disk", systemImage: "internaldrive")
             }
@@ -610,7 +620,7 @@ struct ContainerActionsMenu: View {
         Divider()
 
         Button(role: .destructive) {
-            removeTarget = container
+            removeAction = .removeContainers([container], engine: .init(session.host))
         } label: {
             Label("Remove…", systemImage: "trash")
         }
@@ -659,7 +669,9 @@ enum ContainerPromptCopy {
     }
 }
 
-/// Shared filesystem-export flow: NSSavePanel then streamed write to disk.
+/// Shared filesystem-export flow: NSSavePanel, then a streamed write that
+/// runs as a long operation with progress and Cancel. A failed or cancelled
+/// export deletes the partial file.
 enum ContainerExport {
     @MainActor
     static func run(session: HostSession, container: ContainerSummary) {
@@ -667,19 +679,51 @@ enum ContainerExport {
         panel.nameFieldStringValue = container.displayName + ".tar"
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
-
-        Task {
+        let title = String(localized: "Export \(container.displayName)")
+        LongOperationRunner.run(.export, title: title, session: session) { operation in
             do {
-                let stream = try await session.exportFilesystem(containerID: container.id)
-                FileManager.default.createFile(atPath: url.path, contents: nil)
-                let handle = try FileHandle(forWritingTo: url)
-                defer { try? handle.close() }
-                for try await chunk in stream.bytes {
-                    try handle.write(contentsOf: chunk)
-                }
+                return try await write(session: session, containerID: container.id, to: url, operation: operation)
             } catch {
-                session.lastError = error.localizedDescription
+                try? FileManager.default.removeItem(at: url)
+                throw error
             }
+        }
+    }
+
+    @MainActor
+    private static func write(
+        session: HostSession, containerID: String, to url: URL, operation: LongOperation
+    ) async throws -> String {
+        let stream = try await session.exportFilesystem(containerID: containerID)
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: url)
+        defer { try? handle.close() }
+        var written: Int64 = 0
+        for try await chunk in stream.bytes {
+            try Task.checkCancellation()
+            try handle.write(contentsOf: chunk)
+            written += Int64(chunk.count)
+            operation.update(progress: String(localized: "\(Formatters.bytes(written)) written"))
+        }
+        return String(localized: "Saved \(Formatters.bytes(written)) to \(url.lastPathComponent)")
+    }
+}
+
+/// `container clean` (apple/container CLI 1.4+) as a long operation that
+/// reports how many disks it trimmed.
+enum ContainerTrim {
+    @MainActor
+    static func run(session: HostSession, containers: [ContainerSummary]) {
+        let ids = containers.map(\.id)
+        let title = containers.count == 1
+            ? String(localized: "Trim disk of \(containers[0].displayName)")
+            : String(localized: "Trim container disks")
+        LongOperationRunner.run(.trim, title: title, session: session) { _ in
+            let (count, error) = await session.attempt { await session.trimContainerDisks(ids) }
+            guard let count else { throw OperationFailure(error ?? String(localized: "Trim failed.")) }
+            return count == 1
+                ? String(localized: "Trimmed 1 disk.")
+                : String(localized: "Trimmed \(count) disks.")
         }
     }
 }

@@ -24,7 +24,9 @@ struct BuildImageSheet: View {
     @State private var phase: Phase = .idle
     @State private var logText = ""
     @State private var builtImageID: String?
-    @State private var buildTask: Task<Void, Never>?
+    /// The build in the operation center; Continue in Background closes the
+    /// sheet and lets it finish.
+    @State private var operation: LongOperation?
 
     private enum Phase: Equatable {
         case idle
@@ -58,7 +60,6 @@ struct BuildImageSheet: View {
                     ?? model.sessions.first?.id
             }
         }
-        .onDisappear { buildTask?.cancel() }
     }
 
     // MARK: - Header
@@ -236,8 +237,12 @@ struct BuildImageSheet: View {
                     .textSelection(.enabled)
             }
             Spacer()
+            if phase == .building {
+                Button("Continue in Background") { dismiss() }
+                    .help("The build keeps running. Follow it in Activity.")
+            }
             Button(closeButtonTitle) {
-                buildTask?.cancel()
+                if let operation, phase == .building { model.operations.cancel(operation) }
                 dismiss()
             }
             .keyboardShortcut(.cancelAction)
@@ -320,31 +325,48 @@ struct BuildImageSheet: View {
         logText = ""
         builtImageID = nil
 
-        buildTask = Task {
-            if !session.status.isConnected {
-                append("Connecting to \(session.host.name)…\n")
-                await session.connect()
-            }
-            guard session.status.isConnected else {
-                phase = .failed("Not connected")
-                append("Could not connect to \(session.host.name).\n")
-                return
-            }
-            do {
-                let stream = try session.buildImageStream(spec)
-                for try await line in stream {
-                    if let id = line.imageID { builtImageID = id }
-                    if !line.text.isEmpty { append(line.text) }
+        operation = LongOperationRunner.run(
+            .build, title: String(localized: "Build \(spec.tag)"), session: session, center: model.operations
+        ) { op in
+            try await runBuild(spec, session: session, operation: op)
+        }
+    }
+
+    private func runBuild(_ spec: ImageBuildSpec, session: HostSession, operation: LongOperation) async throws -> String? {
+        if !session.status.isConnected {
+            append("Connecting to \(session.host.name)…\n")
+            await session.connect()
+        }
+        guard session.status.isConnected else {
+            phase = .failed("Not connected")
+            append("Could not connect to \(session.host.name).\n")
+            throw OperationFailure(String(localized: "Could not connect to \(session.host.name)."))
+        }
+        do {
+            let stream = try session.buildImageStream(spec)
+            for try await line in stream {
+                if let id = line.imageID { builtImageID = id }
+                if !line.text.isEmpty {
+                    append(line.text)
+                    let text = line.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !text.isEmpty {
+                        operation.append(log: text)
+                        operation.update(progress: text)
+                    }
                 }
-                phase = .done
-                if logText.isEmpty { append("Build complete.\n") }
-            } catch is CancellationError {
-                // Sheet closing.
-            } catch {
-                let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-                append("\nError: \(message)\n")
-                phase = .failed(message)
             }
+            try Task.checkCancellation()
+            phase = .done
+            if logText.isEmpty { append("Build complete.\n") }
+            return builtImageID.map { String($0.prefix(19)) }
+        } catch is CancellationError {
+            phase = .failed(String(localized: "Cancelled."))
+            throw CancellationError()
+        } catch {
+            let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            append("\nError: \(message)\n")
+            phase = .failed(message)
+            throw error
         }
     }
 
