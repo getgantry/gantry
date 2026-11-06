@@ -16,11 +16,13 @@ struct NewVolumeSheet: View {
             },
             create: { name, driver, labels in
                 let driverValue = driver.trimmingCharacters(in: .whitespaces)
-                return await session.createVolume(
-                    name: name,
-                    driver: driverValue.isEmpty ? "local" : driverValue,
-                    labels: labels
-                ) != nil
+                return await session.attempt(fallback: String(localized: "Could not create the volume.")) {
+                    await session.createVolume(
+                        name: name,
+                        driver: driverValue.isEmpty ? "local" : driverValue,
+                        labels: labels
+                    ) != nil
+                }
             }
         )
     }
