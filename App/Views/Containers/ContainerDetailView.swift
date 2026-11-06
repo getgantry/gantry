@@ -59,6 +59,7 @@ struct ContainerDetailView: View {
             applyPendingTab()
         }
         .navigationTitle(container.displayName)
+        .onscreenContainer(hostID: session.id, containerID: container.id, name: container.displayName)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 actionButton(.start, systemImage: "play.fill", enabled: !isRunning)

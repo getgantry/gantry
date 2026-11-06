@@ -60,5 +60,41 @@ struct GantryShortcuts: AppShortcutsProvider {
             shortTitle: "Compose Up",
             systemImageName: "square.stack.3d.up"
         )
+        AppShortcut(
+            intent: OpenContainerIntent(),
+            phrases: [
+                "Open a container in \(.applicationName)",
+                "Show a container in \(.applicationName)"
+            ],
+            shortTitle: "Open Container",
+            systemImageName: "shippingbox"
+        )
+        AppShortcut(
+            intent: OpenInBrowserIntent(),
+            phrases: [
+                "Open a container in the browser with \(.applicationName)",
+                "\(.applicationName) open in browser"
+            ],
+            shortTitle: "Open in Browser",
+            systemImageName: "safari"
+        )
+        AppShortcut(
+            intent: HostHealthIntent(),
+            phrases: [
+                "Check host health in \(.applicationName)",
+                "How are my \(.applicationName) hosts"
+            ],
+            shortTitle: "Host Health",
+            systemImageName: "heart.text.square"
+        )
+        AppShortcut(
+            intent: ComposeDownIntent(),
+            phrases: [
+                "Compose down with \(.applicationName)",
+                "\(.applicationName) compose down"
+            ],
+            shortTitle: "Compose Down",
+            systemImageName: "square.stack.3d.down.right"
+        )
     }
 }
