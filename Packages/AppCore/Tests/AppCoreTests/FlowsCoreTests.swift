@@ -205,6 +205,29 @@ import Testing
         #expect(session.lastError == nil)
     }
 
+    @Test func workingRefreshAndActionClearTheBanner() async {
+        let transport = MockTransport()
+        transport.on(.get, "/version", json: Fixtures.version)
+        transport.on(.get, "/containers/json", json: Fixtures.containers([("c1", "running")]))
+        transport.on(.post, "/containers/c1/start", status: 204, json: "")
+        let client = DockerClient(transport: transport)
+        let version = try! await client.negotiate()
+        let session = HostSession(host: DockerHost(name: "Local", kind: .local))
+        session._setConnectedClientForTesting(client, version: version)
+
+        session.lastError = "old"
+        await session.refreshAll()
+        #expect(session.lastError == nil)
+
+        session.lastError = "old"
+        _ = await session.perform(.start, on: "c1")
+        #expect(session.lastError == nil)
+
+        session.lastError = "old"
+        _ = await session.attempt { await session.perform(.start, on: "c1") }
+        #expect(session.lastError == "old")
+    }
+
     @Test func routeTable() {
         #expect(ErrorPresentation.route(inSheet: true, background: false) == .sheet)
         #expect(ErrorPresentation.route(inSheet: false, background: false) == .banner)

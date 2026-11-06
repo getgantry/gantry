@@ -353,11 +353,20 @@ struct ComposeUpSheet: View {
             options: .init(recreate: recreate, noCache: noCache)
         )
         do {
-            let started = try await runner.up { event in
-                record(event)
-                operation.append(log: log.last?.text ?? "")
-                operation.update(progress: log.last?.text)
+            // Errors of the steps (a remove of an old container) stay in
+            // this sheet's log instead of the banner behind it.
+            let (outcome, _) = await session.attempt { () async -> Result<Int, Error> in
+                do {
+                    return .success(try await runner.up { event in
+                        record(event)
+                        operation.append(log: log.last?.text ?? "")
+                        operation.update(progress: log.last?.text)
+                    })
+                } catch {
+                    return .failure(error)
+                }
             }
+            let started = try outcome.get()
             finished = true
             NotificationCenter.default.post(name: .gantrySelectHostContainers, object: hostID)
             return String(localized: "\(started) services running")
