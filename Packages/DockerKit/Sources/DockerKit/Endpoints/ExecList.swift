@@ -10,6 +10,8 @@ public enum ExecListError: Error, LocalizedError, Sendable {
     case commandFailed(exitCode: Int)
     /// The 15s read budget elapsed before the command finished.
     case timedOut
+    /// No shell, and the host has no cheap archive listing to fall back on.
+    case shellRequired
 
     public var errorDescription: String? {
         switch self {
@@ -19,6 +21,8 @@ public enum ExecListError: Error, LocalizedError, Sendable {
             "Listing command failed (exit code \(code))."
         case .timedOut:
             "Listing command timed out."
+        case .shellRequired:
+            "This container has no shell. On an apple/container host, directory listing needs /bin/sh in the container."
         }
     }
 }

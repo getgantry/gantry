@@ -948,3 +948,25 @@ private func aliasRequest(_ aliases: [String]) -> ContainerCreateRequest {
     let index = try #require(create.firstIndex(of: "--network"))
     #expect(create[index + 1] == "backend,alias=svc,alias=.svc")
 }
+
+// MARK: - Files and image platform
+
+@Test func appleListDirectoryRefusesTheArchiveFallback() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    #expect(!client.supportsArchiveListing)
+    await #expect(throws: ExecListError.self) {
+        try await client.listDirectory(containerID: "c1", path: "/")
+    }
+    do {
+        _ = try await client.listDirectoryFallback(after: .shellUnavailable, containerID: "c1", path: "/")
+        Issue.record("expected shellRequired")
+    } catch ExecListError.shellRequired {
+    }
+    do {
+        _ = try await client.listDirectoryFallback(after: .commandFailed(exitCode: 2), containerID: "c1", path: "/x")
+        Issue.record("expected commandFailed")
+    } catch ExecListError.commandFailed(let code) {
+        #expect(code == 2)
+    }
+    #expect(!runner.recordedCalls().contains { $0.first == "copy" })
+}

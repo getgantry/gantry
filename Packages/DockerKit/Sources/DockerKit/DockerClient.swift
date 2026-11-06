@@ -16,6 +16,12 @@ public actor DockerClient {
         self.transport = transport
     }
 
+    /// False on apple/container hosts: there `container copy` stages the
+    /// whole subtree on disk before any size cap applies.
+    public nonisolated var supportsArchiveListing: Bool {
+        !(transport is AppleContainerTransport)
+    }
+
     // MARK: - Lifecycle / handshake
 
     /// Negotiates the API version with the daemon.
