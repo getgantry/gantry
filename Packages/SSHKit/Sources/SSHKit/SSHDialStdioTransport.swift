@@ -101,7 +101,7 @@ public actor SSHDialStdioTransport: DockerTransport {
             throw DockerError.cancelled
         } catch {
             await dropPersistentTunnel()
-            throw DockerError.connectionFailed(String(describing: error))
+            throw DockerError.connectionFailed(Self.describe(error))
         }
     }
 
@@ -443,7 +443,7 @@ public actor SSHDialStdioTransport: DockerTransport {
         } catch let error as DockerError {
             throw error
         } catch {
-            throw DockerError.connectionFailed(String(describing: error))
+            throw DockerError.connectionFailed(Self.describe(error))
         }
     }
 
@@ -470,6 +470,12 @@ public actor SSHDialStdioTransport: DockerTransport {
 
     // MARK: - Error mapping
 
+    /// The readable text of an error: `errorDescription` when the error has
+    /// one, so `SSHConnectError.unreachable` does not show as raw enum text.
+    static func describe(_ error: Error) -> String {
+        (error as? LocalizedError)?.errorDescription ?? String(describing: error)
+    }
+
     /// Maps a tunnel-side error into a `DockerError`, surfacing the remote
     /// stderr tail for `dial-stdio` failures (e.g. docker missing on remote).
     private func mapTunnelError(_ error: Error, on tunnel: Tunnel) async -> DockerError {
@@ -480,7 +486,7 @@ public actor SSHDialStdioTransport: DockerTransport {
                 "docker not available on remote host (dial-stdio exit \(failed.exitCode)): \(tail)"
             )
         }
-        return DockerError.connectionFailed(String(describing: error))
+        return DockerError.connectionFailed(Self.describe(error))
     }
 
     // MARK: - Keepalive

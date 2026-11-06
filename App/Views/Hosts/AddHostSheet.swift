@@ -508,15 +508,38 @@ private struct ConnectionTestStatus: View {
             }
             .font(.callout)
         case .failed(let message):
+            ConnectionTestFailure(message: message)
+        }
+    }
+}
+
+/// A failed test: the one-line summary of the error, and the full text
+/// under Details, the same split as the error banner.
+private struct ConnectionTestFailure: View {
+    let message: String
+    @State private var showDetails = false
+
+    var body: some View {
+        let parts = ErrorPresentation.split(message)
+        VStack(alignment: .leading, spacing: 4) {
             Label {
-                Text(message)
+                Text(parts.summary)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
             } icon: {
                 Image(systemName: "xmark.octagon.fill").foregroundStyle(.red)
             }
-            .font(.callout)
+            if let details = parts.details {
+                DisclosureGroup(String(localized: "Details"), isExpanded: $showDetails) {
+                    Text(details)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .font(.caption)
+            }
         }
+        .font(.callout)
     }
 }
 
