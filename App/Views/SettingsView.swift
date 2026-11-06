@@ -38,6 +38,7 @@ private struct GeneralSettings: View {
     @AppStorage("showDockIcon") private var showDockIcon = true
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage(ContainerNotifier.preferenceKey) private var notifyContainerEvents = true
+    @AppStorage(GantryNotification.actionsPreferenceKey) private var notificationActions = true
     @AppStorage(BiometricGate.preferenceKey) private var requireBiometrics = false
     @AppStorage(TerminalTheme.preferenceKey) private var terminalTheme = "system"
 
@@ -136,6 +137,8 @@ private struct GeneralSettings: View {
 
             Section {
                 Toggle("Notify when a container fails", isOn: $notifyContainerEvents)
+                Toggle("Show actions on notifications", isOn: $notificationActions)
+                    .help("Restart, View Logs and Copy as Prompt on container alerts; Show on finished operations.")
             } header: {
                 Text("Notifications")
             } footer: {
