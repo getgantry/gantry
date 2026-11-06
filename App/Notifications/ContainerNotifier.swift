@@ -23,6 +23,7 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         guard !started else { return }
         started = true
         center.delegate = self
+        center.setNotificationCategories(NotificationActions.categories())
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
@@ -37,10 +38,10 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         content.sound = .default
         // Group repeated alerts about the same container in Notification Center.
         content.threadIdentifier = alert.containerID
-        content.userInfo = [
-            "hostID": alert.hostID.uuidString,
-            "containerID": alert.containerID
-        ]
+        content.userInfo = GantryNotification.containerInfo(hostID: alert.hostID, containerID: alert.containerID)
+        if let category = GantryNotification.category(isOperation: false, actionsEnabled: NotificationActions.enabled) {
+            content.categoryIdentifier = category
+        }
         let request = UNNotificationRequest(
             identifier: UUID().uuidString,
             content: content,
@@ -66,6 +67,10 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         }
         content.sound = .default
         content.threadIdentifier = "operations"
+        content.userInfo = GantryNotification.operationInfo
+        if let category = GantryNotification.category(isOperation: true, actionsEnabled: NotificationActions.enabled) {
+            content.categoryIdentifier = category
+        }
         center.add(UNNotificationRequest(identifier: operation.id.uuidString, content: content, trigger: nil))
     }
 
@@ -80,24 +85,27 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         completionHandler([.banner, .sound, .list])
     }
 
-    /// Clicking a notification brings Gantry forward and opens the container.
+    /// A click opens the container (or the activity list); an action button
+    /// runs its action, in the background for Restart and Copy as Prompt.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let info = response.notification.request.content.userInfo
-        let hostString = info["hostID"] as? String
-        let containerID = info["containerID"] as? String
-        if let hostString, let hostID = UUID(uuidString: hostString), let containerID {
-            Task { @MainActor in
-                ContainerNotifier.shared.openContainer(hostID: hostID, containerID: containerID)
-            }
-        } else {
-            // An operation notification: show the window with the activity list.
-            Task { @MainActor in MainWindowActivation.activate() }
-        }
+        let route = NotificationRoute.resolve(
+            actionIdentifier: response.actionIdentifier,
+            userInfo: response.notification.request.content.userInfo
+        )
+        Task { @MainActor in NotificationActions.handle(route) }
         completionHandler()
+    }
+
+    /// Posts a short notification when a notification action fails.
+    func presentFailure(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
 
     private func openContainer(hostID: UUID, containerID: String) {
