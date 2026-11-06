@@ -264,6 +264,22 @@
         }
       }
     },
+    "A host name cannot contain spaces.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A host name cannot contain spaces."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机名不能包含空格。"
+          }
+        }
+      }
+    },
     "Connected (%@, API %@)": {
       "localizations": {
         "en": {
@@ -360,6 +376,54 @@
         }
       }
     },
+    "Docker is not installed on this Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker is not installed on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Mac 上未安装 Docker。"
+          }
+        }
+      }
+    },
+    "Enter a host name or address, not a URL.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a host name or address, not a URL."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入主机名或地址，而不是 URL。"
+          }
+        }
+      }
+    },
+    "Enter a port from 1 to 65535.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a port from 1 to 65535."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 1 到 65535 之间的端口。"
+          }
+        }
+      }
+    },
     "Failed: %@": {
       "localizations": {
         "en": {
@@ -404,6 +468,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂停"
+          }
+        }
+      }
+    },
+    "Put the user name in the User field.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put the user name in the User field."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请将用户名填写在“用户”字段中。"
           }
         }
       }
@@ -532,6 +612,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "命令中的单引号 (') 缺少闭合引号。"
+          }
+        }
+      }
+    },
+    "The connection did not open.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The connection did not open."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接未能打开。"
           }
         }
       }
