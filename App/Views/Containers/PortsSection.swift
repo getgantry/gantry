@@ -53,9 +53,10 @@ struct PortsSection: View {
             .alert("Local Port", isPresented: editAlertBinding) {
                 TextField("Port", text: $editPortText)
                 Button("Apply") { applyEditedPort() }
+                    .disabled(PortInput(editPortText).value == nil)
                 Button("Cancel", role: .cancel) { editingForward = nil }
             } message: {
-                Text("Forward to a different local port on 127.0.0.1.")
+                Text("Forward to a different local port on 127.0.0.1. Enter a port from 1 to 65535.")
             }
             .sheet(item: $sharingPort) { item in
                 CloudflareShareSheet(
@@ -210,7 +211,7 @@ struct PortsSection: View {
     }
 
     private func applyEditedPort() {
-        guard let forward = editingForward, let port = Int(editPortText) else {
+        guard let forward = editingForward, let port = PortInput(editPortText).value else {
             editingForward = nil
             return
         }
