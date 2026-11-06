@@ -197,8 +197,14 @@ struct ContentView: View {
         return model.sessions.first { $0.pendingCredentialRequest != nil }
     }
 
+    // The modifier chain is split into helpers: as one expression it exceeds
+    // the type checker's time budget on CI runners.
     var body: some View {
-        splitView
+        withHostPrompts(withSetupAndLaunchTasks(withRefreshAndFileOpening(withSelectionTracking(splitView))))
+    }
+
+    private func withSelectionTracking(_ content: some View) -> some View {
+        content
         .navigationTitle("Gantry")
         .focusedSceneValue(\.gantrySection, focusedSection)
         .onChange(of: selection) {
@@ -220,6 +226,10 @@ struct ContentView: View {
                 selection = .dashboard
             }
         }
+    }
+
+    private func withRefreshAndFileOpening(_ content: some View) -> some View {
+        content
         .onReceive(NotificationCenter.default.publisher(for: .gantryRefreshAll)) { _ in
             refreshAllHosts()
         }
@@ -273,6 +283,10 @@ struct ContentView: View {
             for url in PendingDockerfileOpens.drain() { buildRequest = DockerfileBuildRequest(url: url) }
             if let jump = PendingContainerJump.take() { selectContainer(jump) }
         }
+    }
+
+    private func withSetupAndLaunchTasks(_ content: some View) -> some View {
+        content
         .sheet(item: $containerSetupRequest) { request in
             ContainerSetupSheet(status: request.status) { snoozeContainerCheck() }
         }
@@ -286,6 +300,10 @@ struct ContentView: View {
                 containerSetupRequest = ContainerSetupRequest(status: status)
             }
         }
+    }
+
+    private func withHostPrompts(_ content: some View) -> some View {
+        content
         .sheet(isPresented: hostKeySheetBinding) {
             if let session = hostKeySession, let prompt = session.pendingHostKeyPrompt {
                 HostKeySheet(session: session, prompt: prompt)
@@ -313,6 +331,7 @@ struct ContentView: View {
             Text("\(label) will be removed from Gantry. Stored credentials are not deleted.")
         }
     }
+
 
     // MARK: - Refresh
 
