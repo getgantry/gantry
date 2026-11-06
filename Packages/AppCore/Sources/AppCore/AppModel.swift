@@ -7,7 +7,12 @@ import os
 @Observable
 public final class AppModel {
     private static let log = Logger(subsystem: "com.andrewkomkov.Gantry", category: "AppModel")
-    public private(set) var sessions: [HostSession]
+    public private(set) var sessions: [HostSession] {
+        didSet { for session in sessions { session.operations = operations } }
+    }
+
+    /// Long operations of every host, for the activity button.
+    public let operations = OperationCenter()
 
     /// Receives notable container events (crash/OOM/unhealthy) from every
     /// session. The app layer sets this to post system notifications. Assigning
@@ -40,6 +45,7 @@ public final class AppModel {
 #endif
         let hosts = Self.loadHosts(detection: detection, defaults: defaults)
         sessions = hosts.map(HostSession.init)
+        for session in sessions { session.operations = operations }
         applyLocalDockerPolicy()
     }
 
