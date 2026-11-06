@@ -49,6 +49,10 @@ public enum AppleSystemPropertyKind: String, Sendable, CaseIterable {
     case cidrV6
     /// `rw`, `ro` or `none` (machine home directory mount).
     case homeMount
+    /// Any whole number (a key without a schema that holds an integer).
+    case integerValue
+    /// Any number (a key without a schema that holds a float).
+    case numberValue
     /// A key Gantry has no schema for: the type is taken from the value.
     case unknown
 
@@ -79,10 +83,12 @@ public struct AppleSystemProperty: Sendable, Equatable, Identifiable {
     public var name: String { AppleContainerControl.splitPropertyKey(key).name }
 
     /// The user file sets a value the services have not loaded yet: a
-    /// services restart applies it.
+    /// services restart applies it. The services report values in their
+    /// own form (`4g` as `4gb`), so both sides are normalised first.
     public var isPendingRestart: Bool {
         guard let user else { return false }
-        return user != effective
+        guard let effective else { return true }
+        return !AppleContainerControl.propertyValuesMatch(user, effective, kind: kind)
     }
 
     public init(
@@ -141,24 +147,89 @@ extension AppleContainerControl {
 
     /// Validates `raw` for `key` and writes it to the user configuration file.
     /// The services load the change at their next start.
+    /// `kind` overrides the schema type, e.g. for a key the schema does not
+    /// know but the services report with a type.
     @discardableResult
-    public static func setUserProperty(_ key: String, to raw: String) throws -> AppleSystemPropertyValue {
-        let value = try validatedPropertyValue(raw, kind: propertyKind(for: key))
-        try writeConfig { updatedConfigTOML($0, key: key, value: value) }
+    public static func setUserProperty(
+        _ key: String,
+        to raw: String,
+        kind: AppleSystemPropertyKind? = nil
+    ) throws -> AppleSystemPropertyValue {
+        try setUserProperty(key, to: raw, kind: kind, configURL: configFileURL())
+    }
+
+    @discardableResult
+    static func setUserProperty(
+        _ key: String,
+        to raw: String,
+        kind: AppleSystemPropertyKind? = nil,
+        configURL: URL
+    ) throws -> AppleSystemPropertyValue {
+        let key = try validatedPropertyKey(key)
+        let value = try validatedPropertyValue(raw, kind: kind ?? propertyKind(for: key))
+        try writeConfig(at: configURL) { try updatedConfigTOML($0, key: key, value: value) }
         return value
     }
 
     /// Removes `key` from the user configuration file, so the services fall
     /// back to the package default at their next start.
     public static func clearUserProperty(_ key: String) throws {
-        try writeConfig { updatedConfigTOML($0, key: key, value: nil) }
+        try clearUserProperty(key, configURL: configFileURL())
     }
 
-    private static func writeConfig(_ transform: (String) throws -> String) throws {
-        let url = configFileURL()
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-        try transform(existing).write(to: url, atomically: true, encoding: .utf8)
+    static func clearUserProperty(_ key: String, configURL: URL) throws {
+        let key = try validatedPropertyKey(key)
+        try writeConfig(at: configURL) { try updatedConfigTOML($0, key: key, value: nil) }
+    }
+
+    /// Rewrites the configuration file through `transform`. A symlinked file
+    /// is written at its target and keeps its permissions; a missing file
+    /// and folder are created. The write is atomic (temporary file + rename).
+    static func writeConfig(at url: URL, _ transform: (String) throws -> String) throws {
+        let target = resolvedConfigTarget(url)
+        let manager = FileManager.default
+        let folder = target.deletingLastPathComponent()
+        if !manager.fileExists(atPath: folder.path) {
+            try manager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o755])
+        }
+        var existing = ""
+        var permissions: Int?
+        if manager.fileExists(atPath: target.path) {
+            // A file that cannot be read as text must not be replaced.
+            existing = try String(contentsOf: target, encoding: .utf8)
+            permissions = (try? manager.attributesOfItem(atPath: target.path))?[.posixPermissions] as? Int
+        }
+        let updated = try transform(existing)
+        guard updated != existing else { return }
+        let temporary = folder.appendingPathComponent(".\(target.lastPathComponent).gantry-\(UUID().uuidString)")
+        try Data(updated.utf8).write(to: temporary, options: .withoutOverwriting)
+        do {
+            try manager.setAttributes([.posixPermissions: permissions ?? 0o644], ofItemAtPath: temporary.path)
+            guard rename(temporary.path, target.path) == 0 else {
+                throw CocoaError(.fileWriteUnknown, userInfo: [NSFilePathErrorKey: target.path])
+            }
+        } catch {
+            try? manager.removeItem(at: temporary)
+            throw error
+        }
+    }
+
+    /// Follows symbolic links to the real file, also when the link points
+    /// at a file that does not exist yet.
+    static func resolvedConfigTarget(_ url: URL) -> URL {
+        var current = url.standardizedFileURL
+        for _ in 0..<32 {
+            let parent = current.deletingLastPathComponent().resolvingSymlinksInPath()
+            current = parent.appendingPathComponent(current.lastPathComponent)
+            guard let destination = try? FileManager.default.destinationOfSymbolicLink(atPath: current.path) else {
+                return current
+            }
+            current = destination.hasPrefix("/")
+                ? URL(fileURLWithPath: destination)
+                : parent.appendingPathComponent(destination)
+            current = current.standardizedFileURL
+        }
+        return current
     }
 
     static func mergeProperties(
@@ -212,6 +283,60 @@ extension AppleContainerControl {
             return .other(String(decoding: data, as: UTF8.self))
         }
         return nil
+    }
+
+    // MARK: - Comparison
+
+    /// Whether the user value and the value the services report mean the
+    /// same. The services print memory sizes as `<n><unit>b` (`4g` → `4gb`)
+    /// and arrays as JSON, so those compare by meaning, not by text.
+    static func propertyValuesMatch(
+        _ user: AppleSystemPropertyValue,
+        _ effective: AppleSystemPropertyValue,
+        kind: AppleSystemPropertyKind
+    ) -> Bool {
+        switch (user, effective) {
+        case let (.string(a), .string(b)) where kind == .memory:
+            guard let lhs = memoryBytes(a), let rhs = memoryBytes(b) else { return a == b }
+            return lhs == rhs
+        case let (.integer(a), .number(b)), let (.number(b), .integer(a)):
+            return Double(a) == b
+        case let (.other(a), .other(b)):
+            return a == b || canonicalTOMLJSON(a).map { $0 == canonicalJSON(b) } ?? false
+        default:
+            return user == effective
+        }
+    }
+
+    /// The size in bytes of a memory value as the CLI parses it: a number and
+    /// an optional `b`, `k`, `m`, `g`, `t` or `p` unit with `b` or `ib`.
+    static func memoryBytes(_ text: String) -> Double? {
+        let value = text.trimmingCharacters(in: .whitespaces).lowercased()
+        guard let match = value.wholeMatch(of: /([0-9.]+)\s*(([bkmgtp])(i?b)?)?/),
+              let number = Double(match.1) else { return nil }
+        let exponents: [Substring: Double] = ["b": 0, "k": 1, "m": 2, "g": 3, "t": 4, "p": 5]
+        let exponent = match.3.flatMap { exponents[$0] } ?? 0
+        return number * pow(1024, exponent)
+    }
+
+    private static func canonicalTOMLJSON(_ literal: String) -> String? {
+        guard let document = try? ConfigTOMLDocument("v = " + literal),
+              let value = document.entries.first?.value else { return nil }
+        return serializedJSON(value.foundationObject)
+    }
+
+    private static func canonicalJSON(_ json: String) -> String? {
+        guard let object = try? JSONSerialization.jsonObject(with: Data(json.utf8), options: [.fragmentsAllowed]) else {
+            return nil
+        }
+        return serializedJSON(object)
+    }
+
+    private static func serializedJSON(_ object: Any) -> String? {
+        guard let data = try? JSONSerialization.data(withJSONObject: object, options: [.fragmentsAllowed, .sortedKeys]) else {
+            return nil
+        }
+        return String(decoding: data, as: UTF8.self)
     }
 
     // MARK: - Validation
@@ -269,6 +394,12 @@ extension AppleContainerControl {
                 throw fail("Enter rw, ro or none.")
             }
             return .string(value.lowercased())
+        case .integerValue:
+            guard let number = Int(value) else { throw fail("Enter a whole number.") }
+            return .integer(number)
+        case .numberValue:
+            guard let number = Double(value), number.isFinite else { throw fail("Enter a number.") }
+            return .number(number)
         case .unknown:
             if let number = Int(value) { return .integer(number) }
             if value == "true" || value == "false" { return .bool(value == "true") }
@@ -319,161 +450,50 @@ extension AppleContainerControl {
         return result + "\""
     }
 
-    /// Reads the flat `table.key = value` pairs of a TOML file. Supports the
-    /// subset `config.toml` uses: `[table]` and `[a.b]` headers, bare or
-    /// quoted keys, strings, integers, floats and booleans. Other values are
-    /// kept as `.other` literals.
+    /// Reads the flat `table.key = value` pairs of a TOML file: tables,
+    /// dotted keys and inline tables flatten into dotted keys. Arrays and
+    /// dates are kept as `.other` literals; pairs under `[[array]]` tables
+    /// are skipped. A file that does not parse gives no values.
     static func parseConfigTOML(_ toml: String) -> [String: AppleSystemPropertyValue] {
+        guard let document = try? ConfigTOMLDocument(toml) else { return [:] }
         var result: [String: AppleSystemPropertyValue] = [:]
-        var section = ""
-        for raw in toml.components(separatedBy: .newlines) {
-            let line = raw.trimmingCharacters(in: .whitespaces)
-            if line.isEmpty || line.hasPrefix("#") { continue }
-            if let header = tableHeader(line) {
-                section = header
-                continue
+        for entry in document.entries where !entry.inArrayOfTables {
+            let key = entry.path.joined(separator: ".")
+            switch entry.value {
+            case .string(let value): result[key] = .string(value)
+            case .integer(let value): result[key] = .integer(value)
+            case .float(let value): result[key] = .number(value)
+            case .bool(let value): result[key] = .bool(value)
+            case .table: continue
+            case .datetime, .array:
+                result[key] = .other(String(decoding: document.bytes[entry.valueRange], as: UTF8.self))
             }
-            guard let (name, literal) = keyValue(line) else { continue }
-            let key = section.isEmpty ? name : "\(section).\(name)"
-            result[key] = parseTOMLValue(literal)
         }
         return result
     }
 
     /// Returns `toml` with `key` set to `value` (or removed when nil). Every
-    /// other line, comment and table stays as it was.
-    static func updatedConfigTOML(_ toml: String, key: String, value: AppleSystemPropertyValue?) -> String {
-        let (section, name) = splitPropertyKey(key)
-        var lines = toml.isEmpty ? [] : toml.components(separatedBy: "\n")
-        if lines.last == "" { lines.removeLast() }
-
-        var current = ""
-        var headerIndex: Int?
-        var lastInSection: Int?
-        var keyIndex: Int?
-        for (index, raw) in lines.enumerated() {
-            let line = raw.trimmingCharacters(in: .whitespaces)
-            if let header = tableHeader(line) {
-                current = header
-                if header == section {
-                    headerIndex = index
-                    lastInSection = index
-                }
-                continue
-            }
-            guard current == section else { continue }
-            if section.isEmpty, headerIndex == nil { lastInSection = index }
-            if !line.isEmpty, !line.hasPrefix("#") { lastInSection = index }
-            if let (lineKey, _) = keyValue(line), lineKey == name { keyIndex = index }
-        }
-
-        let newLine = value.map { "\(tomlKey(name)) = \($0.tomlLiteral)" }
-        if let keyIndex {
-            if let newLine { lines[keyIndex] = newLine } else { lines.remove(at: keyIndex) }
-        } else if let newLine {
-            if section.isEmpty {
-                // Top-level keys must come before the first table.
-                let firstTable = lines.firstIndex { tableHeader($0.trimmingCharacters(in: .whitespaces)) != nil }
-                lines.insert(newLine, at: firstTable ?? lines.count)
-            } else if let lastInSection {
-                lines.insert(newLine, at: lastInSection + 1)
-            } else {
-                if let last = lines.last, !last.trimmingCharacters(in: .whitespaces).isEmpty { lines.append("") }
-                lines.append("[\(section)]")
-                lines.append(newLine)
-            }
-        }
-
-        var result = lines.joined(separator: "\n")
-        if !result.isEmpty { result += "\n" }
-        return result
+    /// other byte of the file stays as it was. Throws when the file is not
+    /// valid TOML or the change cannot be made safely: the result is parsed
+    /// again and compared with the input before it is returned.
+    static func updatedConfigTOML(_ toml: String, key: String, value: AppleSystemPropertyValue?) throws -> String {
+        try ConfigTOMLDocument.edit(
+            toml,
+            path: key.split(separator: ".", omittingEmptySubsequences: false).map(String.init),
+            literal: value?.tomlLiteral
+        )
     }
 
-    private static func tomlKey(_ name: String) -> String {
-        name.wholeMatch(of: /[A-Za-z0-9_-]+/) != nil ? name : tomlQuoted(name)
+    /// A `section.key` (or deeper) property key of bare TOML key parts, so a
+    /// key cannot break out of its line.
+    public static func isValidPropertyKey(_ key: String) -> Bool {
+        key.wholeMatch(of: /[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)+/) != nil
     }
 
-    /// The table name of a `[table]` header line (not `[[array]]`).
-    private static func tableHeader(_ line: String) -> String? {
-        guard line.hasPrefix("["), !line.hasPrefix("[[") else { return nil }
-        let body = stripComment(line)
-        guard body.hasSuffix("]") else { return nil }
-        return body.dropFirst().dropLast()
-            .split(separator: ".")
-            .map { $0.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
-            .joined(separator: ".")
-    }
-
-    /// Splits `key = value` (value without a trailing comment).
-    private static func keyValue(_ line: String) -> (String, String)? {
-        guard let equals = line.firstIndex(of: "=") else { return nil }
-        let key = line[..<equals].trimmingCharacters(in: .whitespaces)
-            .trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
-        guard !key.isEmpty else { return nil }
-        let value = stripComment(String(line[line.index(after: equals)...]))
-        return (key, value)
-    }
-
-    /// Drops a `# comment` that is outside a quoted string.
-    private static func stripComment(_ text: String) -> String {
-        var quote: Character?
-        var escaped = false
-        for index in text.indices {
-            let character = text[index]
-            if escaped { escaped = false; continue }
-            if quote == "\"", character == "\\" { escaped = true; continue }
-            if let open = quote {
-                if character == open { quote = nil }
-            } else if character == "\"" || character == "'" {
-                quote = character
-            } else if character == "#" {
-                return text[..<index].trimmingCharacters(in: .whitespaces)
-            }
+    static func validatedPropertyKey(_ key: String) throws -> String {
+        guard isValidPropertyKey(key) else {
+            throw AppleSystemError.invalidInput("“\(key)” is not a valid property key. Use a dotted name such as build.cpus.")
         }
-        return text.trimmingCharacters(in: .whitespaces)
-    }
-
-    static func parseTOMLValue(_ literal: String) -> AppleSystemPropertyValue {
-        if literal == "true" { return .bool(true) }
-        if literal == "false" { return .bool(false) }
-        if literal.hasPrefix("\""), literal.hasSuffix("\""), literal.count >= 2 {
-            return .string(unescapeTOML(String(literal.dropFirst().dropLast())))
-        }
-        if literal.hasPrefix("'"), literal.hasSuffix("'"), literal.count >= 2 {
-            return .string(String(literal.dropFirst().dropLast()))
-        }
-        let digits = literal.replacingOccurrences(of: "_", with: "")
-        if let integer = Int(digits) { return .integer(integer) }
-        if let number = Double(digits) { return .number(number) }
-        return .other(literal)
-    }
-
-    private static func unescapeTOML(_ text: String) -> String {
-        var result = ""
-        var iterator = text.makeIterator()
-        while let character = iterator.next() {
-            guard character == "\\", let next = iterator.next() else {
-                result.append(character)
-                continue
-            }
-            switch next {
-            case "n": result.append("\n")
-            case "t": result.append("\t")
-            case "r": result.append("\r")
-            case "\"": result.append("\"")
-            case "\\": result.append("\\")
-            case "u", "U":
-                let count = next == "u" ? 4 : 8
-                var hex = ""
-                for _ in 0..<count { if let digit = iterator.next() { hex.append(digit) } }
-                if let code = UInt32(hex, radix: 16), let scalar = Unicode.Scalar(code) {
-                    result.unicodeScalars.append(scalar)
-                }
-            default:
-                result.append("\\")
-                result.append(next)
-            }
-        }
-        return result
+        return key
     }
 }

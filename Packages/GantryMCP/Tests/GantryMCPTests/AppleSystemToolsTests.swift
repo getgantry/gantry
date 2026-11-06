@@ -70,4 +70,66 @@ struct AppleSystemToolsTests {
         let json = try jsonText([dto])
         #expect(json.contains("\"pendingRestart\" : true"))
     }
+
+    // MARK: - Property edits
+
+    /// What `listProperties` returns: schema keys plus reported keys.
+    private var sampleProperties: [AppleSystemProperty] {
+        let schema = AppleContainerControl.propertySchema.map { AppleSystemProperty(key: $0.key, kind: $0.kind) }
+        let reported = [
+            AppleSystemProperty(key: "custom.flag", kind: .unknown, effective: .bool(true)),
+            AppleSystemProperty(key: "custom.ratio", kind: .unknown, effective: .number(0.5)),
+            AppleSystemProperty(key: "custom.count", kind: .unknown, effective: .integer(3)),
+            AppleSystemProperty(key: "container.dns.nameservers", kind: .unknown, effective: .other("[\"1.1.1.1\"]"))
+        ]
+        return schema + reported
+    }
+
+    @Test func acceptsKnownPropertyKeys() throws {
+        let properties = sampleProperties
+        #expect(try GantryTools.editablePropertyKind("build.cpus", in: properties, clearing: false) == .count)
+        #expect(try GantryTools.editablePropertyKind("dns.domain", in: properties, clearing: false) == .domain)
+        // In the schema, not set anywhere.
+        #expect(try GantryTools.editablePropertyKind("kernel.url", in: properties, clearing: false) == .url)
+        // Unknown to the schema: the reported type.
+        #expect(try GantryTools.editablePropertyKind("custom.flag", in: properties, clearing: false) == .bool)
+        #expect(try GantryTools.editablePropertyKind("custom.ratio", in: properties, clearing: false) == .numberValue)
+        #expect(try GantryTools.editablePropertyKind("custom.count", in: properties, clearing: false) == .integerValue)
+        #expect(throws: AppleSystemError.self) { try AppleContainerControl.validatedPropertyValue("lots", kind: .integerValue) }
+        #expect(throws: AppleSystemError.self) { try AppleContainerControl.validatedPropertyValue("maybe", kind: .bool) }
+    }
+
+    @Test func refusesTyposAndInjectedKeys() {
+        let properties = sampleProperties
+        let keys = [
+            "build.cpu", "nothing.here", "cpus", "build.cpus\n[kernel]\nbinaryPath = \"x\"",
+            "build\n[kernel]\nbinaryPath = \"x\"\n[z.y.cpus", "build.cpus]", "[build].cpus",
+            "build.\"cpus\"", "build.cpus = 1", "build.cpus #", "build. cpus"
+        ]
+        for key in keys {
+            #expect(throws: ToolError.self, "\(key.debugDescription)") {
+                try GantryTools.editablePropertyKind(key, in: properties, clearing: false)
+            }
+            #expect(throws: ToolError.self, "\(key.debugDescription)") {
+                try GantryTools.editablePropertyKind(key, in: properties, clearing: true)
+            }
+        }
+    }
+
+    @Test func refusesOverwritingArrays() throws {
+        let properties = sampleProperties
+        #expect(throws: ToolError.self) {
+            try GantryTools.editablePropertyKind("container.dns.nameservers", in: properties, clearing: false)
+        }
+        // Clearing the user value is still allowed.
+        _ = try GantryTools.editablePropertyKind("container.dns.nameservers", in: properties, clearing: true)
+    }
+
+    @Test func valuesCannotInjectLines() {
+        for value in ["4\n[kernel]", "x\"\n[a]", "1\r\nb = 2"] {
+            #expect(throws: AppleSystemError.self) { try AppleContainerControl.validatedPropertyValue(value, kind: .string) }
+        }
+        // Quotes and brackets on one line stay inside the TOML string.
+        #expect(AppleSystemPropertyValue.string("a\"] [b").tomlLiteral == "\"a\\\"] [b\"")
+    }
 }

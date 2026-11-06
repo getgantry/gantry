@@ -163,45 +163,81 @@ public enum ContainerTooling {
     public static func check() async -> Status {
         let brew = brewPath() != nil
         guard let cli = AppleContainerCLIDiscovery.discover() else {
-            await versionCache.store(nil)
             return Status(state: .notInstalled, brewAvailable: brew)
         }
-        guard let raw = try? await runCapture(cli, ["--version"]),
-              let version = parseVersion(raw) else {
+        guard let version = await detectVersion(cli) else {
             // The binary exists but didn't report a version — treat it as
             // present-and-usable rather than nagging on a parse miss.
-            await versionCache.store("unknown")
             return Status(state: .ok(version: "unknown"), brewAvailable: brew)
         }
-        await versionCache.store(version)
         if isVersion(version, atLeast: minimumVersion) {
             return Status(state: .ok(version: version), brewAvailable: brew)
         }
         return Status(state: .outdated(current: version), brewAvailable: brew)
     }
 
-    /// The version the last `check()` detected, running one if none has yet.
-    /// Views use this to gate version-dependent options without shelling out on
-    /// every redraw.
-    public static func currentVersion() async -> String? {
-        if await versionCache.checked { return await versionCache.value }
-        _ = await check()
-        return await versionCache.value
+    /// The version of the CLI at `cliOverride` (or the discovered one). It
+    /// is cached per binary and read again when the binary file changes,
+    /// e.g. after a Homebrew upgrade. Nil when no CLI is found.
+    public static func currentVersion(cliOverride: String? = nil) async -> String? {
+        guard let cli = AppleContainerCLIDiscovery.discover(override: cliOverride) else { return nil }
+        let version = await detectVersion(cli)
+        return version ?? "unknown"
     }
 
-    /// `features(for:)` against the detected CLI version.
-    public static func currentFeatures() async -> Features {
-        features(for: await currentVersion())
+    /// `features(for:)` against the version of the CLI at `cliOverride`
+    /// (a host's CLI path override) or the discovered CLI.
+    public static func currentFeatures(cliOverride: String? = nil) async -> Features {
+        features(for: await currentVersion(cliOverride: cliOverride))
     }
 
-    /// Caches the detected version for the life of the process.
-    private actor VersionCache {
-        private(set) var value: String?
-        private(set) var checked = false
-        func store(_ version: String?) {
-            value = version
-            checked = true
+    /// Forgets the cached versions, e.g. after an install or upgrade.
+    public static func invalidateVersionCache() async {
+        await versionCache.removeAll()
+    }
+
+    /// Reads `--version` unless the cache has the binary with the same
+    /// identity (resolved path, size, modification date).
+    private static func detectVersion(_ cli: String) async -> String? {
+        let identity = BinaryIdentity(path: cli)
+        if let cached = await versionCache.value(for: cli, identity: identity) { return cached }
+        let raw = try? await runCapture(cli, ["--version"])
+        let version = raw.flatMap(parseVersion)
+        await versionCache.store(version, for: cli, identity: identity)
+        return version
+    }
+
+    /// What identifies a binary on disk: a Homebrew upgrade changes the
+    /// symlink target, a copied-over binary changes size or date.
+    struct BinaryIdentity: Equatable, Sendable {
+        var resolvedPath: String
+        var size: Int?
+        var modified: Date?
+
+        init(path: String) {
+            let resolved = URL(fileURLWithPath: path).resolvingSymlinksInPath().path
+            let attributes = try? FileManager.default.attributesOfItem(atPath: resolved)
+            resolvedPath = resolved
+            size = (attributes?[.size] as? NSNumber)?.intValue
+            modified = attributes?[.modificationDate] as? Date
         }
+    }
+
+    /// Detected versions by CLI path.
+    private actor VersionCache {
+        private var entries: [String: (identity: BinaryIdentity, version: String?)] = [:]
+
+        /// The cached version; nil (not cached) when the identity changed.
+        func value(for path: String, identity: BinaryIdentity) -> String?? {
+            guard let entry = entries[path], entry.identity == identity else { return nil }
+            return .some(entry.version)
+        }
+
+        func store(_ version: String?, for path: String, identity: BinaryIdentity) {
+            entries[path] = (identity, version)
+        }
+
+        func removeAll() { entries.removeAll() }
     }
 
     private static let versionCache = VersionCache()

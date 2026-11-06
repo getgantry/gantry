@@ -384,10 +384,10 @@ import Testing
         #expect(values["plugin.foo.list"] == .other("[1, 2]"))
     }
 
-    @Test func updatesUserConfigTOML() {
+    @Test func updatesUserConfigTOML() throws {
         typealias C = AppleContainerControl
         // Into an empty file: a new table.
-        #expect(C.updatedConfigTOML("", key: "build.cpus", value: .integer(4)) == "[build]\ncpus = 4\n")
+        #expect(try C.updatedConfigTOML("", key: "build.cpus", value: .integer(4)) == "[build]\ncpus = 4\n")
 
         let base = """
         # mine
@@ -397,26 +397,26 @@ import Testing
         [dns]
         domain = "test"
         """
-        // Replace an existing key, keep the rest.
-        let replaced = C.updatedConfigTOML(base, key: "build.cpus", value: .integer(6))
-        #expect(replaced == "# mine\n[build]\ncpus = 6\n\n[dns]\ndomain = \"test\"\n")
+        // Replace an existing value, keep the rest (and the comment).
+        let replaced = try C.updatedConfigTOML(base, key: "build.cpus", value: .integer(6))
+        #expect(replaced == "# mine\n[build]\ncpus = 6 # old\n\n[dns]\ndomain = \"test\"")
         // Add a key to an existing table, after its last entry.
-        let added = C.updatedConfigTOML(base, key: "build.memory", value: .string("4g"))
-        #expect(added == "# mine\n[build]\ncpus = 2 # old\nmemory = \"4g\"\n\n[dns]\ndomain = \"test\"\n")
+        let added = try C.updatedConfigTOML(base, key: "build.memory", value: .string("4g"))
+        #expect(added == "# mine\n[build]\ncpus = 2 # old\nmemory = \"4g\"\n\n[dns]\ndomain = \"test\"")
         // Remove a key.
-        let removed = C.updatedConfigTOML(base, key: "dns.domain", value: nil)
+        let removed = try C.updatedConfigTOML(base, key: "dns.domain", value: nil)
         #expect(removed == "# mine\n[build]\ncpus = 2 # old\n\n[dns]\n")
         // Removing a key that is not there changes nothing.
-        #expect(C.updatedConfigTOML(base, key: "kernel.url", value: nil) == base + "\n")
+        #expect(try C.updatedConfigTOML(base, key: "kernel.url", value: nil) == base)
         // A new table goes at the end, after a blank line.
-        let table = C.updatedConfigTOML(base, key: "network.subnet", value: .string("10.0.0.0/24"))
-        #expect(table.hasSuffix("domain = \"test\"\n\n[network]\nsubnet = \"10.0.0.0/24\"\n"))
+        let table = try C.updatedConfigTOML(base, key: "network.subnet", value: .string("10.0.0.0/24"))
+        #expect(table == base + "\n\n[network]\nsubnet = \"10.0.0.0/24\"\n")
         // Dotted tables and quoting.
-        let plugin = C.updatedConfigTOML("", key: "plugin.foo.say", value: .string("a \"b\"\\"))
+        let plugin = try C.updatedConfigTOML("", key: "plugin.foo.say", value: .string("a \"b\"\\"))
         #expect(plugin == "[plugin.foo]\nsay = \"a \\\"b\\\"\\\\\"\n")
         #expect(C.parseConfigTOML(plugin)["plugin.foo.say"] == .string("a \"b\"\\"))
         // The DNS helper and the general writer agree.
-        #expect(C.parseDNSDomain(C.updatedConfigTOML(base, key: "dns.domain", value: .string("dev"))) == "dev")
+        #expect(C.parseDNSDomain(try C.updatedConfigTOML(base, key: "dns.domain", value: .string("dev"))) == "dev")
     }
 
     @Test func splitsPropertyKeys() {

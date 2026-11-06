@@ -164,6 +164,7 @@ struct ContainerSetupSheet: View {
             } else {
                 try await ContainerTooling.install(progress: sink)
             }
+            await ContainerTooling.invalidateVersionCache()
             done = true
         } catch {
             failure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

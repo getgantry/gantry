@@ -205,7 +205,7 @@ struct AppleKernelPane: View {
     }
 
     private func reload() async {
-        features = await ContainerTooling.currentFeatures()
+        features = await ContainerTooling.currentFeatures(cliOverride: cli)
         let status = try? await AppleContainerControl.systemStatus(cliOverride: cli)
         let root = status?.appRoot.map { URL(fileURLWithPath: $0, isDirectory: true) }
         kernel = AppleContainerControl.defaultKernel(appRoot: root, architecture: hostKernelArchitecture)

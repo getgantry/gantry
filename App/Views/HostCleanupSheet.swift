@@ -80,7 +80,7 @@ struct HostCleanupSheet: View {
         .frame(width: 520, height: 460)
         .task {
             if session.host.isAppleContainer {
-                appleFeatures = await ContainerTooling.currentFeatures()
+                appleFeatures = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride)
             }
             usage = await session.systemDF()
         }

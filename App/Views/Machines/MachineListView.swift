@@ -254,7 +254,7 @@ struct MachineDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle(machine.id)
         .task(id: machine.id) { syncEdits() }
-        .task { features = await ContainerTooling.currentFeatures() }
+        .task { features = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride) }
     }
 
     // MARK: Tabs

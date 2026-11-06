@@ -1020,11 +1020,15 @@ public final class HostSession: Identifiable {
     }
 
     private var clusterCreationTasks: [String: Task<Void, Never>] = [:]
+    /// Creations that found the name free right before the CLI started:
+    /// only their nodes may be deleted on cancel.
+    private var ownedClusterCreations: Set<String> = []
 
-    /// Reads the CLI version once to decide whether clusters are available.
+    /// Reads the version of this host's CLI (cached per binary) to decide
+    /// whether clusters are available.
     public func loadClusterSupport() async {
-        guard host.isAppleContainer, clusterFeatures == nil else { return }
-        clusterFeatures = await ContainerTooling.currentFeatures()
+        guard host.isAppleContainer else { return }
+        clusterFeatures = await ContainerTooling.currentFeatures(cliOverride: machineCLIOverride)
     }
 
     /// Reloads the cluster list. No-op when the CLI has no clusters.
@@ -1060,13 +1064,25 @@ public final class HostSession: Identifiable {
         clusterCreations.append(ClusterCreation(options: options))
         let cli = machineCLIOverride
         clusterCreationTasks[name] = Task { [weak self] in
+            do {
+                // The sheet's list can be stale: check the name right before the CLI runs.
+                let existing = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
+                if existing.contains(where: { $0.name == name }) {
+                    throw AppleControlError.command("A cluster named \u{201C}\(name)\u{201D} already exists.")
+                }
+                try Task.checkCancellation()
+            } catch {
+                await self?.finishClusterCreation(name, error: Task.isCancelled ? CancellationError() : error)
+                return
+            }
+            await self?.claimClusterCreation(name, kubeconfigPath: options.kubeconfigPath)
             // One stream, read here, keeps the lines in order and delivers
             // the last one before the finish.
             let (lines, sink) = AsyncStream<String>.makeStream()
             async let failure = Self.runClusterCreation(options, command: command, cli: cli, sink: sink)
             for await line in lines { self?.recordClusterOutput(name, line) }
             let error = await failure
-            await self?.finishClusterCreation(name, error: error)
+            await self?.finishClusterCreation(name, error: Task.isCancelled ? CancellationError() : error)
         }
         Task { await refreshClusters() }
         return true
@@ -1100,8 +1116,15 @@ public final class HostSession: Identifiable {
         }
     }
 
+    private func claimClusterCreation(_ name: String, kubeconfigPath: String?) {
+        ownedClusterCreations.insert(name)
+        ClusterKubeconfigStore.record(kubeconfigPath, host: host.id.uuidString, cluster: name)
+    }
+
     private func finishClusterCreation(_ name: String, error: Error?) async {
         clusterCreationTasks[name] = nil
+        // A cancelled creation stays owned until cancelClusterCreation cleans up.
+        if !(error is CancellationError) { ownedClusterCreations.remove(name) }
         if let error, !(error is CancellationError) {
             if let index = clusterCreations.firstIndex(where: { $0.id == name }) {
                 clusterCreations[index].failure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -1112,18 +1135,27 @@ public final class HostSession: Identifiable {
         await refreshClusters()
     }
 
-    /// Stops a running creation and deletes the nodes it already made.
+    /// Stops a running creation and deletes the nodes it already made. A
+    /// cluster that existed before, or that this run did not start to
+    /// create, is never deleted.
     public func cancelClusterCreation(_ name: String) async {
         guard let task = clusterCreationTasks[name] else { return }
         let kubeconfig = clusterCreations.first { $0.id == name }?.options.kubeconfigPath
         task.cancel()
         await task.value
         clusterCreations.removeAll { $0.id == name }
-        _ = await clusterAction { command in
+        let owned = ownedClusterCreations.remove(name) != nil
+        await refreshClusters()
+        guard owned, clusters.contains(where: { $0.name == name }) else {
+            if owned { ClusterKubeconfigStore.record(nil, host: host.id.uuidString, cluster: name) }
+            return
+        }
+        let deleted = await clusterAction { command in
             try await AppleContainerControl.deleteCluster(
                 name, kubeconfigPath: kubeconfig, command: command, cliOverride: machineCLIOverride
             )
         }
+        if deleted { ClusterKubeconfigStore.record(nil, host: host.id.uuidString, cluster: name) }
     }
 
     /// Removes a failed creation from ``clusterCreations``.
@@ -1132,11 +1164,19 @@ public final class HostSession: Identifiable {
         clusterCreations.removeAll { $0.id == name }
     }
 
+    /// Deletes a cluster and removes its context from the kubeconfig it
+    /// was created with (default `~/.kube/config`).
     @discardableResult
     public func deleteCluster(_ name: String) async -> Bool {
-        await clusterAction { command in
-            try await AppleContainerControl.deleteCluster(name, command: command, cliOverride: machineCLIOverride)
+        let hostID = host.id.uuidString
+        let kubeconfig = ClusterKubeconfigStore.path(host: hostID, cluster: name)
+        let deleted = await clusterAction { command in
+            try await AppleContainerControl.deleteCluster(
+                name, kubeconfigPath: kubeconfig, command: command, cliOverride: machineCLIOverride
+            )
         }
+        if deleted { ClusterKubeconfigStore.record(nil, host: hostID, cluster: name) }
+        return deleted
     }
 
     /// Writes (merges) the cluster context into the kubeconfig at `path`.
