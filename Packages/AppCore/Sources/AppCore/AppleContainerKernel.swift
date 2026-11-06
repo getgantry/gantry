@@ -42,7 +42,7 @@ public struct AppleKernelRequest: Sendable, Equatable {
         case .binary(let path):
             let path = path.trimmingCharacters(in: .whitespaces)
             guard path.hasPrefix("/") else {
-                throw AppleSystemError.invalidInput("Choose a kernel file on this Mac.")
+                throw AppleSystemError.invalidInput(String(localized: "Choose a kernel file on this Mac.", bundle: .module))
             }
             arguments += ["--arch", architecture.rawValue, "--binary", path]
         case .archive(let location, let member, let digest):
@@ -51,25 +51,25 @@ public struct AppleKernelRequest: Sendable, Equatable {
             let digest = digest?.trimmingCharacters(in: .whitespaces) ?? ""
             let remote = location.lowercased().hasPrefix("http://") || location.lowercased().hasPrefix("https://")
             guard remote || location.hasPrefix("/") else {
-                throw AppleSystemError.invalidInput("Enter an http(s) URL or choose a tar archive on this Mac.")
+                throw AppleSystemError.invalidInput(String(localized: "Enter an http(s) URL or choose a tar archive on this Mac.", bundle: .module))
             }
             if remote, URL(string: location)?.host == nil {
-                throw AppleSystemError.invalidInput("“\(location)” is not a valid URL.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(location)” is not a valid URL.", bundle: .module))
             }
             guard !member.isEmpty else {
-                throw AppleSystemError.invalidInput("Enter the path of the kernel file inside the archive.")
+                throw AppleSystemError.invalidInput(String(localized: "Enter the path of the kernel file inside the archive.", bundle: .module))
             }
             arguments += ["--arch", architecture.rawValue, "--tar", location, "--binary", member]
             if !digest.isEmpty {
                 guard supportsDigest else {
-                    throw AppleSystemError.invalidInput("This apple/container version cannot verify a digest. Update to 1.2 or later.")
+                    throw AppleSystemError.invalidInput(String(localized: "This apple/container version cannot verify a digest. Update to 1.2 or later.", bundle: .module))
                 }
                 guard AppleContainerControl.isValidDigest(digest) else {
-                    throw AppleSystemError.invalidInput("The digest must have the form sha256:<64 hex digits>.")
+                    throw AppleSystemError.invalidInput(String(localized: "The digest must have the form sha256:<64 hex digits>.", bundle: .module))
                 }
                 arguments += ["--digest", digest]
             } else if remote, supportsDigest {
-                throw AppleSystemError.invalidInput("A digest (sha256:…) is required for a remote archive.")
+                throw AppleSystemError.invalidInput(String(localized: "A digest (sha256:…) is required for a remote archive.", bundle: .module))
             }
         }
         if force { arguments.append("--force") }

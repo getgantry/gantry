@@ -54,7 +54,7 @@ extension AppleContainerControl {
         var arguments = ["system", "logs"]
         if let last = nonEmpty(last?.trimmingCharacters(in: .whitespaces)) {
             guard isValidLogPeriod(last) else {
-                throw AppleSystemError.invalidInput("“\(last)” is not a valid period. Use a number with an optional m, h or d suffix, for example 30m.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(last)” is not a valid period. Use a number with an optional m, h or d suffix, for example 30m.", bundle: .module))
             }
             arguments += ["--last", last]
         }

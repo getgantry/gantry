@@ -153,7 +153,7 @@ extension HostSession {
         progress: @escaping @MainActor (String) -> Void = { _ in }
     ) async throws -> ExecSession {
         let sidecarID = try await debugSidecarID(for: containerID, progress: progress)
-        progress("Attaching…")
+        progress(String(localized: "Attaching…", bundle: .module))
         return try await openExecSession(containerID: sidecarID, command: DebugShell.shellCommand)
     }
 
@@ -174,14 +174,14 @@ extension HostSession {
         // running and makes reopening the shell instant.
         if let existing = existingSidecar(for: containerID) {
             if existing.state.isRunning { return existing.id }
-            progress("Restarting the debug sidecar…")
+            progress(String(localized: "Restarting the debug sidecar…", bundle: .module))
             _ = await perform(.start, on: existing.id)
             return existing.id
         }
 
         let image = DebugShell.image
         if !images.contains(where: { $0.repoTags.contains(image) }) {
-            progress("Pulling \(image) — first run only…")
+            progress(String(localized: "Pulling \(image) — first run only…", bundle: .module))
             // The pull only completes once the stream does, so drain it.
             for try await update in try await pullImage(reference: image) {
                 if !update.status.isEmpty {
@@ -192,7 +192,7 @@ extension HostSession {
             await refreshImages()
         }
 
-        progress("Starting the debug sidecar…")
+        progress(String(localized: "Starting the debug sidecar…", bundle: .module))
         return try await createAndRun(DebugShell.sidecarSpec(target: containerID, image: image))
     }
 
@@ -219,8 +219,10 @@ public enum DebugShellError: Error, LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .unsupported(let host):
-            "\(host) can't open a debug shell. It needs a Docker engine — apple/container runs each "
-            + "container in its own VM and offers no way to share namespaces with it."
+            String(
+                localized: "\(host) can't open a debug shell. It needs a Docker engine — apple/container runs each container in its own VM and offers no way to share namespaces with it.",
+                bundle: .module
+            )
         }
     }
 }

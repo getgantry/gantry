@@ -47,7 +47,7 @@ public struct ComposeParser: Sendable {
             throw ComposeParseError.invalidYAML(String(describing: error))
         }
         guard let root = node as? [String: Any] else {
-            throw ComposeParseError.invalidYAML("top level is not a mapping")
+            throw ComposeParseError.invalidYAML(String(localized: "top level is not a mapping", bundle: .module))
         }
 
         let env = Interpolator(environment: environment)

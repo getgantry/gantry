@@ -44,14 +44,14 @@ extension AppleContainerControl {
         cliOverride: String? = nil
     ) async throws {
         let arguments = try registryLoginArguments(server: server, username: username, scheme: scheme)
-        guard !password.isEmpty else { throw AppleSystemError.invalidInput("Enter a password or access token.") }
+        guard !password.isEmpty else { throw AppleSystemError.invalidInput(String(localized: "Enter a password or access token.", bundle: .module)) }
         _ = try await runContainer(arguments, cliOverride: cliOverride, input: Data(password.utf8))
     }
 
     public static func logoutRegistry(_ server: String, cliOverride: String? = nil) async throws {
         let host = server.trimmingCharacters(in: .whitespaces)
         guard isValidRegistryServer(host) else {
-            throw AppleSystemError.invalidInput("“\(server)” is not a valid registry host name.")
+            throw AppleSystemError.invalidInput(String(localized: "“\(server)” is not a valid registry host name.", bundle: .module))
         }
         _ = try await runContainer(["registry", "logout", host], cliOverride: cliOverride)
     }
@@ -65,9 +65,9 @@ extension AppleContainerControl {
         let host = server.trimmingCharacters(in: .whitespaces)
         let user = username.trimmingCharacters(in: .whitespaces)
         guard isValidRegistryServer(host) else {
-            throw AppleSystemError.invalidInput("“\(server)” is not a valid registry host name. Use a host name with an optional port, for example ghcr.io or localhost:5000.")
+            throw AppleSystemError.invalidInput(String(localized: "“\(server)” is not a valid registry host name. Use a host name with an optional port, for example ghcr.io or localhost:5000.", bundle: .module))
         }
-        guard !user.isEmpty else { throw AppleSystemError.invalidInput("Enter a user name.") }
+        guard !user.isEmpty else { throw AppleSystemError.invalidInput(String(localized: "Enter a user name.", bundle: .module)) }
         var arguments = ["registry", "login", "--username", user, "--password-stdin"]
         if scheme != .https { arguments += ["--scheme", scheme.rawValue] }
         arguments.append(host)

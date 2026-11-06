@@ -80,36 +80,36 @@ public struct AppleBuilderStartOptions: Sendable, Equatable {
     public func arguments() throws -> [String] {
         var arguments = ["builder", "start"]
         if let cpus {
-            guard cpus > 0 else { throw AppleSystemError.invalidInput("CPUs must be a positive number.") }
+            guard cpus > 0 else { throw AppleSystemError.invalidInput(String(localized: "CPUs must be a positive number.", bundle: .module)) }
             arguments += ["--cpus", String(cpus)]
         }
         if let memory = AppleContainerControl.nonEmpty(memory?.trimmingCharacters(in: .whitespaces)) {
             guard AppleContainerControl.isValidMemorySize(memory) else {
-                throw AppleSystemError.invalidInput("“\(memory)” is not a valid memory size. Use a number with an optional K, M, G, T or P suffix, for example 4g.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(memory)” is not a valid memory size. Use a number with an optional K, M, G, T or P suffix, for example 4g.", bundle: .module))
             }
             arguments += ["--memory", memory]
         }
         for server in dnsServers.map(trimmed).filter({ !$0.isEmpty }) {
             guard AppleContainerControl.isValidIPAddress(server) else {
-                throw AppleSystemError.invalidInput("“\(server)” is not a valid IP address.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(server)” is not a valid IP address.", bundle: .module))
             }
             arguments += ["--dns", server]
         }
         if let domain = AppleContainerControl.nonEmpty(dnsDomain.map(trimmed)) {
             guard AppleContainerControl.isValidDomainName(domain) else {
-                throw AppleSystemError.invalidInput("“\(domain)” is not a valid domain name.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(domain)” is not a valid domain name.", bundle: .module))
             }
             arguments += ["--dns-domain", domain]
         }
         for domain in dnsSearchDomains.map(trimmed).filter({ !$0.isEmpty }) {
             guard AppleContainerControl.isValidDomainName(domain) else {
-                throw AppleSystemError.invalidInput("“\(domain)” is not a valid domain name.")
+                throw AppleSystemError.invalidInput(String(localized: "“\(domain)” is not a valid domain name.", bundle: .module))
             }
             arguments += ["--dns-search", domain]
         }
         for option in dnsOptions.map(trimmed).filter({ !$0.isEmpty }) {
             guard !option.contains(where: \.isWhitespace) else {
-                throw AppleSystemError.invalidInput("A DNS option cannot contain spaces: “\(option)”.")
+                throw AppleSystemError.invalidInput(String(localized: "A DNS option cannot contain spaces: “\(option)”.", bundle: .module))
             }
             arguments += ["--dns-option", option]
         }
