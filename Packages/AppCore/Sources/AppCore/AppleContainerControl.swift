@@ -124,15 +124,15 @@ public enum AppleContainerControl {
     /// restarted (`restartServices`). No admin needed — the file is in the user's
     /// home, written by the user account that runs the services.
     public static func setDefaultDNSDomain(_ domain: String?) throws {
+        try setDefaultDNSDomain(domain, configURL: configFileURL())
+    }
+
+    static func setDefaultDNSDomain(_ domain: String?, configURL: URL) throws {
         let trimmed = domain?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let validated = trimmed.isEmpty ? nil : try validatedDomain(trimmed)
-        let url = configFileURL()
-        try FileManager.default.createDirectory(
-            at: url.deletingLastPathComponent(), withIntermediateDirectories: true
-        )
-        let existing = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-        let updated = updatedConfigTOML(existing, dnsDomain: validated)
-        try updated.write(to: url, atomically: true, encoding: .utf8)
+        try writeConfig(at: configURL) {
+            try updatedConfigTOML($0, key: "dns.domain", value: validated.map { .string($0) })
+        }
     }
 
     /// Stops then starts the background services so configuration changes (like a
@@ -157,66 +157,10 @@ public enum AppleContainerControl {
             .appendingPathComponent(".config/container/config.toml")
     }
 
-    /// Reads the `domain` value from a `[dns]` table in TOML text.
+    /// Reads the `domain` value of the `[dns]` table from TOML text.
     static func parseDNSDomain(_ toml: String) -> String? {
-        var inDNS = false
-        for raw in toml.components(separatedBy: "\n") {
-            let line = raw.trimmingCharacters(in: .whitespaces)
-            if line.hasPrefix("["), line.hasSuffix("]") {
-                inDNS = String(line.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces) == "dns"
-                continue
-            }
-            if inDNS, line.hasPrefix("domain"), let eq = line.firstIndex(of: "=") {
-                let value = line[line.index(after: eq)...]
-                    .trimmingCharacters(in: .whitespaces)
-                    .trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
-                return value.isEmpty ? nil : value
-            }
-        }
-        return nil
-    }
-
-    /// Pure transform: returns `toml` with the `[dns]` table's `domain` key set to
-    /// `domain` (or removed when nil), preserving every other section and key.
-    static func updatedConfigTOML(_ toml: String, dnsDomain domain: String?) -> String {
-        var lines = toml.isEmpty ? [] : toml.components(separatedBy: "\n")
-        func section(_ line: String) -> String? {
-            let t = line.trimmingCharacters(in: .whitespaces)
-            guard t.hasPrefix("["), t.hasSuffix("]") else { return nil }
-            return String(t.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
-        }
-
-        var dnsHeader: Int?
-        var domainLine: Int?
-        var inDNS = false
-        for (i, line) in lines.enumerated() {
-            if let name = section(line) {
-                inDNS = (name == "dns")
-                if inDNS { dnsHeader = i }
-                continue
-            }
-            if inDNS, line.trimmingCharacters(in: .whitespaces).hasPrefix("domain"),
-               line.contains("=") {
-                domainLine = i
-            }
-        }
-
-        let newLine = domain.map { "domain = \"\($0)\"" }
-        if let di = domainLine {
-            if let newLine { lines[di] = newLine } else { lines.remove(at: di) }
-        } else if let newLine {
-            if let hi = dnsHeader {
-                lines.insert(newLine, at: hi + 1)
-            } else {
-                if let last = lines.last, !last.isEmpty { lines.append("") }
-                lines.append("[dns]")
-                lines.append(newLine)
-            }
-        }
-
-        var result = lines.joined(separator: "\n")
-        if !result.isEmpty, !result.hasSuffix("\n") { result += "\n" }
-        return result
+        guard case .string(let domain)? = parseConfigTOML(toml)["dns.domain"], !domain.isEmpty else { return nil }
+        return domain
     }
 
     // MARK: - Validation
