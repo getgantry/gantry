@@ -86,8 +86,8 @@ extension AppleContainerControl {
 
     /// The cluster subcommand of the installed CLI, or an error when the CLI
     /// is older than 1.5.0.
-    public static func clusterCommand() async throws -> String {
-        guard let command = await ContainerTooling.currentFeatures().clusterCommand else {
+    public static func clusterCommand(cliOverride: String? = nil) async throws -> String {
+        guard let command = await ContainerTooling.currentFeatures(cliOverride: cliOverride).clusterCommand else {
             throw AppleControlError.command(
                 "Kubernetes clusters need apple container CLI \(ContainerTooling.clustersVersion) or later."
             )
@@ -100,7 +100,7 @@ extension AppleContainerControl {
         command: String? = nil,
         cliOverride: String? = nil
     ) async throws -> [ContainerCluster] {
-        let resolved = try await resolveClusterCommand(command)
+        let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
         let output = try await runCluster([resolved, "list"], cliOverride: cliOverride)
         return ContainerCluster.parseList(output)
     }
@@ -114,7 +114,7 @@ extension AppleContainerControl {
         cliOverride: String? = nil,
         output: @escaping @Sendable (String) -> Void = { _ in }
     ) async throws {
-        let resolved = try await resolveClusterCommand(command)
+        let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
         try await runClusterStreaming(
             options.arguments(command: resolved),
             environment: kubeconfigEnvironment(options.kubeconfigPath),
@@ -131,7 +131,7 @@ extension AppleContainerControl {
         command: String? = nil,
         cliOverride: String? = nil
     ) async throws {
-        let resolved = try await resolveClusterCommand(command)
+        let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
         try await runCluster(
             [resolved, "delete", "--name", name],
             environment: kubeconfigEnvironment(kubeconfigPath),
@@ -147,7 +147,7 @@ extension AppleContainerControl {
         command: String? = nil,
         cliOverride: String? = nil
     ) async throws {
-        let resolved = try await resolveClusterCommand(command)
+        let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
         let directory = (kubeconfigPath as NSString).deletingLastPathComponent
         if !directory.isEmpty {
             try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
@@ -169,7 +169,7 @@ extension AppleContainerControl {
         command: String? = nil,
         cliOverride: String? = nil
     ) async throws {
-        let resolved = try await resolveClusterCommand(command)
+        let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
         let args = loadImageArguments(image, cluster: cluster, platform: platform, nodes: nodes, command: resolved)
         try await runCluster(args, cliOverride: cliOverride)
     }
@@ -210,9 +210,9 @@ extension AppleContainerControl {
 
     // MARK: Plumbing
 
-    private static func resolveClusterCommand(_ command: String?) async throws -> String {
+    private static func resolveClusterCommand(_ command: String?, cliOverride: String?) async throws -> String {
         if let command { return command }
-        return try await clusterCommand()
+        return try await clusterCommand(cliOverride: cliOverride)
     }
 
     private static func kubeconfigEnvironment(_ path: String?) -> [String: String] {

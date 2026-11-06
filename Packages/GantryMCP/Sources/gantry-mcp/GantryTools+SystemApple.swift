@@ -292,8 +292,8 @@ extension GantryTools {
     // MARK: - Kubernetes clusters
 
     /// The cluster subcommand of the installed CLI and its feature gates.
-    private func clusterFeatures() async throws -> (command: String, features: ContainerTooling.Features) {
-        let features = await ContainerTooling.currentFeatures()
+    private func clusterFeatures(cliOverride: String?) async throws -> (command: String, features: ContainerTooling.Features) {
+        let features = await ContainerTooling.currentFeatures(cliOverride: cliOverride)
         guard let command = features.clusterCommand else {
             throw ToolError("Kubernetes clusters need apple/container CLI \(ContainerTooling.clustersVersion) or later.")
         }
@@ -302,14 +302,14 @@ extension GantryTools {
 
     private func listClusters(_ args: Arguments) async throws -> CallTool.Result {
         let cli = try appleCLIOverride(args)
-        let (command, _) = try await clusterFeatures()
+        let (command, _) = try await clusterFeatures(cliOverride: cli)
         let clusters = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
         return .text(try jsonText(clusters.map(ClusterDTO.init)))
     }
 
     private func createCluster(_ args: Arguments) async throws -> CallTool.Result {
         let cli = try appleCLIOverride(args)
-        let (command, features) = try await clusterFeatures()
+        let (command, features) = try await clusterFeatures(cliOverride: cli)
         let options = try clusterCreateOptions(args, features: features)
         try await AppleContainerControl.createCluster(options, command: command, cliOverride: cli)
         let config = options.kubeconfigPath ?? "~/.kube/config"
@@ -318,7 +318,7 @@ extension GantryTools {
 
     private func deleteCluster(_ args: Arguments) async throws -> CallTool.Result {
         let cli = try appleCLIOverride(args)
-        let (command, _) = try await clusterFeatures()
+        let (command, _) = try await clusterFeatures(cliOverride: cli)
         let name = try args.requiredString("name")
         try await AppleContainerControl.deleteCluster(
             name, kubeconfigPath: args.string("kubeconfig"), command: command, cliOverride: cli

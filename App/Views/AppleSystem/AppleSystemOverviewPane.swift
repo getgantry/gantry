@@ -220,7 +220,9 @@ struct AppleSystemOverviewPane: View {
     private func reload() async {
         loading = true
         defer { loading = false }
-        features = await ContainerTooling.currentFeatures()
+        // A refresh reads the CLI version again (it may have been upgraded).
+        await ContainerTooling.invalidateVersionCache()
+        features = await ContainerTooling.currentFeatures(cliOverride: cli)
         do {
             let current = try await AppleContainerControl.systemStatus(cliOverride: cli)
             status = current

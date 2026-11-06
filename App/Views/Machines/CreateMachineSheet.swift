@@ -95,7 +95,7 @@ struct CreateMachineSheet: View {
         }
         .padding(20)
         .frame(width: 420)
-        .task { features = await ContainerTooling.currentFeatures() }
+        .task { features = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride) }
     }
 
     /// apple/container 1.1 boot options: nested virtualization and a custom

@@ -190,7 +190,7 @@ struct CreateContainerSheet: View {
         .frame(width: 560, height: 640)
         .task {
             if session.host.isAppleContainer {
-                appleFeatures = await ContainerTooling.currentFeatures()
+                appleFeatures = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride)
                 availableDomains = (try? await AppleContainerControl.listDomains(
                     cliOverride: session.host.socketPathOverride
                 )) ?? []
