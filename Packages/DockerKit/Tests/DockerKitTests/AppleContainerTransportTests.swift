@@ -1020,3 +1020,53 @@ private let multiVariantImageJSON = """
     let inspects = runner.recordedCalls().filter { $0.starts(with: ["image", "inspect"]) }
     #expect(inspects.count == 1)
 }
+
+// MARK: - Stats on apple/container 1.7.1
+
+/// `stats --no-stream --format json` from a 1.7.1 host: only the two nodes of
+/// the cluster `gtest`, which `container list` hides, and `cpuUtilization`.
+private let liveStats171 = #"[{"blockReadBytes":788164608,"blockWriteBytes":559792128,"cpuUsageUsec":18318088,"cpuUtilization":0.11966164052968623,"id":"gtest","memoryLimitBytes":3221225472,"memoryUsageBytes":1733218304,"networkRxBytes":0,"networkTxBytes":0,"numProcesses":206},{"blockReadBytes":456302592,"blockWriteBytes":180789248,"cpuUsageUsec":4032320,"cpuUtilization":0.028161277675011816,"id":"gtest-worker-1","memoryLimitBytes":2147483648,"memoryUsageBytes":759992320,"networkRxBytes":0,"networkTxBytes":0,"numProcesses":76}]"#
+
+@Test func appleStatsUseCPUUtilizationWhenPresent() throws {
+    let entries = try #require(try AppleContainerJSON.decode(Data(liveStats171.utf8)) as? [[String: Any]])
+    let body = try AppleContainerJSON.statsBody(fromAppleStats: entries[0], onlineCPUs: 8, monotonicNanoseconds: 5_000_000_000)
+    let sample = try JSONDecoder().decode(ContainerStatsSample.self, from: body)
+    // 0.1197 of one core is 11.97 %, also on the first sample.
+    #expect(abs(sample.cpuPercent - 11.966164052968623) < 0.0001)
+    #expect(sample.cpuTotalUsage == 18_318_088_000)
+    #expect(sample.pids == 206)
+    // A previous baseline does not override the CLI's own measure.
+    let again = try AppleContainerJSON.statsBody(
+        fromAppleStats: entries[0], onlineCPUs: 8, monotonicNanoseconds: 9_000_000_000,
+        previous: (cpuTotal: 1, system: 1)
+    )
+    #expect(abs(try JSONDecoder().decode(ContainerStatsSample.self, from: again).cpuPercent - 11.966164052968623) < 0.0001)
+}
+
+@Test func appleStatsFallBackWithoutCPUUtilization() throws {
+    let entry: [String: Any] = ["id": "c1", "cpuUsageUsec": 2_000_000]
+    #expect(AppleContainerJSON.cpuUtilization(entry) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": true]) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": -1.0]) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": 2.5]) == 2.5)
+    // 1 s of CPU over 1 s of wall time on 4 CPUs: one core, 100 %.
+    let body = try AppleContainerJSON.statsBody(
+        fromAppleStats: entry, onlineCPUs: 4, monotonicNanoseconds: 2_000_000_000,
+        previous: (cpuTotal: 1_000_000_000, system: 4_000_000_000)
+    )
+    #expect(abs(try JSONDecoder().decode(ContainerStatsSample.self, from: body).cpuPercent - 100) < 0.0001)
+}
+
+@Test func appleStatsIgnoreClusterNodeRows() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["stats"], stdout: liveStats171)
+    // A listed container that has no stats row is a 404, not a node's row.
+    do {
+        _ = try await client.containerStatsOnce(id: "web")
+        Issue.record("expected 404")
+    } catch let DockerError.apiError(status, _) {
+        #expect(status == 404)
+    }
+    let node = try await client.containerStatsOnce(id: "gtest-worker-1")
+    #expect(abs(node.cpuPercent - 2.8161277675011816) < 0.0001)
+}
