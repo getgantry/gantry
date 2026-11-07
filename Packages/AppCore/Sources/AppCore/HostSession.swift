@@ -135,7 +135,7 @@ public final class HostSession: Identifiable {
     /// Continuation resumed once the UI answers a host-key prompt.
     private var hostKeyContinuation: CheckedContinuation<Bool, Never>?
 
-    private var client: DockerClient?
+    private(set) var client: DockerClient?
 
     /// Recent container lifecycle events, for "Explain this failure".
     @ObservationIgnored

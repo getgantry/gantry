@@ -31,6 +31,10 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case containersUseImage(Int)
         /// N containers mount the volume.
         case containersUseVolume(Int)
+        /// N containers use one of the selected images.
+        case containersUseImages(Int)
+        /// N containers mount one of the selected volumes.
+        case containersUseVolumes(Int)
         /// The nodes this creation made so far are deleted.
         case partialNodesDeleted
         /// The machine is running and stops.
