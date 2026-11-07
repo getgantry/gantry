@@ -10,7 +10,11 @@ DerivedData/
 .swiftpm/
 
 ## Tooling
-.claude/
+# Keep local Claude Code state out of git, but share the spec-kit skills.
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/speckit-*/
 
 ## Build artifacts
 build/
