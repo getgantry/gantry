@@ -11,6 +11,13 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.26.1](https://github.com/getgantry/gantry/compare/v0.26.0...v0.26.1) (2026-11-07)
+
+
+### Fixes
+
+* **release:** find the universal gantry-mcp build with show-bin-path ([#45](https://github.com/getgantry/gantry/issues/45)) ([7296444](https://github.com/getgantry/gantry/commit/72964446e0008d0a987febd5a085fd9abadabd62))
+
 ## [0.26.0](https://github.com/getgantry/gantry/compare/v0.25.1...v0.26.0) (2026-11-07)
 
 
