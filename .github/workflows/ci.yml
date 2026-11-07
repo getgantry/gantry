@@ -94,13 +94,17 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Cache the build directory
+      # Cache only the fetched dependencies. A restored build folder from
+      # another branch breaks clang dependency scanning on Xcode 27.
+      - name: Cache the package dependencies
         uses: actions/cache@v6
         with:
-          path: Packages/${{ matrix.package }}/.build
-          key: spm-xcode27-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
+          path: |
+            Packages/${{ matrix.package }}/.build/repositories
+            Packages/${{ matrix.package }}/.build/checkouts
+          key: spm-deps-xcode27-${{ matrix.package }}-${{ runner.os }}-${{ hashFiles(format('Packages/{0}/Package.resolved', matrix.package)) }}
           restore-keys: |
-            spm-xcode27-${{ matrix.package }}-${{ runner.os }}-
+            spm-deps-xcode27-${{ matrix.package }}-${{ runner.os }}-
 
       - name: Test ${{ matrix.package }}
         # Live tests are gated with .enabled(if:) on the presence of a local
