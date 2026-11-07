@@ -39,6 +39,45 @@ public enum KubeAPIError: Error, LocalizedError, Equatable {
     }
 }
 
+extension KubeAPIError {
+    /// The error with every credential value of `auth` masked.
+    func redacted(_ auth: KubeAuth) -> KubeAPIError {
+        let secrets = KubeRedaction.secrets(of: auth)
+        switch self {
+        case .status(let code, let reason, let message): return .status(code: code, reason: reason, message: KubeRedaction.redact(message, secrets: secrets))
+        case .transport(let message): return .transport(KubeRedaction.redact(message, secrets: secrets))
+        case .credentials(let message): return .credentials(KubeRedaction.redact(message, secrets: secrets))
+        case .timedOut(let message): return .timedOut(KubeRedaction.redact(message, secrets: secrets))
+        case .noContext, .unexpectedResponse: return self
+        }
+    }
+}
+
+/// Masks credential values in texts that can reach the UI or a log.
+public enum KubeRedaction {
+    public static let mask = "••••••"
+
+    /// The token, password and key of a user, and the lines of a PEM key.
+    public static func secrets(of auth: KubeAuth) -> [String] {
+        var values = [auth.token, auth.password].compactMap { $0 }
+        if let user = auth.username, let password = auth.password {
+            values.append(Data("\(user):\(password)".utf8).base64EncodedString())
+        }
+        if let key = auth.clientKeyPEM.map({ String(decoding: $0, as: UTF8.self) }) {
+            values += key.split(whereSeparator: \.isNewline).map(String.init).filter { !$0.hasPrefix("-----") }
+        }
+        values += auth.exec?.env.values.map { $0 } ?? []
+        return values
+    }
+
+    /// `text` with each secret of 4 or more characters replaced by ``mask``.
+    public static func redact(_ text: String, secrets: [String]) -> String {
+        secrets.filter { $0.count >= 4 }.sorted { $0.count > $1.count }.reduce(text) {
+            $0.replacingOccurrences(of: $1, with: mask)
+        }
+    }
+}
+
 /// One API request, built without a network so tests can check it.
 public struct KubeRequest: Hashable, Sendable {
     public enum Method: String, Sendable {

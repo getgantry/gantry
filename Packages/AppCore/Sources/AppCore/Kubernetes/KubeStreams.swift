@@ -20,7 +20,12 @@ public final class KubeLogStream {
         self.lineLimit = lineLimit
     }
 
-    /// Starts a new stream and drops the old one.
+    /// The pause before a follow stream that ended connects again.
+    @ObservationIgnored public var reconnectDelay: Duration = .seconds(2)
+
+    /// Starts a new stream and drops the old one. With `follow`, a stream that
+    /// the server ends connects again for new lines only, until ``stop()`` or
+    /// an error status (for example a deleted pod).
     public func start(_ client: KubeAPIClient, pod: KubeResource, container: String?, follow: Bool, tail: Int = 500, previous: Bool = false) {
         stop()
         generation += 1
@@ -28,26 +33,43 @@ public final class KubeLogStream {
         lines = []
         failure = nil
         isRunning = true
-        let stream = client.lines(KubeRequests.logs(pod: pod, container: container, follow: follow, tail: tail, previous: previous))
+        let delay = reconnectDelay
         task = Task { [weak self] in
-            var batch: [String] = []
-            var lastFlush = ContinuousClock.now
-            do {
-                for try await line in stream {
-                    batch.append(line)
-                    // Group lines, so a fast log does not redraw per line.
-                    if batch.count >= 200 || ContinuousClock.now - lastFlush > .milliseconds(100) {
-                        self?.receive(batch, generation: current)
-                        batch = []
-                        lastFlush = .now
-                    }
+            var tailLines = tail
+            while true {
+                let request = KubeRequests.logs(pod: pod, container: container, follow: follow, tail: tailLines, previous: previous)
+                let error = await self?.read(client.lines(request), generation: current)
+                guard let self, !Task.isCancelled else { return }
+                let stopping = !follow || previous || error is CancellationError || (error as? KubeAPIError)?.statusCode != nil
+                if stopping {
+                    self.finish(error, generation: current)
+                    return
                 }
-                self?.receive(batch, generation: current)
-                self?.finish(nil, generation: current)
-            } catch {
-                self?.receive(batch, generation: current)
-                self?.finish(error, generation: current)
+                tailLines = 0
+                try? await Task.sleep(for: delay)
             }
+        }
+    }
+
+    /// Reads one stream into ``lines``. Returns the error that ended it.
+    private func read(_ stream: AsyncThrowingStream<String, Error>, generation: Int) async -> Error? {
+        var batch: [String] = []
+        var lastFlush = ContinuousClock.now
+        do {
+            for try await line in stream {
+                batch.append(line)
+                // Group lines, so a fast log does not redraw per line.
+                if batch.count >= 200 || ContinuousClock.now - lastFlush > .milliseconds(100) {
+                    receive(batch, generation: generation)
+                    batch = []
+                    lastFlush = .now
+                }
+            }
+            receive(batch, generation: generation)
+            return nil
+        } catch {
+            receive(batch, generation: generation)
+            return error
         }
     }
 

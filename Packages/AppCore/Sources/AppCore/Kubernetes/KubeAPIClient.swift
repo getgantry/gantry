@@ -77,26 +77,93 @@ actor KubeHTTPClientPool {
     }
 }
 
+/// Sends API requests. The HTTP transport is the real one; tests give a
+/// fake, so they do not need a network or a cluster.
+public protocol KubeTransport: Sendable {
+    /// Runs a request to completion. Throws ``KubeAPIError/status`` for a
+    /// status outside 200–299.
+    func send(_ request: KubeRequest, timeout: Duration) async throws -> (status: Int, body: Data)
+    /// The body of a streaming request, line by line.
+    func lines(_ request: KubeRequest) -> AsyncThrowingStream<String, Error>
+}
+
 /// A Kubernetes API client for one context. It talks HTTPS to the API
 /// server directly; no kubectl. Values of the credentials never go to logs.
 public struct KubeAPIClient: Sendable, Hashable {
     public let connection: KubeConnection
+    let transport: any KubeTransport
 
     /// Each plain request stops after this time, so a dead cluster does not
     /// hang the UI.
     public static let requestTimeout: Duration = .seconds(15)
-    /// The most bytes of one plain response.
-    static let maxBody = 64 << 20
 
-    public init(connection: KubeConnection) {
+    public init(connection: KubeConnection, transport: (any KubeTransport)? = nil) {
         self.connection = connection
+        self.transport = transport ?? KubeHTTPTransport(connection: connection)
     }
+
+    public static func == (lhs: KubeAPIClient, rhs: KubeAPIClient) -> Bool { lhs.connection == rhs.connection }
+    public func hash(into hasher: inout Hasher) { hasher.combine(connection) }
 
     public var context: String? { connection.context }
 
-    // MARK: - Credentials
-
     func requestAuth(refresh: Bool = false) async throws -> KubeRequestAuth {
+        try await KubeHTTPTransport.requestAuth(connection, refresh: refresh)
+    }
+
+    /// The headers of every request, the WebSocket ones included.
+    static func headers(for request: KubeRequest, auth: KubeRequestAuth, accept: String = "application/json") -> HTTPHeaders {
+        var headers = HTTPHeaders()
+        headers.add(name: "Accept", value: accept)
+        headers.add(name: "User-Agent", value: "Gantry")
+        if let authorization = auth.authorization { headers.add(name: "Authorization", value: authorization) }
+        if let contentType = request.contentType { headers.add(name: "Content-Type", value: contentType) }
+        return headers
+    }
+
+    /// Runs a request to completion and returns the body.
+    @discardableResult
+    public func send(_ request: KubeRequest, timeout: Duration = KubeAPIClient.requestTimeout) async throws -> Data {
+        try await transport.send(request, timeout: timeout).body
+    }
+
+    /// The status code of a request that succeeds (for 200 vs 201).
+    func sendWithStatus(_ request: KubeRequest) async throws -> (Int, Data) {
+        let result = try await transport.send(request, timeout: Self.requestTimeout)
+        return (result.status, result.body)
+    }
+
+    /// The body of a streaming request, line by line. The stream ends when
+    /// the server closes it; cancel the consuming task to stop it.
+    public func lines(_ request: KubeRequest) -> AsyncThrowingStream<String, Error> {
+        transport.lines(request)
+    }
+
+    static func describe(_ error: Error, server: URL) -> String {
+        if let error = error as? NIOSSLError {
+            return String(localized: "The TLS connection to \(server.absoluteString) failed: \(String(describing: error)).", bundle: .module)
+        }
+        if let error = error as? BoringSSLError {
+            return String(localized: "The TLS connection to \(server.absoluteString) failed: \(String(describing: error)).", bundle: .module)
+        }
+        if let error = error as? HTTPClientError, error == .connectTimeout {
+            return String(localized: "Gantry cannot connect to \(server.absoluteString).", bundle: .module)
+        }
+        if error is IOError || error is ChannelError {
+            return String(localized: "Gantry cannot connect to \(server.absoluteString). Make sure that the cluster runs.", bundle: .module)
+        }
+        return String(describing: error)
+    }
+}
+
+/// The real transport: AsyncHTTPClient with the TLS identity of the context.
+struct KubeHTTPTransport: KubeTransport {
+    let connection: KubeConnection
+
+    /// The most bytes of one plain response.
+    static let maxBody = 64 << 20
+
+    static func requestAuth(_ connection: KubeConnection, refresh: Bool = false) async throws -> KubeRequestAuth {
         let auth = connection.auth
         var result = KubeRequestAuth(certificatePEM: auth.clientCertificatePEM, keyPEM: auth.clientKeyPEM)
         if let exec = auth.exec {
@@ -120,23 +187,11 @@ public struct KubeAPIClient: Sendable, Hashable {
         return result
     }
 
-    /// The headers of every request, the WebSocket ones included.
-    static func headers(for request: KubeRequest, auth: KubeRequestAuth, accept: String = "application/json") -> HTTPHeaders {
-        var headers = HTTPHeaders()
-        headers.add(name: "Accept", value: accept)
-        headers.add(name: "User-Agent", value: "Gantry")
-        if let authorization = auth.authorization { headers.add(name: "Authorization", value: authorization) }
-        if let contentType = request.contentType { headers.add(name: "Content-Type", value: contentType) }
-        return headers
-    }
-
-    // MARK: - Requests
-
     private func execute(_ request: KubeRequest, auth: KubeRequestAuth, deadline: NIODeadline) async throws -> HTTPClientResponse {
         guard let url = request.url(server: connection.server) else { throw KubeAPIError.unexpectedResponse }
         var http = HTTPClientRequest(url: url.absoluteString)
         http.method = HTTPMethod(rawValue: request.method.rawValue)
-        http.headers = Self.headers(for: request, auth: auth)
+        http.headers = KubeAPIClient.headers(for: request, auth: auth)
         if let body = request.body { http.body = .bytes(ByteBuffer(bytes: body)) }
         let client = try await KubeHTTPClientPool.shared.client(connection, auth: auth)
         do {
@@ -148,46 +203,35 @@ public struct KubeAPIClient: Sendable, Hashable {
         } catch let error as KubeAPIError {
             throw error
         } catch {
-            throw KubeAPIError.transport(Self.describe(error, server: connection.server))
+            throw KubeAPIError.transport(KubeAPIClient.describe(error, server: connection.server))
         }
     }
 
     /// Sends a request; on 401 with an exec plugin, gets a new credential once.
     private func open(_ request: KubeRequest, deadline: NIODeadline) async throws -> HTTPClientResponse {
-        var response = try await execute(request, auth: try await requestAuth(), deadline: deadline)
+        var response = try await execute(request, auth: try await Self.requestAuth(connection), deadline: deadline)
         if response.status == .unauthorized, connection.auth.exec != nil {
-            response = try await execute(request, auth: try await requestAuth(refresh: true), deadline: deadline)
+            response = try await execute(request, auth: try await Self.requestAuth(connection, refresh: true), deadline: deadline)
         }
         guard (200..<300).contains(response.status.code) else {
             let body = (try? await response.body.collect(upTo: 1 << 20)).map { Data(buffer: $0) } ?? Data()
-            throw KubeAPIError.from(statusCode: Int(response.status.code), body: body)
+            throw KubeAPIError.from(statusCode: Int(response.status.code), body: body).redacted(connection.auth)
         }
         return response
     }
 
-    /// Runs a request to completion and returns the body.
-    @discardableResult
-    public func send(_ request: KubeRequest, timeout: Duration = KubeAPIClient.requestTimeout) async throws -> Data {
-        let response = try await open(request, deadline: .now() + .nanoseconds(Int64(timeout.components.seconds) * 1_000_000_000))
+    func send(_ request: KubeRequest, timeout: Duration) async throws -> (status: Int, body: Data) {
+        let response = try await open(request, deadline: .now() + .seconds(max(1, timeout.components.seconds)))
         do {
-            return Data(buffer: try await response.body.collect(upTo: Self.maxBody))
+            return (Int(response.status.code), Data(buffer: try await response.body.collect(upTo: Self.maxBody)))
         } catch is CancellationError {
             throw CancellationError()
         } catch {
-            throw KubeAPIError.transport(Self.describe(error, server: connection.server))
+            throw KubeAPIError.transport(KubeAPIClient.describe(error, server: connection.server))
         }
     }
 
-    /// The status code of a request that succeeds (for 200 vs 201).
-    func sendWithStatus(_ request: KubeRequest) async throws -> (Int, Data) {
-        let response = try await open(request, deadline: .now() + .seconds(Int64(Self.requestTimeout.components.seconds)))
-        let body = Data(buffer: try await response.body.collect(upTo: Self.maxBody))
-        return (Int(response.status.code), body)
-    }
-
-    /// The body of a streaming request, line by line. The stream ends when
-    /// the server closes it; cancel the consuming task to stop it.
-    public func lines(_ request: KubeRequest) -> AsyncThrowingStream<String, Error> {
+    func lines(_ request: KubeRequest) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -204,22 +248,6 @@ public struct KubeAPIClient: Sendable, Hashable {
             }
             continuation.onTermination = { _ in task.cancel() }
         }
-    }
-
-    static func describe(_ error: Error, server: URL) -> String {
-        if let error = error as? NIOSSLError {
-            return String(localized: "The TLS connection to \(server.absoluteString) failed: \(String(describing: error)).", bundle: .module)
-        }
-        if let error = error as? BoringSSLError {
-            return String(localized: "The TLS connection to \(server.absoluteString) failed: \(String(describing: error)).", bundle: .module)
-        }
-        if let error = error as? HTTPClientError, error == .connectTimeout {
-            return String(localized: "Gantry cannot connect to \(server.absoluteString).", bundle: .module)
-        }
-        if error is IOError || error is ChannelError {
-            return String(localized: "Gantry cannot connect to \(server.absoluteString). Make sure that the cluster runs.", bundle: .module)
-        }
-        return String(describing: error)
     }
 }
 

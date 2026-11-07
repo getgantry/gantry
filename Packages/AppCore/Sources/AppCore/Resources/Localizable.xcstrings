@@ -57775,6 +57775,17 @@
           }
         }
       }
+    },
+    "The context %@ uses the auth-provider %@. Kubernetes removed auth-provider in version 1.26. Change the user of the context to an exec credential plugin.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The context %@ uses the auth-provider %@. Kubernetes removed auth-provider in version 1.26. Change the user of the context to an exec credential plugin."
+          }
+        }
+      }
     }
   }
 }

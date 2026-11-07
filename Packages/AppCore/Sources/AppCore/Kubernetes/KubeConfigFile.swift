@@ -41,7 +41,8 @@ public struct KubeAuth: Hashable, Sendable, CustomStringConvertible {
     public var clientCertificatePEM: Data?
     public var clientKeyPEM: Data?
     public var exec: KubeExecConfig?
-    /// The name of a legacy `auth-provider` (for example `oidc`).
+    /// The name of a legacy `auth-provider` (for example `oidc`). Gantry
+    /// does not support it and shows a message.
     public var authProvider: String?
 
     public init() {}
@@ -98,6 +99,7 @@ public enum KubeConfigError: Error, LocalizedError, Equatable {
     case missingCluster(String)
     case invalidServer(String)
     case unreadableFile(String)
+    case authProviderUnsupported(context: String, provider: String)
 
     public var errorDescription: String? {
         switch self {
@@ -111,6 +113,8 @@ public enum KubeConfigError: Error, LocalizedError, Equatable {
             String(localized: "The server address \(server) is not valid.", bundle: .module)
         case .unreadableFile(let path):
             String(localized: "Gantry cannot read the file \(path).", bundle: .module)
+        case .authProviderUnsupported(let context, let provider):
+            String(localized: "The context \(context) uses the auth-provider \(provider). Kubernetes removed auth-provider in version 1.26. Change the user of the context to an exec credential plugin.", bundle: .module)
         }
     }
 }
@@ -213,6 +217,10 @@ public struct KubeConfigFile: @unchecked Sendable {
         )
         if let userName = context.body["user"]?.string, let user = users.first(where: { $0.name == userName }) {
             connection.auth = try Self.auth(user, readFile: readFile)
+            // Kubernetes removed auth-provider in 1.26 (maintainer decision: no support).
+            if let provider = connection.auth.authProvider, connection.auth.exec == nil {
+                throw KubeConfigError.authProviderUnsupported(context: name, provider: provider)
+            }
         }
         return connection
     }
@@ -242,11 +250,7 @@ public struct KubeConfigFile: @unchecked Sendable {
             )
         }
         if let provider = body["auth-provider"] {
-            auth.authProvider = provider["name"]?.string
-            // The legacy providers cache a token in their config.
-            if auth.token == nil, let config = provider["config"] {
-                auth.token = (config["id-token"]?.string ?? config["access-token"]?.string).flatMap { $0.isEmpty ? nil : $0 }
-            }
+            auth.authProvider = provider["name"]?.string ?? "unknown"
         }
         return auth
     }

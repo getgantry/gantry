@@ -61,16 +61,19 @@ public final class KubernetesBrowser {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let kubeconfigPaths: () -> [String]
+    @ObservationIgnored private let transport: ((KubeConnection) -> any KubeTransport)?
     @ObservationIgnored private var config = KubeConfigFile()
     /// The raw objects of the list by uid, for watch events.
     @ObservationIgnored private var items: [String: KubeResource] = [:]
 
     public init(
         defaults: UserDefaults = .standard,
-        kubeconfigPaths: @escaping () -> [String] = { KubeConfig.paths() }
+        kubeconfigPaths: @escaping () -> [String] = { KubeConfig.paths() },
+        transport: ((KubeConnection) -> any KubeTransport)? = nil
     ) {
         self.defaults = defaults
         self.kubeconfigPaths = kubeconfigPaths
+        self.transport = transport
     }
 
     /// Changes when the list must load again; the view restarts ``watch()`` on it.
@@ -122,7 +125,8 @@ public final class KubernetesBrowser {
     private func makeClient() {
         guard let selectedContext else { client = nil; return }
         do {
-            client = KubeAPIClient(connection: try config.connection(for: selectedContext))
+            let connection = try config.connection(for: selectedContext)
+            client = KubeAPIClient(connection: connection, transport: transport?(connection))
         } catch {
             client = nil
             loadError = Self.message(error)
@@ -162,7 +166,7 @@ public final class KubernetesBrowser {
     /// Keeps the list live until the task is cancelled: a list, then a watch
     /// from its resourceVersion. A watch that ends starts again; a lost
     /// resourceVersion (410) or an error lists again. Without watch it polls.
-    public func watch(interval: Duration = KubernetesBrowser.refreshInterval) async {
+    public func watch(interval: Duration = KubernetesBrowser.refreshInterval, retry: Duration = .seconds(2)) async {
         defer { isWatching = false }
         while !Task.isCancelled {
             guard var version = await reload(), let client else {
@@ -199,7 +203,7 @@ public final class KubernetesBrowser {
                         // No watch permission: poll.
                         try? await Task.sleep(for: interval)
                     } else {
-                        try? await Task.sleep(for: .seconds(2))
+                        try? await Task.sleep(for: retry)
                     }
                     break watching
                 }

@@ -86,23 +86,62 @@ public struct KubeExecCredential: Hashable, Sendable, CustomStringConvertible {
     }
 
     /// Runs the plugin and parses its output. Its stderr goes into the error
-    /// text; the plugin output is never logged.
-    public static func run(_ config: KubeExecConfig, connection: KubeConnection) async throws -> KubeExecCredential {
-        guard let path = resolveCommand(config) else {
+    /// text with the env values masked; the plugin output is never logged.
+    public static func run(
+        _ config: KubeExecConfig,
+        connection: KubeConnection,
+        runner: any KubeProcessRunner = KubeChildProcessRunner(),
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        isExecutable: (String) -> Bool = { FileManager.default.isExecutableFile(atPath: $0) }
+    ) async throws -> KubeExecCredential {
+        guard let path = resolveCommand(config, environment: environment, isExecutable: isExecutable) else {
             throw KubeAPIError.credentials(String(localized: "The credential plugin \(config.command) is not installed.", bundle: .module))
         }
-        var environment = config.env
-        environment["KUBERNETES_EXEC_INFO"] = execInfo(config, connection: connection)
-        environment["PATH"] = searchPath(ProcessInfo.processInfo.environment).joined(separator: ":")
-        let result = try await ChildProcess.run(path, config.args, environment: environment)
-        guard result.exit.succeeded else {
-            let text = String(decoding: result.stderr.prefix(600), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
-            let summary = result.exit.summary
+        var pluginEnvironment = config.env
+        pluginEnvironment["KUBERNETES_EXEC_INFO"] = execInfo(config, connection: connection)
+        pluginEnvironment["PATH"] = searchPath(environment).joined(separator: ":")
+        let result = try await runner.run(path, config.args, environment: pluginEnvironment)
+        guard result.succeeded else {
+            let text = KubeRedaction.redact(
+                String(decoding: result.stderr.prefix(600), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines),
+                secrets: Array(config.env.values)
+            )
+            let summary = result.summary
             throw KubeAPIError.credentials(text.isEmpty
                 ? String(localized: "The credential plugin failed (\(summary)).", bundle: .module)
                 : text)
         }
         return try parse(result.stdout)
+    }
+}
+
+/// The result of a finished process.
+public struct KubeProcessResult: Sendable {
+    public var succeeded: Bool
+    /// The exit status or signal, for messages.
+    public var summary: String
+    public var stdout: Data
+    public var stderr: Data
+
+    public init(succeeded: Bool, summary: String, stdout: Data, stderr: Data) {
+        self.succeeded = succeeded
+        self.summary = summary
+        self.stdout = stdout
+        self.stderr = stderr
+    }
+}
+
+/// Runs a credential plugin. Tests give a fake, so they start no process.
+public protocol KubeProcessRunner: Sendable {
+    func run(_ executable: String, _ arguments: [String], environment: [String: String]) async throws -> KubeProcessResult
+}
+
+public struct KubeChildProcessRunner: KubeProcessRunner {
+    public init() {}
+
+    public func run(_ executable: String, _ arguments: [String], environment: [String: String]) async throws -> KubeProcessResult {
+        let result = try await ChildProcess.run(executable, arguments, environment: environment)
+        return KubeProcessResult(succeeded: result.exit.succeeded, summary: result.exit.summary, stdout: result.stdout, stderr: result.stderr)
     }
 }
 
