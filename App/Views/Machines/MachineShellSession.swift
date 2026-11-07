@@ -19,11 +19,16 @@ final class MachineShellSession: TerminalSession, LocalProcessDelegate {
     private var process: LocalProcess!
     private var windowSize = winsize(ws_row: 24, ws_col: 80, ws_xpixel: 0, ws_ypixel: 0)
 
-    init(executable: String, args: [String]) {
+    /// `extraEnvironment` entries (`KEY=value`) go after SwiftTerm's defaults;
+    /// the kubectl exec shell uses it for `KUBECONFIG`.
+    init(executable: String, args: [String], extraEnvironment: [String] = []) {
         (stream, continuation) = AsyncThrowingStream<Data, Error>.makeStream()
         process = LocalProcess(delegate: self)
-        // Pass no environment so SwiftTerm supplies a sane default (TERM, PATH …).
-        process.startProcess(executable: executable, args: args)
+        // No extra entries: SwiftTerm supplies a sane default (TERM, PATH …).
+        let environment = extraEnvironment.isEmpty
+            ? nil
+            : Terminal.getEnvironmentVariables(termName: "xterm-256color") + extraEnvironment
+        process.startProcess(executable: executable, args: args, environment: environment)
     }
 
     // MARK: - TerminalSession

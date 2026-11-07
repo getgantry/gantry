@@ -55,6 +55,10 @@ struct GantryApp: App {
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                     model.applyLocalDockerPolicy()
                 }
+                // kubectl port-forward children must not outlive the app.
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                    model.kubernetes.portForwards.stopAll()
+                }
                 .onChange(of: appearance) { _, newValue in
                     applyAppearance(newValue)
                 }

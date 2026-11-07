@@ -100,6 +100,8 @@ struct SidebarSelection: Hashable {
 /// Top-level sidebar item: the cross-host dashboard or a section of a host.
 enum SidebarItem: Hashable {
     case dashboard
+    /// The Kubernetes browser; it reads kubeconfig contexts, not a host.
+    case kubernetes
     case host(SidebarSelection)
 
     var hostSelection: SidebarSelection? {
@@ -424,7 +426,7 @@ struct ContentView: View {
     /// third column would only say "Nothing Selected".
     private var usesFullWidth: Bool {
         switch selection {
-        case .dashboard, nil: true
+        case .dashboard, .kubernetes, nil: true
         case .host(let hostSelection): hostSelection.section.isFullWidth
         }
     }
@@ -464,7 +466,7 @@ struct ContentView: View {
         switch selection {
         case .dashboard: FocusedSection(section: nil)
         case .host(let hostSelection): FocusedSection(section: hostSelection.section)
-        case nil: nil
+        case .kubernetes, nil: nil
         }
     }
 
@@ -617,6 +619,8 @@ struct ContentView: View {
         List(selection: $selection) {
             Label("Dashboard", systemImage: "square.grid.2x2")
                 .tag(SidebarItem.dashboard)
+            Label("Kubernetes", systemImage: "helm")
+                .tag(SidebarItem.kubernetes)
 
             ForEach(model.sessions) { session in
                 Section(isExpanded: expansionBinding(for: session.host.id)) {
@@ -696,6 +700,8 @@ struct ContentView: View {
         switch selection {
         case .dashboard:
             FleetDashboardView(navigate: navigate)
+        case .kubernetes:
+            KubernetesView()
         case .host(let hostSelection):
             if let session = model.session(id: hostSelection.hostID) {
                 sectionContent(for: hostSelection.section, session: session)
@@ -882,7 +888,10 @@ struct ContentView: View {
             }
         case .cluster(let name):
             if let cluster = session.clusters.first(where: { $0.name == name }) {
-                ClusterDetailView(cluster: cluster, session: session)
+                ClusterDetailView(cluster: cluster, session: session) {
+                    model.kubernetes.selectedContext = cluster.kubectlContext
+                    self.selection = .kubernetes
+                }
             } else {
                 nothingSelected
             }
