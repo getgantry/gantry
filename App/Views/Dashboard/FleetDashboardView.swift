@@ -87,9 +87,9 @@ struct FleetDashboardView: View {
 
             HStack(spacing: 0) {
                 bannerStat(value: "\(c.hostsUp)/\(c.hostsTotal)", label: String(localized: "Hosts"), tint: c.hostsUp == c.hostsTotal ? .green : .orange)
-                bannerStat(value: "\(c.running)", label: String(localized: "Running"), tint: .green)
-                bannerStat(value: "\(c.unhealthy)", label: String(localized: "Unhealthy"), tint: c.unhealthy > 0 ? .red : .secondary)
-                bannerStat(value: "\(c.stopped)", label: String(localized: "Stopped"), tint: .secondary)
+                bannerStat(value: "\(c.running)", label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"), tint: .green)
+                bannerStat(value: "\(c.unhealthy)", label: String(localized: "tile.unhealthy", defaultValue: "Unhealthy", comment: "Label under a count of containers"), tint: c.unhealthy > 0 ? .red : .secondary)
+                bannerStat(value: "\(c.stopped)", label: String(localized: "tile.stopped", defaultValue: "Stopped", comment: "Label under a count of containers"), tint: .secondary)
             }
             .fixedSize()
         }
