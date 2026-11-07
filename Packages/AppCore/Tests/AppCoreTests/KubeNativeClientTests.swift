@@ -111,9 +111,9 @@ struct KubeConfigFileTests {
         #expect(exec.provideClusterInfo)
         #expect(exec.baseDirectory == "/k")
 
-        let oidc = try config.connection(for: "oidc", readFile: files).auth
-        #expect(oidc.authProvider == "oidc")
-        #expect(oidc.token == "idt")
+        #expect(throws: KubeConfigError.authProviderUnsupported(context: "oidc", provider: "oidc")) {
+            try config.connection(for: "oidc", readFile: files)
+        }
 
         #expect(try config.connection(for: "no-user", readFile: files).auth == KubeAuth())
     }
@@ -632,9 +632,13 @@ struct KubernetesBrowserTests {
         contexts: [{name: c, context: {cluster: c}}]
         """)
         defer { try? FileManager.default.removeItem(atPath: path) }
-        let browser = KubernetesBrowser(defaults: UserDefaults(suiteName: "kube-\(UUID().uuidString)")!, kubeconfigPaths: { [path] })
+        let transport = FakeKubeTransport { _ in throw KubeAPIError.transport("Gantry cannot connect to https://127.0.0.1:1.") }
+        let browser = KubernetesBrowser(
+            defaults: UserDefaults(suiteName: "kube-\(UUID().uuidString)")!, kubeconfigPaths: { [path] }, transport: { _ in transport }
+        )
         await browser.prepare()
         #expect(await browser.reload() == nil)
+        #expect(browser.loadError == "Gantry cannot connect to https://127.0.0.1:1.")
         #expect(browser.loadError != nil)
     }
 
@@ -645,5 +649,265 @@ struct KubernetesBrowserTests {
         await browser.prepare()
         #expect(browser.contexts.isEmpty)
         #expect(browser.loadError != nil)
+    }
+}
+
+/// A thread-safe call counter for fake handlers.
+final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = 0
+    func next() -> Int { lock.withLock { defer { value += 1 }; return value } }
+}
+
+/// A transport with scripted answers, so the tests need no cluster.
+final class FakeKubeTransport: KubeTransport, @unchecked Sendable {
+    private let lock = NSLock()
+    private var sendHandler: (KubeRequest) throws -> (Int, Data)
+    private var streams: [(KubeRequest) -> AsyncThrowingStream<String, Error>?] = []
+    private(set) var requests: [KubeRequest] = []
+
+    init(send: @escaping (KubeRequest) throws -> (Int, Data)) {
+        sendHandler = send
+    }
+
+    /// Adds the answer for the next streaming request.
+    func addStream(_ make: @escaping (KubeRequest) -> AsyncThrowingStream<String, Error>?) {
+        lock.withLock { streams.append(make) }
+    }
+
+    func setSend(_ handler: @escaping (KubeRequest) throws -> (Int, Data)) {
+        lock.withLock { sendHandler = handler }
+    }
+
+    var streamRequests: [KubeRequest] { lock.withLock { requests.filter(\.streaming) } }
+
+    func send(_ request: KubeRequest, timeout: Duration) async throws -> (status: Int, body: Data) {
+        let handler = lock.withLock { requests.append(request); return sendHandler }
+        let (status, body) = try handler(request)
+        return (status, body)
+    }
+
+    func lines(_ request: KubeRequest) -> AsyncThrowingStream<String, Error> {
+        let make: ((KubeRequest) -> AsyncThrowingStream<String, Error>?)? = lock.withLock {
+            requests.append(request)
+            return streams.isEmpty ? nil : streams.removeFirst()
+        }
+        // No script left: a stream that stays open until the task ends.
+        return make?(request) ?? AsyncThrowingStream { continuation in
+            let task = Task { try? await Task.sleep(for: .seconds(3600)); continuation.finish() }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    static func finished(_ lines: [String], error: Error? = nil) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            lines.forEach { continuation.yield($0) }
+            continuation.finish(throwing: error)
+        }
+    }
+}
+
+private func podList(_ names: [String], version: String) -> Data {
+    let items = names.map { #"{"metadata":{"name":"\#($0)","namespace":"web","uid":"\#($0)"},"status":{"phase":"Running"}}"# }
+    return json(#"{"metadata":{"resourceVersion":"\#(version)"},"items":[\#(items.joined(separator: ","))]}"#)
+}
+
+private func watchLine(_ type: String, _ name: String, version: String) -> String {
+    #"{"type":"\#(type)","object":{"metadata":{"name":"\#(name)","namespace":"web","uid":"\#(name)","resourceVersion":"\#(version)"},"status":{"phase":"Running"}}}"#
+}
+
+@MainActor
+struct KubernetesBrowserWatchTests {
+    private func browser(_ transport: FakeKubeTransport) throws -> KubernetesBrowser {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("kubeconfig-\(UUID().uuidString)").path
+        try """
+        clusters: [{name: c, cluster: {server: "https://fake"}}]
+        contexts: [{name: c, context: {cluster: c, namespace: web}}]
+        """.write(toFile: path, atomically: true, encoding: .utf8)
+        return KubernetesBrowser(
+            defaults: UserDefaults(suiteName: "kube-\(UUID().uuidString)")!,
+            kubeconfigPaths: { [path] },
+            transport: { _ in transport }
+        )
+    }
+
+    private func wait(_ condition: @escaping @MainActor () -> Bool) async throws {
+        for _ in 0..<200 where !condition() { try await Task.sleep(for: .milliseconds(10)) }
+    }
+
+    @Test func watchAppliesEventsAndListsAgainWhenTheVersionIsTooOld() async throws {
+        let lists = Counter()
+        let transport = FakeKubeTransport { request in
+            if request.path.hasSuffix("/namespaces") { return (200, json(#"{"items":[{"metadata":{"name":"web"}}]}"#)) }
+            // The second list (after 410) sees a new pod c.
+            return lists.next() == 0 ? (200, podList(["a"], version: "1")) : (200, podList(["a", "b", "c"], version: "6"))
+        }
+        transport.addStream { _ in
+            FakeKubeTransport.finished([
+                watchLine("ADDED", "b", version: "2"),
+                #"{"type":"BOOKMARK","object":{"metadata":{"resourceVersion":"5"}}}"#,
+                #"{"type":"ERROR","object":{"kind":"Status","code":410,"reason":"Expired"}}"#,
+            ])
+        }
+        transport.addStream { _ in
+            AsyncThrowingStream { continuation in
+                continuation.yield(watchLine("DELETED", "a", version: "7"))
+                let task = Task { try? await Task.sleep(for: .seconds(3600)); continuation.finish() }
+                continuation.onTermination = { _ in task.cancel() }
+            }
+        }
+        let browser = try browser(transport)
+        await browser.prepare()
+        let watch = Task { await browser.watch(interval: .milliseconds(10), retry: .milliseconds(10)) }
+        defer { watch.cancel() }
+
+        try await wait { browser.resources.map(\.name) == ["b", "c"] }
+        #expect(browser.resources.map(\.name) == ["b", "c"])
+        let versions = transport.streamRequests.compactMap { $0.query.first { $0.name == "resourceVersion" }?.value }
+        #expect(versions == ["1", "6"])
+        #expect(browser.isWatching)
+    }
+
+    @Test func watchEndsCleanlyAndStartsAgainFromTheLastVersion() async throws {
+        let transport = FakeKubeTransport { _ in (200, podList(["a"], version: "1")) }
+        transport.addStream { _ in FakeKubeTransport.finished([watchLine("MODIFIED", "a", version: "3")]) }
+        let browser = try browser(transport)
+        await browser.prepare()
+        let watch = Task { await browser.watch(interval: .milliseconds(10), retry: .milliseconds(10)) }
+        defer { watch.cancel() }
+        try await wait { transport.streamRequests.count >= 2 }
+        let versions = transport.streamRequests.compactMap { $0.query.first { $0.name == "resourceVersion" }?.value }
+        #expect(versions.prefix(2) == ["1", "3"])
+    }
+
+    @Test func forbiddenWatchFallsBackToPolling() async throws {
+        let transport = FakeKubeTransport { _ in (200, podList(["a"], version: "1")) }
+        for _ in 0..<20 {
+            transport.addStream { _ in FakeKubeTransport.finished([], error: KubeAPIError.status(code: 403, reason: "Forbidden", message: "no watch")) }
+        }
+        let browser = try browser(transport)
+        await browser.prepare()
+        let watch = Task { await browser.watch(interval: .milliseconds(20), retry: .milliseconds(10)) }
+        defer { watch.cancel() }
+        try await wait { transport.requests.filter { !$0.streaming && $0.path.hasSuffix("/pods") }.count >= 3 }
+        #expect(transport.requests.filter { !$0.streaming && $0.path.hasSuffix("/pods") }.count >= 3)
+        #expect(browser.resources.map(\.name) == ["a"])
+        #expect(browser.loadError == nil)
+    }
+
+    @Test func followedLogsConnectAgainForNewLines() async throws {
+        let transport = FakeKubeTransport { _ in (200, Data()) }
+        transport.addStream { _ in FakeKubeTransport.finished(["one", "two"]) }
+        transport.addStream { _ in FakeKubeTransport.finished(["three"], error: KubeAPIError.status(code: 404, reason: "NotFound", message: "pod gone")) }
+        let client = KubeAPIClient(connection: KubeConnection(context: "c", server: URL(string: "https://fake")!), transport: transport)
+        let stream = KubeLogStream()
+        stream.reconnectDelay = .milliseconds(10)
+        stream.start(client, pod: KubeResource(kind: .pods, name: "p", namespace: "web"), container: nil, follow: true, tail: 50)
+        try await wait { !stream.isRunning }
+        #expect(stream.lines == ["one", "two", "three"])
+        #expect(stream.failure == "pod gone")
+        let tails = transport.streamRequests.compactMap { $0.query.first { $0.name == "tailLines" }?.value }
+        #expect(tails == ["50", "0"])
+    }
+
+    @Test func applyUsesDiscoveryForUnknownKinds() async throws {
+        let transport = FakeKubeTransport { request in
+            switch request.path {
+            case "/apis/example.com/v1":
+                return (200, json(#"{"resources":[{"name":"widgets","kind":"Widget","namespaced":true}]}"#))
+            case "/apis/example.com/v1/namespaces/dev/widgets/w":
+                return (201, Data())
+            case "/api/v1/namespaces/dev/configmaps/c":
+                throw KubeAPIError.status(code: 422, reason: "Invalid", message: "data is bad")
+            default:
+                throw KubeAPIError.status(code: 404, reason: "NotFound", message: "not found: \(request.path)")
+            }
+        }
+        let client = KubeAPIClient(connection: KubeConnection(context: "c", server: URL(string: "https://fake")!), transport: transport)
+        let results = try await client.apply("""
+        apiVersion: example.com/v1
+        kind: Widget
+        metadata: {name: w}
+        ---
+        apiVersion: v1
+        kind: ConfigMap
+        metadata: {name: c}
+        ---
+        apiVersion: v1
+        kind: ConfigMap
+        """, defaultNamespace: "dev")
+        #expect(results.map(\.outcome) == [.created, .failed("data is bad"), .failed("The object has no metadata.name.")])
+        #expect(results[0].namespace == "dev")
+        let patches = transport.requests.filter { $0.method == .patch }
+        #expect(patches.allSatisfy { $0.contentType == "application/apply-patch+yaml" })
+    }
+}
+
+struct KubeSecretSafetyTests {
+    @Test func redactsCredentialValues() {
+        var auth = KubeAuth()
+        auth.token = "tok-12345"
+        auth.username = "admin"
+        auth.password = "hunter22"
+        auth.clientKeyPEM = Data("-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIKEYLINE\n-----END EC PRIVATE KEY-----\n".utf8)
+        let basic = Data("admin:hunter22".utf8).base64EncodedString()
+        let error = KubeAPIError.status(code: 401, reason: nil, message: "bad tok-12345 hunter22 \(basic) MHcCAQEEIKEYLINE").redacted(auth)
+        let text = error.errorDescription ?? ""
+        #expect(!text.contains("tok-12345"))
+        #expect(!text.contains("hunter22"))
+        #expect(!text.contains(basic))
+        #expect(!text.contains("MHcCAQEEIKEYLINE"))
+        #expect(text.contains(KubeRedaction.mask))
+        #expect(KubeRedaction.redact("abc", secrets: ["ab"]) == "abc")
+    }
+
+    @Test func authProviderShowsAMessage() throws {
+        let file = try KubeConfigFile(yaml: """
+        clusters: [{name: c, cluster: {server: "https://a"}}]
+        contexts: [{name: x, context: {cluster: c, user: u}}]
+        users: [{name: u, user: {auth-provider: {name: oidc, config: {id-token: secret-id-token}}}}]
+        """, directory: "/")
+        #expect(throws: KubeConfigError.authProviderUnsupported(context: "x", provider: "oidc")) { try file.connection(for: "x") }
+        let message = KubeConfigError.authProviderUnsupported(context: "x", provider: "oidc").errorDescription ?? ""
+        #expect(message.contains("exec"))
+        #expect(!message.contains("secret-id-token"))
+    }
+}
+
+/// A process runner with a fixed result, so no process starts.
+struct FakeProcessRunner: KubeProcessRunner {
+    var result: KubeProcessResult
+    func run(_ executable: String, _ arguments: [String], environment: [String: String]) async throws -> KubeProcessResult {
+        #expect(environment["KUBERNETES_EXEC_INFO"]?.contains("ExecCredential") == true)
+        return result
+    }
+}
+
+struct KubeExecRunnerTests {
+    private let connection = KubeConnection(context: "c", server: URL(string: "https://a")!)
+    private let config = KubeExecConfig(command: "/bin/plugin", env: ["API_KEY": "key-98765"])
+
+    @Test func successMissingFailureAndExpiry() async throws {
+        let ok = FakeProcessRunner(result: KubeProcessResult(
+            succeeded: true, summary: "exit 0",
+            stdout: json(#"{"kind":"ExecCredential","status":{"token":"t","expirationTimestamp":"2000-01-01T00:00:00Z"}}"#), stderr: Data()
+        ))
+        let credential = try await KubeExecCredential.run(config, connection: connection, runner: ok, environment: [:]) { _ in true }
+        #expect(credential.token == "t")
+        #expect(!credential.isValid())
+
+        await #expect(throws: KubeAPIError.self) {
+            try await KubeExecCredential.run(config, connection: connection, runner: ok, environment: [:]) { _ in false }
+        }
+
+        let failing = FakeProcessRunner(result: KubeProcessResult(
+            succeeded: false, summary: "exit 1", stdout: Data(), stderr: Data("auth failed for key-98765".utf8)
+        ))
+        do {
+            _ = try await KubeExecCredential.run(config, connection: connection, runner: failing, environment: [:]) { _ in true }
+            Issue.record("no error")
+        } catch let error as KubeAPIError {
+            #expect(error.errorDescription == "auth failed for \(KubeRedaction.mask)")
+        }
     }
 }
