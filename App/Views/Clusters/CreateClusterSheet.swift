@@ -14,6 +14,9 @@ struct CreateClusterSheet: View {
     @State private var workers = 0
     @State private var cpus = 2
     @State private var memoryGB = 4
+    @State private var workerCPUs = 2
+    @State private var workerMemoryGB = 4
+    @State private var sharedImageStore = false
     @State private var nodeImage = ""
     @State private var cni: CNIChoice = .standard
     @State private var manifestPath = ""
@@ -27,6 +30,9 @@ struct CreateClusterSheet: View {
     private var maxCPU: Int { max(1, ProcessInfo.processInfo.activeProcessorCount) }
     private var maxMemGB: Int { max(1, Int((Double(ProcessInfo.processInfo.physicalMemory) / Self.bytesPerGB).rounded())) }
     private var supportsWorkers: Bool { session.clusterFeatures?.clusterWorkers ?? false }
+    /// CLI 1.7+: workers have their own size, and nodes can share the image store.
+    private var supportsClusterService: Bool { session.clusterFeatures?.clusterService ?? false }
+    private var sizesWorkers: Bool { supportsClusterService && supportsWorkers && workers > 0 }
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
 
@@ -62,14 +68,11 @@ struct CreateClusterSheet: View {
                         }
                     }
                 }
-                field("CPUs") {
-                    Stepper(value: $cpus, in: 1...maxCPU) {
-                        Text("\(cpus) per node").monospacedDigit()
-                    }
-                }
-                field("Memory") {
-                    Stepper(value: $memoryGB, in: 1...maxMemGB) {
-                        Text("\(memoryGB) GB per node").monospacedDigit()
+                resourceFields
+                if supportsClusterService {
+                    field("Images") {
+                        Toggle("Use local images", isOn: $sharedImageStore)
+                            .help("The nodes pull images from the local image store, so locally built images run without a registry.")
                     }
                 }
                 field("Node image") {
@@ -140,10 +143,34 @@ struct CreateClusterSheet: View {
         .task { await session.loadClusterSupport() }
     }
 
+    @ViewBuilder
+    private var resourceFields: some View {
+        if sizesWorkers {
+            field("CPUs") { cpuStepper($cpus, String(localized: "\(cpus) for the control plane")) }
+            field("Memory") { memoryStepper($memoryGB, String(localized: "\(memoryGB) GB for the control plane")) }
+            field("Worker CPUs") { cpuStepper($workerCPUs, String(localized: "\(workerCPUs) per worker")) }
+            field("Worker memory") { memoryStepper($workerMemoryGB, String(localized: "\(workerMemoryGB) GB per worker")) }
+        } else {
+            field("CPUs") { cpuStepper($cpus, String(localized: "\(cpus) per node")) }
+            field("Memory") { memoryStepper($memoryGB, String(localized: "\(memoryGB) GB per node")) }
+        }
+    }
+
+    private func cpuStepper(_ value: Binding<Int>, _ text: String) -> some View {
+        Stepper(value: value, in: 1...maxCPU) { Text(text).monospacedDigit() }
+    }
+
+    private func memoryStepper(_ value: Binding<Int>, _ text: String) -> some View {
+        Stepper(value: value, in: 1...maxMemGB) { Text(text).monospacedDigit() }
+    }
+
     private var footnote: String {
         var text = String(localized: "Creating pulls the node image and can take several minutes. The progress shows in the cluster list. The cluster context is added to ~/.kube/config.")
         if cni == .none {
             text += " " + String(localized: "Without a CNI, the nodes stay NotReady until you apply one.")
+        }
+        if supportsClusterService && sharedImageStore {
+            text += " " + String(localized: "To run a local image, set imagePullPolicy to Never or IfNotPresent in your pods.")
         }
         return text
     }
@@ -178,6 +205,9 @@ struct CreateClusterSheet: View {
             workers: supportsWorkers ? workers : nil,
             cpus: cpus,
             memory: "\(memoryGB)G",
+            workerCPUs: sizesWorkers ? workerCPUs : nil,
+            workerMemory: sizesWorkers ? "\(workerMemoryGB)G" : nil,
+            sharedImageStore: supportsClusterService && sharedImageStore,
             nodeImage: nodeImage,
             cni: selectedCNI
         )

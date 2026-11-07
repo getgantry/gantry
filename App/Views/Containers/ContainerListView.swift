@@ -286,6 +286,8 @@ struct ContainerListView: View {
     /// Runs an action across every container of a group concurrently. Each
     /// failure is collected, and one banner lists them all.
     private func runOnGroup(_ containers: [ContainerSummary], _ action: ContainerAction) async {
+        // Cluster nodes belong to their cluster, so group actions skip them.
+        let containers = containers.filter { session.clusterNodeCluster($0.id) == nil }
         let tasks = containers.map { container in
             Task { @MainActor () -> String? in
                 let error = await session.attempt(fallback: String(localized: "The action failed.")) {
@@ -535,23 +537,15 @@ struct ContainerActionsMenu: View {
     private var isRunning: Bool { container.state.isRunning }
     private var isPaused: Bool { container.state == .paused }
     private var caps: HostCapabilities { session.host.capabilities }
+    /// The cluster that owns this container; its lifecycle actions are off.
+    private var nodeCluster: String? { session.clusterNodeCluster(container.id) }
 
     var body: some View {
-        button(.start, enabled: !isRunning)
-        button(.stop, enabled: isRunning)
-        button(.restart, enabled: isRunning)
-        if caps.pauseResume {
-            if isPaused {
-                button(.unpause, enabled: true)
-            } else {
-                button(.pause, enabled: isRunning)
-            }
-        }
-        button(.kill, enabled: isRunning)
+        lifecycleButtons
 
         Divider()
 
-        if caps.renameContainer {
+        if caps.renameContainer, nodeCluster == nil {
             Button {
                 renameText = container.displayName
                 renameTarget = container
@@ -631,6 +625,30 @@ struct ContainerActionsMenu: View {
             removeAction = .removeContainers([container], engine: .init(session.host))
         } label: {
             Label("Remove…", systemImage: "trash")
+        }
+        .disabled(nodeCluster != nil)
+    }
+
+    @ViewBuilder
+    private var lifecycleButtons: some View {
+        if let nodeCluster {
+            // A disabled item explains why the lifecycle actions are missing.
+            Button {} label: {
+                Label(AppleClusterNode.lifecycleExplanation(cluster: nodeCluster), systemImage: "steeringwheel")
+            }
+            .disabled(true)
+        } else {
+            button(.start, enabled: !isRunning)
+            button(.stop, enabled: isRunning)
+            button(.restart, enabled: isRunning)
+            if caps.pauseResume {
+                if isPaused {
+                    button(.unpause, enabled: true)
+                } else {
+                    button(.pause, enabled: isRunning)
+                }
+            }
+            button(.kill, enabled: isRunning)
         }
     }
 

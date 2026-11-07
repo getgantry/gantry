@@ -71,7 +71,9 @@ struct ImageListView: View {
         } label: {
             Label("Copy ID", systemImage: "doc.on.doc")
         }
-        if session.supportsClusters, !session.clusters.isEmpty, let reference = clusterReference(image) {
+        // CLI 1.7 removed `cluster load-image`: clusters use the shared image store instead.
+        if session.supportsClusters, session.clusterFeatures?.clusterLoadImage == true,
+           !session.clusters.isEmpty, let reference = clusterReference(image) {
             Menu {
                 ForEach(session.clusters) { cluster in
                     Button(cluster.name) { loadIntoCluster(reference, cluster: cluster.name) }
