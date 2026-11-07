@@ -17,6 +17,43 @@ extension HostSession {
         details: ContainerDetails,
         domain: String?
     ) async throws -> String {
+        let trimmedDomain = domain?.trimmingCharacters(in: .whitespaces) ?? ""
+        let hasDomain = !trimmedDomain.isEmpty
+
+        // Preserve existing labels, re-stamping (or clearing) our DNS marker so
+        // the address view reflects the new domain.
+        var labels = details.config.labels ?? [:]
+        if hasDomain {
+            labels[Self.dnsDomainLabelKey] = trimmedDomain
+        } else {
+            labels.removeValue(forKey: Self.dnsDomainLabelKey)
+        }
+        let request = recreationRequest(
+            container: container,
+            details: details,
+            labels: labels,
+            domainname: .some(hasDomain ? trimmedDomain : nil)
+        )
+
+        // Force-remove the old container first so its name is free to reuse.
+        _ = await perform(.remove(force: true), on: container.id)
+        let newID = try await createAndRun(request)
+        // Clear any stale negative DNS cache so the new name.domain resolves now.
+        if hasDomain { await AppleContainerControl.flushDNSCache() }
+        return newID
+    }
+
+    /// The create request that makes `container` again: image, command,
+    /// environment, published ports, binds, restart policy and labels.
+    /// `binds` replaces the binds of the old container when given;
+    /// `domainname` is `.none` to keep the old domain, `.some(nil)` to clear it.
+    public func recreationRequest(
+        container: ContainerSummary,
+        details: ContainerDetails,
+        labels: [String: String]? = nil,
+        domainname: String?? = .none,
+        binds: [String]? = nil
+    ) -> ContainerCreateRequest {
         let config = details.config
         let image = (config.image?.isEmpty == false) ? config.image! : container.image
 
@@ -27,18 +64,7 @@ extension HostSession {
                 portMap["\(port.privatePort)/\(port.type)"] = String(published)
             }
         }
-
-        let trimmedDomain = domain?.trimmingCharacters(in: .whitespaces) ?? ""
-        let hasDomain = !trimmedDomain.isEmpty
-
-        // Preserve existing labels, re-stamping (or clearing) our DNS marker so
-        // the address view reflects the new domain.
-        var labels = config.labels ?? [:]
-        if hasDomain {
-            labels[Self.dnsDomainLabelKey] = trimmedDomain
-        } else {
-            labels.removeValue(forKey: Self.dnsDomainLabelKey)
-        }
+        let labels = labels ?? config.labels ?? [:]
 
         // apple/container's inspect reports neither the custom kernel nor its
         // boot arguments, so the labels stamped at create time are the only
@@ -46,27 +72,20 @@ extension HostSession {
         // stock kernel.
         let appleOptions = ContainerCreateRequest.AppleOptions(labels: labels)
 
-        let request = ContainerCreateRequest(
+        return ContainerCreateRequest(
             image: image,
             cmd: config.cmd,
             env: config.env ?? [],
             ports: portMap,
-            binds: details.hostConfig.binds ?? [],
+            binds: binds ?? details.hostConfig.binds ?? [],
             restartPolicy: details.hostConfig.restartPolicy?.name ?? "no",
             tty: config.tty,
             labels: labels,
             autoRemove: details.hostConfig.autoRemove ?? false,
-            domainname: hasDomain ? trimmedDomain : nil,
+            domainname: domainname ?? config.domainname,
             appleOptions: appleOptions,
             name: container.displayName
         )
-
-        // Force-remove the old container first so its name is free to reuse.
-        _ = await perform(.remove(force: true), on: container.id)
-        let newID = try await createAndRun(request)
-        // Clear any stale negative DNS cache so the new name.domain resolves now.
-        if hasDomain { await AppleContainerControl.flushDNSCache() }
-        return newID
     }
 
     /// A friendly, unique container name derived from an image reference — e.g.

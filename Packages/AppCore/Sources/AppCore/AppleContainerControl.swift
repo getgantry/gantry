@@ -58,11 +58,14 @@ public enum AppleContainerControl {
         return .unknown
     }
 
-    public static func startServices(cliOverride: String? = nil) async throws {
+    /// Starts the services on the data root that Gantry stores
+    /// (``AppleDataRootStore``), or on `dataRoot` when given.
+    public static func startServices(cliOverride: String? = nil, dataRoot: AppleDataRoot? = nil) async throws {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }
         // `--disable-kernel-install` keeps 1.0 from blocking on the interactive
         // kernel-download prompt when stdin is not a terminal.
-        let result = await run(cli, ["system", "start", "--disable-kernel-install"])
+        let root = dataRoot ?? AppleDataRootStore.shared.load()
+        let result = await run(cli, root.startArguments, environment: root.cliEnvironment)
         // `system start` can still exit non-zero (e.g. the machine API server
         // check) while bringing the core services up, so confirm by re-checking.
         if result.exitCode != 0, await serviceStatus(cliOverride: cliOverride) != .running {
@@ -137,9 +140,9 @@ public enum AppleContainerControl {
 
     /// Stops then starts the background services so configuration changes (like a
     /// new default DNS domain) take effect. Running containers restart with them.
-    public static func restartServices(cliOverride: String? = nil) async throws {
+    public static func restartServices(cliOverride: String? = nil, dataRoot: AppleDataRoot? = nil) async throws {
         try? await stopServices(cliOverride: cliOverride)
-        try await startServices(cliOverride: cliOverride)
+        try await startServices(cliOverride: cliOverride, dataRoot: dataRoot)
         await flushDNSCache()
     }
 
@@ -209,7 +212,7 @@ public enum AppleContainerControl {
         environment extraEnvironment: [String: String] = [:],
         input: Data? = nil
     ) async -> RunResult {
-        var environment = ["NO_COLOR": "1"]
+        var environment = ["NO_COLOR": "1"].merging(AppleDataRootStore.shared.load().cliEnvironment) { _, new in new }
         environment.merge(extraEnvironment) { _, new in new }
         do {
             let result = try await ChildProcess.run(executable, arguments, environment: environment, input: input)

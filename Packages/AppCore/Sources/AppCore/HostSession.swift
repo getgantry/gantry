@@ -1340,6 +1340,13 @@ public final class HostSession: Identifiable {
             report(AppleClusterNode.lifecycleExplanation(cluster: cluster))
             return false
         }
+        // A bind mount from a disk that is not connected cannot start.
+        if action == .start || action == .restart,
+           let container = containers.first(where: { $0.id == id }),
+           let block = storageBlock(for: container) {
+            report(block.startMessage)
+            return false
+        }
         // A user-driven stop/restart/kill/remove makes the container's exit
         // expected, so its `die` event is not reported as a crash.
         switch action {
@@ -1849,10 +1856,11 @@ extension HostSession {
     public func createVolume(
         name: String,
         driver: String = "local",
-        labels: [String: String] = [:]
+        labels: [String: String] = [:],
+        driverOptions: [String: String] = [:]
     ) async -> Volume? {
         await mutateValue(refresh: refreshVolumes) {
-            try await $0.createVolume(name: name, driver: driver, labels: labels)
+            try await $0.createVolume(name: name, driver: driver, labels: labels, driverOptions: driverOptions)
         }
     }
 

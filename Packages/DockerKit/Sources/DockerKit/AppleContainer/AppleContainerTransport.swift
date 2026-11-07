@@ -13,6 +13,8 @@ public actor AppleContainerTransport: DockerTransport {
     public static let unsupportedMessage = "Not supported by apple/container hosts"
 
     private let runner: any AppleContainerCLIRunning
+    /// The data root to start the services with (see ``AppleDataRoot``).
+    private let dataRoot: @Sendable () -> AppleDataRoot
 
     /// Pending/running exec instances created via `POST /containers/{id}/exec`.
     private struct ExecState {
@@ -42,8 +44,12 @@ public actor AppleContainerTransport: DockerTransport {
     /// samples carry `precpu_stats` and decode to a meaningful CPU%.
     private var statsBaselines: [String: (cpuTotal: Int64, system: Int64)] = [:]
 
-    public init(runner: any AppleContainerCLIRunning) {
+    public init(
+        runner: any AppleContainerCLIRunning,
+        dataRoot: @escaping @Sendable () -> AppleDataRoot = { AppleDataRootStore.shared.load() }
+    ) {
         self.runner = runner
+        self.dataRoot = dataRoot
     }
 
     /// apple/container builds run through the `container build` CLI, not the
@@ -350,7 +356,7 @@ public actor AppleContainerTransport: DockerTransport {
             // closed, blocks forever. Skipping the install still brings the API
             // server up (the kernel only matters when running a container); its
             // exit status is not authoritative, so re-check.
-            _ = try? await runner.run(["system", "start", "--disable-kernel-install"])
+            _ = try? await runner.run(dataRoot().startArguments)
             status = try await systemStatusJSON()
         }
         guard Self.isRunning(status) else {
@@ -1130,6 +1136,10 @@ public actor AppleContainerTransport: DockerTransport {
         var arguments = ["volume", "create"]
         for (key, value) in ((json["Labels"] as? [String: String]) ?? [:]).sorted(by: { $0.key < $1.key }) {
             arguments += ["--label", "\(key)=\(value)"]
+        }
+        // apple/container knows the `size` and `journal` options.
+        for (key, value) in ((json["DriverOpts"] as? [String: String]) ?? [:]).sorted(by: { $0.key < $1.key }) {
+            arguments += ["--opt", "\(key)=\(value)"]
         }
         arguments.append(name)
         try await cli(arguments)

@@ -1036,3 +1036,25 @@ private let multiVariantImageJSON = """
     let node = try await client.containerStatsOnce(id: "gtest-worker-1")
     #expect(abs(node.cpuPercent - 2.8161277675011816) < 0.0001)
 }
+
+// MARK: - Data root and volume options
+
+@Test func appleTransportStartsServicesOnTheStoredDataRoot() async throws {
+    let runner = ScriptedCLIRunner()
+    runner.stub(["system", "status"], stdout: #"{"status":"stopped"}"#)
+    runner.stub(["system", "start"])
+    let root = AppleDataRoot(path: "/Volumes/Fast/com.apple.container")
+    let client = DockerClient(transport: AppleContainerTransport(runner: runner, dataRoot: { root }))
+    await #expect(throws: Error.self) { try await client.negotiate() }
+    #expect(runner.recordedCalls().contains([
+        "system", "start", "--disable-kernel-install", "--app-root", "/Volumes/Fast/com.apple.container"
+    ]))
+}
+
+@Test func appleVolumeCreatePassesDriverOptions() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["volume", "create"])
+    runner.stub(["volume", "inspect"], stdout: #"[{"name":"data","driver":"local"}]"#)
+    _ = try await client.createVolume(name: "data", driverOptions: ["size": "2G"])
+    #expect(runner.recordedCalls().contains(["volume", "create", "--opt", "size=2G", "data"]))
+}
