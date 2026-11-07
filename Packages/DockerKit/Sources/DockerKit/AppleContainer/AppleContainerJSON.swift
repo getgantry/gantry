@@ -468,14 +468,32 @@ enum AppleContainerJSON {
         return id.contains(":") ? id : "sha256:" + id
     }
 
-    /// Total image size in bytes: the sum of `variants[].size` (1.0) or the
-    /// localized `fullSize` string (0.12).
-    static func imageSizeBytes(_ element: [String: Any]) -> Int64 {
+    /// Image size in bytes: the `variants[].size` of the Mac's own Linux
+    /// platform (1.0), or the localized `fullSize` string (0.12). A multi-arch
+    /// index lists every platform, but only the native one runs here.
+    static func imageSizeBytes(_ element: [String: Any], architecture: String = nativeArchitecture) -> Int64 {
         let variants = array(element["variants"])
         if !variants.isEmpty {
-            return variants.reduce(Int64(0)) { $0 + int64($1["size"]) }
+            let native = variants.filter {
+                let platform = object($0["platform"])
+                return string(platform["os"]) == "linux" && string(platform["architecture"]) == architecture
+            }
+            if let first = native.first { return int64(first["size"]) }
+            let sizes = variants.map { int64($0["size"]) }
+            // Without platform data, the variants are layers of one image.
+            let hasPlatforms = variants.contains { !object($0["platform"]).isEmpty }
+            return hasPlatforms ? (sizes.max() ?? 0) : sizes.reduce(0, +)
         }
         return bytes(fromLocalizedSize: string(field(element, "fullSize")))
+    }
+
+    /// The Linux architecture that runs natively on this Mac.
+    static var nativeArchitecture: String {
+        #if arch(arm64)
+        "arm64"
+        #else
+        "amd64"
+        #endif
     }
 
     /// Strips the implicit registry prefix Docker also hides ("docker.io/library/").
