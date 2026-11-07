@@ -366,6 +366,40 @@ struct ClusterDetailView: View {
         }
         .kubeconfigResultAlert($kubeconfigResult)
         .task(id: cluster.nodes.map(\.name)) { networks = await session.clusterNetworks(cluster.name) }
+        .toolbar { detailToolbar }
+    }
+
+    /// Icon-only actions with help tags, then a More menu, so no title
+    /// is cut off at narrow widths.
+    @ToolbarContentBuilder
+    private var detailToolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .primaryAction) {
+            if let browseKubernetes, cluster.isRunning {
+                Button(action: browseKubernetes) {
+                    Label("Browse Resources", systemImage: "helm")
+                }
+                .help("Opens the Kubernetes section with the context of this cluster.")
+                .disabled(busy)
+            }
+            Menu {
+                Button { writeKubeconfig() } label: {
+                    Label("Write Kubeconfig…", systemImage: "square.and.arrow.down")
+                }
+                Button {
+                    copyToPasteboard(AppleContainerControl.kubectlUseContextCommand(for: cluster.kubectlContext))
+                } label: {
+                    Label("Copy kubectl Context Command", systemImage: "doc.on.doc")
+                }
+                Divider()
+                Button(role: .destructive) { deleteAction = ClusterText.deleteAction(cluster.name) } label: {
+                    Label("Delete…", systemImage: "trash")
+                }
+            } label: {
+                Label("More", systemImage: "ellipsis")
+            }
+            .help("More actions for this cluster")
+            .disabled(busy)
+        }
     }
 
     private var header: some View {
@@ -385,64 +419,73 @@ struct ClusterDetailView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            HStack(spacing: 8) {
-                if busy { ProgressView().controlSize(.small) }
-                if let browseKubernetes, cluster.isRunning {
-                    Button(action: browseKubernetes) {
-                        Label("Browse Resources", systemImage: "helm")
-                    }
-                    .help("Opens the Kubernetes section with the context of this cluster.")
-                }
-                Button { writeKubeconfig() } label: {
-                    Label("Write Kubeconfig…", systemImage: "square.and.arrow.down")
-                }
-                Button {
-                    copyToPasteboard(AppleContainerControl.kubectlUseContextCommand(for: cluster.kubectlContext))
-                } label: {
-                    Label("Copy kubectl Context Command", systemImage: "doc.on.doc")
-                }
-                .help("Copies “kubectl config use-context \(cluster.kubectlContext)”.")
-                Button(role: .destructive) { deleteAction = ClusterText.deleteAction(cluster.name) } label: {
-                    Label("Delete…", systemImage: "trash")
-                }
-            }
-            .disabled(busy)
+            if busy { ProgressView().controlSize(.small) }
         }
         .padding([.horizontal, .top])
     }
 
     private var overview: some View {
         ScrollView {
-            FactGrid {
-                Fact(String(localized: "Status"), ClusterText.state(cluster.state))
-                Fact(String(localized: "kubectl Context"), cluster.kubectlContext)
-                if let url = cluster.apiServerURL { Fact(String(localized: "API Server"), url) }
-                if let cp = cluster.controlPlane { Fact(String(localized: "Control Plane"), cp.name) }
-                Fact(String(localized: "Workers"), "\(cluster.workers.count)")
-                if !networks.isEmpty {
-                    Fact(String(localized: "Network"), networks.joined(separator: ", "))
+            VStack(alignment: .leading, spacing: Spacing.m) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: Spacing.s)], spacing: Spacing.s) {
+                    StatTile(
+                        value: "\(cluster.nodes.filter(\.isRunning).count)/\(cluster.nodes.count)",
+                        label: String(localized: "Nodes running"),
+                        systemImage: "server.rack",
+                        tint: cluster.isRunning ? .green : .secondary
+                    )
+                    StatTile(value: "\(totalCPUs)", label: String(localized: "CPUs"), systemImage: "cpu", tint: .blue)
+                    StatTile(value: Formatters.bytes(totalMemory), label: String(localized: "Memory"), systemImage: "memorychip", tint: .green)
                 }
-                if let cp = cluster.controlPlane {
-                    Fact(String(localized: "Node Resources"), "\(cp.cpus) CPU · \(Formatters.bytes(cp.memoryBytes))")
+                DashboardCard("Cluster", systemImage: "steeringwheel") {
+                    clusterFacts
                 }
-                if let worker = cluster.workers.first, cluster.controlPlane.map({ !ClusterText.sameSize($0, worker) }) ?? false {
-                    Fact(String(localized: "Worker Resources"), "\(worker.cpus) CPU · \(Formatters.bytes(worker.memoryBytes))")
+                DashboardCard("Nodes", systemImage: "square.stack.3d.up") {
+                    nodeList
                 }
-                if let version = cluster.kubernetesVersion { Fact(String(localized: "Kubernetes"), version) }
-                if let shared = cluster.sharedImageStore {
-                    Fact(String(localized: "Images"), shared ? String(localized: "Local image store") : String(localized: "Node image store"))
+                if let network = networks.first {
+                    DashboardCard("Reach Services from macOS", systemImage: "network") {
+                        Text("Run a gateway container on the cluster network. For example:")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                        CommandBox(command: "container run -d --name gateway --network \(network),alias=.gateway …")
+                    }
                 }
             }
-            .padding()
+            .padding(Spacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
 
-            if let network = networks.first {
-                Text("To reach cluster services from macOS, run a gateway container on the same network, for example: container run -d --name gateway --network \(network),alias=.gateway …")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-                    .padding(.horizontal)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+    private var totalCPUs: Int { cluster.nodes.reduce(0) { $0 + $1.cpus } }
+    private var totalMemory: Int64 { cluster.nodes.reduce(Int64(0)) { $0 + $1.memoryBytes } }
+
+    private var clusterFacts: some View {
+        FactGrid {
+            Fact(String(localized: "Status"), ClusterText.state(cluster.state))
+            Fact(String(localized: "kubectl Context"), cluster.kubectlContext, monospaced: true, copyable: true)
+            if let url = cluster.apiServerURL { Fact(String(localized: "API Server"), url, monospaced: true, copyable: true) }
+            if !networks.isEmpty {
+                Fact(String(localized: "Network"), networks.joined(separator: ", "), monospaced: true)
+            }
+            if let cp = cluster.controlPlane {
+                Fact(String(localized: "Node Resources"), "\(cp.cpus) CPU · \(Formatters.bytes(cp.memoryBytes))")
+            }
+            if let worker = cluster.workers.first, cluster.controlPlane.map({ !ClusterText.sameSize($0, worker) }) ?? false {
+                Fact(String(localized: "Worker Resources"), "\(worker.cpus) CPU · \(Formatters.bytes(worker.memoryBytes))")
+            }
+            if let version = cluster.kubernetesVersion { Fact(String(localized: "Kubernetes"), version, monospaced: true) }
+            if let shared = cluster.sharedImageStore {
+                Fact(String(localized: "Images"), shared ? String(localized: "Local image store") : String(localized: "Node image store"))
+            }
+        }
+    }
+
+    private var nodeList: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(cluster.nodes.enumerated()), id: \.element.id) { index, node in
+                if index > 0 { Divider() }
+                ClusterNodeSummaryRow(node: node)
             }
         }
     }
@@ -474,6 +517,39 @@ struct ClusterDetailView: View {
             await action()
             busy = false
         }
+    }
+}
+
+/// One node in the cluster overview: state, name, role, address, size.
+private struct ClusterNodeSummaryRow: View {
+    let node: ContainerClusterNode
+
+    var body: some View {
+        HStack(spacing: Spacing.s) {
+            Image(systemName: node.isRunning ? "checkmark.circle.fill" : "stop.circle")
+                .foregroundStyle(node.isRunning ? .green : .secondary)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(verbatim: node.name).font(.callout.monospaced())
+                Text(verbatim: ClusterText.role(node))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: Spacing.xs)
+            if !node.address.isEmpty {
+                Text(verbatim: node.address)
+                    .font(.callout.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
+            Text(verbatim: "\(node.cpus) CPU · \(Formatters.bytes(node.memoryBytes))")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 90, alignment: .trailing)
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(node.isRunning ? String(localized: "running") : String(localized: "stopped"))
     }
 }
 

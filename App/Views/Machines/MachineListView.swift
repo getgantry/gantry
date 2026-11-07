@@ -282,6 +282,7 @@ struct MachineDetailView: View {
         // SwiftUI would centre the header and tab strip vertically.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle(machine.id)
+        .toolbar { detailToolbar }
         .task(id: machine.id) { syncEdits() }
         .task { features = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride) }
     }
@@ -319,15 +320,15 @@ struct MachineDetailView: View {
                 Fact("Memory", Formatters.bytes(machine.memory))
                 Fact("Disk", Formatters.bytes(machine.diskSize))
                 if machine.isRunning, !machine.ipAddress.isEmpty {
-                    Fact("IP Address", machine.ipAddress)
+                    Fact("IP Address", machine.ipAddress, monospaced: true, copyable: true)
                 }
-                if let image = machine.imageReference { Fact("Image", image) }
+                if let image = machine.imageReference { Fact("Image", image, monospaced: true, copyable: true) }
                 if let user = machine.username { Fact("User", user) }
-                if let home = machine.homeMount { Fact("Home Mount", home) }
+                if let home = machine.homeMount { Fact("Home Mount", home, monospaced: true) }
                 if let nested = machine.nestedVirtualization {
                     Fact("Nested Virtualization", nested ? String(localized: "Enabled") : String(localized: "Disabled"))
                 }
-                if let kernel = machine.kernelPath, !kernel.isEmpty { Fact("Kernel", kernel) }
+                if let kernel = machine.kernelPath, !kernel.isEmpty { Fact("Kernel", kernel, monospaced: true) }
                 if !machine.created.isEmpty { Fact("Created", machine.created) }
             }
             .padding()
@@ -352,35 +353,43 @@ struct MachineDetailView: View {
                 }
             }
             Spacer()
-            actionButtons
+            if busy { ProgressView().controlSize(.small) }
         }
         .padding([.horizontal, .top])
     }
 
-    @ViewBuilder
-    private var actionButtons: some View {
-        HStack(spacing: 8) {
-            if busy {
-                ProgressView().controlSize(.small)
-            }
+    /// Icon-only toolbar actions with help tags, and a More menu for the
+    /// rare ones, so no title is cut off.
+    @ToolbarContentBuilder
+    private var detailToolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .primaryAction) {
             if machine.isRunning {
-                Button { openShell() } label: { Label("Shell", systemImage: "terminal") }
-                MachineVSCodeButton(machine: machine)
                 Button { act { await session.stopMachine(machine.id) } } label: {
                     Label("Stop", systemImage: "stop.fill")
                 }
+                .help("Stop the machine")
+                Button { openShell() } label: { Label("Shell", systemImage: "terminal") }
+                    .help("Open a shell in the machine")
+                MachineVSCodeButton(machine: machine)
             } else {
                 Button { act { await session.startMachine(machine.id) } } label: {
                     Label("Start", systemImage: "play.fill")
                 }
+                .help("Start the machine")
             }
-            if !machine.isDefault {
+            Menu {
                 Button { act { await session.setDefaultMachine(machine.id) } } label: {
-                    Label("Set Default", systemImage: "star")
+                    Label("Set as Default", systemImage: "star")
                 }
+                .disabled(machine.isDefault)
+                Button { copyToPasteboard(machine.id) } label: {
+                    Label("Copy Name", systemImage: "doc.on.doc")
+                }
+            } label: {
+                Label("More", systemImage: "ellipsis")
             }
+            .help("More actions for this machine")
         }
-        .disabled(busy)
     }
 
     // MARK: Resource editor

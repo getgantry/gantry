@@ -94,19 +94,22 @@ struct KubeDetailHeader: View {
         HStack(spacing: 8) {
             if resource.kind.canScale {
                 Button { actions.scale(resource) } label: { Label("Scale…", systemImage: "plusminus") }
+                    .help("Scale…")
             }
             if resource.kind.canRestart {
                 Button { actions.restart(resource) } label: { Label("Restart", systemImage: "arrow.clockwise") }
+                    .help("Restart")
             }
             if resource.kind.canPortForward {
                 Button { actions.forward(resource) } label: { Label("Forward Port…", systemImage: "arrow.left.arrow.right") }
+                    .help("Forward Port…")
             }
             if resource.kind.canDelete {
                 Button(role: .destructive) { actions.delete(resource) } label: { Label("Delete…", systemImage: "trash") }
+                    .help("Delete…")
             }
         }
         .labelStyle(.iconOnly)
-        .help("Actions for \(resource.reference)")
     }
 }
 
@@ -128,7 +131,7 @@ struct KubeOverview: View {
                 if let created = resource.createdAt {
                     Fact(String(localized: "Created"), created.formatted(date: .abbreviated, time: .standard))
                 }
-                if !resource.uid.isEmpty { Fact("UID", resource.uid) }
+                if !resource.uid.isEmpty { Fact("UID", resource.uid, monospaced: true, copyable: true) }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
