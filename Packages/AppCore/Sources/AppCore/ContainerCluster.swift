@@ -52,12 +52,23 @@ public struct ContainerCluster: Identifiable, Hashable, Sendable {
     public var name: String
     /// Control-plane nodes first, then workers.
     public var nodes: [ContainerClusterNode]
+    /// The Kubernetes version from the node image tag (CLI 1.7+ JSON only).
+    public var kubernetesVersion: String?
+    /// Whether the nodes pull from the local image store (CLI 1.7+ JSON only).
+    public var sharedImageStore: Bool?
 
     public var id: String { name }
 
-    public init(name: String, nodes: [ContainerClusterNode]) {
+    public init(
+        name: String,
+        nodes: [ContainerClusterNode],
+        kubernetesVersion: String? = nil,
+        sharedImageStore: Bool? = nil
+    ) {
         self.name = name
         self.nodes = nodes
+        self.kubernetesVersion = kubernetesVersion
+        self.sharedImageStore = sharedImageStore
     }
 
     public var controlPlane: ContainerClusterNode? { nodes.first(where: \.isControlPlane) }
@@ -111,6 +122,61 @@ public struct ContainerCluster: Identifiable, Hashable, Sendable {
     }
 
     // MARK: - Parsing
+
+    /// Parses `container cluster list --format json` (CLI 1.7+): an array of
+    /// `{id, configuration, status}`. The JSON has no CPUs or memory; merge
+    /// them from the `--nodes` table with ``mergingResources(from:)``.
+    /// Nil when the data is not that shape.
+    public static func parseJSON(_ data: Data) -> [ContainerCluster]? {
+        guard let items = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return nil }
+        return items.compactMap(parseJSONCluster)
+    }
+
+    private static func parseJSONCluster(_ item: [String: Any]) -> ContainerCluster? {
+        let configuration = item["configuration"] as? [String: Any] ?? [:]
+        let status = item["status"] as? [String: Any] ?? [:]
+        guard let name = (configuration["name"] as? String) ?? (item["id"] as? String), !name.isEmpty else { return nil }
+        let states = (status["nodes"] as? [[String: Any]] ?? []).reduce(into: [String: [String: Any]]()) { result, node in
+            if let nodeName = node["name"] as? String { result[nodeName] = node }
+        }
+        let configured = configuration["nodes"] as? [[String: Any]] ?? []
+        // A node that the configuration does not list still shows.
+        var names = configured.compactMap { $0["name"] as? String }
+        for extra in states.keys.sorted() where !names.contains(extra) { names.append(extra) }
+        let nodes = names.map { nodeName -> ContainerClusterNode in
+            let roles = configured.first { $0["name"] as? String == nodeName }?["roles"] as? [String] ?? []
+            let state = states[nodeName]
+            return ContainerClusterNode(
+                name: nodeName,
+                role: roles.joined(separator: ","),
+                state: state?["status"] as? String ?? "stopped",
+                address: (state?["addresses"] as? [String] ?? []).joined(separator: ","),
+                ports: (state?["ports"] as? [String] ?? []).joined(separator: ",")
+            )
+        }
+        return ContainerCluster(
+            name: name,
+            nodes: nodes.filter(\.isControlPlane) + nodes.filter { !$0.isControlPlane },
+            kubernetesVersion: (configuration["kubernetesVersion"] as? String).flatMap { $0.isEmpty ? nil : $0 },
+            sharedImageStore: configuration["sharedImageStore"] as? Bool
+        )
+    }
+
+    /// Copies the CPUs and memory of each node from `table` (parsed from
+    /// `cluster list --nodes`), matched by cluster and node name.
+    public func mergingResources(from table: [ContainerCluster]) -> ContainerCluster {
+        guard let other = table.first(where: { $0.name == name }) else { return self }
+        var copy = self
+        copy.nodes = nodes.map { node in
+            guard let match = other.nodes.first(where: { $0.name == node.name }) else { return node }
+            var merged = node
+            merged.cpus = match.cpus
+            merged.memoryMB = match.memoryMB
+            if merged.role.isEmpty { merged.role = match.role }
+            return merged
+        }
+        return copy
+    }
 
     /// Parses the `container cluster list` table. The CLI pads each column to
     /// its longest cell, so header offsets keep empty cells and the `2048 MB`
@@ -184,7 +250,8 @@ public struct ContainerCluster: Identifiable, Hashable, Sendable {
     private static func parseLoose(_ line: String) -> Row? {
         var words = line.split(separator: " ").map(String.init)
         guard words.count >= 4, words.first != "CLUSTER" else { return nil }
-        if words.count >= 7, Int(words[5]) != nil, ["MB", "MIB", "GB", "GIB"].contains(words[6].uppercased()) {
+        if words.count >= 7, Double(words[5].replacingOccurrences(of: ",", with: ".")) != nil,
+           ["KB", "MB", "MIB", "GB", "GIB", "TB"].contains(words[6].uppercased()) {
             words[5] += " " + words[6]
             words.remove(at: 6)
         }
@@ -200,12 +267,21 @@ public struct ContainerCluster: Identifiable, Hashable, Sendable {
         ))
     }
 
-    /// Reads `2048 MB` (the CLI form), `2 GB` or a bare number as MiB.
+    /// Reads `2048 MB` (CLI 1.6), `2 GB` or `1.5 GB` (CLI 1.7 uses a byte
+    /// count formatter, so the decimal mark can be a comma) or a bare number
+    /// as MiB.
     static func parseMemoryMB(_ text: String) -> Int {
         let parts = text.split(separator: " ")
-        guard let value = parts.first.flatMap({ Int($0) }) else { return 0 }
+        guard let number = parts.first.map({ $0.replacingOccurrences(of: ",", with: ".") }),
+              let value = Double(number) else { return 0 }
         let unit = parts.count > 1 ? parts[1].uppercased() : "MB"
-        return unit.hasPrefix("G") ? value * 1024 : value
+        let factor: Double = switch unit.first {
+        case "T": 1_048_576
+        case "G": 1024
+        case "K": 1.0 / 1024
+        default: 1
+        }
+        return Int((value * factor).rounded())
     }
 
     private static func group(_ rows: [Row]) -> [ContainerCluster] {
