@@ -11,6 +11,16 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.26.0](https://github.com/getgantry/gantry/compare/v0.25.1...v0.26.0) (2026-11-07)
+
+
+### Features
+
+* **i18n:** add 26 european languages ([#42](https://github.com/getgantry/gantry/issues/42)) ([5bbf0cf](https://github.com/getgantry/gantry/commit/5bbf0cf6c976ea34fccbd65bc458182f54c0d5da))
+* **ui:** label every control and localize every string ([#41](https://github.com/getgantry/gantry/issues/41)) ([dbd6be4](https://github.com/getgantry/gantry/commit/dbd6be4dc9b833f0733fe3efa41324c96f3579e0))
+* **ui:** make lists, layouts and add host clearer ([#38](https://github.com/getgantry/gantry/issues/38)) ([d6ab2eb](https://github.com/getgantry/gantry/commit/d6ab2ebe1414040bb605812a95873520ef83d3a5))
+* **ui:** route errors, confirm destructive actions and track operations ([#39](https://github.com/getgantry/gantry/issues/39)) ([a214a69](https://github.com/getgantry/gantry/commit/a214a697bc743fcae289893ad39bfa7b42e967ea))
+
 ## [0.25.1](https://github.com/getgantry/gantry/compare/v0.25.0...v0.25.1) (2026-11-06)
 
 
