@@ -57776,6 +57776,16 @@
           }
         }
       }
+    },
+    "Browse Resources": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse Resources"
+          }
+        }
+      }
     }
   }
 }

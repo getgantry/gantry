@@ -107,7 +107,12 @@ public enum PaletteCatalog {
     }
 
     public static func machineActions(isRunning: Bool) -> [PaletteAction] {
-        isRunning ? [.open, .stop, .remove] : [.open, .start, .remove]
+        isRunning ? [.open, .shell, .stop, .remove] : [.open, .start, .remove]
+    }
+
+    /// A running cluster can be browsed in the Kubernetes section.
+    public static func clusterActions(isRunning: Bool) -> [PaletteAction] {
+        isRunning ? [.open, .browseResources, .remove] : [.open, .remove]
     }
 
     // MARK: - Builders
@@ -211,7 +216,7 @@ public enum PaletteCatalog {
             status: String(localized: "\(running) of \(cluster.nodes.count) nodes running", bundle: .module),
             isActive: running > 0,
             keywords: cluster.nodes.map(\.name),
-            actions: [.open, .remove]
+            actions: clusterActions(isRunning: cluster.isRunning)
         )
     }
 

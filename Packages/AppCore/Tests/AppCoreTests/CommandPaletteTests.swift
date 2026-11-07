@@ -174,7 +174,7 @@ import DockerKit
     }
 
     @Test func machineActionsFollowState() {
-        #expect(PaletteCatalog.machineActions(isRunning: true) == [.open, .stop, .remove])
+        #expect(PaletteCatalog.machineActions(isRunning: true) == [.open, .shell, .stop, .remove])
         #expect(PaletteCatalog.machineActions(isRunning: false) == [.open, .start, .remove])
     }
 
@@ -218,7 +218,7 @@ import DockerKit
         let apple = PaletteCatalog.Host(id: UUID(), name: "Mac", isAppleContainer: true, isConnected: true)
         let items = PaletteCatalog.items(host: apple, machines: [machine], clusters: [cluster])
         #expect(items.map(\.kind) == [.machine, .cluster])
-        #expect(items.first?.actions == [.open, .stop, .remove])
+        #expect(items.first?.actions == [.open, .shell, .stop, .remove])
     }
 
     @Test func itemIDsAreStable() {
@@ -264,5 +264,18 @@ import DockerKit
         let items = PaletteCatalog.kubernetes(contexts: [])
         #expect(FuzzyMatch.bestScore("kube", in: [items[0].title] + items[0].keywords) != nil)
         #expect(FuzzyMatch.bestScore("k8s", in: [items[0].title] + items[0].keywords) != nil)
+    }
+}
+
+@Suite struct PaletteMovedActionsTests {
+    @Test func runningClusterOffersBrowseResources() {
+        #expect(PaletteCatalog.clusterActions(isRunning: true) == [.open, .browseResources, .remove])
+        #expect(PaletteCatalog.clusterActions(isRunning: false) == [.open, .remove])
+    }
+
+    @Test func browseResourcesHasTitleAndSymbol() {
+        #expect(!PaletteAction.browseResources.title(for: .cluster).isEmpty)
+        #expect(PaletteAction.browseResources.systemImage == "helm")
+        #expect(!PaletteAction.browseResources.isDestructive)
     }
 }
