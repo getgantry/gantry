@@ -156,7 +156,7 @@ struct ContainerListView: View {
         .navigationTitle("Containers")
         .searchable(text: $searchText, prompt: "Filter by name, image, or ID")
         .toolbar { toolbarContent }
-        .onSectionCommand(.newItem, .containers) { showCreateSheet = true }
+        .onSectionCommand(.newItem, .containers, host: session.host.id) { showCreateSheet = true }
         .onSectionCommand(.refresh, .containers) { Task { await session.refreshContainers() } }
         .sheet(isPresented: $showCreateSheet) {
             CreateContainerSheet(session: session)

@@ -130,7 +130,7 @@ struct VolumeListView: View {
         .navigationTitle("Volumes")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
         .toolbar { toolbarContent }
-        .onSectionCommand(.newItem, .volumes) { showingNew = true }
+        .onSectionCommand(.newItem, .volumes, host: session.host.id) { showingNew = true }
         .onSectionCommand(.refresh, .volumes) { Task { await refresh() } }
         .sheet(isPresented: $showingNew) {
             NewVolumeSheet(session: session)

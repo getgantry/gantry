@@ -29,12 +29,14 @@ enum SectionCommand {
     case newItem
     case refresh
     case pullImage
+    case cleanup
 
     var notification: Notification.Name {
         switch self {
         case .newItem: .gantryNewItem
         case .refresh: .gantryRefreshSection
         case .pullImage: .gantryPullImage
+        case .cleanup: .gantryCleanup
         }
     }
 
@@ -44,16 +46,68 @@ enum SectionCommand {
     }
 }
 
+/// A section command for one host, sent by the command palette before the
+/// section view may exist. The view of that host takes it when it appears,
+/// or at once if it is already shown.
+@MainActor
+enum PendingSectionCommand {
+    private struct Request {
+        let command: SectionCommand
+        let section: HostSection
+        let hostID: UUID
+        let date: Date
+    }
+
+    private static var request: Request?
+
+    static func send(_ command: SectionCommand, _ section: HostSection, hostID: UUID) {
+        request = Request(command: command, section: section, hostID: hostID, date: .now)
+        NotificationCenter.default.post(name: .gantryPendingSectionCommand, object: nil)
+    }
+
+    /// Removes and reports a matching request. A request older than a few
+    /// seconds is stale: the view it was for did not appear.
+    static func take(_ command: SectionCommand, _ section: HostSection, hostID: UUID) -> Bool {
+        guard let request, request.command == command, request.section == section,
+              request.hostID == hostID else { return false }
+        self.request = nil
+        return Date.now.timeIntervalSince(request.date) < 5
+    }
+}
+
 extension View {
-    /// Runs `action` when the menu sends `command` to `section`.
+    /// Runs `action` when the menu sends `command` to `section`. With `host`,
+    /// it also runs for a palette request aimed at that host.
     func onSectionCommand(
         _ command: SectionCommand,
         _ section: HostSection,
+        host: UUID? = nil,
         perform action: @escaping () -> Void
     ) -> some View {
-        onReceive(NotificationCenter.default.publisher(for: command.notification)) { note in
-            if note.object as? HostSection == section { action() }
-        }
+        modifier(SectionCommandReceiver(command: command, section: section, host: host, action: action))
+    }
+}
+
+private struct SectionCommandReceiver: ViewModifier {
+    let command: SectionCommand
+    let section: HostSection
+    let host: UUID?
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onReceive(NotificationCenter.default.publisher(for: command.notification)) { note in
+                if note.object as? HostSection == section { action() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .gantryPendingSectionCommand)) { _ in
+                takePending()
+            }
+            .task(id: host) { takePending() }
+    }
+
+    private func takePending() {
+        guard let host, PendingSectionCommand.take(command, section, hostID: host) else { return }
+        action()
     }
 }
 
@@ -98,6 +152,14 @@ struct SectionCommands: Commands {
 
             Button("Build Image from Dockerfile…", action: openDockerfile)
                 .keyboardShortcut("b", modifiers: [.command, .shift])
+        }
+
+        CommandGroup(after: .sidebar) {
+            Button("Command Palette…") {
+                NotificationCenter.default.post(name: .gantryShowPalette, object: nil)
+            }
+            .keyboardShortcut("k", modifiers: .command)
+            Divider()
         }
     }
 }

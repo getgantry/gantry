@@ -74,7 +74,7 @@ struct MachineListView: View {
                 }
             }
         }
-        .onSectionCommand(.newItem, .machines) {
+        .onSectionCommand(.newItem, .machines, host: session.host.id) {
             if !(session.machines.isEmpty && session.machineListError != nil) { showingCreate = true }
         }
         .onSectionCommand(.refresh, .machines) { Task { await session.refreshMachines() } }

@@ -61,6 +61,7 @@ struct HostOverviewView: View {
                 .disabled(refreshing)
             }
         }
+        .onSectionCommand(.cleanup, .overview, host: session.host.id) { showCleanup = true }
         .onSectionCommand(.refresh, .overview) {
             Task {
                 await session.refreshContainers()
