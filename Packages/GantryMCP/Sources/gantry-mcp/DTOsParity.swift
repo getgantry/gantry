@@ -43,6 +43,10 @@ struct ClusterDTO: Encodable {
     var state: String
     var kubectlContext: String
     var apiServer: String?
+    /// CLI 1.7+ only.
+    var kubernetesVersion: String?
+    /// CLI 1.7+ only.
+    var sharedImageStore: Bool?
     var nodes: [Node]
 
     init(_ c: ContainerCluster) {
@@ -50,6 +54,8 @@ struct ClusterDTO: Encodable {
         state = c.state
         kubectlContext = c.kubectlContext
         apiServer = c.apiServerURL
+        kubernetesVersion = c.kubernetesVersion
+        sharedImageStore = c.sharedImageStore
         nodes = c.nodes.map {
             Node(
                 name: $0.name, roles: $0.roles, state: $0.state, cpus: $0.cpus,
