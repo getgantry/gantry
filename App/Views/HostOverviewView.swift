@@ -18,15 +18,20 @@ struct HostOverviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Spacing.m) {
                 if session.host.isAppleContainer {
                     AppleKernelOverviewBanner(session: session)
                 }
                 if let info = session.info {
-                    gaugesRow(info: info)
-                    countsCard(info: info)
-                    diskCard
-                    hostFactsCard(info: info)
+                    metricsGrid(info: info)
+                    countsRow(info: info)
+                    DashboardCard("Top Containers", systemImage: "flame") {
+                        TopContainersList(session: session)
+                    }
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 360), spacing: Spacing.m, alignment: .top)], spacing: Spacing.m) {
+                        diskCard
+                        hostFactsCard(info: info)
+                    }
                 } else {
                     ContentUnavailableView(
                         "No Host Data",
@@ -90,104 +95,90 @@ struct HostOverviewView: View {
         diskUsage = await session.systemDF()
     }
 
-    // MARK: - Gauges
+    // MARK: - Live metrics
 
-    private func gaugesRow(info: SystemInfo) -> some View {
-        HStack(spacing: 16) {
-            cpuGauge(info: info)
-            memoryGauge(info: info)
+    private var samples: [LoadSample] { session.loadHistory }
+
+    private func metricsGrid(info: SystemInfo) -> some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: Spacing.m, alignment: .top)], spacing: Spacing.m) {
+            cpuCard(info: info)
+            memoryCard(info: info)
+            MetricChartCard(
+                title: String(localized: "Network"),
+                systemImage: "network",
+                value: Formatters.rate(load?.networkRate ?? 0),
+                caption: String(localized: "In \(Formatters.rate(load?.networkInRate ?? 0)) · Out \(Formatters.rate(load?.networkOutRate ?? 0))"),
+                points: samples.metricPoints(\.networkRate),
+                tint: .purple,
+                domain: .dynamic(minimum: 1024),
+                format: Formatters.rate
+            )
+            MetricChartCard(
+                title: String(localized: "Disk I/O"),
+                systemImage: "internaldrive",
+                value: Formatters.rate(load?.diskRate ?? 0),
+                caption: String(localized: "Read \(Formatters.rate(load?.diskReadRate ?? 0)) · Write \(Formatters.rate(load?.diskWriteRate ?? 0))"),
+                points: samples.metricPoints(\.diskRate),
+                tint: .orange,
+                domain: .dynamic(minimum: 1024),
+                format: Formatters.rate
+            )
         }
     }
 
-    private func cpuGauge(info: SystemInfo) -> some View {
+    private func cpuCard(info: SystemInfo) -> some View {
         let capacity = Double(max(info.ncpu, 1)) * 100.0
-        let percentOfHost = min((load?.cpuPercent ?? 0) / capacity, 1.0)
-        return gaugeCard(
+        return MetricChartCard(
             title: String(localized: "CPU"),
             systemImage: "cpu",
-            fraction: percentOfHost,
-            centerText: (load?.cpuPercent ?? 0).formatted(.number.precision(.fractionLength(0))) + "%",
-            caption: String(localized: "of \(info.ncpu) CPUs · \(session.containerCounts.running) running"),
-            tint: .blue
+            value: Formatters.cpu(load?.cpuPercent ?? 0),
+            caption: String(localized: "of \(info.ncpu) CPUs"),
+            points: samples.metricPoints(\.cpuFraction),
+            tint: .blue,
+            format: { Formatters.cpu($0 * capacity) }
         )
     }
 
-    private func memoryGauge(info: SystemInfo) -> some View {
-        let used = load?.memBytes ?? 0
-        let total = max(info.memTotal, 1)
-        return gaugeCard(
+    private func memoryCard(info: SystemInfo) -> some View {
+        let total = Double(max(info.memTotal, 1))
+        return MetricChartCard(
             title: String(localized: "Memory"),
             systemImage: "memorychip",
-            fraction: min(Double(used) / Double(total), 1.0),
-            centerText: Formatters.bytes(used),
-            caption: String(localized: "of \(Formatters.bytes(info.memTotal)) · containers"),
-            tint: .green
+            value: Formatters.bytes(load?.memBytes ?? 0),
+            caption: String(localized: "of \(Formatters.bytes(info.memTotal))"),
+            points: samples.metricPoints(\.memFraction),
+            tint: .green,
+            format: { Formatters.bytes(Int64($0 * total)) }
         )
-    }
-
-    private func gaugeCard(
-        title: String,
-        systemImage: String,
-        fraction: Double,
-        centerText: String,
-        caption: String,
-        tint: Color
-    ) -> some View {
-        VStack(spacing: 10) {
-            Label(title, systemImage: systemImage)
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Gauge(value: fraction) {
-                EmptyView()
-            } currentValueLabel: {
-                Text(centerText)
-                    .font(.system(.caption, design: .rounded).weight(.semibold))
-                    .contentTransition(.numericText())
-            }
-            .gaugeStyle(.accessoryCircularCapacity)
-            .scaleEffect(1.35)
-            .tint(tint)
-            .frame(height: 80)
-            .animation(.snappy, value: fraction)
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     // MARK: - Containers / images counts
 
-    private func countsCard(info: SystemInfo) -> some View {
+    private func countsRow(info: SystemInfo) -> some View {
         // The container list is the one source for these counts; the daemon's
         // own totals include the hidden apple builder and lag behind events.
         let counts = session.containerCounts
-        return HStack(spacing: 0) {
-            countCell(value: counts.running, label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"), tint: .green)
+        return LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: Spacing.m)], spacing: Spacing.m) {
+            StatTile(
+                value: "\(counts.running)",
+                label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"),
+                systemImage: "play.circle.fill", tint: .green
+            )
             // apple/container cannot pause, so the tile would always read 0.
             if session.host.capabilities.pauseResume {
-                countCell(value: counts.paused, label: String(localized: "tile.paused", defaultValue: "Paused", comment: "Label under a count of containers"), tint: .yellow)
+                StatTile(
+                    value: "\(counts.paused)",
+                    label: String(localized: "tile.paused", defaultValue: "Paused", comment: "Label under a count of containers"),
+                    systemImage: "pause.circle.fill", tint: .yellow
+                )
             }
-            countCell(value: counts.stopped, label: String(localized: "tile.stopped", defaultValue: "Stopped", comment: "Label under a count of containers"), tint: .gray)
-            countCell(value: info.images, label: String(localized: "Images"), tint: .blue)
+            StatTile(
+                value: "\(counts.stopped)",
+                label: String(localized: "tile.stopped", defaultValue: "Stopped", comment: "Label under a count of containers"),
+                systemImage: "stop.circle.fill", tint: .secondary
+            )
+            StatTile(value: "\(info.images)", label: String(localized: "Images"), systemImage: "square.stack.3d.up.fill", tint: .blue)
         }
-        .padding(.vertical, 12)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-    }
-
-    private func countCell(value: Int, label: String, tint: Color) -> some View {
-        VStack(spacing: 2) {
-            Text("\(value)")
-                .font(.title2.monospacedDigit().weight(.semibold))
-                .foregroundStyle(tint)
-                .contentTransition(.numericText())
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Disk usage
@@ -195,8 +186,12 @@ struct HostOverviewView: View {
     private var diskCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("Disk", systemImage: "internaldrive")
-                    .font(.headline)
+                Label {
+                    Text("Disk")
+                } icon: {
+                    Image(systemName: "internaldrive").symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
+                }
+                .font(.headline)
                 Spacer()
                 Button {
                     showCleanup = true
@@ -215,15 +210,9 @@ struct HostOverviewView: View {
             if let diskUsage {
                 let segments = diskSegments(diskUsage)
                 stackedBar(segments: segments)
-                HStack(spacing: 16) {
-                    ForEach(segments, id: \.label) { segment in
-                        HStack(spacing: 5) {
-                            Circle().fill(segment.tint).frame(width: 8, height: 8)
-                            Text("\(segment.label) \(Formatters.bytes(segment.size, style: .file))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.m) { diskLegend(segments) }
+                    VStack(alignment: .leading, spacing: Spacing.xxs) { diskLegend(segments) }
                 }
             } else {
                 HStack(spacing: 8) {
@@ -234,11 +223,22 @@ struct HostOverviewView: View {
                 }
             }
         }
-        .padding(14)
+        .padding(Spacing.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .cardBackground()
         .sheet(isPresented: $showCleanup, onDismiss: { Task { diskUsage = await session.systemDF() } }) {
             HostCleanupSheet(session: session)
+        }
+    }
+
+    private func diskLegend(_ segments: [DiskSegment]) -> some View {
+        ForEach(segments, id: \.label) { segment in
+            HStack(spacing: 5) {
+                Circle().fill(segment.tint).frame(width: 8, height: 8)
+                Text("\(segment.label) \(Formatters.bytes(segment.size, style: .file))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -289,19 +289,23 @@ struct HostOverviewView: View {
 
     private func hostFactsCard(info: SystemInfo) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Host", systemImage: "server.rack")
-                .font(.headline)
+            Label {
+                Text("Host")
+            } icon: {
+                Image(systemName: "server.rack").symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
+            }
+            .font(.headline)
             FactGrid {
-                Fact("Name", info.name.isEmpty ? "—" : info.name)
+                Fact("Name", info.name.isEmpty ? "—" : info.name, copyable: !info.name.isEmpty)
                 Fact("Operating System", info.operatingSystem.isEmpty ? "—" : info.operatingSystem)
                 Fact("Architecture", info.architecture.isEmpty ? "—" : info.architecture)
-                Fact(HostKindLabels.engineName(session.host), info.serverVersion.isEmpty ? "—" : info.serverVersion)
+                Fact(HostKindLabels.engineName(session.host), info.serverVersion.isEmpty ? "—" : info.serverVersion, monospaced: true)
                 Fact("CPUs", "\(info.ncpu)")
                 Fact("Memory", Formatters.bytes(info.memTotal))
             }
         }
-        .padding(14)
+        .padding(Spacing.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .cardBackground()
     }
 }

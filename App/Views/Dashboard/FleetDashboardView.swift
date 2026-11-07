@@ -19,19 +19,20 @@ struct FleetDashboardView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Spacing.m) {
                 fleetBanner
                 FleetIssuesView(navigate: navigate)
                 LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 300), spacing: 16, alignment: .top)],
-                    spacing: 16
+                    columns: [GridItem(.adaptive(minimum: 380), spacing: Spacing.m, alignment: .top)],
+                    spacing: Spacing.m
                 ) {
                     ForEach(model.sessions) { session in
                         HostCard(session: session, navigate: navigate)
                     }
                 }
+                RecentActivityCard(operations: model.operations)
             }
-            .padding()
+            .padding(Spacing.l)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("Dashboard")
@@ -93,11 +94,11 @@ struct FleetDashboardView: View {
             }
             .fixedSize()
         }
-        .padding(14)
+        .padding(Spacing.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: Spacing.cardRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: Spacing.cardRadius, style: .continuous)
                 .strokeBorder(tint.opacity(0.25), lineWidth: 1)
         )
     }
@@ -152,13 +153,16 @@ private struct HostCard: View {
     private var samples: [LoadSample] { session.loadHistory }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.s) {
             header
             switch session.status {
             case .connected:
                 if session.info != nil {
                     metricsRow
+                    ratesRow
                     containersSection
+                    topContainers
+                    quickActions
                     footer
                 } else {
                     loadingRow(String(localized: "Loading host info…"))
@@ -171,13 +175,10 @@ private struct HostCard: View {
                 disconnectedSection
             }
         }
-        .padding(14)
+        .padding(Spacing.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            .quaternary.opacity(isHovered ? 0.7 : 0.5),
-            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .cardBackground(highlighted: isHovered)
+        .contentShape(RoundedRectangle(cornerRadius: Spacing.cardRadius, style: .continuous))
         .onHover { isHovered = $0 }
         .animation(.easeInOut(duration: 0.15), value: isHovered)
         .onTapGesture {
@@ -196,7 +197,7 @@ private struct HostCard: View {
                 Label("Reconnect", systemImage: "arrow.clockwise")
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityLabel("Host \(session.host.name), \(session.accessibilityStatus)")
     }
 
@@ -206,7 +207,7 @@ private struct HostCard: View {
         HStack(spacing: 6) {
             HostStatusSymbol(session: session)
             Text(session.host.name)
-                .font(.headline)
+                .font(.title3.weight(.semibold))
                 .lineLimit(1)
             if let badge = session.host.badgeSystemImage {
                 Image(systemName: badge)
@@ -255,6 +256,83 @@ private struct HostCard: View {
 
     private var latest: LoadSample? { samples.last }
 
+    /// Network and disk rates in one line each, with a small chart.
+    private var ratesRow: some View {
+        HStack(alignment: .top, spacing: Spacing.s) {
+            rateCell(
+                title: String(localized: "Network"), systemImage: "network",
+                value: Formatters.rate(latest?.networkRate ?? 0),
+                points: samples.metricPoints(\.networkRate), tint: .purple
+            )
+            rateCell(
+                title: String(localized: "Disk I/O"), systemImage: "internaldrive",
+                value: Formatters.rate(latest?.diskRate ?? 0),
+                points: samples.metricPoints(\.diskRate), tint: .orange
+            )
+        }
+    }
+
+    private func rateCell(title: String, systemImage: String, value: String, points: [MetricPoint], tint: Color) -> some View {
+        HStack(spacing: Spacing.xs) {
+            Image(systemName: systemImage)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(tint)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: title)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Text(verbatim: value)
+                    .font(.callout.monospacedDigit())
+            }
+            Spacer(minLength: Spacing.xxs)
+            Sparkline(points: points, tint: tint, domain: .dynamic(minimum: 1024), lineWidth: 1)
+                .frame(width: 64, height: 22)
+                .opacity(points.count > 1 ? 1 : 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The three busiest containers, when any run.
+    @ViewBuilder
+    private var topContainers: some View {
+        if session.containerCounts.running > 0 {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                Text("Top Containers")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                TopContainersList(session: session, limit: 3) { id in
+                    navigate(session.host.id, .containers, .container(id))
+                }
+            }
+        }
+    }
+
+    /// Jumps into the host: the same targets as the context menu, visible.
+    private var quickActions: some View {
+        HStack(spacing: Spacing.xs) {
+            Button {
+                navigate(session.host.id, .overview, nil)
+            } label: {
+                Label("Overview", systemImage: "gauge.with.dots.needle.50percent")
+            }
+            Button {
+                navigate(session.host.id, .containers, nil)
+            } label: {
+                Label("Containers", systemImage: "shippingbox")
+            }
+            Button {
+                navigate(session.host.id, .images, nil)
+            } label: {
+                Label("Images", systemImage: "square.stack.3d.up")
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .labelStyle(.titleAndIcon)
+    }
+
     private func metricCell(
         title: String,
         value: String,
@@ -274,11 +352,18 @@ private struct HostCard: View {
                     .lineLimit(1)
             }
             Text(value)
-                .font(.system(.body, design: .rounded).weight(.semibold).monospacedDigit())
+                .font(.system(.title2, design: .rounded).weight(.semibold).monospacedDigit())
                 .contentTransition(.numericText())
             sparkline(series: series, tint: tint)
+            if let summary = MetricSummary(series.map(\.1)), series.count > 1 {
+                Text("Peak \(summary.peak.formatted(.percent.precision(.fractionLength(0)))) of capacity")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 
     private func sparkline(series: [(Date, Double)], tint: Color) -> some View {
@@ -307,7 +392,8 @@ private struct HostCard: View {
         .chartYAxis(.hidden)
         .chartYScale(domain: 0...1)
         .chartLegend(.hidden)
-        .frame(height: 30)
+        .frame(height: 48)
+        .accessibilityHidden(true)
         .opacity(series.count > 1 ? 1 : 0.3)
         .overlay {
             if series.count < 2 {
