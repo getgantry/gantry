@@ -86,8 +86,14 @@ struct AppleSystemPropertiesPane: View {
         .navigationTitle(AppleSystemPane.properties.title)
         .task { await reload() }
         .sheet(item: $editing) { property in
-            AppleSystemPropertyEditor(property: property) {
-                Task { await reload() }
+            if property.kind.isList {
+                AppleSystemListEditor(property: property) {
+                    Task { await reload() }
+                }
+            } else {
+                AppleSystemPropertyEditor(property: property) {
+                    Task { await reload() }
+                }
             }
         }
         .confirmationDialog(
@@ -157,6 +163,7 @@ struct AppleSystemPropertiesPane: View {
         switch section {
         case "build": String(localized: "The image builder container. Changes apply when the builder is next created.")
         case "container": String(localized: "Defaults for containers created without CPU or memory options.")
+        case "container.dns": String(localized: "DNS defaults for new containers and the builder. The --dns, --dns-search, --dns-option and --dns-domain options override them.")
         case "dns": String(localized: "Container host names resolve under this domain. Create the domain in Settings first.")
         case "kernel": String(localized: "The kernel that “Install Recommended Kernel” downloads.")
         case "network": String(localized: "Default subnets for new networks.")
@@ -174,6 +181,10 @@ struct AppleSystemPropertiesPane: View {
         case "build.rosetta": String(localized: "Use Rosetta to build amd64 images")
         case "build.image": String(localized: "Builder image reference")
         case "dns.domain": String(localized: "Local DNS domain for container names")
+        case "container.dns.domain": String(localized: "DNS domain for container host names")
+        case "container.dns.nameservers": String(localized: "DNS servers, for example 1.1.1.1")
+        case "container.dns.searchDomains": String(localized: "DNS search domains")
+        case "container.dns.options": String(localized: "Resolver options, for example ndots:2")
         case "kernel.binaryPath": String(localized: "Kernel file inside the archive")
         case "kernel.url": String(localized: "Kernel archive URL")
         case "kernel.digest": String(localized: "Expected archive digest (sha256:…)")

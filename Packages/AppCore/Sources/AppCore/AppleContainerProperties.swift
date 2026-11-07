@@ -6,6 +6,8 @@ public enum AppleSystemPropertyValue: Sendable, Equatable, Hashable {
     case integer(Int)
     case number(Double)
     case bool(Bool)
+    /// An array of strings, e.g. `container.dns.nameservers`.
+    case strings([String])
     /// A value Gantry does not edit (an array or table), kept as its literal.
     case other(String)
 
@@ -16,6 +18,7 @@ public enum AppleSystemPropertyValue: Sendable, Equatable, Hashable {
         case .integer(let value): String(value)
         case .number(let value): String(value)
         case .bool(let value): value ? "true" : "false"
+        case .strings(let values): values.isEmpty ? "[]" : values.joined(separator: ", ")
         case .other(let literal): literal
         }
     }
@@ -27,8 +30,15 @@ public enum AppleSystemPropertyValue: Sendable, Equatable, Hashable {
         case .integer(let value): String(value)
         case .number(let value): String(value)
         case .bool(let value): value ? "true" : "false"
+        case .strings(let values): "[" + values.map(AppleContainerControl.tomlQuoted).joined(separator: ", ") + "]"
         case .other(let literal): literal
         }
+    }
+
+    /// The items of a string array value; nil for other values.
+    public var stringItems: [String]? {
+        if case .strings(let values) = self { return values }
+        return nil
     }
 }
 
@@ -49,6 +59,12 @@ public enum AppleSystemPropertyKind: String, Sendable, CaseIterable {
     case cidrV6
     /// `rw`, `ro` or `none` (machine home directory mount).
     case homeMount
+    /// A list of DNS server IP addresses.
+    case nameserverList
+    /// A list of DNS domain names.
+    case domainList
+    /// A list of strings without spaces, e.g. resolver options.
+    case stringList
     /// Any whole number (a key without a schema that holds an integer).
     case integerValue
     /// Any number (a key without a schema that holds a float).
@@ -62,6 +78,14 @@ public enum AppleSystemPropertyKind: String, Sendable, CaseIterable {
         case .bool: ["true", "false"]
         case .homeMount: ["rw", "ro", "none"]
         default: nil
+        }
+    }
+
+    /// The value is a string array, edited as a list of rows.
+    public var isList: Bool {
+        switch self {
+        case .nameserverList, .domainList, .stringList: true
+        default: false
         }
     }
 }
@@ -117,6 +141,10 @@ extension AppleContainerControl {
         ("build.image", .imageReference),
         ("container.cpus", .count),
         ("container.memory", .memory),
+        ("container.dns.domain", .domain),
+        ("container.dns.nameservers", .nameserverList),
+        ("container.dns.searchDomains", .domainList),
+        ("container.dns.options", .stringList),
         ("dns.domain", .domain),
         ("kernel.binaryPath", .string),
         ("kernel.url", .url),
@@ -142,7 +170,39 @@ extension AppleContainerControl {
     public static func listProperties(cliOverride: String? = nil) async throws -> [AppleSystemProperty] {
         let output = try await runContainer(["system", "property", "list", "--format", "json"], cliOverride: cliOverride)
         let userText = (try? String(contentsOf: configFileURL(), encoding: .utf8)) ?? ""
-        return mergeProperties(effective: parsePropertyList(output), user: parseConfigTOML(userText))
+        let features = await ContainerTooling.currentFeatures(cliOverride: cliOverride)
+        return mergeProperties(
+            effective: parsePropertyList(output),
+            user: parseConfigTOML(userText),
+            containerDNSDefaults: features.containerDNSDefaults
+        )
+    }
+
+    /// The `[container.dns]` keys, which the services read from 1.7.0.
+    public static let containerDNSKeys: Set<String> = [
+        "container.dns.domain", "container.dns.nameservers", "container.dns.searchDomains", "container.dns.options"
+    ]
+
+    /// Validates each row of a list property and writes the list to the
+    /// user configuration file. Empty rows are dropped; an empty list
+    /// removes the key, so the services use their default.
+    @discardableResult
+    public static func setUserList(_ key: String, to rows: [String], kind: AppleSystemPropertyKind? = nil) throws -> AppleSystemPropertyValue? {
+        try setUserList(key, to: rows, kind: kind, configURL: configFileURL())
+    }
+
+    @discardableResult
+    static func setUserList(
+        _ key: String,
+        to rows: [String],
+        kind: AppleSystemPropertyKind? = nil,
+        configURL: URL
+    ) throws -> AppleSystemPropertyValue? {
+        let key = try validatedPropertyKey(key)
+        let items = try validatedPropertyList(rows, kind: kind ?? propertyKind(for: key))
+        let value: AppleSystemPropertyValue? = items.isEmpty ? nil : .strings(items)
+        try writeConfig(at: configURL) { try updatedConfigTOML($0, key: key, value: value) }
+        return value
     }
 
     /// Validates `raw` for `key` and writes it to the user configuration file.
@@ -232,9 +292,12 @@ extension AppleContainerControl {
         return current
     }
 
+    /// `containerDNSDefaults` lists the `[container.dns]` keys (CLI 1.7.0+);
+    /// keys the file or the services already hold are listed in any case.
     static func mergeProperties(
         effective: [String: AppleSystemPropertyValue],
-        user: [String: AppleSystemPropertyValue]
+        user: [String: AppleSystemPropertyValue],
+        containerDNSDefaults: Bool = false
     ) -> [AppleSystemProperty] {
         // A table from a plugin (`[machine]`) is listed only when the
         // installed CLI reports it, so a package without the plugin does not
@@ -244,6 +307,9 @@ extension AppleContainerControl {
         let coreSections: Set<String> = ["build", "container", "dns", "kernel", "network", "registry", "vminit"]
         var keys = propertySchema.map(\.key).filter { key in
             let section = splitPropertyKey(key).section
+            if containerDNSKeys.contains(key) {
+                return containerDNSDefaults || effective[key] != nil || user[key] != nil
+            }
             return coreSections.contains(section) || reportedSections.contains(section)
         }
         let known = Set(propertySchema.map(\.key))
@@ -279,6 +345,9 @@ extension AppleContainerControl {
         }
         if let string = value as? String { return .string(string) }
         if value is NSNull { return nil }
+        if let array = value as? [Any], let strings = array as? [String], strings.count == array.count {
+            return .strings(strings)
+        }
         if let data = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]) {
             return .other(String(decoding: data, as: UTF8.self))
         }
@@ -348,6 +417,11 @@ extension AppleContainerControl {
         func fail(_ message: String) -> AppleSystemError { .invalidInput(message) }
         guard !value.isEmpty else { throw fail(String(localized: "Enter a value, or clear the property to use the default.", bundle: .module)) }
         guard !value.contains(where: \.isNewline) else { throw fail("A value cannot contain line breaks.") }
+        if kind.isList {
+            // A typed list (MCP, one-line editor): items split at commas or spaces.
+            let rows = value.split(whereSeparator: { $0 == "," || $0.isWhitespace }).map(String.init)
+            return .strings(try validatedPropertyList(rows, kind: kind))
+        }
         switch kind {
         case .bool:
             switch value.lowercased() {
@@ -394,6 +468,8 @@ extension AppleContainerControl {
                 throw fail(String(localized: "Enter rw, ro or none.", bundle: .module))
             }
             return .string(value.lowercased())
+        case .nameserverList, .domainList, .stringList:
+            return .strings(try validatedPropertyList([value], kind: kind))
         case .integerValue:
             guard let number = Int(value) else { throw fail(String(localized: "Enter a whole number.", bundle: .module)) }
             return .integer(number)
@@ -404,6 +480,39 @@ extension AppleContainerControl {
             if let number = Int(value) { return .integer(number) }
             if value == "true" || value == "false" { return .bool(value == "true") }
             return .string(value)
+        }
+    }
+
+    /// Validates the rows of a list property. Rows are trimmed and empty
+    /// rows dropped; a duplicate row is an error.
+    public static func validatedPropertyList(_ rows: [String], kind: AppleSystemPropertyKind) throws -> [String] {
+        let items = rows.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        var seen: Set<String> = []
+        for item in items {
+            try validateListItem(item, kind: kind)
+            guard seen.insert(item.lowercased()).inserted else {
+                throw AppleSystemError.invalidInput(String(localized: "“\(item)” is in the list two times.", bundle: .module))
+            }
+        }
+        return items
+    }
+
+    private static func validateListItem(_ item: String, kind: AppleSystemPropertyKind) throws {
+        func fail(_ message: String) -> AppleSystemError { .invalidInput(message) }
+        guard !item.contains(where: { $0.isWhitespace || $0 == "," }) else {
+            throw fail(String(localized: "“\(item)” cannot contain spaces or commas.", bundle: .module))
+        }
+        switch kind {
+        case .nameserverList:
+            guard isValidIPAddress(item) else {
+                throw fail(String(localized: "“\(item)” is not an IP address. Enter an address such as 1.1.1.1.", bundle: .module))
+            }
+        case .domainList:
+            guard isValidDomainName(item) else {
+                throw fail(String(localized: "“\(item)” is not a domain name. Use letters, digits, dots and hyphens.", bundle: .module))
+            }
+        default:
+            break
         }
     }
 
@@ -465,6 +574,8 @@ extension AppleContainerControl {
             case .float(let value): result[key] = .number(value)
             case .bool(let value): result[key] = .bool(value)
             case .table: continue
+            case .array(let items) where items.allSatisfy({ if case .string = $0 { true } else { false } }):
+                result[key] = .strings(items.compactMap { if case .string(let item) = $0 { item } else { nil } })
             case .datetime, .array:
                 result[key] = .other(String(decoding: document.bytes[entry.valueRange], as: UTF8.self))
             }

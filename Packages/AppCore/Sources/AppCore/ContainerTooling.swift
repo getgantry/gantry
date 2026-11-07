@@ -42,6 +42,8 @@ public enum ContainerTooling {
     public static let clusterCommandRenameVersion = "1.6.1"
     /// The cluster service: new `cluster list`, worker sizes, shared image store.
     public static let clusterServiceVersion = "1.7.0"
+    /// `[container.dns]` defaults in config.toml (nameservers, search domains, options).
+    public static let containerDNSDefaultsVersion = "1.7.0"
     /// The first CLI release where `container system kernel set` verifies a
     /// kernel archive against `--digest` (required for a remote `--tar` URL).
     public static let kernelArchiveDigestVersion = "1.2.0"
@@ -79,6 +81,8 @@ public enum ContainerTooling {
         public var kernelArchiveDigest: Bool
         /// Host, client, paths and resources in `container system status`.
         public var systemStatusDetails: Bool
+        /// `[container.dns]` defaults in config.toml.
+        public var containerDNSDefaults: Bool
 
         public init(
             nestedVirtualization: Bool,
@@ -89,7 +93,8 @@ public enum ContainerTooling {
             clusterWorkers: Bool = false,
             clusterService: Bool = false,
             kernelArchiveDigest: Bool = false,
-            systemStatusDetails: Bool = false
+            systemStatusDetails: Bool = false,
+            containerDNSDefaults: Bool = false
         ) {
             self.nestedVirtualization = nestedVirtualization
             self.nonRootSocketMounts = nonRootSocketMounts
@@ -100,6 +105,7 @@ public enum ContainerTooling {
             self.clusterService = clusterService
             self.kernelArchiveDigest = kernelArchiveDigest
             self.systemStatusDetails = systemStatusDetails
+            self.containerDNSDefaults = containerDNSDefaults
         }
     }
 
@@ -117,7 +123,8 @@ public enum ContainerTooling {
                 clusterWorkers: true,
                 clusterService: true,
                 kernelArchiveDigest: true,
-                systemStatusDetails: true
+                systemStatusDetails: true,
+                containerDNSDefaults: true
             )
         }
         return Features(
@@ -129,7 +136,8 @@ public enum ContainerTooling {
             clusterWorkers: isVersion(version, atLeast: clusterWorkersVersion),
             clusterService: isVersion(version, atLeast: clusterServiceVersion),
             kernelArchiveDigest: isVersion(version, atLeast: kernelArchiveDigestVersion),
-            systemStatusDetails: isVersion(version, atLeast: systemStatusDetailsVersion)
+            systemStatusDetails: isVersion(version, atLeast: systemStatusDetailsVersion),
+            containerDNSDefaults: isVersion(version, atLeast: containerDNSDefaultsVersion)
         )
     }
 

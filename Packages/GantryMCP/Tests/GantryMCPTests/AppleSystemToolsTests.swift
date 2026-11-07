@@ -80,7 +80,8 @@ struct AppleSystemToolsTests {
             AppleSystemProperty(key: "custom.flag", kind: .unknown, effective: .bool(true)),
             AppleSystemProperty(key: "custom.ratio", kind: .unknown, effective: .number(0.5)),
             AppleSystemProperty(key: "custom.count", kind: .unknown, effective: .integer(3)),
-            AppleSystemProperty(key: "container.dns.nameservers", kind: .unknown, effective: .other("[\"1.1.1.1\"]"))
+            AppleSystemProperty(key: "custom.ports", kind: .unknown, effective: .other("[1, 2]")),
+            AppleSystemProperty(key: "custom.names", kind: .unknown, effective: .strings(["a"]))
         ]
         return schema + reported
     }
@@ -119,10 +120,20 @@ struct AppleSystemToolsTests {
     @Test func refusesOverwritingArrays() throws {
         let properties = sampleProperties
         #expect(throws: ToolError.self) {
-            try GantryTools.editablePropertyKind("container.dns.nameservers", in: properties, clearing: false)
+            try GantryTools.editablePropertyKind("custom.ports", in: properties, clearing: false)
         }
         // Clearing the user value is still allowed.
-        _ = try GantryTools.editablePropertyKind("container.dns.nameservers", in: properties, clearing: true)
+        _ = try GantryTools.editablePropertyKind("custom.ports", in: properties, clearing: true)
+    }
+
+    @Test func editsStringLists() throws {
+        let properties = sampleProperties
+        #expect(try GantryTools.editablePropertyKind("container.dns.nameservers", in: properties, clearing: false) == .nameserverList)
+        #expect(try GantryTools.editablePropertyKind("custom.names", in: properties, clearing: false) == .stringList)
+        let value = try AppleContainerControl.validatedPropertyValue("1.1.1.1, 8.8.8.8", kind: .nameserverList)
+        #expect(value == .strings(["1.1.1.1", "8.8.8.8"]))
+        #expect(value.tomlLiteral == "[\"1.1.1.1\", \"8.8.8.8\"]")
+        #expect(throws: AppleSystemError.self) { try AppleContainerControl.validatedPropertyValue("dns.google", kind: .nameserverList) }
     }
 
     @Test func valuesCannotInjectLines() {
