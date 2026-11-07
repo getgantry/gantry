@@ -27,6 +27,23 @@ public struct AppleBuilderStatus: Sendable, Equatable, Codable {
 
     public var isRunning: Bool { state == "running" }
 
+    /// The `build.image` property when the builder runs another image, else
+    /// nil. `container builder start` compares the two references as text
+    /// and recreates the builder when they differ (apple/container 1.7.1).
+    public func imageUpdate(configuredImage: String?) -> String? {
+        guard let configured = configuredImage?.trimmingCharacters(in: .whitespaces),
+              !configured.isEmpty, !image.isEmpty, configured != image else { return nil }
+        return configured
+    }
+
+    /// The tag of an image reference (`…/builder:0.13.3` → `0.13.3`), or the
+    /// whole reference when it has no tag.
+    public static func imageTag(_ reference: String) -> String {
+        let name = reference.split(separator: "@").first.map(String.init) ?? reference
+        guard let colon = name.lastIndex(of: ":"), !name[colon...].contains("/") else { return reference }
+        return String(name[name.index(after: colon)...])
+    }
+
     public init(
         id: String,
         image: String,
