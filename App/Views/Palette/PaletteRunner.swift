@@ -199,6 +199,7 @@ struct PaletteRunner {
         case .stop: Task { _ = await session.perform(.stop, on: id) }
         case .restart: Task { _ = await session.perform(.restart, on: id) }
         case .remove: confirm(.removeContainers([container], engine: .init(session.host)), hostID)
+        case .browseResources: navigate(hostID, .containers, .container(id))
         }
     }
 
@@ -250,6 +251,7 @@ struct PaletteRunner {
         switch action {
         case .start: Task { _ = await session.startMachine(id) }
         case .stop: Task { _ = await session.stopMachine(id) }
+        case .shell: AppleContainerControl.openShellInTerminal(for: id, cliOverride: session.host.socketPathOverride)
         case .remove: confirm(.deleteMachine(machine), session.host.id)
         default: navigate(session.host.id, .machines, .machine(id))
         }
@@ -258,6 +260,8 @@ struct PaletteRunner {
     private func runCluster(_ name: String, _ action: PaletteAction, _ session: HostSession) {
         if action == .remove {
             confirm(DestructiveAction(kind: .deleteCluster, targets: [name]), session.host.id)
+        } else if action == .browseResources, let cluster = session.clusters.first(where: { $0.name == name }) {
+            showKubernetes(cluster.kubectlContext)
         } else {
             navigate(session.host.id, .clusters, .cluster(name))
         }
