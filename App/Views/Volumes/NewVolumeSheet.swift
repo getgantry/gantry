@@ -28,6 +28,7 @@ struct NewVolumeSheet: View {
     @State private var driver = "local"
     @State private var location: NewVolumeLocation = .engine
     @State private var parent = ""
+    @State private var folderCheck: StorageCheck?
     @State private var labels: [LabelPair] = []
     @State private var working = false
     @State private var errorText: String?
@@ -42,7 +43,7 @@ struct NewVolumeSheet: View {
                 if location == .engine {
                     TextField("Driver", text: $driver).textFieldStyle(.roundedBorder)
                 } else {
-                    FolderLocationField(parent: $parent, name: name)
+                    FolderLocationField(parent: $parent, check: $folderCheck, name: name)
                 }
                 LabelEditor(pairs: $labels)
             }
@@ -77,9 +78,7 @@ struct NewVolumeSheet: View {
     private var canCreate: Bool {
         guard !trimmedName.isEmpty, !working else { return false }
         guard location == .folder else { return true }
-        return !parent.isEmpty && StorageCheck.folderVolume(
-            on: SystemStorageDiskReader().disk(containing: parent), path: parent
-        ).isAllowed
+        return !parent.isEmpty && folderCheck?.isAllowed == true
     }
 
     private func submit() {
@@ -117,6 +116,8 @@ struct NewVolumeSheet: View {
 /// The parent folder of a folder volume, with the disk check.
 struct FolderLocationField: View {
     @Binding var parent: String
+    /// The check of `parent`; nil while it runs.
+    @Binding var check: StorageCheck?
     let name: String
 
     var body: some View {
@@ -130,10 +131,13 @@ struct FolderLocationField: View {
                 Text("Gantry makes the folder \(FolderVolumeRules.folder(named: name.isEmpty ? "…" : name, in: parent)).")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                StorageIssueList(check: StorageCheck.folderVolume(
-                    on: SystemStorageDiskReader().disk(containing: parent), path: parent
-                ))
+                if let check { StorageIssueList(check: check) } else { ProgressView().controlSize(.small) }
             }
+        }
+        .task(id: parent) {
+            check = nil
+            guard !parent.isEmpty else { return }
+            check = await StorageCheckLoader.folderVolume(path: parent)
         }
     }
 

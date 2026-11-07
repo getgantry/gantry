@@ -41,6 +41,7 @@ struct VolumeTransferSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var newName = ""
     @State private var parent = ""
+    @State private var folderCheck: StorageCheck?
     @State private var operation: LongOperation?
     @State private var destination: VolumeEndpoint?
     @State private var confirm: DestructiveAction?
@@ -70,7 +71,7 @@ struct VolumeTransferSheet: View {
     @ViewBuilder
     private var form: some View {
         TextField(String(localized: "New volume name"), text: $newName).textFieldStyle(.roundedBorder)
-        if case .toFolder = move { FolderLocationField(parent: $parent, name: newName) }
+        if case .toFolder = move { FolderLocationField(parent: $parent, check: $folderCheck, name: newName) }
         Text("Gantry copies the files with a short-lived helper container. The old volume stays until you remove it.")
             .font(.callout)
             .foregroundStyle(.secondary)
@@ -123,7 +124,7 @@ struct VolumeTransferSheet: View {
 
     private var canStart: Bool {
         guard FolderVolumeRules.isValidName(newName) else { return false }
-        if case .toFolder = move { return !parent.isEmpty }
+        if case .toFolder = move { return !parent.isEmpty && folderCheck?.isAllowed == true }
         return true
     }
 

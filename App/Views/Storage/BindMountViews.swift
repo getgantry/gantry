@@ -7,6 +7,7 @@ import DockerKit
 struct BindSourceMenu: View {
     let session: HostSession
     let onPick: (String) -> Void
+    @State private var external: [StorageDisk] = []
 
     var body: some View {
         Menu {
@@ -21,6 +22,9 @@ struct BindSourceMenu: View {
         .fixedSize()
         .help(String(localized: "Choose a volume or a disk"))
         .accessibilityLabel(String(localized: "Choose a volume or a disk"))
+        .task(id: StorageMonitor.shared.presence) {
+            external = session.usesLocalPaths ? await StorageCheckLoader.externalDisks() : []
+        }
     }
 
     @ViewBuilder
@@ -50,7 +54,6 @@ struct BindSourceMenu: View {
     @ViewBuilder
     private var disks: some View {
         if session.usesLocalPaths {
-            let external = SystemStorageDiskReader().mountedDisks().filter { !$0.isBootDisk }
             if !external.isEmpty {
                 Section(String(localized: "Folder on a Disk")) {
                     ForEach(external) { disk in
@@ -71,28 +74,21 @@ struct BindSourceMenu: View {
 struct BindMountWarnings: View {
     let session: HostSession
     let paths: [String]
+    @State private var findings: [(path: String, check: StorageCheck)] = []
 
     var body: some View {
-        if session.usesLocalPaths {
-            ForEach(findings, id: \.path) { finding in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: finding.path).font(.caption.monospaced()).foregroundStyle(.secondary)
-                    StorageIssueList(check: finding.check)
+        Group {
+            if session.usesLocalPaths {
+                ForEach(findings, id: \.path) { finding in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: finding.path).font(.caption.monospaced()).foregroundStyle(.secondary)
+                        StorageIssueList(check: finding.check)
+                    }
                 }
             }
         }
-    }
-
-    private var findings: [(path: String, check: StorageCheck)] {
-        let reader = SystemStorageDiskReader()
-        var seen = Set<String>()
-        return paths
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { $0.hasPrefix("/Volumes/") && seen.insert($0).inserted }
-            .map { path in
-                let disk = StorageMonitor.shared.presence.isConnected(path) ? reader.disk(containing: path) : nil
-                return (path, StorageCheck.bindMount(on: disk, path: path))
-            }
-            .filter { !$0.check.issues.isEmpty }
+        .task(id: paths) {
+            findings = await StorageCheckLoader.bindMounts(paths: paths, presence: StorageMonitor.shared.presence)
+        }
     }
 }

@@ -103,3 +103,35 @@ public enum StorageFormat {
         ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
     }
 }
+
+/// Disk checks off the main thread: a file call on an external disk can
+/// wait a long time (for example while macOS asks for access).
+public enum StorageCheckLoader {
+    public static func folderVolume(path: String, disks: any StorageDiskReading = SystemStorageDiskReader()) async -> StorageCheck {
+        await Task.detached { StorageCheck.folderVolume(on: disks.disk(containing: path), path: path) }.value
+    }
+
+    /// Findings for bind sources under `/Volumes`; paths without issues are left out.
+    public static func bindMounts(
+        paths: [String],
+        presence: DiskPresence,
+        disks: any StorageDiskReading = SystemStorageDiskReader()
+    ) async -> [(path: String, check: StorageCheck)] {
+        await Task.detached {
+            var seen = Set<String>()
+            return paths
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .filter { $0.hasPrefix("/Volumes/") && seen.insert($0).inserted }
+                .map { path in
+                    let disk = presence.isConnected(path) ? disks.disk(containing: path) : nil
+                    return (path, StorageCheck.bindMount(on: disk, path: path))
+                }
+                .filter { !$0.1.issues.isEmpty }
+        }.value
+    }
+
+    /// Mounted disks other than the boot disk.
+    public static func externalDisks(disks: any StorageDiskReading = SystemStorageDiskReader()) async -> [StorageDisk] {
+        await Task.detached { disks.mountedDisks().filter { !$0.isBootDisk } }.value
+    }
+}
