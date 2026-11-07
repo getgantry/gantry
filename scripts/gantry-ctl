@@ -1,0 +1,28 @@
+#!/bin/bash
+# Drive a running Debug build of Gantry through its automation socket.
+#
+#   scripts/gantry-ctl open/containers?item=web      # navigate
+#   scripts/gantry-ctl palette
+#   scripts/gantry-ctl snapshot /abs/path.png        # PNG of the main window
+#   scripts/gantry-ctl state /abs/path.json          # selection as JSON
+#   scripts/gantry-ctl appearance dark               # light | dark | system
+#
+# GANTRY_APP selects the copy when several Debug builds run (a path fragment
+# of the .app); the default is the newest Debug process.
+set -euo pipefail
+
+pattern="${GANTRY_APP:-Debug/Gantry.app/Contents/MacOS/Gantry}"
+pid="$(pgrep -n -f "$pattern" || true)"
+[ -n "$pid" ] || { echo "no running Gantry matches: $pattern" >&2; exit 1; }
+sock="$(getconf DARWIN_USER_TEMP_DIR)gantry-automation-$pid.sock"
+[ -S "$sock" ] || { echo "no automation socket for pid $pid (Debug build only)" >&2; exit 1; }
+
+cmd="${1:?usage: gantry-ctl <command> [arg]}"
+case "$cmd" in
+  snapshot)   link="gantry://debug/snapshot?path=${2:?path}" ;;
+  state)      link="gantry://debug/state?path=${2:?path}" ;;
+  appearance) link="gantry://debug/appearance?mode=${2:?mode}" ;;
+  gantry://*) link="$cmd" ;;
+  *)          link="gantry://$cmd" ;;
+esac
+printf '%s\n' "$link" | nc -U -w 2 "$sock"

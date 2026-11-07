@@ -1,5 +1,7 @@
 import AppKit
 import Foundation
+import AppCore
+import GantryShared
 
 /// Reopens the primary SwiftUI scene for app-wide callbacks that do not have
 /// SwiftUI's `openWindow` environment (Finder and notification delegates).
@@ -51,13 +53,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // right-click → Services entry routes file URLs back to us.
         NSApp.servicesProvider = ComposeServiceProvider()
         NSUpdateDynamicServices()
+        #if DEBUG
+        AutomationSocket.start()
+        #endif
     }
 
     /// "Open With → Gantry" / double-click on a registered file: a Dockerfile
     /// goes to the Build Image flow, anything else to Compose Up.
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
-            if ControlRequestHandler.handles(url) {
+            if let link = AppLink.parse(url, scheme: SharedIdentifiers.urlScheme) {
+                AppLinkHandler.handle(link)
+            } else if ControlRequestHandler.handles(url) {
                 ControlRequestHandler.handle(url)
             } else if DockerfileDetector.isDockerfile(url) {
                 Self.openDockerfile(url)

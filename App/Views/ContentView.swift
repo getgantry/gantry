@@ -184,6 +184,8 @@ struct ContentView: View {
     /// apple/container setup is presented only with a status payload.
     @State private var containerSetupRequest: ContainerSetupRequest?
     @State private var showingPalette = false
+    /// The window of this ContentView; links act only on the target window.
+    @State private var hostWindow: NSWindow?
     /// The palette result to run once the palette sheet has closed.
     @State private var paletteChoice: PaletteChoice?
     @State private var paletteConfirm: DestructiveAction?
@@ -366,6 +368,28 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .gantryShowPalette)) { _ in
             showingPalette = true
         }
+        .background(WindowReader { window in if hostWindow !== window { hostWindow = window } })
+        .onReceive(NotificationCenter.default.publisher(for: .gantryOpenLink)) { _ in
+            guard hostWindow == nil || hostWindow === AppLinkTarget.window else { return }
+            PendingAppLinks.drain().forEach(apply)
+        }
+        .onAppear { PendingAppLinks.drain().forEach(apply) }
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: .gantryDumpState)) { note in
+            guard let path = note.object as? String, hostWindow === AppLinkTarget.window else { return }
+            let windows = NSApp.windows.map { "\($0.identifier?.rawValue ?? "-") visible=\($0.isVisible)" }
+            let state: [String: String] = [
+                "windows": windows.joined(separator: "; "),
+                "selection": selection.map { String(describing: $0) } ?? "none",
+                "detail": detailSelection.map { String(describing: $0) } ?? "none",
+                "palette": String(showingPalette),
+                "hosts": model.sessions.map { "\($0.host.name)=\($0.id)" }.joined(separator: ", "),
+            ]
+            let data = try? JSONSerialization.data(withJSONObject: state, options: [.prettyPrinted, .sortedKeys])
+            let url = URL(fileURLWithPath: path)
+            try? data?.write(to: url)
+        }
+        #endif
         // The choice runs after the sheet closes, so a confirmation or
         // another sheet it opens can be shown.
         .sheet(isPresented: $showingPalette, onDismiss: runPaletteChoice) {
@@ -726,6 +750,26 @@ struct ContentView: View {
     private func selectContainer(_ jump: ContainerJump) {
         PendingContainerJump.clear(jump)
         navigate(to: jump.hostID, section: .containers, detail: .container(jump.containerID))
+    }
+
+    /// Opens the place that a `gantry://` link names (see `AppLink`).
+    private func apply(_ link: AppLink) {
+        switch link {
+        case .open(let target, let hostName, let item):
+            if target == "dashboard" { selection = .dashboard; return }
+            if target == "kubernetes" { selection = .kubernetes; return }
+            guard let section = HostSection(rawValue: target),
+                  let hostID = AppLink.resolveHost(hostName, in: model.sessions.map { ($0.id, $0.host.name) }),
+                  let session = model.session(id: hostID) else { return }
+            let detail = item.flatMap { AppLinkItem.detail($0, section: section, session: session) }
+            navigate(to: hostID, section: section, detail: detail)
+        case .palette:
+            showingPalette = true
+        case .settings:
+            openSettings()
+        case .snapshot, .appearance, .state:
+            break
+        }
     }
 
     private func navigate(to hostID: UUID, section: HostSection, detail: DetailSelection?) {
