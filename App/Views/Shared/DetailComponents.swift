@@ -5,18 +5,26 @@ struct Fact: Identifiable {
     let id = UUID()
     let label: Text
     let value: String
+    /// Monospaced value, for ids, versions, addresses and paths.
+    var monospaced = false
+    /// Shows a copy button next to the value.
+    var copyable = false
 
     /// A literal label is a catalog key.
-    init(_ label: LocalizedStringKey, _ value: String) {
+    init(_ label: LocalizedStringKey, _ value: String, monospaced: Bool = false, copyable: Bool = false) {
         self.label = Text(label)
         self.value = value
+        self.monospaced = monospaced
+        self.copyable = copyable
     }
 
     /// A label that is already localized, for example from `String(localized:)`.
     @_disfavoredOverload
-    init<S: StringProtocol>(_ label: S, _ value: String) {
+    init<S: StringProtocol>(_ label: S, _ value: String, monospaced: Bool = false, copyable: Bool = false) {
         self.label = Text(verbatim: String(label))
         self.value = value
+        self.monospaced = monospaced
+        self.copyable = copyable
     }
 }
 
@@ -35,12 +43,24 @@ struct FactGrid: View {
                     fact.label
                         .foregroundStyle(.secondary)
                         .gridColumnAlignment(.leading)
-                    Text(fact.value)
-                        .textSelection(.enabled)
+                    value(fact)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(.callout)
             }
+        }
+    }
+}
+
+extension FactGrid {
+    @ViewBuilder
+    fileprivate func value(_ fact: Fact) -> some View {
+        if fact.copyable {
+            CopyableValue(value: fact.value, monospaced: fact.monospaced)
+        } else {
+            Text(verbatim: fact.value)
+                .font(fact.monospaced ? .callout.monospaced() : .callout)
+                .textSelection(.enabled)
         }
     }
 }
