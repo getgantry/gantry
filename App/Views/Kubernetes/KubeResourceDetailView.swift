@@ -84,32 +84,20 @@ struct KubeDetailHeader: View {
                 }
             }
             Spacer()
-            buttons
         }
         .padding([.horizontal, .top])
-    }
-
-    @ViewBuilder
-    private var buttons: some View {
-        HStack(spacing: 8) {
-            if resource.kind.canScale {
-                Button { actions.scale(resource) } label: { Label("Scale…", systemImage: "plusminus") }
-                    .help("Scale…")
-            }
-            if resource.kind.canRestart {
-                Button { actions.restart(resource) } label: { Label("Restart", systemImage: "arrow.clockwise") }
-                    .help("Restart")
-            }
-            if resource.kind.canPortForward {
-                Button { actions.forward(resource) } label: { Label("Forward Port…", systemImage: "arrow.left.arrow.right") }
-                    .help("Forward Port…")
-            }
-            if resource.kind.canDelete {
-                Button(role: .destructive) { actions.delete(resource) } label: { Label("Delete…", systemImage: "trash") }
-                    .help("Delete…")
+        .toolbar {
+            // The resource actions go in one More menu in the window
+            // toolbar. The row context menu has the same items.
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    KubeResourceMenu(resource: resource, actions: actions)
+                } label: {
+                    Label("More", systemImage: "ellipsis")
+                }
+                .help("Actions for \(resource.reference)")
             }
         }
-        .labelStyle(.iconOnly)
     }
 }
 
