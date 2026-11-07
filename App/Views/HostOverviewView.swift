@@ -164,12 +164,12 @@ struct HostOverviewView: View {
         // own totals include the hidden apple builder and lag behind events.
         let counts = session.containerCounts
         return HStack(spacing: 0) {
-            countCell(value: counts.running, label: String(localized: "Running"), tint: .green)
+            countCell(value: counts.running, label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"), tint: .green)
             // apple/container cannot pause, so the tile would always read 0.
             if session.host.capabilities.pauseResume {
-                countCell(value: counts.paused, label: String(localized: "Paused"), tint: .yellow)
+                countCell(value: counts.paused, label: String(localized: "tile.paused", defaultValue: "Paused", comment: "Label under a count of containers"), tint: .yellow)
             }
-            countCell(value: counts.stopped, label: String(localized: "Stopped"), tint: .gray)
+            countCell(value: counts.stopped, label: String(localized: "tile.stopped", defaultValue: "Stopped", comment: "Label under a count of containers"), tint: .gray)
             countCell(value: info.images, label: String(localized: "Images"), tint: .blue)
         }
         .padding(.vertical, 12)
