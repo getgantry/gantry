@@ -101,8 +101,13 @@ extension GantryTools {
                     "host_id": appleHostID,
                     "name": Schema.string("Cluster name. It is also the kubectl context name."),
                     "workers": Schema.integer("Number of worker nodes (optional; default 0; CLI 1.6+)."),
-                    "cpus": Schema.integer("CPUs per node (optional)."),
-                    "memory": Schema.string("Memory per node, e.g. 4G (optional)."),
+                    "cpus": Schema.integer("CPUs per node (optional). On CLI 1.7+ with workers, CPUs of the control plane."),
+                    "memory": Schema.string("Memory per node, e.g. 4G (optional). On CLI 1.7+ with workers, memory of the control plane."),
+                    "worker_cpus": Schema.integer("CPUs per worker node (optional; CLI 1.7+)."),
+                    "worker_memory": Schema.string("Memory per worker node, e.g. 4G (optional; CLI 1.7+)."),
+                    "shared_image_store": Schema.boolean(
+                        "Let the nodes pull images from the local image store, so locally built images run without a registry (optional; CLI 1.7+)."
+                    ),
                     "node_image": Schema.string("Node image reference (optional; CLI default kindest/node)."),
                     "cni": Schema.string(
                         "CNI to install: 'default' (kindnet), 'none' (CLI 1.6+), or the path of a CNI manifest file (optional)."
@@ -402,11 +407,29 @@ func clusterCreateOptions(
             throw ToolError("cni 'none' needs apple/container CLI \(ContainerTooling.clusterWorkersVersion) or later.")
         }
     }
+    let workerCPUs = args.intOrNil("worker_cpus")
+    let workerMemory = args.string("worker_memory")
+    let sharedImageStore = args.bool("shared_image_store", default: false)
+    if !features.clusterService {
+        if workerCPUs != nil || workerMemory != nil {
+            throw ToolError("worker_cpus and worker_memory need apple/container CLI \(ContainerTooling.clusterServiceVersion) or later.")
+        }
+        if sharedImageStore {
+            throw ToolError("shared_image_store needs apple/container CLI \(ContainerTooling.clusterServiceVersion) or later.")
+        }
+    }
+    if workerCPUs != nil || workerMemory != nil, (workers ?? 0) == 0 {
+        throw ToolError("worker_cpus and worker_memory need 'workers' of 1 or more.")
+    }
+    if let workerCPUs, workerCPUs < 1 { throw ToolError("'worker_cpus' must be 1 or more.") }
     return AppleContainerControl.ClusterCreateOptions(
         name: name,
         workers: workers,
         cpus: args.intOrNil("cpus"),
         memory: args.string("memory"),
+        workerCPUs: workerCPUs,
+        workerMemory: workerMemory,
+        sharedImageStore: sharedImageStore,
         nodeImage: args.string("node_image"),
         cni: cni,
         removeOnStop: args.bool("remove_on_stop", default: false),

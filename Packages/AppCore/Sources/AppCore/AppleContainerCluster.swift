@@ -19,9 +19,17 @@ extension AppleContainerControl {
     public struct ClusterCreateOptions: Sendable, Equatable {
         public var name: String
         public var workers: Int?
+        /// CPUs of each node; on CLI 1.7+ with workers, of the control plane only.
         public var cpus: Int?
         /// Memory per node with an optional K/M/G/T/P suffix, for example `4G`.
+        /// On CLI 1.7+ with workers, of the control plane only.
         public var memory: String?
+        /// CPUs of each worker (`--workers count=,cpus=`, CLI 1.7+).
+        public var workerCPUs: Int?
+        /// Memory of each worker, for example `4G` (CLI 1.7+).
+        public var workerMemory: String?
+        /// Let the nodes pull from the local image store (`--shared-image-store`, CLI 1.7+).
+        public var sharedImageStore: Bool
         public var nodeImage: String?
         public var cni: ClusterCNI
         /// Remove the node containers when they stop (`--rm`).
@@ -37,6 +45,9 @@ extension AppleContainerControl {
             workers: Int? = nil,
             cpus: Int? = nil,
             memory: String? = nil,
+            workerCPUs: Int? = nil,
+            workerMemory: String? = nil,
+            sharedImageStore: Bool = false,
             nodeImage: String? = nil,
             cni: ClusterCNI = .standard,
             removeOnStop: Bool = false,
@@ -48,6 +59,9 @@ extension AppleContainerControl {
             self.workers = workers
             self.cpus = cpus
             self.memory = memory
+            self.workerCPUs = workerCPUs
+            self.workerMemory = workerMemory
+            self.sharedImageStore = sharedImageStore
             self.nodeImage = nodeImage
             self.cni = cni
             self.removeOnStop = removeOnStop
@@ -74,8 +88,18 @@ extension AppleContainerControl {
             case .manifest(let path):
                 if let path = trimmed(path) { args += ["--cni", path] }
             }
-            if let workers, workers > 0 { args += ["--workers", String(workers)] }
+            if sharedImageStore { args.append("--shared-image-store") }
+            if let workers, workers > 0 { args += ["--workers", workersValue(workers)] }
             return args
+        }
+
+        /// `3`, or `count=3,cpus=2,memory=4G` when the workers have a size.
+        private func workersValue(_ count: Int) -> String {
+            var pairs: [String] = []
+            if let workerCPUs, workerCPUs > 0 { pairs.append("cpus=\(workerCPUs)") }
+            if let memory = trimmed(workerMemory) { pairs.append("memory=\(memory)") }
+            guard !pairs.isEmpty else { return String(count) }
+            return (["count=\(count)"] + pairs).joined(separator: ",")
         }
 
         private func trimmed(_ value: String?) -> String? {
@@ -95,14 +119,37 @@ extension AppleContainerControl {
         return command
     }
 
-    /// `container cluster list`, parsed from its table.
+    /// The clusters with their nodes. CLI 1.7+ (`perClusterList`) prints
+    /// one row per cluster, so the nodes come from `--format json` and the
+    /// CPUs and memory from the `--nodes` table. Older CLIs print the node
+    /// table by default. Nil `perClusterList` reads it from the CLI version.
     public static func listClusters(
         command: String? = nil,
+        perClusterList: Bool? = nil,
         cliOverride: String? = nil
     ) async throws -> [ContainerCluster] {
         let resolved = try await resolveClusterCommand(command, cliOverride: cliOverride)
-        let output = try await runCluster([resolved, "list"], cliOverride: cliOverride)
-        return ContainerCluster.parseList(output)
+        var perCluster = perClusterList
+        if perCluster == nil {
+            perCluster = await ContainerTooling.currentFeatures(cliOverride: cliOverride).clusterService
+        }
+        guard perCluster == true else {
+            return ContainerCluster.parseList(try await runCluster([resolved, "list"], cliOverride: cliOverride))
+        }
+        let table = try await runCluster(listArguments(command: resolved, perClusterList: true), cliOverride: cliOverride)
+        let tableClusters = ContainerCluster.parseList(table)
+        let json = try? await runCluster(listJSONArguments(command: resolved), cliOverride: cliOverride)
+        guard let parsed = json.flatMap({ ContainerCluster.parseJSON(Data($0.utf8)) }) else { return tableClusters }
+        return parsed.map { $0.mergingResources(from: tableClusters) }
+    }
+
+    /// The node table: `cluster list --nodes` on CLI 1.7+, else `cluster list`.
+    public static func listArguments(command: String = "cluster", perClusterList: Bool) -> [String] {
+        perClusterList ? [command, "list", "--nodes"] : [command, "list"]
+    }
+
+    public static func listJSONArguments(command: String = "cluster") -> [String] {
+        [command, "list", "--format", "json"]
     }
 
     /// `container cluster create`. Pulls the node image and boots every node,
@@ -160,7 +207,8 @@ extension AppleContainerControl {
     }
 
     /// `container cluster load-image --name <cluster> <image>`: copies a local
-    /// image into the containerd of every node (or only `nodes`).
+    /// image into the containerd of every node (or only `nodes`). CLI 1.5.0
+    /// to 1.6.x only; 1.7.0 replaced it with `create --shared-image-store`.
     public static func loadImageIntoCluster(
         _ image: String,
         cluster: String,

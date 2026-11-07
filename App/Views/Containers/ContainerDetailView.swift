@@ -115,7 +115,7 @@ struct ContainerDetailView: View {
     private var overflowMenu: some View {
         let caps = session.host.capabilities
         return Menu {
-            if caps.renameContainer {
+            if caps.renameContainer, session.clusterNodeCluster(container.id) == nil {
                 Button {
                     renameText = container.displayName
                     showRename = true
@@ -182,6 +182,11 @@ struct ContainerDetailView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
+                if let cluster = session.clusterNodeCluster(container.id) {
+                    Label(AppleClusterNode.lifecycleExplanation(cluster: cluster), systemImage: "steeringwheel")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
             ExplainFailureButton(session: session, container: container)
@@ -202,13 +207,14 @@ struct ContainerDetailView: View {
 
     @ViewBuilder
     private func actionButton(_ action: ContainerAction, systemImage: String, enabled: Bool) -> some View {
+        let nodeCluster = session.clusterNodeCluster(container.id)
         Button {
             Task { _ = await session.perform(action, on: container.id) }
         } label: {
             Label(action.displayName, systemImage: systemImage)
         }
-        .disabled(!enabled)
-        .help(action.displayName)
+        .disabled(!enabled || nodeCluster != nil)
+        .help(nodeCluster.map { AppleClusterNode.lifecycleExplanation(cluster: $0) } ?? action.displayName)
     }
 
     // MARK: - Tabs

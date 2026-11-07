@@ -1091,7 +1091,11 @@ public final class HostSession: Identifiable {
     public func refreshClusters() async {
         guard supportsClusters, let command = clusterFeatures?.clusterCommand else { return }
         do {
-            clusters = try await AppleContainerControl.listClusters(command: command, cliOverride: machineCLIOverride)
+            clusters = try await AppleContainerControl.listClusters(
+                command: command,
+                perClusterList: clusterFeatures?.clusterService ?? false,
+                cliOverride: machineCLIOverride
+            )
             clusterListError = nil
         } catch {
             guard !(error is CancellationError) else { return }
@@ -1132,10 +1136,13 @@ public final class HostSession: Identifiable {
             cancel: { [weak self] in Task { await self?.cancelClusterCreation(name) } }
         )
         let cli = machineCLIOverride
+        let perClusterList = clusterFeatures?.clusterService ?? false
         clusterCreationTasks[name] = Task { [weak self] in
             do {
                 // The sheet's list can be stale: check the name right before the CLI runs.
-                let existing = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
+                let existing = try await AppleContainerControl.listClusters(
+                    command: command, perClusterList: perClusterList, cliOverride: cli
+                )
                 if existing.contains(where: { $0.name == name }) {
                     throw AppleControlError.command(String(localized: "A cluster named \u{201C}\(name)\u{201D} already exists.", bundle: .module))
                 }
@@ -1286,7 +1293,8 @@ public final class HostSession: Identifiable {
     /// Copies a local image into the containerd of every node of `cluster`.
     @discardableResult
     public func loadImageIntoCluster(_ image: String, cluster: String) async -> Bool {
-        await clusterAction { command in
+        guard clusterFeatures?.clusterLoadImage == true else { return false }
+        return await clusterAction { command in
             try await AppleContainerControl.loadImageIntoCluster(
                 image, cluster: cluster, command: command, cliOverride: machineCLIOverride
             )
@@ -1307,6 +1315,10 @@ public final class HostSession: Identifiable {
     // MARK: - Container actions
 
     public func perform(_ action: ContainerAction, on id: String) async -> Bool {
+        if let cluster = clusterNodeCluster(id) {
+            report(AppleClusterNode.lifecycleExplanation(cluster: cluster))
+            return false
+        }
         // A user-driven stop/restart/kill/remove makes the container's exit
         // expected, so its `die` event is not reported as a crash.
         switch action {
@@ -1333,6 +1345,13 @@ public final class HostSession: Identifiable {
                 try await client.removeContainer(id: id, force: force, removeVolumes: false)
             }
         }
+    }
+
+    /// The cluster of the container `id` when it is a cluster node on an
+    /// apple/container host; the cluster plugin owns its lifecycle.
+    public func clusterNodeCluster(_ id: String) -> String? {
+        guard host.isAppleContainer, let container = containers.first(where: { $0.id == id }) else { return nil }
+        return AppleClusterNode.clusterName(of: container)
     }
 
     /// The last inspected details for a container, if still cached this session.

@@ -69,6 +69,39 @@ struct ClusterToolTests {
         #expect(plain.arguments(command: "k8s") == ["k8s", "create", "--name", "a"])
     }
 
+    @Test func workerSizeAndSharedImagesOnCLI17() throws {
+        let v17 = ContainerTooling.features(for: "1.7.1")
+        let args = Arguments([
+            "name": .string("dev"),
+            "workers": .int(2),
+            "worker_cpus": .int(4),
+            "worker_memory": .string("8G"),
+            "shared_image_store": .bool(true)
+        ])
+        let options = try clusterCreateOptions(args, features: v17)
+        #expect(options.workerCPUs == 4)
+        #expect(options.workerMemory == "8G")
+        #expect(options.sharedImageStore)
+        #expect(options.arguments().contains("--shared-image-store"))
+        #expect(options.arguments().suffix(2) == ["--workers", "count=2,cpus=4,memory=8G"])
+    }
+
+    @Test func rejectsWorkerSizeAndSharedImagesBefore17() {
+        #expect(throws: (any Error).self) {
+            try clusterCreateOptions(Arguments(["name": .string("a"), "workers": .int(1), "worker_cpus": .int(2)]), features: current)
+        }
+        #expect(throws: (any Error).self) {
+            try clusterCreateOptions(Arguments(["name": .string("a"), "shared_image_store": .bool(true)]), features: current)
+        }
+        // A worker size needs workers.
+        #expect(throws: (any Error).self) {
+            try clusterCreateOptions(
+                Arguments(["name": .string("a"), "worker_memory": .string("2G")]),
+                features: ContainerTooling.features(for: "1.7.1")
+            )
+        }
+    }
+
     @Test func clusterToolsRejectUnknownHost() async {
         for name in ["list_clusters", "create_cluster", "delete_cluster"] {
             let result = await GantryTools().call(

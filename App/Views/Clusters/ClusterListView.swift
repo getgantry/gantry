@@ -41,6 +41,9 @@ struct ClusterListView: View {
                     Label("No Clusters", systemImage: "steeringwheel")
                 } description: {
                     Text("Create a local Kubernetes cluster. Each node runs in its own lightweight VM.")
+                    if session.clusterFeatures?.clusterService == true {
+                        Text("Clusters made with container 1.6 or earlier do not show here. To remove one, run container cluster delete --name NAME.")
+                    }
                 } actions: {
                     Button("New Cluster…") { showingCreate = true }
                         .buttonStyle(.borderedProminent)
@@ -408,6 +411,13 @@ struct ClusterDetailView: View {
                 if let cp = cluster.controlPlane {
                     Fact(String(localized: "Node Resources"), "\(cp.cpus) CPU · \(Formatters.bytes(cp.memoryBytes))")
                 }
+                if let worker = cluster.workers.first, cluster.controlPlane.map({ !ClusterText.sameSize($0, worker) }) ?? false {
+                    Fact(String(localized: "Worker Resources"), "\(worker.cpus) CPU · \(Formatters.bytes(worker.memoryBytes))")
+                }
+                if let version = cluster.kubernetesVersion { Fact(String(localized: "Kubernetes"), version) }
+                if let shared = cluster.sharedImageStore {
+                    Fact(String(localized: "Images"), shared ? String(localized: "Local image store") : String(localized: "Node image store"))
+                }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -457,6 +467,10 @@ struct ClusterDetailView: View {
 
 /// Localized display text for cluster states, roles and summaries.
 enum ClusterText {
+    static func sameSize(_ a: ContainerClusterNode, _ b: ContainerClusterNode) -> Bool {
+        a.cpus == b.cpus && a.memoryMB == b.memoryMB
+    }
+
     static func deleteAction(_ name: String) -> DestructiveAction {
         DestructiveAction(kind: .deleteCluster, targets: [name])
     }

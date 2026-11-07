@@ -15,7 +15,7 @@ public enum ContainerTooling {
     /// 0.12 shapes defensively, but 0.12 is no longer the supported target).
     public static let minimumVersion = "1.0.0"
     /// The version Gantry is tested against; offered on a fresh install.
-    public static let recommendedVersion = "1.6.1"
+    public static let recommendedVersion = "1.7.1"
     /// The Homebrew formula name (`brew install container`).
     public static let formula = "container"
 
@@ -40,6 +40,8 @@ public enum ContainerTooling {
     public static let clusterWorkersVersion = "1.6.0"
     /// `container k8s` was renamed to `container cluster`.
     public static let clusterCommandRenameVersion = "1.6.1"
+    /// The cluster service: new `cluster list`, worker sizes, shared image store.
+    public static let clusterServiceVersion = "1.7.0"
     /// The first CLI release where `container system kernel set` verifies a
     /// kernel archive against `--digest` (required for a remote `--tar` URL).
     public static let kernelArchiveDigestVersion = "1.2.0"
@@ -67,6 +69,9 @@ public enum ContainerTooling {
         public var clusterCommand: String?
         /// `cluster create --workers` and `--cni NONE`.
         public var clusterWorkers: Bool
+        public var clusterService: Bool
+        /// 1.7.0 removed `cluster load-image`.
+        public var clusterLoadImage: Bool { clusters && !clusterService }
 
         /// Local Kubernetes clusters.
         public var clusters: Bool { clusterCommand != nil }
@@ -82,6 +87,7 @@ public enum ContainerTooling {
             containerClean: Bool = false,
             clusterCommand: String? = nil,
             clusterWorkers: Bool = false,
+            clusterService: Bool = false,
             kernelArchiveDigest: Bool = false,
             systemStatusDetails: Bool = false
         ) {
@@ -91,6 +97,7 @@ public enum ContainerTooling {
             self.containerClean = containerClean
             self.clusterCommand = clusterCommand
             self.clusterWorkers = clusterWorkers
+            self.clusterService = clusterService
             self.kernelArchiveDigest = kernelArchiveDigest
             self.systemStatusDetails = systemStatusDetails
         }
@@ -108,6 +115,7 @@ public enum ContainerTooling {
                 containerClean: true,
                 clusterCommand: "cluster",
                 clusterWorkers: true,
+                clusterService: true,
                 kernelArchiveDigest: true,
                 systemStatusDetails: true
             )
@@ -119,6 +127,7 @@ public enum ContainerTooling {
             containerClean: isVersion(version, atLeast: containerCleanVersion),
             clusterCommand: clusterCommand(for: version),
             clusterWorkers: isVersion(version, atLeast: clusterWorkersVersion),
+            clusterService: isVersion(version, atLeast: clusterServiceVersion),
             kernelArchiveDigest: isVersion(version, atLeast: kernelArchiveDigestVersion),
             systemStatusDetails: isVersion(version, atLeast: systemStatusDetailsVersion)
         )
