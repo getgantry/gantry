@@ -87,6 +87,19 @@ struct GantryApp: App {
         }
         .defaultSize(width: 840, height: 520)
 
+        // "Explain this failure" panels and their suggested-command terminals.
+        WindowGroup(id: ExplainTarget.windowID, for: ExplainTarget.self) { $target in
+            ExplainWindow(target: target)
+                .environment(model)
+        }
+        .defaultSize(width: 600, height: 620)
+
+        WindowGroup(id: ExplainTerminalRequest.windowID, for: ExplainTerminalRequest.self) { $request in
+            ExplainTerminalWindow(request: request)
+                .environment(model)
+        }
+        .defaultSize(width: 760, height: 460)
+
         MenuBarExtra("Gantry", image: "MenuBarIcon", isInserted: $showMenuBarExtra) {
             MenuBarView()
                 .environment(model)
