@@ -159,8 +159,8 @@ struct ImageListView: View {
                 }
             }
         }
-        .onSectionCommand(.pullImage, .images) { showingPull = true }
-        .onSectionCommand(.newItem, .images) { chooseDockerfile() }
+        .onSectionCommand(.pullImage, .images, host: session.host.id) { showingPull = true }
+        .onSectionCommand(.newItem, .images, host: session.host.id) { chooseDockerfile() }
         .sheet(item: $buildRequest, onDismiss: { Task { await refresh() } }) { request in
             BuildImageSheet(dockerfileURL: request.url, preferredHostID: session.id)
                 .environment(model)

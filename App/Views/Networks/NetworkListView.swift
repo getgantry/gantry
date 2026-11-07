@@ -96,7 +96,7 @@ struct NetworkListView: View {
                 }
             }
         }
-        .onSectionCommand(.newItem, .networks) { showingNew = true }
+        .onSectionCommand(.newItem, .networks, host: session.host.id) { showingNew = true }
         .onSectionCommand(.refresh, .networks) { Task { await session.refreshNetworks() } }
         .sheet(isPresented: $showingNew) {
             NewNetworkSheet(session: session)

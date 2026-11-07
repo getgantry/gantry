@@ -40,6 +40,15 @@ extension Notification.Name {
     /// does the navigating — this only chooses what the pane shows on arrival.
     static let gantryOpenDebugShell = Notification.Name("gantryOpenDebugShell")
 
+    /// View > Command Palette (⌘K). ContentView shows the palette.
+    static let gantryShowPalette = Notification.Name("gantryShowPalette")
+
+    /// Opens Reclaim Space on a host's Overview (see `SectionCommand.cleanup`).
+    static let gantryCleanup = Notification.Name("gantryCleanup")
+
+    /// A palette request is waiting in `PendingSectionCommand`.
+    static let gantryPendingSectionCommand = Notification.Name("gantryPendingSectionCommand")
+
 }
 
 /// Identifies a container to jump to, carried by `.gantrySelectContainer`.

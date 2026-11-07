@@ -134,6 +134,7 @@ enum DetailSelection: Hashable {
 struct ContentView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     /// Land on the fleet dashboard at launch.
     @State private var selection: SidebarItem? = .dashboard
@@ -155,6 +156,12 @@ struct ContentView: View {
     @State private var isDropTargeted = false
     /// apple/container setup is presented only with a status payload.
     @State private var containerSetupRequest: ContainerSetupRequest?
+    @State private var showingPalette = false
+    /// The palette result to run once the palette sheet has closed.
+    @State private var paletteChoice: PaletteChoice?
+    @State private var paletteConfirm: DestructiveAction?
+    @State private var paletteConfirmHost: UUID?
+    @State private var paletteRecents = PaletteRecents.load()
     #if DEBUG
     @State private var testPromptSession: HostSession?
     #endif
@@ -200,7 +207,7 @@ struct ContentView: View {
     // The modifier chain is split into helpers: as one expression it exceeds
     // the type checker's time budget on CI runners.
     var body: some View {
-        withHostPrompts(withSetupAndLaunchTasks(withRefreshAndFileOpening(withSelectionTracking(splitView))))
+        withCommandPalette(withHostPrompts(withSetupAndLaunchTasks(withRefreshAndFileOpening(withSelectionTracking(splitView)))))
     }
 
     private func withSelectionTracking(_ content: some View) -> some View {
@@ -321,6 +328,40 @@ struct ContentView: View {
         .toolbar { ActivityToolbarItem() }
     }
 
+    private func withCommandPalette(_ content: some View) -> some View {
+        content
+        .onReceive(NotificationCenter.default.publisher(for: .gantryShowPalette)) { _ in
+            showingPalette = true
+        }
+        // The choice runs after the sheet closes, so a confirmation or
+        // another sheet it opens can be shown.
+        .sheet(isPresented: $showingPalette, onDismiss: runPaletteChoice) {
+            CommandPaletteView(items: PaletteSource.items(model: model), recents: paletteRecents.ids, choice: $paletteChoice)
+        }
+        .destructiveConfirmation($paletteConfirm) { action, force in
+            guard let hostID = paletteConfirmHost, let session = model.session(id: hostID) else { return }
+            await PaletteRunner.perform(action, force: force, on: session)
+        }
+    }
+
+    private func runPaletteChoice() {
+        guard let choice = paletteChoice else { return }
+        paletteChoice = nil
+        paletteRecents.record(choice.item.id)
+        paletteRecents.save()
+        PaletteRunner(
+            model: model,
+            navigate: navigate,
+            showDashboard: { selection = .dashboard },
+            showAddHost: { showingAddHost = true },
+            openSettings: { openSettings() },
+            openHostTerminal: { openWindow(id: "hostTerminal", value: $0) },
+            confirm: { action, hostID in
+                paletteConfirmHost = hostID
+                paletteConfirm = action
+            }
+        ).run(choice.item, choice.action)
+    }
 
     // MARK: - Refresh
 

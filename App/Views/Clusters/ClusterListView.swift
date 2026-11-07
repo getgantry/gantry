@@ -86,7 +86,7 @@ struct ClusterListView: View {
                 }
             }
         }
-        .onSectionCommand(.newItem, .clusters) {
+        .onSectionCommand(.newItem, .clusters, host: session.host.id) {
             if !(clusters.isEmpty && session.clusterListError != nil) { showingCreate = true }
         }
         .onSectionCommand(.refresh, .clusters) { Task { await session.refreshClusters() } }
