@@ -106,7 +106,7 @@ struct NetworkListView: View {
                 Menu {
                     Button("Prune Unused Networks…") { pruneConfirm = true }
                 } label: {
-                    Label("More", systemImage: "ellipsis.circle")
+                    Label("More", systemImage: "ellipsis")
                 }
             }
         }

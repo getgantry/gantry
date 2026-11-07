@@ -89,9 +89,11 @@ struct ContainerListView: View {
         return ListEmptyState(
             title: "No Containers",
             systemImage: "shippingbox",
-            description: "Run a container from an image to see it here.",
+            description: "Run a container from an image. In New Container, you can also paste a docker run command.",
             actionTitle: apple ? "Quick Run…" : "New Container…",
-            action: { if apple { showQuickRun = true } else { showCreateSheet = true } }
+            action: { if apple { showQuickRun = true } else { showCreateSheet = true } },
+            secondaryActionTitle: apple ? "New Container…" : nil,
+            secondaryAction: apple ? { showCreateSheet = true } : nil
         )
     }
 
@@ -241,7 +243,9 @@ struct ContainerListView: View {
         ContainerRow(
             container: container,
             imageArchitecture: archByImageID[container.imageID] ?? "",
-            hostArchitecture: session.info?.architecture ?? ""
+            hostArchitecture: session.info?.architecture ?? "",
+            history: container.state.isRunning ? session.containerLoadHistory.history(container.id) : [],
+            cpuCapacity: Double(max(session.info?.ncpu ?? 1, 1)) * 100
         )
         .tag(container.id)
     }
@@ -378,7 +382,7 @@ struct ContainerListView: View {
                     Label("Prune Stopped Containers…", systemImage: "trash")
                 }
             } label: {
-                Label("More", systemImage: "ellipsis.circle")
+                Label("More", systemImage: "ellipsis")
             }
         }
     }
@@ -418,22 +422,44 @@ private struct ContainerRow: View {
     let container: ContainerSummary
     let imageArchitecture: String
     let hostArchitecture: String
+    /// Recent load of a running container; empty when stopped or not sampled yet.
+    let history: [ContainerLoadPoint]
+    let cpuCapacity: Double
+
+    /// Published ports, deduplicated, in a stable order.
+    private var publishedPorts: [String] {
+        var seen = Set<String>()
+        return container.ports.compactMap { port in
+            guard let publicPort = port.publicPort else { return nil }
+            // Verbatim string: Int interpolation in Text applies digit grouping.
+            let text = ":" + String(publicPort)
+            return seen.insert(text).inserted ? text : nil
+        }
+    }
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Spacing.s) {
             StatusDot(state: container.state)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(container.displayName)
                     .font(.headline)
                     .lineLimit(1)
-                Text("\(container.image) · \(container.status)")
+                Text(verbatim: container.image)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .truncationMode(.middle)
+                HStack(spacing: Spacing.xxs) {
+                    Text(verbatim: container.status)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                    portTags
+                }
             }
 
-            Spacer()
+            Spacer(minLength: Spacing.xs)
 
             ArchBadge(architecture: imageArchitecture, hostArchitecture: hostArchitecture)
 
@@ -441,25 +467,55 @@ private struct ContainerRow: View {
                 HealthBadge(health: health)
             }
 
-            if let port = container.ports.first(where: { $0.publicPort != nil }),
-               let publicPort = port.publicPort {
-                // Verbatim string: interpolating an Int into Text would apply
-                // locale digit grouping and render port 54333 as "54.333".
-                Text(verbatim: ":\(String(publicPort))")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(.quaternary, in: .capsule)
-                    .help(
-                        container.ports
-                            .filter { $0.publicPort != nil }
-                            .map(\.display)
-                            .joined(separator: "\n")
-                    )
+            if let latest = history.last {
+                loadSummary(latest)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 3)
+    }
+
+    @ViewBuilder
+    private var portTags: some View {
+        let ports = publishedPorts
+        if !ports.isEmpty {
+            ForEach(ports.prefix(3), id: \.self) { port in
+                Text(verbatim: port)
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(.quaternary, in: .capsule)
+            }
+            if ports.count > 3 {
+                Text(verbatim: "+\(ports.count - 3)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// CPU sparkline with the current CPU and memory, for running containers.
+    private func loadSummary(_ latest: ContainerLoadPoint) -> some View {
+        HStack(spacing: Spacing.xs) {
+            Sparkline(
+                points: history.metricPoints { $0.cpuPercent / cpuCapacity },
+                tint: .blue,
+                domain: .dynamic(minimum: 0.05),
+                lineWidth: 1
+            )
+            .frame(width: 48, height: 18)
+            .opacity(history.count > 1 ? 1 : 0)
+            VStack(alignment: .trailing, spacing: 0) {
+                Text(verbatim: Formatters.cpu(latest.cpuPercent))
+                Text(verbatim: Formatters.bytes(latest.memoryBytes))
+                    .foregroundStyle(.secondary)
+            }
+            .font(.caption2.monospacedDigit())
+            .frame(minWidth: 52, alignment: .trailing)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Load")
+        .accessibilityValue(Text("CPU \(Formatters.cpu(latest.cpuPercent)), memory \(Formatters.bytes(latest.memoryBytes))"))
     }
 }
 

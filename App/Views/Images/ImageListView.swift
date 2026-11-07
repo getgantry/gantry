@@ -171,7 +171,7 @@ struct ImageListView: View {
                     Button("Prune Dangling Images…") { pruneConfirm = .dangling }
                     Button("Prune All Unused…") { pruneConfirm = .allUnused }
                 } label: {
-                    Label("More", systemImage: "ellipsis.circle")
+                    Label("More", systemImage: "ellipsis")
                 }
             }
         }

@@ -213,7 +213,7 @@ struct VolumeListView: View {
             Menu {
                 Button("Prune Unused Volumes…") { pruneConfirm = true }
             } label: {
-                Label("More", systemImage: "ellipsis.circle")
+                Label("More", systemImage: "ellipsis")
             }
         }
     }
