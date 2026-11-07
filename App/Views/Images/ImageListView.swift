@@ -125,7 +125,8 @@ struct ImageListView: View {
                 systemImage: "square.stack.3d.up",
                 description: "Pull an image from a registry or build one from a Dockerfile.",
                 actionTitle: "Pull Image…",
-                action: { showingPull = true }
+                action: { showingPull = true },
+                secondaryActions: [ListEmptyAction(title: "Build Image…") { chooseDockerfile() }]
             ),
             total: session.images.count,
             filtered: filtered.count,
@@ -407,7 +408,7 @@ struct ImageDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 FactGrid {
-                    Fact("ID", image.shortID)
+                    Fact("ID", image.shortID, monospaced: true, copyText: image.id)
                     Fact("Size", image.sizeDisplay)
                     Fact("Created", image.createdDate.formatted(date: .abbreviated, time: .shortened))
                     Fact("Containers", image.containers >= 0 ? "\(image.containers)" : "—")

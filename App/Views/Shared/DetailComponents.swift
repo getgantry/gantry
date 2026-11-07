@@ -9,22 +9,27 @@ struct Fact: Identifiable {
     var monospaced = false
     /// Shows a copy button next to the value.
     var copyable = false
+    /// The text that the copy button copies, when it differs from the value
+    /// (a full ID behind a short one).
+    var copyText: String?
 
     /// A literal label is a catalog key.
-    init(_ label: LocalizedStringKey, _ value: String, monospaced: Bool = false, copyable: Bool = false) {
+    init(_ label: LocalizedStringKey, _ value: String, monospaced: Bool = false, copyable: Bool = false, copyText: String? = nil) {
         self.label = Text(label)
         self.value = value
         self.monospaced = monospaced
-        self.copyable = copyable
+        self.copyable = copyable || copyText != nil
+        self.copyText = copyText
     }
 
     /// A label that is already localized, for example from `String(localized:)`.
     @_disfavoredOverload
-    init<S: StringProtocol>(_ label: S, _ value: String, monospaced: Bool = false, copyable: Bool = false) {
+    init<S: StringProtocol>(_ label: S, _ value: String, monospaced: Bool = false, copyable: Bool = false, copyText: String? = nil) {
         self.label = Text(verbatim: String(label))
         self.value = value
         self.monospaced = monospaced
-        self.copyable = copyable
+        self.copyable = copyable || copyText != nil
+        self.copyText = copyText
     }
 }
 
@@ -56,7 +61,7 @@ extension FactGrid {
     @ViewBuilder
     fileprivate func value(_ fact: Fact) -> some View {
         if fact.copyable {
-            CopyableValue(value: fact.value, monospaced: fact.monospaced)
+            CopyableValue(value: fact.value, copyText: fact.copyText, monospaced: fact.monospaced)
         } else {
             Text(verbatim: fact.value)
                 .font(fact.monospaced ? .callout.monospaced() : .callout)

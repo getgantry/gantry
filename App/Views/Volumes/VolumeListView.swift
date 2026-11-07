@@ -302,7 +302,8 @@ struct VolumeDetailView: View {
                         FactGrid {
                             Fact("Driver", volume.driver)
                             Fact("Scope", volume.scope)
-                            Fact("Mountpoint", volume.mountpoint)
+                            Fact("Name", volume.name, monospaced: true, copyable: true)
+                            Fact("Mountpoint", volume.mountpoint, monospaced: true, copyable: !volume.mountpoint.isEmpty)
                             if let size = volumeSize, size >= 0 {
                                 Fact("Size", Formatters.bytes(size, style: .file))
                             }

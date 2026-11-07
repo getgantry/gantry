@@ -173,6 +173,8 @@ struct StatTile: View {
 /// A value in a monospaced font with a copy button next to it.
 struct CopyableValue: View {
     let value: String
+    /// What the button copies; nil copies `value`.
+    var copyText: String?
     var monospaced = true
 
     @State private var copied = false
@@ -185,7 +187,7 @@ struct CopyableValue: View {
                 .lineLimit(2)
                 .truncationMode(.middle)
             Button {
-                copyToPasteboard(value)
+                copyToPasteboard(copyText ?? value)
                 copied = true
                 Task {
                     try? await Task.sleep(for: .seconds(1.5))

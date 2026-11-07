@@ -198,7 +198,7 @@ struct NetworkDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         FactGrid {
-                            Fact("ID", network.shortID)
+                            Fact("ID", network.shortID, monospaced: true, copyText: network.id)
                             Fact("Driver", network.driver)
                             Fact("Scope", network.scope)
                             Fact("IPv6", network.enableIPv6 ? String(localized: "Enabled") : String(localized: "Disabled"))

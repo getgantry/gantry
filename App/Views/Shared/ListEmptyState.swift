@@ -8,9 +8,14 @@ struct ListEmptyState {
     var description: LocalizedStringKey
     var actionTitle: LocalizedStringKey?
     var action: (() -> Void)?
-    /// A second way in, shown as a plain button next to the main action.
-    var secondaryActionTitle: LocalizedStringKey?
-    var secondaryAction: (() -> Void)?
+    /// More ways in, shown as plain buttons after the main action.
+    var secondaryActions: [ListEmptyAction] = []
+}
+
+struct ListEmptyAction: Identifiable {
+    let title: LocalizedStringKey
+    let action: () -> Void
+    var id: String { "\(title)" }
 }
 
 extension View {
@@ -63,8 +68,8 @@ struct ListEmptyStateView: View {
                     Button(title, action: action)
                         .buttonStyle(.borderedProminent)
                 }
-                if let title = state.secondaryActionTitle, let action = state.secondaryAction {
-                    Button(title, action: action)
+                ForEach(state.secondaryActions) { item in
+                    Button(item.title, action: item.action)
                 }
             }
         }
