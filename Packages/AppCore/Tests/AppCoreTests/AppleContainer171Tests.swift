@@ -47,6 +47,19 @@ private func tempConfig(_ text: String?) throws -> URL {
         #expect(withUser.first { $0.key == "container.dns.nameservers" }?.user == .strings(["1.1.1.1"]))
     }
 
+    /// A 1.6.1 host: `system property list --format json` has no
+    /// [container.dns] table, and the 1.6.1 features do not list the keys.
+    @Test func cli161ShowsNoDNSKeys() {
+        let properties161 = #"{"build":{"cpus":2,"image":"ghcr.io/apple/container-builder-shim/builder:0.12.0","memory":"2048mb","rosetta":true},"container":{"cpus":4,"memory":"1gb"},"dns":{},"kernel":{},"network":{},"registry":{"domain":"docker.io"},"vminit":{}}"#
+        let features = ContainerTooling.features(for: "1.6.1")
+        let keys = C.mergeProperties(
+            effective: C.parsePropertyList(properties161), user: [:],
+            containerDNSDefaults: features.containerDNSDefaults
+        ).map(\.key)
+        #expect(keys.allSatisfy { !C.containerDNSKeys.contains($0) })
+        #expect(keys.contains("dns.domain"))
+    }
+
     @Test func readsStringArrays() {
         let toml = """
         [container.dns]

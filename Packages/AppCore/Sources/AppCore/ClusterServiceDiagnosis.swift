@@ -108,3 +108,13 @@ public enum ClusterServiceDiagnosis {
         return String(parts[parts.count - 1].split(separator: "_").first ?? "")
     }
 }
+
+extension ClusterServiceDiagnosis {
+    /// Whether the Kubernetes browser shows the cluster service notice: when
+    /// the selected context is a cluster of the container tool, or when there
+    /// is no context (the clusters of the tool cannot be listed).
+    public static func showsKubernetesNotice(contexts: [KubeContext], selectedContext: String?) -> Bool {
+        guard !contexts.isEmpty else { return true }
+        return contexts.first { $0.name == selectedContext }?.isAppleCluster ?? false
+    }
+}
