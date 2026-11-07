@@ -278,7 +278,7 @@ struct StorageVolumesCard: View {
             }
             ForEach(volumes) { volume in
                 LabeledContent(volume.name) {
-                    Text("\(StorageFormat.bytes(volume.size.allocated)) on disk, \(StorageFormat.bytes(volume.size.apparent)) image")
+                    Text("Used: \(StorageFormat.bytes(volume.size.allocated)). Full size: \(StorageFormat.bytes(volume.size.apparent)).")
                         .monospacedDigit()
                 }
                 .font(.callout)
