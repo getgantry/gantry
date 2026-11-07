@@ -27,6 +27,18 @@ public enum ClusterKubeconfigStore {
         record(path, host: host, cluster: cluster, file: fileURL())
     }
 
+    /// Every recorded kubeconfig, as cluster name and file path.
+    public static func entries() -> [(cluster: String, path: String)] {
+        entries(file: fileURL())
+    }
+
+    static func entries(file: URL?) -> [(cluster: String, path: String)] {
+        lock.lock(); defer { lock.unlock() }
+        return read(file)
+            .map { (cluster: String($0.key.split(separator: "/", maxSplits: 1).last ?? ""), path: $0.value) }
+            .sorted { $0.cluster == $1.cluster ? $0.path < $1.path : $0.cluster < $1.cluster }
+    }
+
     static func path(host: String, cluster: String, file: URL?) -> String? {
         lock.lock(); defer { lock.unlock() }
         return read(file)[key(host: host, cluster: cluster)]

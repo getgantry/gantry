@@ -14,6 +14,9 @@ public final class AppModel {
     /// Long operations of every host, for the activity button.
     public let operations = OperationCenter()
 
+    /// The Kubernetes section; it is not bound to a host.
+    public let kubernetes = KubernetesBrowser()
+
     /// Receives notable container events (crash/OOM/unhealthy) from every
     /// session. The app layer sets this to post system notifications. Assigning
     /// it wires the handler into all existing sessions; new sessions inherit it.

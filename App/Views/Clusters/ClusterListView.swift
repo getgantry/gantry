@@ -307,6 +307,8 @@ private struct ClusterCreationRow: View {
 struct ClusterDetailView: View {
     let cluster: ContainerCluster
     let session: HostSession
+    /// Opens the Kubernetes section on the context of this cluster.
+    var browseKubernetes: (() -> Void)?
 
     @State private var tab: DetailTab = .overview
     @State private var busy = false
@@ -379,6 +381,12 @@ struct ClusterDetailView: View {
             Spacer()
             HStack(spacing: 8) {
                 if busy { ProgressView().controlSize(.small) }
+                if let browseKubernetes, cluster.isRunning {
+                    Button(action: browseKubernetes) {
+                        Label("Browse Resources", systemImage: "helm")
+                    }
+                    .help("Opens the Kubernetes section with the context of this cluster.")
+                }
                 Button { writeKubeconfig() } label: {
                     Label("Write Kubeconfig…", systemImage: "square.and.arrow.down")
                 }

@@ -24,6 +24,7 @@ enum DestructiveActionText {
         case .stopServices: return String(localized: "Stop apple/container services?")
         case .restartServices: return String(localized: "Restart apple/container services?")
         case .cancelClusterCreation: return String(localized: "Stop creating cluster “\(name)”?")
+        case .deleteKubeResource: return String(localized: "Delete “\(name)”?")
         }
     }
 
@@ -72,7 +73,7 @@ enum DestructiveActionText {
     static func confirmLabel(_ action: DestructiveAction) -> String {
         switch action.kind {
         case .removeContainer, .removeImage, .removeVolume, .removeNetwork: String(localized: "Remove")
-        case .deleteMachine, .deleteCluster, .deleteDomain: String(localized: "Delete")
+        case .deleteMachine, .deleteCluster, .deleteDomain, .deleteKubeResource: String(localized: "Delete")
         case .forgetCredential: String(localized: "Forget")
         case .removeHost: String(localized: "Remove Host")
         case .stopGroup: String(localized: "Stop All")
@@ -108,6 +109,8 @@ enum DestructiveActionText {
             String(localized: "Gantry disconnects and removes the host. Containers on the host do not change.")
         case .stopServices: String(localized: "Containers cannot run until the services start again.")
         case .restartServices: String(localized: "The services stop and start again.")
+        case .deleteKubeResource:
+            String(localized: "Kubernetes deletes the object from the cluster. A controller can create a replacement.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }
