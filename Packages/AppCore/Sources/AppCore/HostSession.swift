@@ -1382,6 +1382,17 @@ public final class HostSession: Identifiable {
         return details
     }
 
+    /// A recipe that creates the container again, for "Copy as docker run".
+    /// The image config is subtracted when the image can be inspected.
+    public func recipe(for container: ContainerSummary) async -> ContainerRecipe? {
+        guard let details = await details(for: container.id) else { return nil }
+        var defaults: ContainerRecipe.ImageDefaults?
+        if let client, let data = try? await client.rawInspectImage(id: details.image) {
+            defaults = ContainerRecipe.ImageDefaults(inspectJSON: data)
+        }
+        return ContainerRecipe(details: details, summary: container, image: defaults)
+    }
+
     // MARK: - Log / stats streams
 
     /// Opens a follow log stream for a container. Inspects the container first
