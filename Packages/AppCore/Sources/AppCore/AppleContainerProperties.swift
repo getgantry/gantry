@@ -346,21 +346,21 @@ extension AppleContainerControl {
     public static func validatedPropertyValue(_ raw: String, kind: AppleSystemPropertyKind) throws -> AppleSystemPropertyValue {
         let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         func fail(_ message: String) -> AppleSystemError { .invalidInput(message) }
-        guard !value.isEmpty else { throw fail("Enter a value, or clear the property to use the default.") }
+        guard !value.isEmpty else { throw fail(String(localized: "Enter a value, or clear the property to use the default.", bundle: .module)) }
         guard !value.contains(where: \.isNewline) else { throw fail("A value cannot contain line breaks.") }
         switch kind {
         case .bool:
             switch value.lowercased() {
             case "true", "yes", "on", "1": return .bool(true)
             case "false", "no", "off", "0": return .bool(false)
-            default: throw fail("Enter true or false.")
+            default: throw fail(String(localized: "Enter true or false.", bundle: .module))
             }
         case .count:
-            guard let number = Int(value), number > 0 else { throw fail("Enter a positive whole number.") }
+            guard let number = Int(value), number > 0 else { throw fail(String(localized: "Enter a positive whole number.", bundle: .module)) }
             return .integer(number)
         case .memory:
             guard isValidMemorySize(value) else {
-                throw fail("Enter a memory size such as 2048mb or 4g.")
+                throw fail(String(localized: "Enter a memory size such as 2048mb or 4g.", bundle: .module))
             }
             return .string(value.lowercased())
         case .string:
@@ -371,34 +371,34 @@ extension AppleContainerControl {
         case .url:
             guard let url = URL(string: value), let scheme = url.scheme?.lowercased(),
                   scheme == "https" || scheme == "http", url.host != nil else {
-                throw fail("Enter an http(s) URL.")
+                throw fail(String(localized: "Enter an http(s) URL.", bundle: .module))
             }
             return .string(value)
         case .digest:
-            guard isValidDigest(value) else { throw fail("The digest must have the form sha256:<64 hex digits>.") }
+            guard isValidDigest(value) else { throw fail(String(localized: "The digest must have the form sha256:<64 hex digits>.", bundle: .module)) }
             return .string(value)
         case .domain:
-            guard isValidDomainName(value) else { throw fail("Enter a domain name: letters, digits, dots and hyphens.") }
+            guard isValidDomainName(value) else { throw fail(String(localized: "Enter a domain name: letters, digits, dots and hyphens.", bundle: .module)) }
             return .string(value)
         case .registryHost:
-            guard isValidRegistryServer(value) else { throw fail("Enter a registry host name, for example docker.io.") }
+            guard isValidRegistryServer(value) else { throw fail(String(localized: "Enter a registry host name, for example docker.io.", bundle: .module)) }
             return .string(value)
         case .cidrV4:
-            guard isValidCIDR(value, v6: false) else { throw fail("Enter an IPv4 subnet such as 192.168.100.0/24.") }
+            guard isValidCIDR(value, v6: false) else { throw fail(String(localized: "Enter an IPv4 subnet such as 192.168.100.0/24.", bundle: .module)) }
             return .string(value)
         case .cidrV6:
-            guard isValidCIDR(value, v6: true) else { throw fail("Enter an IPv6 subnet such as fd00:abcd::/64.") }
+            guard isValidCIDR(value, v6: true) else { throw fail(String(localized: "Enter an IPv6 subnet such as fd00:abcd::/64.", bundle: .module)) }
             return .string(value)
         case .homeMount:
             guard let choices = kind.choices, choices.contains(value.lowercased()) else {
-                throw fail("Enter rw, ro or none.")
+                throw fail(String(localized: "Enter rw, ro or none.", bundle: .module))
             }
             return .string(value.lowercased())
         case .integerValue:
-            guard let number = Int(value) else { throw fail("Enter a whole number.") }
+            guard let number = Int(value) else { throw fail(String(localized: "Enter a whole number.", bundle: .module)) }
             return .integer(number)
         case .numberValue:
-            guard let number = Double(value), number.isFinite else { throw fail("Enter a number.") }
+            guard let number = Double(value), number.isFinite else { throw fail(String(localized: "Enter a number.", bundle: .module)) }
             return .number(number)
         case .unknown:
             if let number = Int(value) { return .integer(number) }
@@ -492,7 +492,7 @@ extension AppleContainerControl {
 
     static func validatedPropertyKey(_ key: String) throws -> String {
         guard isValidPropertyKey(key) else {
-            throw AppleSystemError.invalidInput("“\(key)” is not a valid property key. Use a dotted name such as build.cpus.")
+            throw AppleSystemError.invalidInput(String(localized: "“\(key)” is not a valid property key. Use a dotted name such as build.cpus.", bundle: .module))
         }
         return key
     }

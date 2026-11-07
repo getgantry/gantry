@@ -267,8 +267,10 @@ struct HostCleanupSheet: View {
             freed = max(0, (before.containersSize + before.volumesSize) - (after.containersSize + after.volumesSize))
         }
         reclaimedTotal += freed
-        results[.trimDisks] = String(localized: "Trimmed \(trimmed) container(s)")
-            + (freed > 0 ? String(localized: " · freed \(Formatters.bytes(freed, style: .file))") : "")
+        let freedText = Formatters.bytes(freed, style: .file)
+        results[.trimDisks] = freed > 0
+            ? String(localized: "Trimmed \(trimmed) containers · freed \(freedText)")
+            : String(localized: "Trimmed \(trimmed) containers")
     }
 
     private func record(_ category: Category, _ result: PruneResult?) {
@@ -277,8 +279,10 @@ struct HostCleanupSheet: View {
             return
         }
         reclaimedTotal += result.spaceReclaimed
-        results[category] = String(localized: "Freed \(Formatters.bytes(result.spaceReclaimed, style: .file))")
-            + (result.deletedCount > 0 ? " · \(result.deletedCount) removed" : "")
+        let freed = Formatters.bytes(result.spaceReclaimed, style: .file)
+        results[category] = result.deletedCount > 0
+            ? String(localized: "Freed \(freed) · \(result.deletedCount) removed")
+            : String(localized: "Freed \(freed)")
     }
 }
 

@@ -105,6 +105,7 @@ struct AppleRegistriesPane: View {
                     }
                     .buttonStyle(.borderless)
                     .help(String(localized: "Log Out"))
+                    .accessibilityLabel(String(localized: "Log Out"))
                 }
                 .width(32)
             }

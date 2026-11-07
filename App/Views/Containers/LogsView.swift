@@ -85,9 +85,10 @@ struct LogsView: View {
         .onChange(of: lines.count) { recomputeMatches() }
         .background {
             // Invisible button gives Cmd+F a target that focuses the field.
-            Button("") { searchFocused = true }
+            Button("Find") { searchFocused = true }
                 .keyboardShortcut("f", modifiers: .command)
                 .hidden()
+                .accessibilityHidden(true)
         }
     }
 
@@ -100,13 +101,15 @@ struct LogsView: View {
             }
             .toggleStyle(.button)
             .help("Follow output")
+            .accessibilityLabel("Follow output")
 
             Button {
                 setPaused(!paused)
             } label: {
                 Image(systemName: paused ? "play.fill" : "pause.fill")
             }
-            .help(paused ? "Resume" : "Pause")
+            .help(paused ? String(localized: "Resume") : String(localized: "Pause"))
+            .accessibilityLabel(paused ? String(localized: "Resume") : String(localized: "Pause"))
 
             Button {
                 lines.removeAll()
@@ -115,6 +118,7 @@ struct LogsView: View {
                 Image(systemName: "trash")
             }
             .help("Clear")
+            .accessibilityLabel("Clear")
 
             Button {
                 copyAll()
@@ -122,6 +126,7 @@ struct LogsView: View {
                 Image(systemName: "doc.on.doc")
             }
             .help("Copy all")
+            .accessibilityLabel("Copy all")
 
             levelMenu
 
@@ -162,7 +167,8 @@ struct LogsView: View {
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
-        .help(minLevel == nil ? "Filter by level" : "Showing \(minLevel!.displayName) and up")
+        .help(minLevel.map { String(localized: "Showing \($0.displayName) and up") } ?? String(localized: "Filter by level"))
+        .accessibilityLabel(String(localized: "Filter by level"))
     }
 
     private var searchBar: some View {
@@ -170,7 +176,7 @@ struct LogsView: View {
             HStack(spacing: 4) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField(regexSearch ? "Regex" : "Search", text: $search)
+                TextField(regexSearch ? String(localized: "Regex") : String(localized: "Search"), text: $search)
                     .textFieldStyle(.plain)
                     .focused($searchFocused)
                     .onSubmit { advance(by: 1) }
@@ -178,12 +184,14 @@ struct LogsView: View {
                 Button {
                     regexSearch.toggle()
                 } label: {
-                    Text(".*")
+                    Text(verbatim: ".*")
                         .font(.system(size: 11, weight: .semibold, design: .monospaced))
                         .foregroundStyle(regexSearch ? Color.accentColor : .secondary)
                 }
                 .buttonStyle(.plain)
-                .help(regexSearch ? "Regular expression search (on)" : "Regular expression search (off)")
+                .help(regexSearch ? String(localized: "Regular expression search (on)") : String(localized: "Regular expression search (off)"))
+                .accessibilityLabel(String(localized: "Regular expression search"))
+                .accessibilityValue(regexSearch ? String(localized: "on") : String(localized: "off"))
 
                 if isSearching {
                     Text(matchCounterText)
@@ -197,6 +205,7 @@ struct LogsView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Clear search")
+                    .accessibilityLabel("Clear search")
                 }
             }
             .padding(.horizontal, 6)
@@ -209,24 +218,27 @@ struct LogsView: View {
             }
             .disabled(matchLineIDs.isEmpty)
             .help("Previous match")
+            .accessibilityLabel("Previous match")
 
             Button { advance(by: 1) } label: {
                 Image(systemName: "chevron.down")
             }
             .disabled(matchLineIDs.isEmpty)
             .help("Next match")
+            .accessibilityLabel("Next match")
 
             Toggle(isOn: $filterOnly) {
                 Image(systemName: "line.3.horizontal.decrease")
             }
             .toggleStyle(.button)
-            .help(filterOnly ? "Showing only matching lines" : "Showing all lines with highlights")
+            .help(filterOnly ? String(localized: "Showing only matching lines") : String(localized: "Showing all lines with highlights"))
+            .accessibilityLabel(String(localized: "Show only matching lines"))
         }
     }
 
     private var matchCounterText: String {
-        guard !matchLineIDs.isEmpty else { return "0 of 0" }
-        return "\(currentMatch + 1) of \(matchLineIDs.count)"
+        guard !matchLineIDs.isEmpty else { return String(localized: "\(0) of \(0)") }
+        return String(localized: "\(currentMatch + 1) of \(matchLineIDs.count)")
     }
 
     private func errorBanner(_ message: String) -> some View {

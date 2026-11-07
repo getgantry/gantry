@@ -169,6 +169,7 @@ struct AppleSystemErrorBanner: View {
                 }
                 .buttonStyle(.plain)
                 .help(String(localized: "Dismiss"))
+                .accessibilityLabel(String(localized: "Dismiss"))
             }
         }
         .padding(10)

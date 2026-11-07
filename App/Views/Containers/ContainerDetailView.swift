@@ -23,6 +23,18 @@ struct ContainerDetailView: View {
         case processes = "Processes"
         case inspect = "Inspect"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .overview: String(localized: "Overview")
+            case .logs: String(localized: "Logs")
+            case .stats: String(localized: "Stats")
+            case .terminal: String(localized: "Terminal")
+            case .files: String(localized: "Files")
+            case .processes: String(localized: "Processes")
+            case .inspect: String(localized: "Inspect")
+            }
+        }
     }
 
     private var isRunning: Bool { container.state.isRunning }
@@ -33,7 +45,7 @@ struct ContainerDetailView: View {
                 .padding([.horizontal, .top])
 
             Picker("Section", selection: $tab) {
-                ForEach(DetailTab.allCases) { Text($0.rawValue).tag($0) }
+                ForEach(DetailTab.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -359,7 +371,7 @@ private struct ContainerOverview: View {
                 if let user = d.config.user, !user.isEmpty {
                     Fact("User", user)
                 }
-                Fact("TTY", d.config.tty ? "Yes" : "No")
+                Fact("TTY", d.config.tty ? String(localized: "Yes") : String(localized: "No"))
                 if let net = d.hostConfig.networkMode {
                     Fact("Network Mode", net)
                 }

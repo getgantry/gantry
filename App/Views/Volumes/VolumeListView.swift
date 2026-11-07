@@ -3,7 +3,7 @@ import AppKit
 import AppCore
 import DockerKit
 
-/// How the volumes list is ordered. Raw values double as the menu labels.
+/// How the volumes list is ordered.
 enum VolumeSort: String, CaseIterable, Identifiable {
     case name = "Name"
     case size = "Size"
@@ -11,6 +11,14 @@ enum VolumeSort: String, CaseIterable, Identifiable {
     case created = "Created"
 
     var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .name: String(localized: "Name")
+        case .size: String(localized: "Size")
+        case .driver: String(localized: "Driver")
+        case .created: String(localized: "Created")
+        }
+    }
     var systemImage: String {
         switch self {
         case .name: "textformat"
@@ -166,7 +174,7 @@ struct VolumeListView: View {
             Menu {
                 Picker("Sort By", selection: $sort) {
                     ForEach(VolumeSort.allCases) { option in
-                        Label(option.rawValue, systemImage: option.systemImage).tag(option)
+                        Label(option.title, systemImage: option.systemImage).tag(option)
                     }
                 }
                 Divider()

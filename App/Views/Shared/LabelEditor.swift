@@ -44,6 +44,8 @@ struct LabelEditor: View {
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.borderless)
+                        .help("Remove label")
+                        .accessibilityLabel("Remove label")
                     }
                 }
             }

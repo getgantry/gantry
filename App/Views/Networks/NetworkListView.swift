@@ -185,7 +185,7 @@ struct NetworkDetailView: View {
                             Fact("ID", network.shortID)
                             Fact("Driver", network.driver)
                             Fact("Scope", network.scope)
-                            Fact("IPv6", network.enableIPv6 ? "Enabled" : "Disabled")
+                            Fact("IPv6", network.enableIPv6 ? String(localized: "Enabled") : String(localized: "Disabled"))
                         }
                         if let config = network.ipam?.config, !config.isEmpty {
                             SectionTitle("IPAM")

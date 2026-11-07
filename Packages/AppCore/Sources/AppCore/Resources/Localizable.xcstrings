@@ -2,18 +2,34 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
-    "%@ on %@ exited with code %@.": {
+    "%@ can't open a debug shell. It needs a Docker engine — apple/container runs each container in its own VM and offers no way to share namespaces with it.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ on %@ exited with code %@."
+            "value": "%@ can't open a debug shell. It needs a Docker engine — apple/container runs each container in its own VM and offers no way to share namespaces with it."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@（%@）以退出码 %@ 退出。"
+            "value": "%@ 无法打开调试 Shell。它需要 Docker 引擎：apple/container 将每个容器运行在独立的虚拟机中，无法与其共享命名空间。"
+          }
+        }
+      }
+    },
+    "%@ on %@ exited with code %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ on %@ exited with code %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ 上的 %1$@ 已退出，退出码为 %3$lld。"
           }
         }
       }
@@ -46,6 +62,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@（%@）因内存不足被终止。"
+          }
+        }
+      }
+    },
+    "%@ was killed by signal %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ was killed by signal %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 被信号 %2$lld 终止。"
+          }
+        }
+      }
+    },
+    "%@ was killed by signal %lld. Last output: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ was killed by signal %lld. Last output: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 被信号 %2$lld 终止。最后的输出：%3$@"
+          }
+        }
+      }
+    },
+    "%@: `user:` is not yet applied and was ignored.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: `user:` is not yet applied and was ignored."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：暂不支持 `user:`，已忽略。"
+          }
+        }
+      }
+    },
+    "%@: bind-mount host paths must exist on the remote server, not your Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: bind-mount host paths must exist on the remote server, not your Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：绑定挂载的主机路径必须存在于远程服务器上，而不是你的 Mac 上。"
+          }
+        }
+      }
+    },
+    "%@: joins multiple networks; apple/container attaches only `%@`.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: joins multiple networks; apple/container attaches only `%@`."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：加入了多个网络；apple/container 只会连接 `%2$@`。"
+          }
+        }
+      }
+    },
+    "%@: restart policy `%@` is not supported on apple/container and was ignored.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: restart policy `%@` is not supported on apple/container and was ignored."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@：apple/container 不支持重启策略 `%2$@`，已忽略。"
           }
         }
       }
@@ -248,6 +360,22 @@
         }
       }
     },
+    "A cluster named “%@” already exists.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cluster named “%@” already exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名为“%@”的集群已存在。"
+          }
+        }
+      }
+    },
     "A container named “%@” already exists. Choose another name.": {
       "localizations": {
         "en": {
@@ -264,6 +392,38 @@
         }
       }
     },
+    "A digest (sha256:…) is required for a remote archive.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A digest (sha256:…) is required for a remote archive."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "远程归档文件需要提供摘要（sha256:…）。"
+          }
+        }
+      }
+    },
+    "A DNS option cannot contain spaces: “%@”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A DNS option cannot contain spaces: “%@”."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS 选项不能包含空格：“%@”。"
+          }
+        }
+      }
+    },
     "A host name cannot contain spaces.": {
       "localizations": {
         "en": {
@@ -276,6 +436,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "主机名不能包含空格。"
+          }
+        }
+      }
+    },
+    "A host shell requires a connected SSH host": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A host shell requires a connected SSH host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机 Shell 需要已连接的 SSH 主机"
+          }
+        }
+      }
+    },
+    "Attaching…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attaching…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接…"
+          }
+        }
+      }
+    },
+    "Authorization was cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authorization was cancelled."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "授权已取消。"
+          }
+        }
+      }
+    },
+    "Can't read compose file: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't read compose file: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 Compose 文件：%@"
+          }
+        }
+      }
+    },
+    "Cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消。"
+          }
+        }
+      }
+    },
+    "Choose a kernel file on this Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a kernel file on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择此 Mac 上的内核文件。"
+          }
+        }
+      }
+    },
+    "cloudflared exited (code %d) before the tunnel came up.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloudflared exited (code %d) before the tunnel came up."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隧道建立前 cloudflared 已退出（退出码 %d）。"
+          }
+        }
+      }
+    },
+    "cloudflared isn't installed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cloudflared isn't installed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装 cloudflared。"
           }
         }
       }
@@ -308,6 +596,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在连接…"
+          }
+        }
+      }
+    },
+    "Connection cancelled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection cancelled"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接已取消"
+          }
+        }
+      }
+    },
+    "Connection lost. Reconnecting…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection lost. Reconnecting…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接已断开，正在重新连接…"
+          }
+        }
+      }
+    },
+    "Container not found: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container not found: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到容器：%@"
           }
         }
       }
@@ -360,6 +696,166 @@
         }
       }
     },
+    "Could not create network %@; it may already exist.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create network %@; it may already exist."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建网络 %@，它可能已存在。"
+          }
+        }
+      }
+    },
+    "Could not create volume %@; it may already exist.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create volume %@; it may already exist."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建卷 %@，它可能已存在。"
+          }
+        }
+      }
+    },
+    "Could not find a free local port": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not find a free local port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到可用的本地端口"
+          }
+        }
+      }
+    },
+    "Could not list DNS domains.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not list DNS domains."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法列出 DNS 域名。"
+          }
+        }
+      }
+    },
+    "Could not reach the Docker daemon on %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not reach the Docker daemon on %@: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法访问 %1$@ 上的 Docker 守护进程：%2$@"
+          }
+        }
+      }
+    },
+    "Could not reach this port locally to tunnel it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not reach this port locally to tunnel it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法在本地访问此端口，因此无法为它建立隧道。"
+          }
+        }
+      }
+    },
+    "Could not read `container system status`.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read `container system status`."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 `container system status`。"
+          }
+        }
+      }
+    },
+    "Could not start apple/container services.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start apple/container services."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法启动 apple/container 服务。"
+          }
+        }
+      }
+    },
+    "Could not stop apple/container services.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not stop apple/container services."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法停止 apple/container 服务。"
+          }
+        }
+      }
+    },
+    "CPUs must be a positive number.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPUs must be a positive number."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 数量必须为正数。"
+          }
+        }
+      }
+    },
     "Create cluster %@": {
       "localizations": {
         "en": {
@@ -392,6 +888,22 @@
         }
       }
     },
+    "Docker host not found: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker host not found: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 Docker 主机：%@"
+          }
+        }
+      }
+    },
     "Docker is not installed on this Mac.": {
       "localizations": {
         "en": {
@@ -404,6 +916,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "此 Mac 上未安装 Docker。"
+          }
+        }
+      }
+    },
+    "Enter a domain name: letters, digits, dots and hyphens.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a domain name: letters, digits, dots and hyphens."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入域名：仅限字母、数字、点和连字符。"
           }
         }
       }
@@ -424,6 +952,54 @@
         }
       }
     },
+    "Enter a memory size such as 2048mb or 4g.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a memory size such as 2048mb or 4g."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入内存大小，例如 2048mb 或 4g。"
+          }
+        }
+      }
+    },
+    "Enter a number.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a number."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入数字。"
+          }
+        }
+      }
+    },
+    "Enter a password or access token.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a password or access token."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入密码或访问令牌。"
+          }
+        }
+      }
+    },
     "Enter a port from 1 to 65535.": {
       "localizations": {
         "en": {
@@ -436,6 +1012,198 @@
           "stringUnit": {
             "state": "translated",
             "value": "请输入 1 到 65535 之间的端口。"
+          }
+        }
+      }
+    },
+    "Enter a positive whole number.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a positive whole number."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入正整数。"
+          }
+        }
+      }
+    },
+    "Enter a registry host name, for example docker.io.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a registry host name, for example docker.io."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入镜像仓库主机名，例如 docker.io。"
+          }
+        }
+      }
+    },
+    "Enter a user name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a user name."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入用户名。"
+          }
+        }
+      }
+    },
+    "Enter a value, or clear the property to use the default.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a value, or clear the property to use the default."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入一个值，或清除此属性以使用默认值。"
+          }
+        }
+      }
+    },
+    "Enter a whole number.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a whole number."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入整数。"
+          }
+        }
+      }
+    },
+    "Enter an http(s) URL or choose a tar archive on this Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an http(s) URL or choose a tar archive on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 http(s) URL，或选择此 Mac 上的 tar 归档文件。"
+          }
+        }
+      }
+    },
+    "Enter an http(s) URL.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an http(s) URL."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 http(s) URL。"
+          }
+        }
+      }
+    },
+    "Enter an IPv4 subnet such as 192.168.100.0/24.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an IPv4 subnet such as 192.168.100.0/24."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 IPv4 子网，例如 192.168.100.0/24。"
+          }
+        }
+      }
+    },
+    "Enter an IPv6 subnet such as fd00:abcd::/64.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an IPv6 subnet such as fd00:abcd::/64."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 IPv6 子网，例如 fd00:abcd::/64。"
+          }
+        }
+      }
+    },
+    "Enter rw, ro or none.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter rw, ro or none."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 rw、ro 或 none。"
+          }
+        }
+      }
+    },
+    "Enter the path of the kernel file inside the archive.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the path of the kernel file inside the archive."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入归档文件中内核文件的路径。"
+          }
+        }
+      }
+    },
+    "Enter true or false.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter true or false."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 true 或 false。"
           }
         }
       }
@@ -456,6 +1224,54 @@
         }
       }
     },
+    "Homebrew isn't installed. Install it from https://brew.sh, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew isn't installed. Install it from https://brew.sh, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装 Homebrew。请从 https://brew.sh 安装后重试。"
+          }
+        }
+      }
+    },
+    "Host file browsing requires a connected SSH host": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host file browsing requires a connected SSH host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览主机文件需要已连接的 SSH 主机"
+          }
+        }
+      }
+    },
+    "Invalid compose YAML: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid compose YAML: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose YAML 无效：%@"
+          }
+        }
+      }
+    },
     "Kill": {
       "localizations": {
         "en": {
@@ -472,6 +1288,102 @@
         }
       }
     },
+    "Kubernetes clusters need apple container CLI %@ or later.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kubernetes clusters need apple container CLI %@ or later."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kubernetes 集群需要 apple container CLI %@ 或更高版本。"
+          }
+        }
+      }
+    },
+    "No local Docker socket was found. Make sure Docker is running.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No local Docker socket was found. Make sure Docker is running."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到本地 Docker 套接字。请确认 Docker 正在运行。"
+          }
+        }
+      }
+    },
+    "No saved SSH password for %@. Connect once from the Gantry app to store it in the Keychain.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved SSH password for %@. Connect once from the Gantry app to store it in the Keychain."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有为 %@ 保存 SSH 密码。请先在 Gantry App 中连接一次，将其存入钥匙串。"
+          }
+        }
+      }
+    },
+    "No usable SSH key found": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No usable SSH key found"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到可用的 SSH 密钥"
+          }
+        }
+      }
+    },
+    "No usable SSH key found for %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No usable SSH key found for %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 %@ 可用的 SSH 密钥。"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not connected"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未连接"
+          }
+        }
+      }
+    },
     "Pause": {
       "localizations": {
         "en": {
@@ -484,6 +1396,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂停"
+          }
+        }
+      }
+    },
+    "Port forwarding requires a connected SSH host": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port forwarding requires a connected SSH host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "端口转发需要已连接的 SSH 主机"
+          }
+        }
+      }
+    },
+    "Pulling %@ — first run only…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling %@ — first run only…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取 %@（仅首次运行）…"
           }
         }
       }
@@ -520,6 +1464,44 @@
         }
       }
     },
+    "Removing %lld existing containers for project %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removing %#@containers@ for project %2$@."
+          },
+          "substitutions": {
+            "containers": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg existing container"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg existing containers"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在移除项目 %2$@ 的 %1$lld 个现有容器。"
+          }
+        }
+      }
+    },
     "Restart": {
       "localizations": {
         "en": {
@@ -532,6 +1514,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "重启"
+          }
+        }
+      }
+    },
+    "Restarting the debug sidecar…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restarting the debug sidecar…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重启调试边车容器…"
           }
         }
       }
@@ -552,6 +1550,22 @@
         }
       }
     },
+    "Service `%@` has neither `image:` nor `build:`.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service `%@` has neither `image:` nor `build:`."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务 `%@` 既没有 `image:` 也没有 `build:`。"
+          }
+        }
+      }
+    },
     "Start": {
       "localizations": {
         "en": {
@@ -564,6 +1578,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "启动"
+          }
+        }
+      }
+    },
+    "Starting the debug sidecar…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting the debug sidecar…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在启动调试边车容器…"
           }
         }
       }
@@ -584,6 +1614,70 @@
         }
       }
     },
+    "The `container %@` command is not installed. Install the official apple/container package, which includes the plugin.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The `container %@` command is not installed. Install the official apple/container package, which includes the plugin."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装 `container %@` 命令。请安装官方 apple/container 软件包，其中包含此插件。"
+          }
+        }
+      }
+    },
+    "The apple/container CLI could not be found.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The apple/container CLI could not be found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 apple/container CLI。"
+          }
+        }
+      }
+    },
+    "The apple/container CLI was not found for %@. Install it with `brew install container`.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The apple/container CLI was not found for %@. Install it with `brew install container`."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 %@ 所需的 apple/container CLI。请使用 `brew install container` 安装。"
+          }
+        }
+      }
+    },
+    "The apple/container CLI was not found. Install it with `brew install container`.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The apple/container CLI was not found. Install it with `brew install container`."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 apple/container CLI。请使用 `brew install container` 安装。"
+          }
+        }
+      }
+    },
     "The command ends with a backslash (\\).": {
       "localizations": {
         "en": {
@@ -596,6 +1690,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "命令以反斜杠 (\\) 结尾。"
+          }
+        }
+      }
+    },
+    "The command exited with code %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The command exited with code %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令已退出，退出码为 %lld。"
           }
         }
       }
@@ -664,6 +1774,22 @@
         }
       }
     },
+    "The digest must have the form sha256:<64 hex digits>.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The digest must have the form sha256:<64 hex digits>."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "摘要格式必须为 sha256:<64 位十六进制数字>。"
+          }
+        }
+      }
+    },
     "The host port must be a number from 1 to 65535.": {
       "localizations": {
         "en": {
@@ -676,6 +1802,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "主机端口必须是 1 到 65535 之间的数字。"
+          }
+        }
+      }
+    },
+    "The install command exited with code %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The install command exited with code %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装命令已退出，退出码为 %lld。"
           }
         }
       }
@@ -696,6 +1838,54 @@
         }
       }
     },
+    "The privileged command failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The privileged command failed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "特权命令执行失败。"
+          }
+        }
+      }
+    },
+    "The SSH key at %@ is passphrase-protected and no passphrase is saved for %@. Connect once from the Gantry app to store it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The SSH key at %@ is passphrase-protected and no passphrase is saved for %@. Connect once from the Gantry app to store it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位于 %1$@ 的 SSH 密钥受密码短语保护，但没有为 %2$@ 保存密码短语。请先在 Gantry App 中连接一次以保存它。"
+          }
+        }
+      }
+    },
+    "This apple/container version cannot verify a digest. Update to 1.2 or later.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This apple/container version cannot verify a digest. Update to 1.2 or later."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本的 apple/container 无法校验摘要。请更新到 1.2 或更高版本。"
+          }
+        }
+      }
+    },
     "This container port is already mapped in another row.": {
       "localizations": {
         "en": {
@@ -708,6 +1898,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "此容器端口已在另一行中映射。"
+          }
+        }
+      }
+    },
+    "This file has no `services:` — it doesn't look like a Compose file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file has no `services:` — it doesn't look like a Compose file."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件没有 `services:`，看起来不是 Compose 文件。"
+          }
+        }
+      }
+    },
+    "This Mac can't run nested virtualization (it needs Apple silicon M3 or newer on macOS 15+).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac can't run nested virtualization (it needs Apple silicon M3 or newer on macOS 15+)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Mac 无法运行嵌套虚拟化（需要 M3 或更新的 Apple 芯片，并运行 macOS 15 或更高版本）。"
+          }
+        }
+      }
+    },
+    "This port isn't published, so it can't be shared.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This port isn't published, so it can't be shared."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此端口未发布，因此无法共享。"
+          }
+        }
+      }
+    },
+    "top level is not a mapping": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "top level is not a mapping"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顶层不是映射"
           }
         }
       }
@@ -740,6 +1994,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法将“%@”作为普通文件读取，因此未保存任何内容。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid domain name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid domain name."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的域名。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid domain name. Use letters, digits, dots and hyphens.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid domain name. Use letters, digits, dots and hyphens."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的域名。请使用字母、数字、点和连字符。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid IP address.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid IP address."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的 IP 地址。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid memory size. Use a number with an optional K, M, G, T or P suffix, for example 4g.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid memory size. Use a number with an optional K, M, G, T or P suffix, for example 4g."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的内存大小。请使用数字，可带 K、M、G、T 或 P 后缀，例如 4g。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid period. Use a number with an optional m, h or d suffix, for example 30m.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid period. Use a number with an optional m, h or d suffix, for example 30m."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的时间段。请使用数字，可带 m、h 或 d 后缀，例如 30m。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid property key. Use a dotted name such as build.cpus.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid property key. Use a dotted name such as build.cpus."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的属性键。请使用以点分隔的名称，例如 build.cpus。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid registry host name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid registry host name."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的镜像仓库主机名。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid registry host name. Use a host name with an optional port, for example ghcr.io or localhost:5000.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid registry host name. Use a host name with an optional port, for example ghcr.io or localhost:5000."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的镜像仓库主机名。请使用主机名（可带端口），例如 ghcr.io 或 localhost:5000。"
+          }
+        }
+      }
+    },
+    "“%@” is not a valid URL.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a valid URL."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是有效的 URL。"
           }
         }
       }

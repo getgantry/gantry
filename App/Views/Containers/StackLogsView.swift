@@ -92,14 +92,18 @@ struct StackLogsView: View {
                 Toggle(isOn: $autoScroll) { Image(systemName: "arrow.down.to.line") }
                     .toggleStyle(.button)
                     .help("Follow output")
+                    .accessibilityLabel("Follow output")
                 Button { setPaused(!paused) } label: {
                     Image(systemName: paused ? "play.fill" : "pause.fill")
                 }
-                .help(paused ? "Resume" : "Pause")
+                .help(paused ? String(localized: "Resume") : String(localized: "Pause"))
+                .accessibilityLabel(paused ? String(localized: "Resume") : String(localized: "Pause"))
                 Button { lines.removeAll(); held.reset() } label: { Image(systemName: "trash") }
                     .help("Clear")
+                    .accessibilityLabel("Clear")
                 Button { copyAll() } label: { Image(systemName: "doc.on.doc") }
                     .help("Copy all")
+                    .accessibilityLabel("Copy all")
 
                 levelMenu
                 servicesMenu
@@ -137,6 +141,7 @@ struct StackLogsView: View {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .help("Filter by level")
+        .accessibilityLabel("Filter by level")
     }
 
     private var servicesMenu: some View {
@@ -155,27 +160,32 @@ struct StackLogsView: View {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .help("Show / hide services")
+        .accessibilityLabel("Show / hide services")
     }
 
     private var searchBar: some View {
         HStack(spacing: 4) {
             Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-            TextField(regexSearch ? "Regex" : "Search", text: $search)
+            TextField(regexSearch ? String(localized: "Regex") : String(localized: "Search"), text: $search)
                 .textFieldStyle(.plain)
                 .focused($searchFocused)
                 .findShortcut($searchFocused)
             Button { regexSearch.toggle() } label: {
-                Text(".*")
+                Text(verbatim: ".*")
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
                     .foregroundStyle(regexSearch ? Color.accentColor : .secondary)
             }
             .buttonStyle(.plain)
             .help("Regular expression search")
+            .accessibilityLabel("Regular expression search")
+            .accessibilityValue(regexSearch ? String(localized: "on") : String(localized: "off"))
             if isSearching {
                 Button { search = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .help("Clear search")
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(.horizontal, 6)

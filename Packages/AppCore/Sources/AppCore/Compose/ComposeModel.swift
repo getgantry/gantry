@@ -236,10 +236,10 @@ public enum ComposeParseError: Error, LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .notReadable(let p): "Can't read compose file: \(p)"
-        case .invalidYAML(let m): "Invalid compose YAML: \(m)"
-        case .noServices: "This file has no `services:` — it doesn't look like a Compose file."
-        case .serviceMissingImageAndBuild(let s): "Service `\(s)` has neither `image:` nor `build:`."
+        case .notReadable(let p): String(localized: "Can't read compose file: \(p)", bundle: .module)
+        case .invalidYAML(let m): String(localized: "Invalid compose YAML: \(m)", bundle: .module)
+        case .noServices: String(localized: "This file has no `services:` — it doesn't look like a Compose file.", bundle: .module)
+        case .serviceMissingImageAndBuild(let s): String(localized: "Service `\(s)` has neither `image:` nor `build:`.", bundle: .module)
         }
     }
 }

@@ -24,7 +24,7 @@ public enum MachineCapabilities {
     public static var nestedVirtualizationUnavailableReason: String? {
         supportsNestedVirtualization
             ? nil
-            : "This Mac can't run nested virtualization (it needs Apple silicon M3 or newer on macOS 15+)."
+            : String(localized: "This Mac can't run nested virtualization (it needs Apple silicon M3 or newer on macOS 15+).", bundle: .module)
     }
 
     /// Whether `path` points at a Unix domain socket. Bind-mounting one into a

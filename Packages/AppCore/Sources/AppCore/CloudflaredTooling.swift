@@ -175,11 +175,11 @@ public enum CloudflaredError: Error, LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .homebrewMissing:
-            "Homebrew isn't installed. Install it from https://brew.sh, then try again."
+            String(localized: "Homebrew isn't installed. Install it from https://brew.sh, then try again.", bundle: .module)
         case .notInstalled:
-            "cloudflared isn't installed."
+            String(localized: "cloudflared isn't installed.", bundle: .module)
         case .commandFailed(let code):
-            "The command exited with code \(code)."
+            String(localized: "The command exited with code \(code).", bundle: .module)
         }
     }
 }

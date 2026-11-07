@@ -124,9 +124,7 @@ struct FleetIssuesView: View {
 
     private func groupHeader(_ session: HostSession) -> some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(session.status.dotColor)
-                .frame(width: 7, height: 7)
+            HostStatusSymbol(session: session, size: 7)
             Text(session.host.name)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)

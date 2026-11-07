@@ -169,9 +169,9 @@ struct AppleSystemOverviewPane: View {
                 // totals include the hidden image builder.
                 if session.status.isConnected {
                     let counts = session.containerCounts
-                    Fact(String(localized: "Containers"), String(localized: "\(String(counts.running)) running of \(String(counts.total))"))
+                    Fact(String(localized: "Containers"), String(localized: "\(counts.running) running of \(counts.total)"))
                 } else if let running = status?.containersRunning, let total = status?.containersTotal {
-                    Fact(String(localized: "Containers"), String(localized: "\(String(running)) running of \(String(total))"))
+                    Fact(String(localized: "Containers"), String(localized: "\(running) running of \(total)"))
                 }
                 if let images = status?.images { Fact(String(localized: "Images"), String(images)) }
             }
@@ -219,6 +219,7 @@ struct AppleSystemOverviewPane: View {
             }
             .buttonStyle(.borderless)
             .help(String(localized: "Show in Finder"))
+            .accessibilityLabel(String(localized: "Show in Finder"))
         }
         .font(.callout)
     }

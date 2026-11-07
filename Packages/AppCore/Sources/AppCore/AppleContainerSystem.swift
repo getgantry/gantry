@@ -13,7 +13,7 @@ public enum AppleSystemError: Error, LocalizedError, Sendable, Equatable {
     public var errorDescription: String? {
         switch self {
         case .pluginMissing(let command):
-            "The `container \(command)` command is not installed. Install the official apple/container package, which includes the plugin."
+            String(localized: "The `container \(command)` command is not installed. Install the official apple/container package, which includes the plugin.", bundle: .module)
         case .invalidInput(let message):
             message
         }
@@ -77,7 +77,7 @@ extension AppleContainerControl {
         let result = await run(cli, ["system", "status", "--format", "json"])
         if let parsed = parseSystemStatus(result.stdout) { return parsed }
         if result.exitCode != 0 { return AppleSystemStatus(status: "stopped") }
-        throw AppleControlError.command("Could not read `container system status`.")
+        throw AppleControlError.command(String(localized: "Could not read `container system status`.", bundle: .module))
     }
 
     static func parseSystemVersions(_ json: String) -> [AppleComponentVersion] {
@@ -232,10 +232,12 @@ extension AppleContainerControl {
     /// exit status or signal when the command printed nothing.
     static func streamError(arguments: [String], exit: ChildProcessExit, tail: [String]) -> Error {
         if exit.signaled {
-            let detail = tail.last.map { " Last output: \($0)" } ?? ""
-            return AppleControlError.command(
-                "container \(arguments.joined(separator: " ")) was \(exit.summary).\(detail)"
-            )
+            let command = "container " + arguments.joined(separator: " ")
+            let signal = Int(exit.status)
+            let message = tail.last.map {
+                String(localized: "\(command) was killed by signal \(signal). Last output: \($0)", bundle: .module)
+            } ?? String(localized: "\(command) was killed by signal \(signal).", bundle: .module)
+            return AppleControlError.command(message)
         }
         return commandError(arguments: arguments, stdout: "", stderr: tail.joined(separator: "\n"))
     }

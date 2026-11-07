@@ -119,7 +119,7 @@ struct AppleAddressSection: View {
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "cloud").font(.caption2)
-                            Text(":\(String(port))").font(.caption.monospacedDigit())
+                            Text(verbatim: ":\(port)").font(.caption.monospacedDigit())
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
@@ -128,6 +128,7 @@ struct AppleAddressSection: View {
                     }
                     .buttonStyle(.plain)
                     .help("Share http://\(ip):\(String(port)) publicly via Cloudflare")
+                    .accessibilityLabel("Share http://\(ip):\(String(port)) publicly via Cloudflare")
                 }
             }
         }
@@ -167,6 +168,7 @@ struct AppleAddressSection: View {
                 }
                 .buttonStyle(.borderless)
                 .help("Copy")
+                .accessibilityLabel("Copy")
                 Spacer()
             }
             if !ports.isEmpty {
@@ -252,6 +254,7 @@ struct AssignDomainSheet: View {
                         .buttonStyle(.borderless)
                         .disabled(newDomain.trimmingCharacters(in: .whitespaces).isEmpty || addingDomain)
                         .help("Create this local domain (requires admin)")
+                        .accessibilityLabel("Create Domain")
                     }
                 } header: {
                     Text("Domain")
@@ -326,7 +329,7 @@ struct AssignDomainSheet: View {
     private func apply() async {
         isWorking = true
         errorText = nil
-        statusText = "Recreating…"
+        statusText = String(localized: "Recreating…")
         defer { isWorking = false; statusText = nil }
         do {
             let newID = try await session.recreateWithDomain(
@@ -389,7 +392,7 @@ private struct FlowChips: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "safari").font(.caption2)
-                        Text(":\(String(port))").font(.caption.monospacedDigit())
+                        Text(verbatim: ":\(port)").font(.caption.monospacedDigit())
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
@@ -398,6 +401,7 @@ private struct FlowChips: View {
                 }
                 .buttonStyle(.plain)
                 .help("Open http://…:\(String(port)) in your browser")
+                .accessibilityLabel("Open http://…:\(String(port)) in your browser")
             }
         }
     }

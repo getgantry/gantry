@@ -108,12 +108,12 @@ struct CreateContainerSheet: View {
                     ) { $row in
                         TextField("Host", text: $row.host, prompt: Text("Host port"))
                             .frame(width: 90)
-                        Text(":").foregroundStyle(.secondary)
+                        Text(verbatim: ":").foregroundStyle(.secondary)
                         TextField("Container", text: $row.container, prompt: Text("Container port"))
                             .frame(width: 110)
-                        Picker("", selection: $row.proto) {
-                            Text("tcp").tag("tcp")
-                            Text("udp").tag("udp")
+                        Picker("Protocol", selection: $row.proto) {
+                            Text(verbatim: "tcp").tag("tcp")
+                            Text(verbatim: "udp").tag("udp")
                         }
                         .labelsHidden()
                         .frame(width: 70)
@@ -132,7 +132,7 @@ struct CreateContainerSheet: View {
                         empty: { EnvRow() }
                     ) { $row in
                         TextField("KEY", text: $row.key)
-                        Text("=").foregroundStyle(.secondary)
+                        Text(verbatim: "=").foregroundStyle(.secondary)
                         TextField("VALUE", text: $row.value)
                     }
                 }
@@ -150,7 +150,9 @@ struct CreateContainerSheet: View {
                             Image(systemName: "folder")
                         }
                         .buttonStyle(.borderless)
-                        Text(":").foregroundStyle(.secondary)
+                        .help("Choose a host folder")
+                        .accessibilityLabel("Choose a host folder")
+                        Text(verbatim: ":").foregroundStyle(.secondary)
                         TextField("Container path", text: $row.container)
                         Toggle("ro", isOn: $row.readOnly)
                             .toggleStyle(.checkbox)
@@ -311,7 +313,7 @@ struct CreateContainerSheet: View {
     @ViewBuilder
     private func editorRows<Element: Identifiable, RowContent: View>(
         _ rows: Binding<[Element]>,
-        addLabel: String,
+        addLabel: LocalizedStringKey,
         empty: @escaping () -> Element,
         @ViewBuilder content: @escaping (Binding<Element>) -> RowContent
     ) -> some View {
@@ -325,6 +327,8 @@ struct CreateContainerSheet: View {
                     Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.borderless)
+                .help("Remove row")
+                .accessibilityLabel("Remove row")
             }
         }
         Button {
@@ -345,9 +349,9 @@ struct CreateContainerSheet: View {
         guard session.host.isAppleContainer,
               binds.contains(where: { MachineCapabilities.isUnixSocket($0.host) }) else { return nil }
         if appleFeatures?.nonRootSocketMounts ?? true {
-            return "Unix socket mount — permissions are propagated into the container, including when it runs as a non-root user."
+            return String(localized: "Unix socket mount — permissions are propagated into the container, including when it runs as a non-root user.")
         }
-        return "Unix socket mount — containers that run as a non-root user need apple/container \(ContainerTooling.socketMountVersion) or newer to use it."
+        return String(localized: "Unix socket mount — containers that run as a non-root user need apple/container \(ContainerTooling.socketMountVersion) or newer to use it.")
     }
 
     private func pickHostPath(for id: UUID) {

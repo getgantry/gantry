@@ -124,6 +124,7 @@ struct MenuBarView: View {
             }
             .buttonStyle(.borderless)
             .help("Quit Gantry")
+            .accessibilityLabel("Quit Gantry")
 
             Spacer()
 
@@ -211,11 +212,11 @@ private struct HostBlock: View {
         VStack(alignment: .leading, spacing: 6) {
             // Host header
             HStack(spacing: 6) {
-                Circle()
-                    .fill(session.status.dotColor)
-                    .frame(width: 7, height: 7)
+                HostStatusSymbol(session: session, size: 7)
                 Text(session.host.name)
                     .font(.subheadline.weight(.semibold))
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityValue(session.accessibilityStatus)
                 if let badge = session.host.badgeSystemImage {
                     Image(systemName: badge)
                         .font(.caption2)
@@ -280,9 +281,7 @@ private struct RunningRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(container.state.tint)
-                .frame(width: 7, height: 7)
+            StatusSymbol(systemName: container.state.symbolName, tint: container.state.tint, size: 7)
             Button {
                 openContainer()
             } label: {
@@ -361,6 +360,7 @@ private struct RunningRow: View {
             }
             .buttonStyle(.plain)
             .help("Copy \(endpoint.hostPort)")
+            .accessibilityLabel("Copy \(endpoint.hostPort)")
         } else if let port = firstPublicPort {
             Text(verbatim: ":\(port)")
                 .font(.caption.monospacedDigit())
@@ -409,9 +409,7 @@ private struct ExitedRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(container.state.tint)
-                .frame(width: 7, height: 7)
+            StatusSymbol(systemName: container.state.symbolName, tint: container.state.tint, size: 7)
             Text(container.displayName)
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -491,5 +489,6 @@ private struct ActionButton: View {
         .buttonStyle(.borderless)
         .disabled(busy)
         .help(help)
+        .accessibilityLabel(help)
     }
 }

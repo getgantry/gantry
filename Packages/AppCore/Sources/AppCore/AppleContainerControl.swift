@@ -20,9 +20,9 @@ public enum AppleControlError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .cliNotFound:
-            "The apple/container CLI could not be found."
+            String(localized: "The apple/container CLI could not be found.", bundle: .module)
         case .invalidDomain(let name):
-            "“\(name)” is not a valid domain name. Use letters, digits, dots and hyphens."
+            String(localized: "“\(name)” is not a valid domain name. Use letters, digits, dots and hyphens.", bundle: .module)
         case .command(let message):
             message
         }
@@ -67,7 +67,7 @@ public enum AppleContainerControl {
         // check) while bringing the core services up, so confirm by re-checking.
         if result.exitCode != 0, await serviceStatus(cliOverride: cliOverride) != .running {
             throw AppleControlError.command(
-                result.stderr.isEmpty ? "Could not start apple/container services." : result.stderr
+                result.stderr.isEmpty ? String(localized: "Could not start apple/container services.", bundle: .module) : result.stderr
             )
         }
     }
@@ -77,7 +77,7 @@ public enum AppleContainerControl {
         let result = await run(cli, ["system", "stop"])
         if result.exitCode != 0 {
             throw AppleControlError.command(
-                result.stderr.isEmpty ? "Could not stop apple/container services." : result.stderr
+                result.stderr.isEmpty ? String(localized: "Could not stop apple/container services.", bundle: .module) : result.stderr
             )
         }
     }
@@ -88,7 +88,7 @@ public enum AppleContainerControl {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }
         let result = await run(cli, ["system", "dns", "list", "--format", "json"])
         guard result.exitCode == 0 else {
-            throw AppleControlError.command(result.stderr.isEmpty ? "Could not list DNS domains." : result.stderr)
+            throw AppleControlError.command(result.stderr.isEmpty ? String(localized: "Could not list DNS domains.", bundle: .module) : result.stderr)
         }
         return parseDomains(result.stdout)
     }
@@ -219,7 +219,7 @@ public enum AppleContainerControl {
                 stderr: String(decoding: result.stderr, as: UTF8.self)
             )
         } catch is CancellationError {
-            return RunResult(exitCode: -1, stdout: "", stderr: "Cancelled.")
+            return RunResult(exitCode: -1, stdout: "", stderr: String(localized: "Cancelled.", bundle: .module))
         } catch {
             return RunResult(exitCode: -1, stdout: "", stderr: error.localizedDescription)
         }
@@ -235,9 +235,9 @@ public enum AppleContainerControl {
             let message = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             // -128 is AppleScript's user-cancelled code.
             if message.contains("-128") || message.localizedCaseInsensitiveContains("cancel") {
-                throw AppleControlError.command("Authorization was cancelled.")
+                throw AppleControlError.command(String(localized: "Authorization was cancelled.", bundle: .module))
             }
-            throw AppleControlError.command(message.isEmpty ? "The privileged command failed." : message)
+            throw AppleControlError.command(message.isEmpty ? String(localized: "The privileged command failed.", bundle: .module) : message)
         }
     }
 }

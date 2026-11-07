@@ -313,7 +313,7 @@ struct AddHostSheet: View {
                     .foregroundStyle(.secondary)
             case .keyFile:
                 HStack {
-                    Text(keyFilePath.isEmpty ? "No key selected" : keyFilePath)
+                    Text(keyFilePath.isEmpty ? String(localized: "No key selected") : keyFilePath)
                         .font(.system(.body, design: .monospaced))
                         .lineLimit(1)
                         .truncationMode(.middle)

@@ -230,15 +230,15 @@ extension HostSession {
         onLine: (@Sendable (String) -> Void)? = nil
     ) async -> CloudflareTunnel? {
         guard let publicPort = port.publicPort, publicPort > 0 else {
-            report("This port isn't published, so it can't be shared.")
+            report(String(localized: "This port isn't published, so it can't be shared.", bundle: .module))
             return nil
         }
         guard CloudflaredTooling.cliPath() != nil else {
-            report("cloudflared isn't installed.")
+            report(String(localized: "cloudflared isn't installed.", bundle: .module))
             return nil
         }
         guard let target = await localTargetURL(for: port, containerID: containerID, label: label) else {
-            report("Could not reach this port locally to tunnel it.")
+            report(String(localized: "Could not reach this port locally to tunnel it.", bundle: .module))
             return nil
         }
         return await startCloudflareTunnel(
@@ -266,7 +266,7 @@ extension HostSession {
         onLine: (@Sendable (String) -> Void)? = nil
     ) async -> CloudflareTunnel? {
         guard let cli = CloudflaredTooling.cliPath() else {
-            report("cloudflared isn't installed.")
+            report(String(localized: "cloudflared isn't installed.", bundle: .module))
             return nil
         }
 
@@ -309,7 +309,7 @@ extension HostSession {
                         // with the tunnel still present and not active is a failure.
                         if existing.publicURL == nil {
                             self.updateCloudflareTunnel(id) {
-                                $0.status = .failed("cloudflared exited (code \(code)) before the tunnel came up.")
+                                $0.status = .failed(String(localized: "cloudflared exited (code \(code)) before the tunnel came up.", bundle: .module))
                             }
                         }
                     }

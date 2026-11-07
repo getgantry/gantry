@@ -89,7 +89,7 @@ extension AppleContainerControl {
     public static func clusterCommand(cliOverride: String? = nil) async throws -> String {
         guard let command = await ContainerTooling.currentFeatures(cliOverride: cliOverride).clusterCommand else {
             throw AppleControlError.command(
-                "Kubernetes clusters need apple container CLI \(ContainerTooling.clustersVersion) or later."
+                String(localized: "Kubernetes clusters need apple container CLI \(ContainerTooling.clustersVersion) or later.", bundle: .module)
             )
         }
         return command

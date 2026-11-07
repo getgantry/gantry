@@ -105,7 +105,7 @@ struct AppleSystemPropertiesPane: View {
         Section {
             HStack(spacing: 10) {
                 Image(systemName: "arrow.clockwise.circle.fill").foregroundStyle(.tint)
-                Text(String(localized: "\(String(pending.count)) changed properties apply after the services restart."))
+                Text(String(localized: "\(pending.count) changed properties apply after the services restart."))
                     .font(.callout)
                 Spacer()
                 Button(String(localized: "Restart Services")) { confirmRestart = true }
@@ -149,6 +149,7 @@ struct AppleSystemPropertiesPane: View {
             .buttonStyle(.borderless)
             .disabled(property.effective.map { if case .other = $0 { true } else { false } } ?? false)
             .help(String(localized: "Edit"))
+            .accessibilityLabel(String(localized: "Edit"))
         }
     }
 

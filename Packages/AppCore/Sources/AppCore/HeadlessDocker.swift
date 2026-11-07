@@ -40,7 +40,7 @@ public enum HeadlessDocker {
         case .appleContainer:
             guard let appleTransport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
                 throw HeadlessDockerError.connectionFailed(
-                    "The apple/container CLI was not found for \(host.name). Install it with `brew install container`."
+                    String(localized: "The apple/container CLI was not found for \(host.name). Install it with `brew install container`.", bundle: .module)
                 )
             }
             transport = appleTransport
@@ -52,7 +52,7 @@ public enum HeadlessDocker {
         } catch {
             await client.shutdown()
             throw HeadlessDockerError.connectionFailed(
-                "Could not reach the Docker daemon on \(host.name): \(error.localizedDescription)"
+                String(localized: "Could not reach the Docker daemon on \(host.name): \(error.localizedDescription)", bundle: .module)
             )
         }
         return client
@@ -141,7 +141,7 @@ public enum HeadlessDocker {
             let account = KeychainStore.sshPasswordAccount(hostID: host.id)
             guard let stored = KeychainStore.get(account: account) else {
                 throw HeadlessDockerError.missingCredential(
-                    "No saved SSH password for \(host.name). Connect once from the Gantry app to store it in the Keychain."
+                    String(localized: "No saved SSH password for \(host.name). Connect once from the Gantry app to store it in the Keychain.", bundle: .module)
                 )
             }
             return .password(stored)
@@ -167,7 +167,7 @@ public enum HeadlessDocker {
                 guard let stored = KeychainStore.get(account: passphraseAccount),
                       let key = try? SSHKeyLoader.load(contentsOf: path, passphrase: stored) else {
                     lastError = HeadlessDockerError.missingCredential(
-                        "The SSH key at \(path) is passphrase-protected and no passphrase is saved for \(hostName). Connect once from the Gantry app to store it."
+                        String(localized: "The SSH key at \(path) is passphrase-protected and no passphrase is saved for \(hostName). Connect once from the Gantry app to store it.", bundle: .module)
                     )
                     continue
                 }
@@ -180,7 +180,7 @@ public enum HeadlessDocker {
         }
 
         throw lastError ?? HeadlessDockerError.missingCredential(
-            "No usable SSH key found for \(hostName)."
+            String(localized: "No usable SSH key found for \(hostName).", bundle: .module)
         )
     }
 
@@ -220,15 +220,15 @@ public enum HeadlessDockerError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .noLocalSocket:
-            "No local Docker socket was found. Make sure Docker is running."
+            String(localized: "No local Docker socket was found. Make sure Docker is running.", bundle: .module)
         case .missingCredential(let detail):
             detail
         case .connectionFailed(let detail):
             detail
         case .hostNotFound(let detail):
-            "Docker host not found: \(detail)"
+            String(localized: "Docker host not found: \(detail)", bundle: .module)
         case .containerNotFound(let detail):
-            "Container not found: \(detail)"
+            String(localized: "Container not found: \(detail)", bundle: .module)
         }
     }
 }

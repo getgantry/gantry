@@ -33,6 +33,14 @@ struct ContainerListView: View {
         case running = "Running"
         case stopped = "Stopped"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .all: String(localized: "All")
+            case .running: String(localized: "Running")
+            case .stopped: String(localized: "Stopped")
+            }
+        }
     }
 
     private var filtered: [ContainerSummary] {
@@ -185,7 +193,7 @@ struct ContainerListView: View {
         .alert("Prune Complete", isPresented: $showPruneResult, presenting: pruneResult) { _ in
             Button("OK", role: .cancel) {}
         } message: { result in
-            Text("Removed \(result.deletedCount) container(s), reclaiming \(Formatters.bytes(result.spaceReclaimed)).")
+            Text("Removed \(result.deletedCount) containers, reclaiming \(Formatters.bytes(result.spaceReclaimed)).")
         }
         .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
             await removeContainers(action, force: force)
@@ -233,7 +241,7 @@ struct ContainerListView: View {
 
     private func groupHeader(_ group: ContainerGroup) -> some View {
         HStack(spacing: 4) {
-            Text(group.name ?? "Standalone")
+            Text(group.name ?? String(localized: "Standalone"))
                 .font(.subheadline.weight(.semibold))
             Spacer()
             if let name = group.name {
@@ -251,7 +259,7 @@ struct ContainerListView: View {
     /// An inline icon button shown on the group header row.
     private func groupButton(
         _ icon: String,
-        _ help: String,
+        _ help: LocalizedStringKey,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -263,6 +271,7 @@ struct ContainerListView: View {
         }
         .buttonStyle(.borderless)
         .help(help)
+        .accessibilityLabel(help)
     }
 
     private func confirmGroup(_ group: ContainerGroup, _ kind: DestructiveAction.Kind) {
@@ -301,7 +310,7 @@ struct ContainerListView: View {
         ToolbarItem(placement: .primaryAction) {
             Menu {
                 Picker("Filter", selection: $filter) {
-                    ForEach(StateFilter.allCases) { Text($0.rawValue).tag($0) }
+                    ForEach(StateFilter.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.inline)
             } label: {
@@ -449,9 +458,7 @@ private struct StatusDot: View {
     private var isTransient: Bool { state == .restarting }
 
     var body: some View {
-        Circle()
-            .fill(state.tint)
-            .frame(width: 8, height: 8)
+        StatusSymbol(systemName: state.symbolName, tint: state.tint)
             .opacity(isTransient && pulsing ? 0.3 : 1)
             .animation(.easeInOut(duration: 0.3), value: state)
             .animation(

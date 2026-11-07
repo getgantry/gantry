@@ -112,3 +112,14 @@ jobs:
         # are skipped rather than executed.
         working-directory: Packages/${{ matrix.package }}
         run: swift test
+
+  localization:
+    name: Localization catalogs
+    # Only Python is needed, so this job runs on Linux and finishes in seconds.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the String Catalogs
+        run: python3 scripts/check-localization.py

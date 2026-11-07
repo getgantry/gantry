@@ -53,11 +53,13 @@ struct CloudflareTunnelsList: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Open in browser")
+                        .accessibilityLabel("Open in browser")
                         Button { copyToPasteboard(url.absoluteString) } label: {
                             Image(systemName: "doc.on.doc")
                         }
                         .buttonStyle(.borderless)
                         .help("Copy URL")
+                        .accessibilityLabel("Copy URL")
                     }
                     Button {
                         let id = tunnel.id
@@ -67,6 +69,7 @@ struct CloudflareTunnelsList: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Stop sharing")
+                    .accessibilityLabel("Stop sharing")
                 }
             }
         }
@@ -81,8 +84,8 @@ struct CloudflareTunnelsList: View {
     private func statusDot(_ status: CloudflareTunnel.Status) -> some View {
         switch status {
         case .starting: ProgressView().controlSize(.mini)
-        case .active: Circle().fill(.green).frame(width: 8, height: 8)
-        case .failed: Circle().fill(.red).frame(width: 8, height: 8)
+        case .active: StatusSymbol(systemName: "circle.fill", tint: .green)
+        case .failed: StatusSymbol(systemName: "xmark.circle.fill", tint: .red)
         }
     }
 }
@@ -250,9 +253,9 @@ struct CloudflareShareSheet: View {
                         .font(.callout.monospaced()).textSelection(.enabled)
                         .lineLimit(1).truncationMode(.middle)
                     Button { NSWorkspace.shared.open(url) } label: { Image(systemName: "safari") }
-                        .buttonStyle(.borderless).help("Open in browser")
+                        .buttonStyle(.borderless).help("Open in browser").accessibilityLabel("Open in browser")
                     Button { copyURL(url) } label: { Image(systemName: "doc.on.doc") }
-                        .buttonStyle(.borderless).help("Copy URL")
+                        .buttonStyle(.borderless).help("Copy URL").accessibilityLabel("Copy URL")
                 }
             case .failed(let message):
                 Label(message, systemImage: "xmark.octagon.fill")

@@ -106,6 +106,10 @@ struct ContainerTerminalView: View {
         case shell = "Shell"
         case debug = "Debug"
         var id: String { rawValue }
+
+        var title: String {
+            self == .shell ? String(localized: "Shell") : String(localized: "Debug")
+        }
     }
 
     @State private var mode: Mode = .shell
@@ -161,7 +165,7 @@ struct ContainerTerminalView: View {
     private var modeBar: some View {
         HStack(spacing: 10) {
             Picker("Mode", selection: $mode) {
-                ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
+                ForEach(Mode.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -205,7 +209,7 @@ struct ContainerTerminalView: View {
         case .debug:
             TerminalPane(
                 title: container.displayName,
-                subtitle: "debug shell",
+                subtitle: String(localized: "debug shell"),
                 // A distinct identity so switching modes reconnects rather
                 // than reusing the plain shell's session.
                 connectionID: "\(container.id)#debug",

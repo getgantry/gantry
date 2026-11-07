@@ -197,16 +197,14 @@ private struct HostCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Host \(session.host.name), \(session.status.shortDescription)")
+        .accessibilityLabel("Host \(session.host.name), \(session.accessibilityStatus)")
     }
 
     // MARK: Header
 
     private var header: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(session.status.dotColor)
-                .frame(width: 8, height: 8)
+            HostStatusSymbol(session: session)
             Text(session.host.name)
                 .font(.headline)
                 .lineLimit(1)

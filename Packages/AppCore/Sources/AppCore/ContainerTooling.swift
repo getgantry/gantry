@@ -356,9 +356,9 @@ public enum ContainerToolingError: Error, LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .homebrewMissing:
-            "Homebrew isn't installed. Install it from https://brew.sh, then try again."
+            String(localized: "Homebrew isn't installed. Install it from https://brew.sh, then try again.", bundle: .module)
         case .commandFailed(let code):
-            "The install command exited with code \(code)."
+            String(localized: "The install command exited with code \(code).", bundle: .module)
         }
     }
 }

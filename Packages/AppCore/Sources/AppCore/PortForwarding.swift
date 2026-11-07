@@ -147,7 +147,7 @@ extension HostSession {
         desiredLocalPort: Int? = nil
     ) async -> PortForward? {
         guard let factory = sshClientFactory else {
-            report("Port forwarding requires a connected SSH host")
+            report(String(localized: "Port forwarding requires a connected SSH host", bundle: .module))
             return nil
         }
 
@@ -160,7 +160,7 @@ extension HostSession {
         }
 
         guard let localPort = LocalPort.free(preferring: desiredLocalPort) else {
-            report("Could not find a free local port")
+            report(String(localized: "Could not find a free local port", bundle: .module))
             return nil
         }
 

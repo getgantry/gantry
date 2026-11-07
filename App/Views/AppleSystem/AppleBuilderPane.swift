@@ -71,7 +71,7 @@ struct AppleBuilderPane: View {
         guard let builder else { return (String(localized: "Not created"), .secondary) }
         return builder.isRunning
             ? (String(localized: "Running"), .green)
-            : (builder.state.capitalized, .orange)
+            : (RuntimeStateText.label(builder.state), .orange)
     }
 
     @ViewBuilder
@@ -123,7 +123,7 @@ struct AppleBuilderPane: View {
             if let builder {
                 FactGrid {
                     Fact(String(localized: "Container"), builder.id)
-                    Fact(String(localized: "State"), builder.state.capitalized)
+                    Fact(String(localized: "State"), RuntimeStateText.label(builder.state))
                     Fact(String(localized: "Image"), builder.image.isEmpty ? "—" : builder.image)
                     if let cpus = builder.cpus { Fact(String(localized: "CPUs"), String(cpus)) }
                     if let memory = builder.memoryBytes { Fact(String(localized: "Memory"), Formatters.bytes(memory)) }

@@ -145,7 +145,7 @@ public struct ComposeRunner {
             emit(.creatingNetwork(full))
             let labels = [Label.project: project.name, "com.docker.compose.network": key]
             if await session.createNetwork(name: full, labels: labels) == nil {
-                emit(.warning("Could not create network \(full); it may already exist."))
+                emit(.warning(String(localized: "Could not create network \(full); it may already exist.", bundle: .module)))
             }
         }
     }
@@ -173,7 +173,7 @@ public struct ComposeRunner {
             emit(.creatingVolume(full))
             let labels = [Label.project: project.name, "com.docker.compose.volume": key]
             if await session.createVolume(name: full, labels: labels) == nil {
-                emit(.warning("Could not create volume \(full); it may already exist."))
+                emit(.warning(String(localized: "Could not create volume \(full); it may already exist.", bundle: .module)))
             }
         }
     }
@@ -275,18 +275,18 @@ public struct ComposeRunner {
             if caps.restartPolicy {
                 restartPolicy = ContainerCreateRequest.RestartPolicy(name: restart)
             } else {
-                emit(.warning("\(service.name): restart policy `\(restart)` is not supported on apple/container and was ignored."))
+                emit(.warning(String(localized: "\(service.name): restart policy `\(restart)` is not supported on apple/container and was ignored.", bundle: .module)))
             }
         }
         if service.user != nil {
-            emit(.warning("\(service.name): `user:` is not yet applied and was ignored."))
+            emit(.warning(String(localized: "\(service.name): `user:` is not yet applied and was ignored.", bundle: .module)))
         }
 
         // Bind mounts resolve on whichever host the daemon runs on. Over SSH the
         // daemon is remote, so a host path from the local compose file won't
         // exist there — warn rather than silently mounting an empty directory.
         if session.host.isSSH, service.volumes.contains(where: { if case .bind = $0.kind { return true } else { return false } }) {
-            emit(.warning("\(service.name): bind-mount host paths must exist on the remote server, not your Mac."))
+            emit(.warning(String(localized: "\(service.name): bind-mount host paths must exist on the remote server, not your Mac.", bundle: .module)))
         }
 
         // Networks: Docker attaches every declared network; apple/container
@@ -299,7 +299,7 @@ public struct ComposeRunner {
             }
         } else {
             if networks.count > 1 {
-                emit(.warning("\(service.name): joins multiple networks; apple/container attaches only `\(networks[0])`."))
+                emit(.warning(String(localized: "\(service.name): joins multiple networks; apple/container attaches only `\(networks[0])`.", bundle: .module)))
             }
             endpoints = networks.first.map { key in
                 [networkFullName(key): ContainerCreateRequest.EndpointConfig(aliases: [service.name])]
@@ -335,7 +335,7 @@ public struct ComposeRunner {
     private func removeExistingProjectContainers(emit: @MainActor (ComposeUpEvent) -> Void) async {
         let mine = session.containers.filter { $0.labels[Label.project] == project.name }
         if mine.isEmpty { return }
-        emit(.info("Removing \(mine.count) existing container(s) for project \(project.name)."))
+        emit(.info(String(localized: "Removing \(mine.count) existing containers for project \(project.name).", bundle: .module)))
         for container in mine {
             _ = await session.perform(.remove(force: true), on: container.id)
         }

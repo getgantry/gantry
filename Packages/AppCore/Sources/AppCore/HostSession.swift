@@ -278,7 +278,7 @@ public final class HostSession: Identifiable {
         case .appleContainer:
             guard let transport = AppleContainerTransport(cliPathOverride: host.socketPathOverride) else {
                 status = .failed(
-                    "The apple/container CLI was not found. Install it with `brew install container`."
+                    String(localized: "The apple/container CLI was not found. Install it with `brew install container`.", bundle: .module)
                 )
                 return
             }
@@ -368,7 +368,7 @@ public final class HostSession: Identifiable {
                 resolvedIdentityFiles: resolved.identityFiles
             )
         } catch is CancellationError {
-            if generation == connectionGeneration { status = .failed("Connection cancelled") }
+            if generation == connectionGeneration { status = .failed(String(localized: "Connection cancelled", bundle: .module)) }
             return
         } catch {
             if generation == connectionGeneration { status = .failed(error.localizedDescription) }
@@ -512,7 +512,7 @@ public final class HostSession: Identifiable {
             }
         }
 
-        throw lastError ?? DockerError.connectionFailed("No usable SSH key found")
+        throw lastError ?? DockerError.connectionFailed(String(localized: "No usable SSH key found", bundle: .module))
     }
 
     // MARK: - Interactive prompt plumbing
@@ -726,7 +726,7 @@ public final class HostSession: Identifiable {
             client = nil
             Task { await dead.shutdown() }
         }
-        status = .failed("Connection lost. Reconnecting…")
+        status = .failed(String(localized: "Connection lost. Reconnecting…", bundle: .module))
         scheduleAutoReconnect(after: 3, attemptsLeft: 8)
     }
 
@@ -1132,7 +1132,7 @@ public final class HostSession: Identifiable {
                 // The sheet's list can be stale: check the name right before the CLI runs.
                 let existing = try await AppleContainerControl.listClusters(command: command, cliOverride: cli)
                 if existing.contains(where: { $0.name == name }) {
-                    throw AppleControlError.command("A cluster named \u{201C}\(name)\u{201D} already exists.")
+                    throw AppleControlError.command(String(localized: "A cluster named \u{201C}\(name)\u{201D} already exists.", bundle: .module))
                 }
                 try Task.checkCancellation()
             } catch {
@@ -1365,7 +1365,7 @@ public final class HostSession: Identifiable {
     /// then tails the last 100 lines and follows new output.
     public func logStream(for containerID: String) async throws -> AsyncThrowingStream<LogEntry, Error> {
         guard let client else {
-            throw DockerError.connectionFailed("Not connected")
+            throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module))
         }
         let details = try await client.inspectContainer(id: containerID)
         return try await client.containerLogs(
@@ -1381,7 +1381,7 @@ public final class HostSession: Identifiable {
     /// Opens a streaming stats feed for a container.
     public func statsStream(for containerID: String) async throws -> AsyncThrowingStream<ContainerStatsSample, Error> {
         guard let client else {
-            throw DockerError.connectionFailed("Not connected")
+            throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module))
         }
         return try await client.containerStats(id: containerID)
     }
@@ -1433,7 +1433,7 @@ public final class HostSession: Identifiable {
         _ body: (DockerClient) async throws -> Void
     ) async -> Bool {
         guard let client else {
-            report("Not connected")
+            report(String(localized: "Not connected", bundle: .module))
             return false
         }
         do {
@@ -1454,7 +1454,7 @@ public final class HostSession: Identifiable {
         _ body: (DockerClient) async throws -> T
     ) async -> T? {
         guard let client else {
-            report("Not connected")
+            report(String(localized: "Not connected", bundle: .module))
             return nil
         }
         do {
@@ -1469,7 +1469,7 @@ public final class HostSession: Identifiable {
     }
 
     private func rawInspect(_ body: (DockerClient) async throws -> Data) async -> String {
-        guard let client else { return "Not connected" }
+        guard let client else { return String(localized: "Not connected", bundle: .module) }
         do {
             let data = try await body(client)
             return Self.prettyJSON(from: data)
@@ -1507,7 +1507,7 @@ extension HostSession {
     /// connection (independent of the Docker tunnel).
     public func openHostShell() throws -> HostShellSession {
         guard let factory = sshClientFactory else {
-            throw DockerError.connectionFailed("A host shell requires a connected SSH host")
+            throw DockerError.connectionFailed(String(localized: "A host shell requires a connected SSH host", bundle: .module))
         }
         return HostShellSession(shell: SSHHostShell(makeClient: factory))
     }
@@ -1516,7 +1516,7 @@ extension HostSession {
     /// torn down on disconnect.
     public func hostFileSystem() throws -> SSHHostFileSystem {
         guard let factory = sshClientFactory else {
-            throw DockerError.connectionFailed("Host file browsing requires a connected SSH host")
+            throw DockerError.connectionFailed(String(localized: "Host file browsing requires a connected SSH host", bundle: .module))
         }
         if let existing = hostFileSystemStorage { return existing }
         let fs = SSHHostFileSystem(makeClient: factory)
@@ -1534,7 +1534,7 @@ extension HostSession {
     /// runs exactly one command and surfaces the failure if it cannot start.
     public func openExecSession(containerID: String, command: [String]) async throws -> ExecSession {
         guard let client else {
-            throw DockerError.connectionFailed("Not connected")
+            throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module))
         }
         let execID = try await client.createExec(containerID: containerID, command: command, tty: true)
         let connection = try await client.startExecHijacked(execID: execID, tty: true)
@@ -1555,7 +1555,7 @@ extension HostSession {
     /// caller can offer a "pull image and retry" path on a 404.
     @discardableResult
     public func createAndRun(_ config: ContainerCreateRequest) async throws -> String {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         let id = try await client.createContainer(config: config, name: config.name)
         try await client.startContainer(id: id)
         await refreshContainers()
@@ -1594,7 +1594,7 @@ extension HostSession {
     /// Creates a container from `config` without starting it.
     @discardableResult
     public func createContainer(_ config: ContainerCreateRequest) async throws -> String {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         let id = try await client.createContainer(config: config, name: config.name)
         await refreshContainers()
         return id
@@ -1632,7 +1632,7 @@ extension HostSession {
 
     /// Opens the export byte stream for a container's filesystem (a tar).
     public func exportFilesystem(containerID: String) async throws -> DockerByteStream {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         return try await client.exportContainer(id: containerID)
     }
 
@@ -1640,7 +1640,7 @@ extension HostSession {
 
     /// Lists the running processes inside a container (`docker top`).
     public func processes(containerID: String) async throws -> ContainerTop {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         return try await client.containerProcesses(id: containerID)
     }
 
@@ -1650,7 +1650,7 @@ extension HostSession {
     /// usable shell it falls back to the archive listing, which tars the
     /// subtree (bounded at 64 MB); apple/container hosts have no fallback.
     public func listDirectory(containerID: String, path: String) async throws -> [ContainerFileEntry] {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         do {
             return try await client.listDirectoryFast(containerID: containerID, path: path)
         } catch let error as ExecListError {
@@ -1661,13 +1661,13 @@ extension HostSession {
 
     /// Downloads a path from a container as a tar byte stream.
     public func downloadArchive(containerID: String, path: String) async throws -> DockerByteStream {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         return try await client.downloadArchive(containerID: containerID, path: path)
     }
 
     /// Uploads a tar archive into a container at `path`.
     public func uploadArchive(containerID: String, path: String, tar: Data) async throws {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         try await client.uploadArchive(containerID: containerID, path: path, tar: tar)
     }
 }
@@ -1690,7 +1690,7 @@ extension HostSession {
         auth: RegistryAuth? = nil
     ) async throws -> AsyncThrowingStream<PullProgress, Error> {
         guard let client else {
-            throw DockerError.connectionFailed("Not connected")
+            throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module))
         }
         // When the caller didn't pass explicit credentials, resolve them from
         // `~/.docker/config.json` the way the docker CLI would. This is what
@@ -1713,7 +1713,7 @@ extension HostSession {
     /// over SSH) via the daemon `/build` tar upload. Refreshes images on success.
     @discardableResult
     public func buildImage(_ spec: ImageBuildSpec) async throws -> String {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         let log = try await client.buildImage(spec)
         await refreshImages()
         return log
@@ -1724,7 +1724,7 @@ extension HostSession {
     public func buildImageStream(
         _ spec: ImageBuildSpec
     ) throws -> AsyncThrowingStream<BuildLogLine, Error> {
-        guard let client else { throw DockerError.connectionFailed("Not connected") }
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         let upstream = client.buildImageStream(spec)
         return AsyncThrowingStream { continuation in
             let task = Task {

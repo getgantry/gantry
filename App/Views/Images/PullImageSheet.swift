@@ -111,7 +111,7 @@ struct PullImageSheet: View {
                         HStack(spacing: 8) {
                             ProgressView()
                                 .controlSize(.small)
-                            Text(statusLine.isEmpty ? "Starting…" : statusLine)
+                            Text(statusLine.isEmpty ? String(localized: "Starting…") : statusLine)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

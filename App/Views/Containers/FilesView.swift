@@ -73,6 +73,7 @@ struct FilesView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .help("Refresh")
+            .accessibilityLabel("Refresh")
             if session.host.capabilities.containerUpload {
                 Button {
                     upload()
@@ -295,7 +296,7 @@ struct FilesView: View {
         // so let the picker select them too.
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
-        panel.prompt = "Upload"
+        panel.prompt = String(localized: "Upload")
         guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
 
         requestUpload(panel.urls, into: path)
@@ -414,6 +415,7 @@ private struct FileRow: View {
                     .buttonStyle(.borderless)
                     .opacity(hovered ? 1 : 0.55)
                     .help("Download")
+                    .accessibilityLabel("Download")
                 }
             }
         }
@@ -444,10 +446,10 @@ private struct FileRow: View {
     private var helpText: String {
         if entry.isDirectory {
             return canTransfer
-                ? "Double-click to open · drag out to export"
-                : "Double-click to open"
+                ? String(localized: "Double-click to open · drag out to export")
+                : String(localized: "Double-click to open")
         }
-        return canTransfer ? "Drag out to copy to Finder" : entry.name
+        return canTransfer ? String(localized: "Drag out to copy to Finder") : entry.name
     }
 
     private var backgroundColor: Color {
