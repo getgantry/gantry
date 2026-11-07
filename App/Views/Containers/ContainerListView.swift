@@ -92,9 +92,16 @@ struct ContainerListView: View {
             description: "Run a container from an image. In New Container, you can also paste a docker run command.",
             actionTitle: apple ? "Quick Run…" : "New Container…",
             action: { if apple { showQuickRun = true } else { showCreateSheet = true } },
-            secondaryActionTitle: apple ? "New Container…" : nil,
-            secondaryAction: apple ? { showCreateSheet = true } : nil
+            secondaryActions: (apple ? [ListEmptyAction(title: "New Container…") { showCreateSheet = true }] : [])
+                + [ListEmptyAction(title: "Pull Image…") { pullImage() }]
         )
+    }
+
+    /// Opens Images on this host and starts Pull Image there, the same route
+    /// as the palette command.
+    private func pullImage() {
+        AppLinkHandler.handle(.open(target: HostSection.images.rawValue, host: session.host.id.uuidString, item: nil))
+        PendingSectionCommand.send(.pullImage, .images, hostID: session.host.id)
     }
 
     // MARK: - Collapse persistence
