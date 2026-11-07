@@ -126,10 +126,10 @@ struct AppleSystemOverviewPane: View {
         AppleSystemCard(title: String(localized: "Versions"), systemImage: "number") {
             FactGrid {
                 if let client {
-                    Fact(String(localized: "CLI"), describe(client))
+                    Fact(String(localized: "CLI"), describe(client), monospaced: true)
                 }
                 if let server {
-                    Fact(String(localized: "API server"), describe(server))
+                    Fact(String(localized: "API server"), describe(server), monospaced: true)
                 } else if status != nil {
                     Fact(String(localized: "API server"), String(localized: "Not running"))
                 }
