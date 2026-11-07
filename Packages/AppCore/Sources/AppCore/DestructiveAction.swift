@@ -21,6 +21,14 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case restartServices
         case cancelClusterCreation
         case deleteKubeResource
+        /// Stop the services and copy the data root to another disk.
+        case moveDataRoot
+        /// Delete the old copy of a data root after a move.
+        case deleteOldDataRoot
+        /// Make containers again with a moved volume.
+        case switchVolume
+        /// Forget a folder volume; the folder stays on the disk.
+        case forgetFolderVolume
     }
 
     /// What else happens when the action runs.
@@ -75,7 +83,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
     /// and restart only ask for a confirmation.
     public var isGated: Bool {
         switch kind {
-        case .stopGroup, .restartGroup, .stopServices, .restartServices, .cancelClusterCreation: false
+        case .stopGroup, .restartGroup, .stopServices, .restartServices, .cancelClusterCreation,
+             .moveDataRoot, .forgetFolderVolume: false
         default: true
         }
     }
@@ -154,6 +163,35 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
     /// Deletes a Kubernetes object; `targets` holds its id.
     public static func deleteKubeResource(_ resource: KubeResource) -> DestructiveAction {
         DestructiveAction(kind: .deleteKubeResource, targets: [resource.id], names: [resource.reference])
+    }
+
+    /// Moves the data root: the services stop during the copy.
+    public static func moveDataRoot(to destination: String, runningContainers: Int) -> DestructiveAction {
+        DestructiveAction(
+            kind: .moveDataRoot,
+            targets: [destination],
+            impact: runningContainers > 0 ? .runningContainersStop(runningContainers) : .none
+        )
+    }
+
+    /// Deletes the folder of an old data root; `targets` holds its path.
+    public static func deleteOldDataRoot(_ path: String) -> DestructiveAction {
+        DestructiveAction(kind: .deleteOldDataRoot, targets: [path])
+    }
+
+    /// Makes the containers that use a moved volume again.
+    public static func switchVolume(_ volume: String, containers: [ContainerSummary]) -> DestructiveAction {
+        let running = containers.filter { $0.state.isRunning }.count
+        return DestructiveAction(
+            kind: .switchVolume,
+            targets: containers.map(\.id),
+            names: [volume] + containers.map(\.displayName),
+            impact: running > 0 ? .runningContainersStop(running) : .none
+        )
+    }
+
+    public static func forgetFolderVolume(_ name: String) -> DestructiveAction {
+        DestructiveAction(kind: .forgetFolderVolume, targets: [name])
     }
 
     public static func deleteMachine(_ machine: ContainerMachine) -> DestructiveAction {

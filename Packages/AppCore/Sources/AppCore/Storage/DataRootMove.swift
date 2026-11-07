@@ -307,3 +307,45 @@ public struct TreeManifest: Sendable, Equatable {
         return TreeManifest(entries: entries)
     }
 }
+
+/// Runs a data root move as a long operation with progress and Cancel.
+@MainActor
+public enum DataRootMoveOperation {
+    @discardableResult
+    public static func start(
+        _ plan: DataRootMovePlan,
+        totalBytes: Int64,
+        center: OperationCenter,
+        hostName: String?,
+        environment: any DataRootMoveEnvironment,
+        onFinish: @escaping @MainActor (Bool) -> Void = { _ in }
+    ) -> LongOperation {
+        center.run(
+            .storage,
+            title: String(localized: "Move container data to \(plan.destination)", bundle: .module),
+            host: hostName,
+            cancelConfirmation: String(localized: "Stop the move? The original data stays in use.", bundle: .module)
+        ) { operation in
+            do {
+                let old = try await DataRootMover(environment: environment).run(plan, totalBytes: totalBytes) { progress in
+                    Task { @MainActor in
+                        var text = progress.step.title
+                        if let copied = progress.copiedBytes, let total = progress.totalBytes {
+                            text += " – \(StorageFormat.bytes(copied)) / \(StorageFormat.bytes(total))"
+                        }
+                        operation.update(progress: text, fraction: progress.fraction)
+                        if operation.logTail(1).last != progress.step.title {
+                            operation.append(log: progress.step.title)
+                        }
+                    }
+                }
+                OldDataRootRecord.save(old)
+                onFinish(true)
+                return String(localized: "The data is now in \(plan.destination).", bundle: .module)
+            } catch {
+                onFinish(false)
+                throw error
+            }
+        }
+    }
+}
