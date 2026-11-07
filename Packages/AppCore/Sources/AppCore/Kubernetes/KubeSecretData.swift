@@ -31,10 +31,10 @@ public enum KubeSecretData {
     /// The annotation that holds the whole applied manifest, values included.
     static let lastApplied = "kubectl.kubernetes.io/last-applied-configuration"
 
-    /// The `data` entries of `kubectl get secret -o json`, sorted by key.
+    /// The `data` entries of a Secret JSON object, sorted by key.
     public static func entries(fromJSON data: Data) throws -> [KubeSecretEntry] {
         guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw KubectlError.unexpectedOutput
+            throw KubeAPIError.unexpectedResponse
         }
         return (root["data"] as? [String: Any] ?? [:])
             .map { KubeSecretEntry(key: $0.key, encoded: $0.value as? String ?? "") }
@@ -63,7 +63,7 @@ public enum KubeSecretData {
     /// YAML of a secret without its values, with sorted keys like kubectl.
     public static func redactedYAML(fromJSON data: Data) throws -> String {
         guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw KubectlError.unexpectedOutput
+            throw KubeAPIError.unexpectedResponse
         }
         return try Yams.dump(object: plain(redacted(root)), allowUnicode: true, sortKeys: true)
     }
