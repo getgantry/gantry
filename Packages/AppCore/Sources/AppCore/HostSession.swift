@@ -171,9 +171,13 @@ public final class HostSession: Identifiable {
     /// events into a single list reload.
     private var pendingContainerRefresh: Task<Void, Never>?
 
-    /// Previous one-shot CPU counters per container, for the inter-tick
-    /// deltas behind `containerLoad()`.
-    private var loadCPUBaseline: [String: (total: Int64, system: Int64)] = [:]
+    /// Previous one-shot counters per container, for the inter-tick deltas
+    /// (CPU, network, disk) behind `containerLoad()`.
+    private var loadBaseline: [String: ContainerCounters] = [:]
+
+    /// Per-container load history for list sparklines and the top-containers
+    /// cards. Updated with `loadHistory`, one point per sample.
+    public private(set) var containerLoadHistory = ContainerLoadHistory(capacity: 60)
 
     /// Rolling container-load history (~10 minutes at one sample every 5 s),
     /// collected for the whole lifetime of the connection so dashboards have
@@ -614,7 +618,8 @@ public final class HostSession: Identifiable {
         reconcileTask?.cancel()
         reconcileTask = nil
         loadHistory = []
-        loadCPUBaseline = [:]
+        loadBaseline = [:]
+        containerLoadHistory.removeAll()
         pendingContainerRefresh?.cancel()
         pendingContainerRefresh = nil
         sshClientFactory = nil
@@ -1934,7 +1939,7 @@ extension HostSession {
         // The hidden builder and debug sidecars do not count, as in the lists.
         let running = visibleContainers.filter { $0.state.isRunning }.map(\.id)
         guard !running.isEmpty else {
-            loadCPUBaseline = [:]
+            loadBaseline = [:]
             return ContainerLoad(cpuPercent: 0, memoryUsedBytes: 0, sampled: 0)
         }
 
@@ -1952,24 +1957,23 @@ extension HostSession {
             return collected
         }
 
-        var cpuPercent = 0.0
-        var memoryUsed: Int64 = 0
-        var baseline: [String: (total: Int64, system: Int64)] = [:]
+        let now = Date.now
+        var points: [String: ContainerLoadPoint] = [:]
+        var baseline: [String: ContainerCounters] = [:]
         for (id, sample) in samples {
-            memoryUsed += sample.memoryUsageBytes
-            if let previous = loadCPUBaseline[id] {
-                let cpuDelta = sample.cpuTotalUsage - previous.total
-                let systemDelta = sample.systemCPUUsage - previous.system
-                if cpuDelta > 0, systemDelta > 0 {
-                    cpuPercent += Double(cpuDelta) / Double(systemDelta)
-                        * Double(max(sample.onlineCPUs, 1)) * 100.0
-                }
-            }
-            baseline[id] = (sample.cpuTotalUsage, sample.systemCPUUsage)
+            let counters = ContainerCounters(sample, date: now)
+            points[id] = LoadMath.point(previous: loadBaseline[id], current: counters)
+            baseline[id] = counters
         }
-        loadCPUBaseline = baseline
+        loadBaseline = baseline
 
-        return ContainerLoad(cpuPercent: cpuPercent, memoryUsedBytes: memoryUsed, sampled: samples.count)
+        let total = LoadMath.total(Array(points.values), date: now)
+        return ContainerLoad(
+            cpuPercent: total.cpuPercent,
+            memoryUsedBytes: total.memoryBytes,
+            sampled: samples.count,
+            points: points
+        )
     }
 
     /// Prunes the builder cache. Returns the reclaimed space report.
@@ -1994,6 +1998,8 @@ public struct ContainerLoad: Sendable, Hashable {
     public let memoryUsedBytes: Int64
     /// How many running containers the sample covers.
     public let sampled: Int
+    /// The load of each sampled container, by container id.
+    public var points: [String: ContainerLoadPoint] = [:]
 }
 
 /// One point of a host's rolling load history (`HostSession.loadHistory`).
@@ -2009,6 +2015,14 @@ public struct LoadSample: Identifiable, Sendable {
     public let memBytes: Int64
     /// How many running containers the sample covers.
     public let sampled: Int
+    /// Network and disk rates across the sampled containers, bytes per second.
+    public var networkInRate: Double = 0
+    public var networkOutRate: Double = 0
+    public var diskReadRate: Double = 0
+    public var diskWriteRate: Double = 0
+
+    public var networkRate: Double { networkInRate + networkOutRate }
+    public var diskRate: Double { diskReadRate + diskWriteRate }
 }
 
 extension HostSession {
@@ -2060,6 +2074,8 @@ extension HostSession {
         guard status.isConnected, let info, let load = await containerLoad() else { return }
         let cpuCapacity = Double(max(info.ncpu, 1)) * 100.0
         let memTotal = Double(max(info.memTotal, 1))
+        let total = LoadMath.total(Array(load.points.values), date: .now)
+        containerLoadHistory.record(load.points)
         loadHistory.append(
             LoadSample(
                 date: .now,
@@ -2067,7 +2083,11 @@ extension HostSession {
                 cpuPercent: load.cpuPercent,
                 memFraction: min(Double(load.memoryUsedBytes) / memTotal, 1.0),
                 memBytes: load.memoryUsedBytes,
-                sampled: load.sampled
+                sampled: load.sampled,
+                networkInRate: total.networkInRate,
+                networkOutRate: total.networkOutRate,
+                diskReadRate: total.diskReadRate,
+                diskWriteRate: total.diskWriteRate
             )
         )
         if loadHistory.count > Self.loadHistoryWindow {
