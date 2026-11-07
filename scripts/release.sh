@@ -70,8 +70,11 @@ else
 fi
 
 echo "==> Building gantry-mcp (release, universal)"
-swift build -c release --package-path Packages/GantryMCP --arch arm64 --arch x86_64 | tail -1
-MCP_BIN="Packages/GantryMCP/.build/apple/Products/Release/gantry-mcp"
+MCP_BUILD_ARGS=(-c release --package-path Packages/GantryMCP --arch arm64 --arch x86_64)
+swift build "${MCP_BUILD_ARGS[@]}" | tail -1
+# Ask SwiftPM for the output folder: Xcode 27 moved universal builds from
+# .build/apple to .build/out.
+MCP_BIN="$(swift build "${MCP_BUILD_ARGS[@]}" --show-bin-path)/gantry-mcp"
 [ -f "$MCP_BIN" ] || { echo "gantry-mcp not found at $MCP_BIN"; exit 1; }
 lipo -archs "$MCP_BIN" | grep -q "x86_64 arm64\|arm64 x86_64" \
     || { echo "gantry-mcp is not universal: $(lipo -archs "$MCP_BIN")"; exit 1; }
