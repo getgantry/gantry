@@ -121,11 +121,11 @@ struct KubernetesBrowserView: View {
         }
         ToolbarItemGroup(placement: .primaryAction) {
             Button {
-                Task { await browser.reload() }
+                Task { _ = await browser.reload() }
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
-            .help("Reload the list. It also reloads every 5 seconds.")
+            .help("Reload the list. The list also updates live.")
             Button {
                 showingForwards.toggle()
             } label: {
