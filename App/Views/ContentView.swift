@@ -118,15 +118,40 @@ enum DetailSelection: Hashable {
     case machine(String)
     case cluster(String)
     case appleSystem(String)
+    /// Several items of one list; the detail column shows a summary.
+    case many(BulkResource, Set<String>)
 
-    /// The id of the selected list item; nil for a System pane.
+    /// The id of the selected list item; nil for a System pane or several items.
     var resourceID: String? {
         switch self {
         case .container(let id), .image(let id), .volume(let id), .network(let id),
              .machine(let id), .cluster(let id):
             id
-        case .appleSystem:
+        case .appleSystem, .many:
             nil
+        }
+    }
+
+    /// One id gives the plain detail, several give the summary, none clears.
+    static func from(_ ids: Set<String>, resource: BulkResource) -> DetailSelection? {
+        if ids.count > 1 { return .many(resource, ids) }
+        guard let id = ids.first else { return nil }
+        return switch resource {
+        case .containers: .container(id)
+        case .images: .image(id)
+        case .volumes: .volume(id)
+        case .networks: .network(id)
+        }
+    }
+
+    /// The selected ids when this selection belongs to `resource`.
+    func ids(for resource: BulkResource) -> Set<String> {
+        switch (self, resource) {
+        case (.many(let owner, let ids), _): owner == resource ? ids : []
+        case (.container(let id), .containers), (.image(let id), .images),
+             (.volume(let id), .volumes), (.network(let id), .networks):
+            [id]
+        default: []
         }
     }
 }
@@ -221,6 +246,12 @@ struct ContentView: View {
             pendingDetailSelection = nil
         }
         .onChange(of: liveDetailIDs) { old, new in
+            // Removed items leave a multi-selection; the rest stays selected.
+            if case .many(let resource, let ids) = detailSelection {
+                let kept = ids.intersection(new)
+                if kept != ids { detailSelection = .from(kept, resource: resource) }
+                return
+            }
             // The selected item was removed: go back to no selection instead
             // of a "… Unavailable" page.
             guard let id = detailSelection?.resourceID, old.contains(id), !new.contains(id) else { return }
@@ -451,6 +482,16 @@ struct ContentView: View {
         case .machine: return session.machines.map(\.id)
         case .cluster: return session.clusters.map(\.name)
         case .appleSystem: return []
+        case .many(let resource, _): return bulkIDs(resource, in: session)
+        }
+    }
+
+    private func bulkIDs(_ resource: BulkResource, in session: HostSession) -> [String] {
+        switch resource {
+        case .containers: session.containers.map(\.id)
+        case .images: session.images.map(\.id)
+        case .volumes: session.volumes.map(\.name)
+        case .networks: session.networks.map(\.id)
         }
     }
 
@@ -847,6 +888,8 @@ struct ContentView: View {
             }
         case .appleSystem(let pane):
             AppleSystemDetailView(paneID: pane, session: session)
+        case .many(let resource, let ids):
+            BulkSummaryView(session: session, resource: resource, ids: ids)
         }
     }
 
@@ -857,31 +900,31 @@ struct ContentView: View {
     // source of truth. Reads project the current case back to an id (or nil when
     // a different section owns the selection).
 
-    private var containerSelectionBinding: Binding<String?> {
+    private var containerSelectionBinding: Binding<Set<String>> {
         Binding(
-            get: { if case .container(let id) = detailSelection { id } else { nil } },
-            set: { detailSelection = $0.map(DetailSelection.container) }
+            get: { detailSelection?.ids(for: .containers) ?? [] },
+            set: { detailSelection = .from($0, resource: .containers) }
         )
     }
 
-    private var imageSelectionBinding: Binding<String?> {
+    private var imageSelectionBinding: Binding<Set<String>> {
         Binding(
-            get: { if case .image(let id) = detailSelection { id } else { nil } },
-            set: { detailSelection = $0.map(DetailSelection.image) }
+            get: { detailSelection?.ids(for: .images) ?? [] },
+            set: { detailSelection = .from($0, resource: .images) }
         )
     }
 
-    private var volumeSelectionBinding: Binding<String?> {
+    private var volumeSelectionBinding: Binding<Set<String>> {
         Binding(
-            get: { if case .volume(let name) = detailSelection { name } else { nil } },
-            set: { detailSelection = $0.map(DetailSelection.volume) }
+            get: { detailSelection?.ids(for: .volumes) ?? [] },
+            set: { detailSelection = .from($0, resource: .volumes) }
         )
     }
 
-    private var networkSelectionBinding: Binding<String?> {
+    private var networkSelectionBinding: Binding<Set<String>> {
         Binding(
-            get: { if case .network(let id) = detailSelection { id } else { nil } },
-            set: { detailSelection = $0.map(DetailSelection.network) }
+            get: { detailSelection?.ids(for: .networks) ?? [] },
+            set: { detailSelection = .from($0, resource: .networks) }
         )
     }
 

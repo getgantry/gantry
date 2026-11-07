@@ -13,6 +13,8 @@ public enum OperationKind: String, Sendable, CaseIterable {
     case export
     case trim
     case brewInstall
+    /// One action on several selected items.
+    case bulk
     case other
 }
 

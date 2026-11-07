@@ -2851,6 +2851,178 @@
         }
       }
     },
+    "%@ selected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ selected"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ausgewählt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélection : %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionados: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selezionati: %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionados: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ geselecteerd"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ markerade"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ valgt"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ valgt"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ valittu"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaznaczono: %@"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vybráno: %@"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vybraté: %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kijelölve"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selectate: %@"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Избрани: %@"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επιλεγμένα: %@"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odabrano: %@"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izbrano: %@"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изабрано: %@"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izabrano: %@"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasirinkta: %@"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atlasīti: %@"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitud: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрано: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрано: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已选择 %@"
+          }
+        }
+      }
+    },
     "%@ written": {
       "localizations": {
         "en": {
@@ -3373,6 +3545,178 @@
     },
     "%lld": {
       "shouldTranslate": false
+    },
+    "%lld Selected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Selected"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ausgewählt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélection : %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionados: %lld"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selezionati: %lld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionados: %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld geselecteerd"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld markerade"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld valgt"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld valgt"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld valittu"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaznaczono: %lld"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vybráno: %lld"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vybraté: %lld"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kijelölve"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selectate: %lld"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Избрани: %lld"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επιλεγμένα: %lld"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odabrano: %lld"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izbrano: %lld"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изабрано: %lld"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izabrano: %lld"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasirinkta: %lld"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atlasīti: %lld"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitud: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрано: %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрано: %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已选择 %lld 项"
+          }
+        }
+      }
     },
     "%lld changed properties apply after the services restart.": {
       "localizations": {
@@ -6150,6 +6494,1286 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld ГБ на узел"
+          }
+        }
+      }
+    },
+    "%lld containers use these images. Use Force Remove to remove them anyway.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container uses these images. Use Force Remove to remove them anyway."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers use these images. Use Force Remove to remove them anyway."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Container verwendet diese Images. Wähle „Entfernen erzwingen“, um sie trotzdem zu entfernen."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Container verwenden diese Images. Wähle „Entfernen erzwingen“, um sie trotzdem zu entfernen."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneur utilise ces images. Utilisez Forcer la suppression pour les supprimer quand même."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneurs utilisent ces images. Utilisez Forcer la suppression pour les supprimer quand même."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneurs utilisent ces images. Utilisez Forcer la suppression pour les supprimer quand même."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedor usa estas imágenes. Usa Forzar eliminación para eliminarlas de todos modos."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedores usan estas imágenes. Usa Forzar eliminación para eliminarlas de todos modos."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedores usan estas imágenes. Usa Forzar eliminación para eliminarlas de todos modos."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usa queste immagini. Usa Forza rimozione per rimuoverle comunque."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usano queste immagini. Usa Forza rimozione per rimuoverle comunque."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usano queste immagini. Usa Forza rimozione per rimuoverle comunque."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentor utiliza estas imagens. Utilize Forçar remoção para as remover mesmo assim."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentores utilizam estas imagens. Utilize Forçar remoção para as remover mesmo assim."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentores utilizam estas imagens. Utilize Forçar remoção para as remover mesmo assim."
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container gebruikt deze images. Gebruik “Verwijder geforceerd” om de images toch te verwijderen."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers gebruiken deze images. Gebruik “Verwijder geforceerd” om de images toch te verwijderen."
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container använder de här imagerna. Använd Tvinga borttagning för att ta bort dem ändå."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containrar använder de här imagerna. Använd Tvinga borttagning för att ta bort dem ändå."
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container bruger disse images. Brug Tvangsfjern for at fjerne dem alligevel."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere bruger disse images. Brug Tvangsfjern for at fjerne dem alligevel."
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container bruker disse imagene. Bruk Tving fjerning for å fjerne dem likevel."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere bruker disse imagene. Bruk Tving fjerning for å fjerne dem likevel."
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontti käyttää näitä levykuvia. Poista ne silti valitsemalla Pakota poisto."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konttia käyttää näitä levykuvia. Poista ne silti valitsemalla Pakota poisto."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontener używa tych obrazów. Aby mimo to je usunąć, użyj opcji Wymuś usunięcie."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenery używają tych obrazów. Aby mimo to je usunąć, użyj opcji Wymuś usunięcie."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenerów używa tych obrazów. Aby mimo to je usunąć, użyj opcji Wymuś usunięcie."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenera używa tych obrazów. Aby mimo to je usunąć, użyj opcji Wymuś usunięcie."
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejner používá tyto image. Chcete-li je přesto odstranit, použijte „Vynutit odstranění“."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejnery používají tyto image. Chcete-li je přesto odstranit, použijte „Vynutit odstranění“."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejneru používá tyto image. Chcete-li je přesto odstranit, použijte „Vynutit odstranění“."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejnerů používá tyto image. Chcete-li je přesto odstranit, použijte „Vynutit odstranění“."
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajner používa tieto obrazy. Ak ich chcete aj tak odstrániť, použite Vynútene odstrániť."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnery používajú tieto obrazy. Ak ich chcete aj tak odstrániť, použite Vynútene odstrániť."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnera používa tieto obrazy. Ak ich chcete aj tak odstrániť, použite Vynútene odstrániť."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnerov používa tieto obrazy. Ak ich chcete aj tak odstrániť, použite Vynútene odstrániť."
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konténer használja ezeket az image-eket. A „Kényszerített eltávolítás” gombbal így is eltávolíthatja őket."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konténer használja ezeket az image-eket. A „Kényszerített eltávolítás” gombbal így is eltávolíthatja őket."
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container folosește aceste imagini. Folosiți Elimină forțat pentru a le elimina oricum."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere folosesc aceste imagini. Folosiți Elimină forțat pentru a le elimina oricum."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld de containere folosesc aceste imagini. Folosiți Elimină forțat pentru a le elimina oricum."
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер използва тези образи. Използвайте „Премахни принудително“, за да ги премахнете въпреки това."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера използват тези образи. Използвайте „Премахни принудително“, за да ги премахнете въпреки това."
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld κοντέινερ χρησιμοποιεί αυτές τις εικόνες. Χρησιμοποιήστε την «Αναγκαστική αφαίρεση» για να τις αφαιρέσετε ούτως ή άλλως."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld κοντέινερ χρησιμοποιούν αυτές τις εικόνες. Χρησιμοποιήστε την «Αναγκαστική αφαίρεση» για να τις αφαιρέσετε ούτως ή άλλως."
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koristi %lld kontejner. Upotrijebite Prisilno ukloni da biste ih ipak uklonili."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koriste %lld kontejnera. Upotrijebite Prisilno ukloni da biste ih ipak uklonili."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koristi %lld kontejnera. Upotrijebite Prisilno ukloni da biste ih ipak uklonili."
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnik uporablja te slike. Če jih želite kljub temu odstraniti, uporabite Prisilno odstrani."
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnika uporabljata te slike. Če jih želite kljub temu odstraniti, uporabite Prisilno odstrani."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebniki uporabljajo te slike. Če jih želite kljub temu odstraniti, uporabite Prisilno odstrani."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnikov uporablja te slike. Če jih želite kljub temu odstraniti, uporabite Prisilno odstrani."
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове слике користи %lld контејнер. Употребите „Принудно уклони“ да бисте их ипак уклонили."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове слике користе %lld контејнера. Употребите „Принудно уклони“ да бисте их ипак уклонили."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове слике користи %lld контејнера. Употребите „Принудно уклони“ да бисте их ипак уклонили."
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koristi %lld kontejner. Upotrebite „Prinudno ukloni“ da biste ih ipak uklonili."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koriste %lld kontejnera. Upotrebite „Prinudno ukloni“ da biste ih ipak uklonili."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove slike koristi %lld kontejnera. Upotrebite „Prinudno ukloni“ da biste ih ipak uklonili."
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos atvaizdus naudoja %lld konteineris. Norėdami vis tiek juos pašalinti, naudokite „Pašalinti priverstinai“."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos atvaizdus naudoja %lld konteineriai. Norėdami vis tiek juos pašalinti, naudokite „Pašalinti priverstinai“."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos atvaizdus naudoja %lld konteinerio. Norėdami vis tiek juos pašalinti, naudokite „Pašalinti priverstinai“."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos atvaizdus naudoja %lld konteinerių. Norėdami vis tiek juos pašalinti, naudokite „Pašalinti priverstinai“."
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos attēlus izmanto %lld konteineri. Lai tos tomēr noņemtu, izmantojiet „Noņemt piespiedu kārtā”."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos attēlus izmanto %lld konteiners. Lai tos tomēr noņemtu, izmantojiet „Noņemt piespiedu kārtā”."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos attēlus izmanto %lld konteineri. Lai tos tomēr noņemtu, izmantojiet „Noņemt piespiedu kārtā”."
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Neid tõmmiseid kasutab %lld konteiner. Kui soovite need ikkagi eemaldada, kasutage käsku Sundeemalda."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Neid tõmmiseid kasutab %lld konteinerit. Kui soovite need ikkagi eemaldada, kasutage käsku Sundeemalda."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер використовує ці образи. Щоб усе одно вилучити їх, виберіть «Вилучити примусово»."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнери використовують ці образи. Щоб усе одно вилучити їх, виберіть «Вилучити примусово»."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнерів використовують ці образи. Щоб усе одно вилучити їх, виберіть «Вилучити примусово»."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнери використовують ці образи. Щоб усе одно вилучити їх, виберіть «Вилучити примусово»."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер использует эти образы. Чтобы всё равно удалить их, выберите «Удалить принудительно»."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера используют эти образы. Чтобы всё равно удалить их, выберите «Удалить принудительно»."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнеров используют эти образы. Чтобы всё равно удалить их, выберите «Удалить принудительно»."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера используют эти образы. Чтобы всё равно удалить их, выберите «Удалить принудительно»."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个容器使用这些镜像。可使用强制移除仍将其移除。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld containers use these volumes.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container uses these volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers use these volumes."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Container verwendet diese Volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Container verwenden diese Volumes."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneur utilise ces volumes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneurs utilisent ces volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld conteneurs utilisent ces volumes."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedor usa estos volúmenes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedores usan estos volúmenes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contenedores usan estos volúmenes."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usa questi volumi."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usano questi volumi."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container usano questi volumi."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentor utiliza estes volumes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentores utilizam estes volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld contentores utilizam estes volumes."
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container gebruikt deze volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers gebruiken deze volumes."
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container använder de här volymerna."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containrar använder de här volymerna."
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container bruger disse volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere bruger disse volumes."
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container bruker disse volumene."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere bruker disse volumene."
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontti käyttää näitä taltioita."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konttia käyttää näitä taltioita."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontener używa tych woluminów."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenery używają tych woluminów."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenerów używa tych woluminów."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontenera używa tych woluminów."
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejner používá tyto svazky."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejnery používají tyto svazky."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejneru používá tyto svazky."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontejnerů používá tyto svazky."
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajner používa tieto zväzky."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnery používajú tieto zväzky."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnera používa tieto zväzky."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld kontajnerov používa tieto zväzky."
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konténer használja ezeket a köteteket."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld konténer használja ezeket a köteteket."
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container folosește aceste volume."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containere folosesc aceste volume."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld de containere folosesc aceste volume."
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер използва тези томове."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера използват тези томове."
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld κοντέινερ χρησιμοποιεί αυτούς τους τόμους."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld κοντέινερ χρησιμοποιούν αυτούς τους τόμους."
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koristi %lld kontejner."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koriste %lld kontejnera."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koristi %lld kontejnera."
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnik uporablja te nosilce."
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnika uporabljata te nosilce."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebniki uporabljajo te nosilce."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld vsebnikov uporablja te nosilce."
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове волумене користи %lld контејнер."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове волумене користе %lld контејнера."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ове волумене користи %lld контејнера."
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koristi %lld kontejner."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koriste %lld kontejnera."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ove volumene koristi %lld kontejnera."
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos tomus naudoja %lld konteineris."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos tomus naudoja %lld konteineriai."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos tomus naudoja %lld konteinerio."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šiuos tomus naudoja %lld konteinerių."
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos sējumus izmanto %lld konteineri."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos sējumus izmanto %lld konteiners."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Šos sējumus izmanto %lld konteineri."
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Neid köiteid kasutab %lld konteiner."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Neid köiteid kasutab %lld konteinerit."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер використовує ці томи."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнери використовують ці томи."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнерів використовують ці томи."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнери використовують ці томи."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнер использует эти тома."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера используют эти тома."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнеров используют эти тома."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld контейнера используют эти тома."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个容器使用这些卷。"
+                }
+              }
+            }
           }
         }
       }
@@ -12758,6 +14382,178 @@
         }
       }
     },
+    "%lld running, %lld not running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld running, %2$lld not running"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld aktiv, %2$lld nicht aktiv"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld en cours d'exécution, %2$lld à l'arrêt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld en ejecución, %2$lld sin ejecutar"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld in esecuzione, %2$lld non in esecuzione"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld em execução, %2$lld sem execução"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld actief, %2$lld niet actief"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld körs, %2$lld körs inte"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kører, %2$lld kører ikke"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kjører, %2$lld kjører ikke"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld käynnissä, %2$lld ei käynnissä"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchomione: %1$lld, nieuruchomione: %2$lld"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spuštěno: %1$lld, nespuštěno: %2$lld"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spustené: %1$lld, nespustené: %2$lld"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld fut, %2$lld nem fut"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "În execuție: %1$lld, oprite: %2$lld"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работещи: %1$lld, неработещи: %2$lld"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld σε εκτέλεση, %2$lld εκτός εκτέλεσης"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokrenuto: %1$lld, nije pokrenuto: %2$lld"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izvaja se: %1$lld, ne izvaja se: %2$lld"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Покренуто: %1$lld, није покренуто: %2$lld"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokrenuto: %1$lld, nije pokrenuto: %2$lld"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veikia: %1$lld, neveikia: %2$lld"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darbojas: %1$lld, nedarbojas: %2$lld"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Töötab: %1$lld, ei tööta: %2$lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено: %1$lld, не запущено: %2$lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работают: %1$lld, не работают: %2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 个运行中，%2$lld 个未运行"
+          }
+        }
+      }
+    },
     "%lld stopped": {
       "localizations": {
         "en": {
@@ -15008,6 +16804,178 @@
           "stringUnit": {
             "state": "translated",
             "value": "О программе"
+          }
+        }
+      }
+    },
+    "Actions for the selected items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions for the selected items"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktionen für die ausgewählten Objekte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions pour les éléments sélectionnés"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acciones para los elementos seleccionados"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Azioni per gli elementi selezionati"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ações para os itens selecionados"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acties voor de geselecteerde onderdelen"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åtgärder för de markerade objekten"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handlinger for de valgte emner"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handlinger for de valgte objektene"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valittujen kohteiden toiminnot"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akcje dla zaznaczonych elementów"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akce pro vybrané položky"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akcie pre vybraté položky"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Műveletek a kijelölt elemekkel"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acțiuni pentru elementele selectate"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действия за избраните елементи"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ενέργειες για τα επιλεγμένα στοιχεία"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radnje za odabrane stavke"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dejanja za izbrane elemente"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Радње за изабране ставке"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radnje za izabrane stavke"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasirinktų elementų veiksmai"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darbības ar atlasītajiem vienumiem"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitud üksuste toimingud"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дії для вибраних об’єктів"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действия для выбранных объектов"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所选项目的操作"
           }
         }
       }
@@ -115116,6 +117084,1926 @@
         }
       }
     },
+    "Remove %lld images?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld image?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld images?"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Image entfernen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Images entfernen?"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld image ?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld images ?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld images ?"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld imagen?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld imágenes?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld imágenes?"
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld immagine?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld immagini?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld immagini?"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld imagem?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld imagens?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld imagens?"
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image verwijderen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images verwijderen?"
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld image?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld images?"
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld image?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld images?"
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld image?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld images?"
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld levykuva?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld levykuvaa?"
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld obraz?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld obrazy?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld obrazów?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld obrazu?"
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld image?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld image?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld imagu?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld imagů?"
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld obraz?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld obrazy?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld obrazu?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld obrazov?"
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld image-et?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld image-et?"
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld imagine?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld imagini?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld de imagini?"
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахне ли %lld образ?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахнат ли %lld образа?"
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld εικόνας;"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld εικόνων;"
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld sliku?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld slike?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld slika?"
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld sliko?"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld sliki?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld slike?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld slik?"
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld слику?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld слике?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld слика?"
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld sliku?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld slike?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld slika?"
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld atvaizdą?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld atvaizdus?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld atvaizdo?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld atvaizdų?"
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld attēlus?"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld attēlu?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld attēlus?"
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld tõmmis?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld tõmmist?"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld образ?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld образи?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld образів?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld образи?"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld образ?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld образа?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld образов?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld образа?"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "移除 %lld 个镜像？"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Remove %lld networks?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld network?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld networks?"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Netzwerk entfernen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Netzwerke entfernen?"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld réseau ?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld réseaux ?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld réseaux ?"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld red?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld redes?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld redes?"
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld rete?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld reti?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld reti?"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld rede?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld redes?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld redes?"
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld netwerk verwijderen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld netwerken verwijderen?"
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld nätverk?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld nätverk?"
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld netværk?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld netværk?"
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld nettverk?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld nettverk?"
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld verkko?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld verkkoa?"
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld sieć?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld sieci?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld sieci?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld sieci?"
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld síť?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld sítě?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld sítě?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld sítí?"
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld sieť?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld siete?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld siete?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld sietí?"
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld hálózatot?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld hálózatot?"
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld rețea?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld rețele?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld de rețele?"
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахне ли %lld мрежа?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахнат ли %lld мрежи?"
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld δικτύου;"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld δικτύων;"
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mrežu?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mreže?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mreža?"
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld omrežje?"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld omrežji?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld omrežja?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld omrežij?"
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld мрежу?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld мреже?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld мрежа?"
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mrežu?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mreže?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld mreža?"
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tinklą?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tinklus?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tinklo?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tinklų?"
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld tīklus?"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld tīklu?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld tīklus?"
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld võrk?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld võrku?"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld мережу?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld мережі?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld мереж?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld мережі?"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld сеть?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld сети?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld сетей?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld сети?"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "移除 %lld 个网络？"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Remove %lld volumes?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld volume?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld volumes?"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Volume entfernen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Volumes entfernen?"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld volume ?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld volumes ?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer %lld volumes ?"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld volumen?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld volúmenes?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Eliminar %lld volúmenes?"
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld volume?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld volumi?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Rimuovere %lld volumi?"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld volume?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld volumes?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover %lld volumes?"
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld volume verwijderen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld volumes verwijderen?"
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld volym?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vill du ta bort %lld volymer?"
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld volume?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern %lld volumes?"
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld volum?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vil du fjerne %lld volumer?"
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld taltio?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poistetaanko %lld taltiota?"
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld wolumin?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld woluminy?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld woluminów?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Usunąć %lld woluminu?"
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld svazek?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld svazky?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld svazku?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstranit %lld svazků?"
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld zväzok?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld zväzky?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld zväzku?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odstrániť %lld zväzkov?"
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld kötetet?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eltávolít %lld kötetet?"
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld volum?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld volume?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Eliminați %lld de volume?"
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахне ли %lld том?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Да се премахнат ли %lld тома?"
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld τόμου;"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Αφαίρεση %lld τόμων;"
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumen?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumena?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumena?"
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld nosilec?"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld nosilca?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld nosilce?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Želite odstraniti %lld nosilcev?"
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld волумен?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld волумена?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Уклонити %lld волумена?"
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumen?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumena?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ukloniti %lld volumena?"
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tomą?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tomus?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tomo?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pašalinti %lld tomų?"
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld sējumus?"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld sējumu?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vai noņemt %lld sējumus?"
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld köide?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Kas eemaldada %lld köidet?"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld том?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld томи?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld томів?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Вилучити %lld томи?"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld том?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld тома?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld томов?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Удалить %lld тома?"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "移除 %lld 个卷？"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Remove all stopped containers?": {
       "localizations": {
         "en": {
@@ -174116,6 +178004,350 @@
         }
       }
     },
+    "The networks are deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The networks are deleted from this host."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Netzwerke werden von diesem Host gelöscht."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les réseaux sont supprimés de cet hôte."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las redes se eliminan de este host."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le reti vengono eliminate da questo host."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As redes são eliminadas deste host."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De netwerken worden van deze host verwijderd."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nätverken raderas från den här värden."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netværkene slettes fra denne vært."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nettverkene slettes fra denne verten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkot poistetaan tältä isännältä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sieci zostaną usunięte z tego hosta."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sítě budou z tohoto hostitele smazány."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siete sa vymažú z tohto hostiteľa."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A hálózatok törlődnek erről a gazdagépről."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rețelele sunt șterse de pe această gazdă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мрежите се изтриват от този хост."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Τα δίκτυα διαγράφονται από αυτόν τον host."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mreže se brišu s ovog hosta."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omrežja bodo izbrisana s tega gostitelja."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мреже се бришу са овог хоста."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mreže se brišu sa ovog hosta."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tinklai ištrinami iš šio serverio."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tīkli tiek dzēsti no šī resursdatora."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Võrgud kustutatakse sellest hostist."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мережі буде видалено з цього хоста."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сети будут удалены с этого хоста."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些网络将从此主机删除。"
+          }
+        }
+      }
+    },
+    "The volumes and all their data are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The volumes and all their data are deleted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Volumes und alle ihre Daten werden gelöscht."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les volumes et toutes leurs données sont supprimés."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los volúmenes y todos sus datos se eliminan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I volumi e tutti i loro dati vengono eliminati."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os volumes e todos os respetivos dados são eliminados."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De volumes en al hun gegevens worden verwijderd."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volymerna och alla deras data raderas."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disse volumes og alle deres data slettes."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumene og alle dataene i dem slettes."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taltiot ja kaikki niiden data poistetaan."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woluminy i wszystkie ich dane zostaną usunięte."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Svazky a všechna jejich data budou smazány."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zväzky a všetky ich údaje sa vymažú."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A kötetek és az összes adatuk törlődik."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumele și toate datele lor sunt șterse."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Томовете и всички техни данни се изтриват."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι τόμοι και όλα τα δεδομένα τους διαγράφονται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumeni i svi njihovi podaci se brišu."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nosilci in vsi njihovi podatki bodo izbrisani."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Волумени и сви њихови подаци се бришу."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumeni i svi njihovi podaci se brišu."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomai ir visi jų duomenys ištrinami."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sējumi un visi to dati tiek dzēsti."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Köited ja kõik nende andmed kustutatakse."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Томи та всі їхні дані буде видалено."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тома и все их данные будут удалены."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些卷及其所有数据将被删除。"
+          }
+        }
+      }
+    },
     "apple/container checks the credentials with the registry and keeps them in your keychain. Gantry does not save the password.": {
       "localizations": {
         "en": {
@@ -187528,6 +191760,350 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ничего не выбрано"
+          }
+        }
+      }
+    },
+    "The images are deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The images are deleted from this host."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Images werden von diesem Host gelöscht."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les images sont supprimées de cet hôte."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las imágenes se eliminan de este host."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le immagini vengono eliminate da questo host."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As imagens são eliminadas deste host."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De images worden van deze host verwijderd."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagerna raderas från den här värden."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disse images slettes fra denne vært."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagene slettes fra denne verten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Levykuvat poistetaan tältä isännältä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazy zostaną usunięte z tego hosta."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image budou z tohoto hostitele smazány."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazy sa vymažú z tohto hostiteľa."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az image-ek törlődnek erről a gazdagépről."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaginile sunt șterse de pe această gazdă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образите се изтриват от този хост."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι εικόνες διαγράφονται από αυτόν τον host."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike se brišu s ovog hosta."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike bodo izbrisane s tega gostitelja."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слике се бришу са овог хоста."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike se brišu sa ovog hosta."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atvaizdai ištrinami iš šio serverio."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attēli tiek dzēsti no šī resursdatora."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tõmmised kustutatakse sellest hostist."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образи буде видалено з цього хоста."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образы будут удалены с этого хоста."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些镜像将从此主机删除。"
+          }
+        }
+      }
+    },
+    "and %lld more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "and %lld more"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "und %lld weitere"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "et %lld de plus"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "y %lld más"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e altri %lld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e mais %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en nog %lld"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "och %lld till"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "og %lld mere"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "og %lld til"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ja %lld muuta"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i jeszcze %lld"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a další (%lld)"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a ďalšie (%lld)"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "és még %lld"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "și încă %lld"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и още %lld"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "και %lld ακόμη"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i još %lld"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in še %lld"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и још %lld"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i još %lld"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ir dar %lld"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "un vēl %lld"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ja veel %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "і ще %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и ещё %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以及另外 %lld 个"
           }
         }
       }

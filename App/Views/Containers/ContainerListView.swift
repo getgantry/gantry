@@ -5,7 +5,7 @@ import DockerKit
 
 struct ContainerListView: View {
     @Bindable var session: HostSession
-    @Binding var selection: String?
+    @Binding var selection: Set<String>
 
     @State private var searchText = ""
     @State private var filter: StateFilter = .all
@@ -145,6 +145,7 @@ struct ContainerListView: View {
         // disclosure chevron in the content column on macOS; the flat list keeps
         // the plain inset look.
         .modifier(ComposeListStyle(grouped: hasProjects))
+        .contextMenu(forSelectionType: String.self, menu: contextMenu)
         .listEmptyState(
             emptyState,
             total: session.containerCounts.total,
@@ -195,7 +196,9 @@ struct ContainerListView: View {
         } message: { result in
             Text("Removed \(result.deletedCount) containers, reclaiming \(Formatters.bytes(result.spaceReclaimed)).")
         }
-        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
+        .bulkRemoveConfirmation(
+            $removeAction, session: session, resource: .containers, onDelete: deleteSelected
+        ) { action, force in
             await removeContainers(action, force: force)
         }
         .destructiveConfirmation($groupAction) { action, _ in
@@ -203,10 +206,26 @@ struct ContainerListView: View {
         }
     }
 
-    /// The Delete key removes the selected container.
+    /// The Delete key removes the selected containers.
     private func deleteSelected() -> DestructiveAction? {
-        guard let selection, let container = session.containers.first(where: { $0.id == selection }) else { return nil }
-        return .removeContainers([container], engine: .init(session.host))
+        session.bulkRemoveAction(on: .containers, ids: selection)
+    }
+
+    /// One clicked container keeps its full menu; several get the bulk menu.
+    @ViewBuilder
+    private func contextMenu(_ ids: Set<String>) -> some View {
+        if ids.count > 1 {
+            BulkActionsMenu(session: session, resource: .containers, ids: ids, removeAction: $removeAction)
+        } else if let id = ids.first, let container = session.containers.first(where: { $0.id == id }) {
+            ContainerActionsMenu(
+                container: container,
+                session: session,
+                removeAction: $removeAction,
+                renameTarget: $renameTarget,
+                renameText: $renameText,
+                commitTarget: $commitTarget
+            )
+        }
     }
 
     private func removeContainers(_ action: DestructiveAction, force: Bool) async {
@@ -225,16 +244,6 @@ struct ContainerListView: View {
             hostArchitecture: session.info?.architecture ?? ""
         )
         .tag(container.id)
-            .contextMenu {
-                ContainerActionsMenu(
-                    container: container,
-                    session: session,
-                    removeAction: $removeAction,
-                    renameTarget: $renameTarget,
-                    renameText: $renameText,
-                    commitTarget: $commitTarget
-                )
-            }
     }
 
     // MARK: - Group header
@@ -309,6 +318,11 @@ struct ContainerListView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        if selection.count > 1 {
+            ToolbarItem(placement: .primaryAction) {
+                BulkToolbarMenu(session: session, resource: .containers, ids: selection, removeAction: $removeAction)
+            }
+        }
         ToolbarItem(placement: .primaryAction) {
             Menu {
                 Picker("Filter", selection: $filter) {
