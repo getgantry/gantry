@@ -88,36 +88,44 @@ struct AppleSystemOverviewPane: View {
 
     @ViewBuilder
     private var actions: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Spacing.xs) {
             if busy || loading { ProgressView().controlSize(.small) }
-            if running {
-                Button {
-                    serviceAction = .services(.restartServices, runningContainers: runningContainers)
-                } label: {
-                    Label(String(localized: "Restart"), systemImage: "arrow.clockwise.circle")
-                }
-                .help(String(localized: "Stop and start the services. Running containers stop."))
-                Button {
-                    serviceAction = .services(.stopServices, runningContainers: runningContainers)
-                } label: {
-                    Label(String(localized: "Stop"), systemImage: "stop.fill")
-                }
-            } else if status != nil {
-                Button {
-                    act { try await AppleContainerControl.startServices(cliOverride: cli) }
-                } label: {
-                    Label(String(localized: "Start"), systemImage: "play.fill")
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            Button {
-                Task { await reload() }
-            } label: {
-                Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
-            }
-            .onSectionCommand(.refresh, .system) { Task { await reload() } }
+            ControlGroup { serviceButtons }
+                .fixedSize()
         }
         .disabled(busy)
+    }
+
+    /// One control group, so that the text-labeled buttons read as one set.
+    @ViewBuilder
+    private var serviceButtons: some View {
+        if running {
+            Button {
+                serviceAction = .services(.restartServices, runningContainers: runningContainers)
+            } label: {
+                Label(String(localized: "Restart"), systemImage: "arrow.clockwise.circle")
+            }
+            .help(String(localized: "Stop and start the services. Running containers stop."))
+            Button {
+                serviceAction = .services(.stopServices, runningContainers: runningContainers)
+            } label: {
+                Label(String(localized: "Stop"), systemImage: "stop.fill")
+            }
+        } else if status != nil {
+            Button {
+                act { try await AppleContainerControl.startServices(cliOverride: cli) }
+            } label: {
+                Label(String(localized: "Start"), systemImage: "play.fill")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        Button {
+            Task { await reload() }
+        } label: {
+            Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
+        }
+        .help(String(localized: "Refresh"))
+        .onSectionCommand(.refresh, .system) { Task { await reload() } }
     }
 
     // MARK: - Cards
@@ -164,18 +172,31 @@ struct AppleSystemOverviewPane: View {
 
     private var resourcesCard: some View {
         AppleSystemCard(title: String(localized: "Resources"), systemImage: "shippingbox") {
-            FactGrid {
-                // The container list is the source while connected: the CLI's
-                // totals include the hidden image builder.
-                if session.status.isConnected {
-                    let counts = session.containerCounts
-                    Fact(String(localized: "Containers"), String(localized: "\(counts.running) running of \(counts.total)"))
-                } else if let running = status?.containersRunning, let total = status?.containersTotal {
-                    Fact(String(localized: "Containers"), String(localized: "\(running) running of \(total)"))
+            HStack(spacing: Spacing.s) {
+                if let counts = resourceCounts {
+                    StatTile(
+                        value: "\(counts.running)",
+                        label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"),
+                        systemImage: "play.circle.fill", tint: .green
+                    )
+                    StatTile(value: "\(counts.total)", label: String(localized: "Containers"), systemImage: "shippingbox.fill", tint: .secondary)
                 }
-                if let images = status?.images { Fact(String(localized: "Images"), String(images)) }
+                if let images = status?.images {
+                    StatTile(value: "\(images)", label: String(localized: "Images"), systemImage: "square.stack.3d.up.fill", tint: .blue)
+                }
             }
         }
+    }
+
+    /// Running and total containers. The container list is the source while
+    /// connected, because the CLI totals include the hidden image builder.
+    private var resourceCounts: (running: Int, total: Int)? {
+        if session.status.isConnected {
+            let counts = session.containerCounts
+            return (counts.running, counts.total)
+        }
+        guard let running = status?.containersRunning, let total = status?.containersTotal else { return nil }
+        return (running, total)
     }
 
     /// A grid, so the label column takes the width of the longest label in
