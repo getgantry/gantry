@@ -5,6 +5,7 @@ import AppCore
 enum DestructiveActionText {
     static func title(_ action: DestructiveAction) -> String {
         let name = action.names.first ?? ""
+        if let title = bulkTitle(action) { return title }
         switch action.kind {
         case .removeContainer:
             return action.names.count == 1
@@ -27,9 +28,45 @@ enum DestructiveActionText {
     }
 
     static func message(_ action: DestructiveAction) -> String {
-        [baseMessage(action.kind), impact(action.impact)]
+        let base = isBulk(action) ? bulkBaseMessage(action.kind) : baseMessage(action.kind)
+        let text = [base, impact(action.impact)]
             .compactMap { $0 }
             .joined(separator: " ")
+        guard isBulk(action) else { return text }
+        return text + "\n\n" + nameList(action)
+    }
+
+    /// A remove of several items: the confirmation lists them.
+    private static func isBulk(_ action: DestructiveAction) -> Bool {
+        action.names.count > 1 && [.removeContainer, .removeImage, .removeVolume, .removeNetwork].contains(action.kind)
+    }
+
+    private static func bulkTitle(_ action: DestructiveAction) -> String? {
+        guard isBulk(action) else { return nil }
+        let count = action.names.count
+        return switch action.kind {
+        case .removeImage: String(localized: "Remove \(count) images?")
+        case .removeVolume: String(localized: "Remove \(count) volumes?")
+        case .removeNetwork: String(localized: "Remove \(count) networks?")
+        default: String(localized: "Remove \(count) containers?")
+        }
+    }
+
+    private static func bulkBaseMessage(_ kind: DestructiveAction.Kind) -> String? {
+        switch kind {
+        case .removeImage: String(localized: "The images are deleted from this host.")
+        case .removeVolume: String(localized: "The volumes and all their data are deleted.")
+        case .removeNetwork: String(localized: "The networks are deleted from this host.")
+        default: baseMessage(kind)
+        }
+    }
+
+    /// One name per line, and "and N more" after the limit.
+    private static func nameList(_ action: DestructiveAction) -> String {
+        let (shown, more) = action.listedNames()
+        var lines = shown
+        if more > 0 { lines.append(String(localized: "and \(more) more")) }
+        return lines.joined(separator: "\n")
     }
 
     static func confirmLabel(_ action: DestructiveAction) -> String {
@@ -91,6 +128,10 @@ enum DestructiveActionText {
             count == 1
                 ? String(localized: "1 container uses this volume.")
                 : String(localized: "\(count) containers use this volume.")
+        case .containersUseImages(let count):
+            String(localized: "\(count) containers use these images. Use Force Remove to remove them anyway.")
+        case .containersUseVolumes(let count):
+            String(localized: "\(count) containers use these volumes.")
         case .partialNodesDeleted:
             String(localized: "The nodes that this creation made so far are deleted.")
         case .machineStops:

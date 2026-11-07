@@ -1034,6 +1034,26 @@
         }
       }
     },
+    "%@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%@: %lld of %lld failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$lld of %3$lld failed."
+          }
+        }
+      }
+    },
     "%@: `user:` is not yet applied and was ignored.": {
       "localizations": {
         "en": {
@@ -1374,6 +1394,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@: пути хоста для bind-монтирования должны существовать на удалённом сервере, а не на вашем Mac."
+          }
+        }
+      }
+    },
+    "%@: done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: done"
           }
         }
       }
@@ -3944,6 +3974,26 @@
         }
       }
     },
+    "%lld done, %lld skipped.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld done, %2$lld skipped."
+          }
+        }
+      }
+    },
+    "%lld done.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld done."
+          }
+        }
+      }
+    },
     "%lld hosts": {
       "localizations": {
         "en": {
@@ -4580,6 +4630,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld images": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld image"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld images"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld networks": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld network"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld networks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %2$lld"
           }
         }
       }
@@ -6121,6 +6225,28 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "%lld сервиса"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld volumes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld volume"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld volumes"
                 }
               }
             }
@@ -17480,6 +17606,16 @@
         }
       }
     },
+    "Pull Latest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pull Latest"
+          }
+        }
+      }
+    },
     "Pulling %@ — first run only…": {
       "localizations": {
         "en": {
@@ -22852,6 +22988,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SSH-ключ %1$@ защищён парольной фразой, а для %2$@ парольная фраза не сохранена. Подключитесь один раз из приложения Gantry, чтобы сохранить её."
+          }
+        }
+      }
+    },
+    "This action is not available here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This action is not available here."
           }
         }
       }

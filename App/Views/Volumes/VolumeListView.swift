@@ -31,7 +31,7 @@ enum VolumeSort: String, CaseIterable, Identifiable {
 
 struct VolumeListView: View {
     @Bindable var session: HostSession
-    @Binding var selection: String?
+    @Binding var selection: Set<String>
 
     @State private var searchText = ""
     @State private var removeAction: DestructiveAction?
@@ -79,10 +79,31 @@ struct VolumeListView: View {
         return ascending ? sorted : sorted.reversed()
     }
 
-    /// The Delete key removes the selected volume.
+    /// The Delete key removes the selected volumes.
     private func deleteSelected() -> DestructiveAction? {
-        guard let selection else { return nil }
-        return .removeVolume(name: selection, containers: session.containers, engine: .init(session.host))
+        if selection.count > 1 { return session.bulkRemoveAction(on: .volumes, ids: selection) }
+        guard let name = selection.first else { return nil }
+        return .removeVolume(name: name, containers: session.containers, engine: .init(session.host))
+    }
+
+    /// One clicked volume keeps its menu; several get the bulk menu.
+    @ViewBuilder
+    private func contextMenu(_ ids: Set<String>) -> some View {
+        if ids.count > 1 {
+            BulkActionsMenu(session: session, resource: .volumes, ids: ids, removeAction: $removeAction)
+        } else if let name = ids.first {
+            Button {
+                copyToPasteboard(name)
+            } label: {
+                Label("Copy Name", systemImage: "doc.on.doc")
+            }
+            Divider()
+            Button(role: .destructive) {
+                removeAction = .removeVolume(name: name, containers: session.containers, engine: .init(session.host))
+            } label: {
+                Label("Remove…", systemImage: "trash")
+            }
+        }
     }
 
     var body: some View {
@@ -95,23 +116,9 @@ struct VolumeListView: View {
                 )
                 .tag(volume.name)
                     .transition(.opacity.combined(with: .move(edge: .top)))
-                    .contextMenu {
-                        Button {
-                            copyToPasteboard(volume.name)
-                        } label: {
-                            Label("Copy Name", systemImage: "doc.on.doc")
-                        }
-                        Divider()
-                        Button(role: .destructive) {
-                            removeAction = .removeVolume(
-                                name: volume.name, containers: session.containers, engine: .init(session.host)
-                            )
-                        } label: {
-                            Label("Remove…", systemImage: "trash")
-                        }
-                    }
             }
         }
+        .contextMenu(forSelectionType: String.self, menu: contextMenu)
         .listEmptyState(
             ListEmptyState(
                 title: "No Volumes",
@@ -153,7 +160,9 @@ struct VolumeListView: View {
             Text("Removes all volumes not used by at least one container. This permanently deletes their data.")
         }
         .pruneResultAlert($pruneOutcome)
-        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
+        .bulkRemoveConfirmation(
+            $removeAction, session: session, resource: .volumes, onDelete: deleteSelected
+        ) { action, force in
             for name in action.targets { await session.removeVolume(name: name, force: force) }
         }
     }
@@ -162,6 +171,11 @@ struct VolumeListView: View {
     // type checker's time budget.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        if selection.count > 1 {
+            ToolbarItem(placement: .primaryAction) {
+                BulkToolbarMenu(session: session, resource: .volumes, ids: selection, removeAction: $removeAction)
+            }
+        }
         ToolbarItem(placement: .primaryAction) {
             Button {
                 showingNew = true

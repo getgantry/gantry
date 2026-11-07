@@ -5,7 +5,7 @@ import DockerKit
 
 struct NetworkListView: View {
     @Bindable var session: HostSession
-    @Binding var selection: String?
+    @Binding var selection: Set<String>
 
     @State private var searchText = ""
     @State private var removeAction: DestructiveAction?
@@ -14,7 +14,7 @@ struct NetworkListView: View {
     @State private var pruneOutcome: PruneOutcome?
 
     /// Built-in networks that cannot be removed.
-    private static let builtIns: Set<String> = ["bridge", "host", "none"]
+    private static let builtIns = BulkPlan.builtInNetworks
 
     private var filtered: [NetworkResource] {
         guard !searchText.isEmpty else { return session.networks }
@@ -28,11 +28,33 @@ struct NetworkListView: View {
         DestructiveAction(kind: .removeNetwork, targets: [network.id], names: [network.name])
     }
 
-    /// The Delete key removes the selected network (not a built-in one).
+    /// The Delete key removes the selected networks (not the built-in ones).
     private func deleteSelected() -> DestructiveAction? {
-        guard let selection, let network = session.networks.first(where: { $0.id == selection }),
+        if selection.count > 1 { return session.bulkRemoveAction(on: .networks, ids: selection) }
+        guard let id = selection.first, let network = session.networks.first(where: { $0.id == id }),
               !Self.builtIns.contains(network.name) else { return nil }
         return Self.removeAction(for: network)
+    }
+
+    /// One clicked network keeps its menu; several get the bulk menu.
+    @ViewBuilder
+    private func contextMenu(_ ids: Set<String>) -> some View {
+        if ids.count > 1 {
+            BulkActionsMenu(session: session, resource: .networks, ids: ids, removeAction: $removeAction)
+        } else if let id = ids.first, let network = session.networks.first(where: { $0.id == id }) {
+            Button {
+                copyToPasteboard(network.id)
+            } label: {
+                Label("Copy ID", systemImage: "doc.on.doc")
+            }
+            Divider()
+            Button(role: .destructive) {
+                removeAction = Self.removeAction(for: network)
+            } label: {
+                Label("Remove…", systemImage: "trash")
+            }
+            .disabled(Self.builtIns.contains(network.name))
+        }
     }
 
     var body: some View {
@@ -41,22 +63,9 @@ struct NetworkListView: View {
                 NetworkRow(network: network)
                     .tag(network.id)
                     .transition(.opacity.combined(with: .move(edge: .top)))
-                    .contextMenu {
-                        Button {
-                            copyToPasteboard(network.id)
-                        } label: {
-                            Label("Copy ID", systemImage: "doc.on.doc")
-                        }
-                        Divider()
-                        Button(role: .destructive) {
-                            removeAction = Self.removeAction(for: network)
-                        } label: {
-                            Label("Remove…", systemImage: "trash")
-                        }
-                        .disabled(Self.builtIns.contains(network.name))
-                    }
             }
         }
+        .contextMenu(forSelectionType: String.self, menu: contextMenu)
         .listEmptyState(
             ListEmptyState(
                 title: "No Networks",
@@ -74,6 +83,11 @@ struct NetworkListView: View {
         .navigationTitle("Networks")
         .searchable(text: $searchText, prompt: "Filter by name or driver")
         .toolbar {
+            if selection.count > 1 {
+                ToolbarItem(placement: .primaryAction) {
+                    BulkToolbarMenu(session: session, resource: .networks, ids: selection, removeAction: $removeAction)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingNew = true
@@ -119,7 +133,9 @@ struct NetworkListView: View {
             Text("Removes all networks not used by at least one container.")
         }
         .pruneResultAlert($pruneOutcome)
-        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, _ in
+        .bulkRemoveConfirmation(
+            $removeAction, session: session, resource: .networks, onDelete: deleteSelected
+        ) { action, _ in
             for id in action.targets { await session.removeNetwork(id: id) }
         }
     }

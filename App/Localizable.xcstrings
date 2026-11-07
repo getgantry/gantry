@@ -2851,6 +2851,16 @@
         }
       }
     },
+    "%@ selected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ selected"
+          }
+        }
+      }
+    },
     "%@ written": {
       "localizations": {
         "en": {
@@ -3373,6 +3383,16 @@
     },
     "%lld": {
       "shouldTranslate": false
+    },
+    "%lld Selected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Selected"
+          }
+        }
+      }
     },
     "%lld changed properties apply after the services restart.": {
       "localizations": {
@@ -6150,6 +6170,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld ГБ на узел"
+          }
+        }
+      }
+    },
+    "%lld containers use these images. Use Force Remove to remove them anyway.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container uses these images. Use Force Remove to remove them anyway."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers use these images. Use Force Remove to remove them anyway."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld containers use these volumes.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld container uses these volumes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld containers use these volumes."
+                }
+              }
+            }
           }
         }
       }
@@ -12758,6 +12822,16 @@
         }
       }
     },
+    "%lld running, %lld not running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld running, %2$lld not running"
+          }
+        }
+      }
+    },
     "%lld stopped": {
       "localizations": {
         "en": {
@@ -15008,6 +15082,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "О программе"
+          }
+        }
+      }
+    },
+    "Actions for the selected items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions for the selected items"
           }
         }
       }
@@ -115116,6 +115200,72 @@
         }
       }
     },
+    "Remove %lld images?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld image?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld images?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Remove %lld networks?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld network?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld networks?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Remove %lld volumes?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld volume?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld volumes?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Remove all stopped containers?": {
       "localizations": {
         "en": {
@@ -174116,6 +174266,26 @@
         }
       }
     },
+    "The networks are deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The networks are deleted from this host."
+          }
+        }
+      }
+    },
+    "The volumes and all their data are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The volumes and all their data are deleted."
+          }
+        }
+      }
+    },
     "apple/container checks the credentials with the registry and keeps them in your keychain. Gantry does not save the password.": {
       "localizations": {
         "en": {
@@ -187528,6 +187698,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ничего не выбрано"
+          }
+        }
+      }
+    },
+    "The images are deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The images are deleted from this host."
+          }
+        }
+      }
+    },
+    "and %lld more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "and %lld more"
           }
         }
       }

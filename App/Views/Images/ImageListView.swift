@@ -5,7 +5,7 @@ import DockerKit
 
 struct ImageListView: View {
     @Bindable var session: HostSession
-    @Binding var selection: String?
+    @Binding var selection: Set<String>
 
     @State private var searchText = ""
     @State private var removeAction: DestructiveAction?
@@ -61,7 +61,16 @@ struct ImageListView: View {
         ImageRow(image: image, hostArchitecture: session.info?.architecture ?? "")
             .tag(image.id)
             .transition(.opacity.combined(with: .move(edge: .top)))
-            .contextMenu { imageMenu(image) }
+    }
+
+    /// One clicked image keeps its menu; several get the bulk menu.
+    @ViewBuilder
+    private func contextMenu(_ ids: Set<String>) -> some View {
+        if ids.count > 1 {
+            BulkActionsMenu(session: session, resource: .images, ids: ids, removeAction: $removeAction)
+        } else if let id = ids.first, let image = session.images.first(where: { $0.id == id }) {
+            imageMenu(image)
+        }
     }
 
     @ViewBuilder
@@ -96,9 +105,10 @@ struct ImageListView: View {
         )
     }
 
-    /// The Delete key removes the selected image.
+    /// The Delete key removes the selected images.
     private func deleteSelected() -> DestructiveAction? {
-        guard let selection, let image = session.images.first(where: { $0.id == selection }) else { return nil }
+        if selection.count > 1 { return session.bulkRemoveAction(on: .images, ids: selection) }
+        guard let id = selection.first, let image = session.images.first(where: { $0.id == id }) else { return nil }
         return removeAction(for: image)
     }
 
@@ -108,6 +118,7 @@ struct ImageListView: View {
                 imageRow(image)
             }
         }
+        .contextMenu(forSelectionType: String.self, menu: contextMenu)
         .listEmptyState(
             ListEmptyState(
                 title: "No Images",
@@ -128,6 +139,11 @@ struct ImageListView: View {
         }
         .searchable(text: $searchText, prompt: "Filter by tag or ID")
         .toolbar {
+            if selection.count > 1 {
+                ToolbarItem(placement: .primaryAction) {
+                    BulkToolbarMenu(session: session, resource: .images, ids: selection, removeAction: $removeAction)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingPull = true
@@ -217,7 +233,11 @@ struct ImageListView: View {
             }
         }
         .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
-            for id in action.targets { await session.removeImage(id: id, force: force) }
+            if action.targets.count > 1 {
+                await session.runBulk(.remove(force: force), on: .images, ids: Set(action.targets))?.wait()
+            } else {
+                for id in action.targets { await session.removeImage(id: id, force: force) }
+            }
             await loadDiskUsage()
         }
         .task {
