@@ -55,6 +55,9 @@ struct CreateClusterSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Create Cluster")
                 .font(.title2.weight(.bold))
+            if let problem = session.clusterServiceProblem {
+                ClusterServiceProblemNotice(problem: problem, session: session)
+            }
 
             VStack(alignment: .leading, spacing: 10) {
                 field("Name") {

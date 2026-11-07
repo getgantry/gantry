@@ -28,7 +28,9 @@ struct ClusterListView: View {
 
     var body: some View {
         Group {
-            if clusters.isEmpty, session.clusterCreations.isEmpty, let error = session.clusterListError {
+            if clusters.isEmpty, session.clusterCreations.isEmpty, let problem = session.clusterServiceProblem {
+                ClusterServiceProblemView(problem: problem, session: session)
+            } else if clusters.isEmpty, session.clusterCreations.isEmpty, let error = session.clusterListError {
                 ListingUnavailableView(
                     title: String(localized: "Clusters Unavailable"),
                     systemImage: "steeringwheel",
@@ -50,6 +52,10 @@ struct ClusterListView: View {
                 }
             } else {
                 List(selection: $selection) {
+                    if let problem = session.clusterServiceProblem {
+                        ClusterServiceProblemNotice(problem: problem, session: session)
+                            .selectionDisabled()
+                    }
                     if !session.clusterCreations.isEmpty {
                         Section("Creating") {
                             ForEach(session.clusterCreations) { creation in
