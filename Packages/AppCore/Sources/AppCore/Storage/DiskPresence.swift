@@ -57,6 +57,35 @@ public struct DiskPresence: Sendable, Equatable {
     }
 }
 
+/// What still uses a disk that macOS is about to eject.
+public struct EjectWarning: Sendable, Equatable {
+    public var diskName: String
+    /// Container names, and the services when the data root is on the disk.
+    public var users: [String]
+
+    /// Nil when nothing runs from the disk at `mountPoint`.
+    public static func make(
+        mountPoint: String,
+        containers: [ContainerSummary],
+        dataRoot: String?
+    ) -> EjectWarning? {
+        var users = DiskPresence.runningContainers(on: mountPoint, in: containers).map(\.displayName)
+        if let dataRoot, StoragePaths.isInside(dataRoot, mountPoint) {
+            users.insert(String(localized: "container services", bundle: .module), at: 0)
+        }
+        guard !users.isEmpty else { return nil }
+        return EjectWarning(diskName: (StoragePaths.normalized(mountPoint) as NSString).lastPathComponent, users: users)
+    }
+
+    public var title: String {
+        String(localized: "Stop the containers before you eject “\(diskName)”", bundle: .module)
+    }
+
+    public var body: String {
+        String(localized: "These still use the disk: \(users.joined(separator: ", ")).", bundle: .module)
+    }
+}
+
 /// Why a host or a container cannot use its storage now.
 public struct StorageBlock: Sendable, Equatable {
     /// Names of the disks that are not connected.

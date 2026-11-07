@@ -423,6 +423,19 @@ struct DiskPresenceTests {
         #expect(DiskPresence.runningContainers(on: "/Volumes/Fast", in: [a, b, c]).map(\.id) == ["a"])
     }
 
+    @Test func ejectWarningListsServicesAndRunningContainers() throws {
+        let a = try container(id: "web", running: true, mounts: [("/Volumes/Fast/site", nil)])
+        let b = try container(id: "old", running: false, mounts: [("/Volumes/Fast/old", nil)])
+        let warning = try #require(EjectWarning.make(
+            mountPoint: "/Volumes/Fast", containers: [a, b], dataRoot: "/Volumes/Fast/com.apple.container"
+        ))
+        #expect(warning.diskName == "Fast")
+        #expect(warning.users.count == 2 && warning.users.last == "web")
+        #expect(warning.body.contains("web") && warning.title.contains("Fast"))
+        #expect(EjectWarning.make(mountPoint: "/Volumes/Fast", containers: [b], dataRoot: "/Users/me/root") == nil)
+        #expect(EjectWarning.make(mountPoint: "/Volumes/Other", containers: [a], dataRoot: nil) == nil)
+    }
+
     @Test func blockMessagesNameTheDisks() {
         #expect(StorageBlock(disks: ["Fast"]).message.contains("Fast"))
         #expect(StorageBlock(disks: ["A", "B"]).message.contains("B"))
@@ -509,6 +522,13 @@ struct VolumeTransferTests {
             == ["image", "save", "--output", "/Volumes/F/n.tar", "nginx:1"])
         #expect(ImageArchive.appleLoadArguments(from: "/Volumes/F/n.tar") == ["image", "load", "--input", "/Volumes/F/n.tar"])
         #expect(HelperJob.containerName("copy").hasPrefix("gantry-copy-"))
+    }
+
+    @Test func refusesAnExportLargerThanTheFreeSpace() {
+        #expect(VolumeTransferPlan.spaceIssue(needed: 11, on: disk("/Volumes/F", free: 10))
+            == .notEnoughSpace(needed: 11, available: 10))
+        #expect(VolumeTransferPlan.spaceIssue(needed: 10, on: disk("/Volumes/F", free: 10)) == nil)
+        #expect(VolumeTransferPlan.spaceIssue(needed: 10, on: nil) == nil)
     }
 
     @Test func replacesTheMovedSourceOnly() {

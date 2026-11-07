@@ -282,24 +282,20 @@ public struct TreeManifest: Sendable, Equatable {
         return result.sorted()
     }
 
-    /// Reads a tree from the file system without following links.
+    /// Reads a tree from the file system without following links. Paths
+    /// come from the enumerator as relative paths, so a root reached
+    /// through a link (/var is /private/var) gives the same keys.
     public static func read(_ root: String) throws -> TreeManifest {
-        let base = URL(fileURLWithPath: root, isDirectory: true)
-        let keys: [URLResourceKey] = [.fileResourceTypeKey, .fileSizeKey]
-        guard let walker = FileManager.default.enumerator(at: base, includingPropertiesForKeys: keys) else {
-            return TreeManifest(entries: [:])
-        }
+        let fm = FileManager.default
+        guard let walker = fm.enumerator(atPath: root) else { return TreeManifest(entries: [:]) }
         var entries: [String: Entry] = [:]
-        let prefix = base.standardizedFileURL.path + "/"
-        for case let url as URL in walker {
-            let full = url.standardizedFileURL.path
-            let relative = full.hasPrefix(prefix) ? String(full.dropFirst(prefix.count)) : url.lastPathComponent
-            let values = try url.resourceValues(forKeys: Set(keys))
-            switch values.fileResourceType {
-            case .directory?: entries[relative] = Entry(kind: .directory)
-            case .regular?: entries[relative] = Entry(kind: .file, size: Int64(values.fileSize ?? 0))
-            case .symbolicLink?:
-                let target = try? FileManager.default.destinationOfSymbolicLink(atPath: full)
+        while let relative = walker.nextObject() as? String {
+            let attributes = try walker.fileAttributes ?? fm.attributesOfItem(atPath: root + "/" + relative)
+            switch attributes[.type] as? FileAttributeType {
+            case .typeDirectory?: entries[relative] = Entry(kind: .directory)
+            case .typeRegular?: entries[relative] = Entry(kind: .file, size: (attributes[.size] as? Int64) ?? 0)
+            case .typeSymbolicLink?:
+                let target = try? fm.destinationOfSymbolicLink(atPath: root + "/" + relative)
                 entries[relative] = Entry(kind: .symlink, linkTarget: target)
             default: continue
             }

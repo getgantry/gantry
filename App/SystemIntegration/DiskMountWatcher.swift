@@ -34,19 +34,13 @@ final class DiskMountWatcher {
     /// Posts a notification when containers still run from the disk.
     private func willUnmount(_ path: String?) {
         guard let path, let model else { return }
-        let name = (path as NSString).lastPathComponent
-        var running: [String] = []
-        for session in model.sessions where session.usesLocalPaths {
-            running += DiskPresence.runningContainers(on: path, in: session.containers).map(\.displayName)
-        }
-        if model.sessions.contains(where: { $0.host.isAppleContainer }),
-           StoragePaths.isInside(AppleDataRootStore.shared.load().effectivePath, path) {
-            running.insert(String(localized: "container services"), at: 0)
-        }
-        guard !running.isEmpty else { return }
-        ContainerNotifier.shared.presentFailure(
-            title: String(localized: "Stop the containers before you eject “\(name)”"),
-            body: String(localized: "These still use the disk: \(running.joined(separator: ", ")).")
-        )
+        let local = model.sessions.filter(\.usesLocalPaths)
+        let hasApple = model.sessions.contains { $0.host.isAppleContainer }
+        guard let warning = EjectWarning.make(
+            mountPoint: path,
+            containers: local.flatMap(\.containers),
+            dataRoot: hasApple ? AppleDataRootStore.shared.load().effectivePath : nil
+        ) else { return }
+        ContainerNotifier.shared.presentFailure(title: warning.title, body: warning.body)
     }
 }

@@ -89,7 +89,16 @@ extension HostSession {
 
     /// Writes a volume to a tar archive in `folder`. Returns the file path.
     @discardableResult
-    public func exportVolume(_ volume: VolumeEndpoint, name: String, toFolder folder: String) async throws -> String {
+    public func exportVolume(
+        _ volume: VolumeEndpoint,
+        name: String,
+        toFolder folder: String,
+        disks: any StorageDiskReading = SystemStorageDiskReader()
+    ) async throws -> String {
+        if case .named(let volumeName) = volume, let needed = volumeSizes[volumeName],
+           let issue = VolumeTransferPlan.spaceIssue(needed: needed, on: disks.disk(containing: folder)) {
+            throw OperationFailure(issue.message)
+        }
         let fileName = VolumeTransferPlan.archiveName(for: name)
         try await runHelperJob(VolumeTransferPlan.exportTar(volume, toFolder: folder, fileName: fileName), purpose: "export")
         return StoragePaths.normalized(folder) + "/" + fileName

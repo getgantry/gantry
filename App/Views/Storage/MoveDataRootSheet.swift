@@ -73,7 +73,8 @@ struct MoveDataRootSheet: View {
     }
 
     private func loadTargets() async {
-        let source = overview.configuredRoot.effectivePath
+        // A root that is a link: copy the folder it points to, not the link.
+        let source = (overview.configuredRoot.effectivePath as NSString).resolvingSymlinksInPath
         targets = await StorageOverview.moveTargets(size: size, source: source)
             .map { MoveTarget(disk: $0.disk, plan: $0.plan) }
         selection = targets.first { if case .success = $0.plan { true } else { false } }?.id

@@ -28,7 +28,7 @@ public struct HelperJob: Sendable, Equatable {
     }
 
     /// A small image with `sh`, `cp` and `tar`.
-    public static let defaultImage = "docker.io/library/alpine:3.20"
+    public static let defaultImage = "docker.io/library/alpine:latest"
 
     public var image: String = HelperJob.defaultImage
     public var mounts: [Mount]
@@ -102,6 +102,12 @@ public enum VolumeTransferPlan {
             script: "tar -xf \"/in/$1\" -C /to",
             arguments: [(path as NSString).lastPathComponent]
         )
+    }
+
+    /// A refusal when the disk has less free space than `needed`.
+    public static func spaceIssue(needed: Int64, on disk: StorageDisk?) -> StorageIssue? {
+        guard let disk, needed > disk.availableBytes else { return nil }
+        return .notEnoughSpace(needed: needed, available: disk.availableBytes)
     }
 
     /// A default archive name: `<volume>-<yyyyMMdd-HHmmss>.tar`.
