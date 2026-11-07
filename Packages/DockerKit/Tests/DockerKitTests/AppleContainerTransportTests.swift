@@ -307,6 +307,21 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     #expect(Array(create[(imageIndex + 1)...]) == ["nginx", "-g", "daemon off;"])
 }
 
+@Test func appleTransportCreateContainerPassesUserAndInteractive() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "web-1\n")
+
+    var config = ContainerCreateRequest(image: "alpine", name: "web-1")
+    config.user = "1000:1000"
+    config.openStdin = true
+    _ = try await client.createContainer(config: config, name: "web-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    let userIndex = try #require(create.firstIndex(of: "--user"))
+    #expect(create[userIndex + 1] == "1000:1000")
+    #expect(create.contains("--interactive"))
+}
+
 @Test func appleTransportCreateContainerMapsDomainToDNSDomain() async throws {
     let (client, runner) = try await makeConnectedClient()
     runner.stub(["create"], stdout: "web-1\n")

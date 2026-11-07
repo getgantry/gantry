@@ -4,9 +4,9 @@ import AppCore
 import DockerKit
 
 /// Sheet for creating and running a new container. Mirrors the common
-/// `docker run` knobs: image, name, command, port mappings, environment,
-/// volume binds, restart policy, TTY and auto-remove. On a 404 from create
-/// (image missing locally) it offers to pull the image and retry.
+/// `docker run` knobs and reads them from a pasted command or a saved
+/// recipe (``ContainerRecipe``). On a 404 from create (image missing
+/// locally) it offers to pull the image and retry.
 struct CreateContainerSheet: View {
     @Bindable var session: HostSession
     @Environment(\.dismiss) private var dismiss
@@ -14,12 +14,24 @@ struct CreateContainerSheet: View {
     @State private var image = ""
     @State private var name = ""
     @State private var command = ""
+    @State private var entrypoint = ""
     @State private var ports: [PortRow] = []
     @State private var env: [EnvRow] = []
+    /// `--env-file` paths from a pasted command; kept, not read.
+    @State private var envFiles: [String] = []
     @State private var binds: [BindRow] = []
+    @State private var labels: [EnvRow] = []
+    @State private var network = ""
     @State private var restartPolicy = "no"
+    @State private var cpus = ""
+    @State private var memory = ""
+    @State private var workdir = ""
+    @State private var user = ""
     @State private var tty = false
+    @State private var interactive = false
     @State private var autoRemove = false
+    /// Only kept for "Copy as Command": Gantry always runs in the background.
+    @State private var detach = true
     /// apple/container DNS domain to launch on ("" = none), and the domains
     /// available locally to pick from.
     @State private var domain = ""
@@ -43,6 +55,13 @@ struct CreateContainerSheet: View {
     @State private var nameError: String?
     /// Set when the new container stopped right after it started.
     @State private var earlyExit: StartedContainerExit?
+
+    @State private var showPasteSheet = false
+    /// The last pasted command, for its list of flags that were not used.
+    @State private var pasted: RunCommandParser.Result?
+    @State private var showSavePrompt = false
+    @State private var recipeName = ""
+    @State private var store = RecipeStore.shared
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
 
@@ -74,16 +93,12 @@ struct CreateContainerSheet: View {
     private var canCreate: Bool {
         !image.trimmingCharacters(in: .whitespaces).isEmpty && !isWorking
             && commandError == nil && portIssues.isEmpty && nameIssue == nil
+            && currentRecipe.cpusIssue == nil && currentRecipe.memoryIssue == nil
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("New Container")
-                    .font(.title2.weight(.semibold))
-                Spacer()
-            }
-            .padding()
+            header
 
             Divider()
 
@@ -98,6 +113,12 @@ struct CreateContainerSheet: View {
                     TextField("Command (optional)", text: $command, prompt: Text("The image's default command"))
                         .textFieldStyle(.roundedBorder)
                     FieldError(message: commandError)
+                    TextField("Entrypoint (optional)", text: $entrypoint, prompt: Text("The image's default entrypoint"))
+                        .textFieldStyle(.roundedBorder)
+                }
+
+                if let pasted, !(pasted.unsupported.isEmpty && pasted.notes.isEmpty) {
+                    pastedSection(pasted)
                 }
 
                 Section {
@@ -106,6 +127,8 @@ struct CreateContainerSheet: View {
                         addLabel: "Add Port",
                         empty: { PortRow() }
                     ) { $row in
+                        TextField("Host IP", text: $row.hostIP, prompt: Text("All"))
+                            .frame(width: 80)
                         TextField("Host", text: $row.host, prompt: Text("Host port"))
                             .frame(width: 90)
                         Text(verbatim: ":").foregroundStyle(.secondary)
@@ -135,6 +158,7 @@ struct CreateContainerSheet: View {
                         Text(verbatim: "=").foregroundStyle(.secondary)
                         TextField("VALUE", text: $row.value)
                     }
+                    envFileRows
                 }
 
                 Section("Volumes") {
@@ -164,23 +188,19 @@ struct CreateContainerSheet: View {
                     }
                 }
 
-                if session.host.isAppleContainer {
-                    networkingSection
-                }
+                labelsSection
 
-                Section("Options") {
-                    if session.host.capabilities.restartPolicy {
-                        Picker("Restart Policy", selection: $restartPolicy) {
-                            ForEach(RestartPolicyOption.allCases) { Text($0.label).tag($0.rawValue) }
-                        }
-                    }
-                    Toggle("Allocate a TTY", isOn: $tty)
-                    Toggle("Remove on exit (--rm)", isOn: $autoRemove)
-                }
+                networkingSection
+
+                optionsSection
+
+                resourcesSection
 
                 if session.host.isAppleContainer {
                     kernelSection
                 }
+
+                hostWarningsSection
 
                 if let errorText {
                     Section {
@@ -213,8 +233,15 @@ struct CreateContainerSheet: View {
 
             footer
         }
-        .frame(width: 560, height: 640)
+        .frame(width: 600, height: 700)
         .startedContainerExitAlert($earlyExit, session: session) { dismiss() }
+        .sheet(isPresented: $showPasteSheet) {
+            PasteCommandSheet(isAppleHost: session.host.isAppleContainer) { result in
+                apply(result.recipe)
+                pasted = result
+            }
+        }
+        .saveRecipePrompt(isPresented: $showSavePrompt, name: $recipeName, store: store) { currentRecipe }
         .task {
             if session.host.isAppleContainer {
                 appleFeatures = await ContainerTooling.currentFeatures(cliOverride: session.appleCLIOverride)
@@ -249,25 +276,32 @@ struct CreateContainerSheet: View {
         .padding()
     }
 
-    /// DNS-domain picker for apple/container hosts: launch a container on a local
-    /// domain so it resolves as `name.domain` across the Mac. Mirrors Quick Run.
+    /// The network, and on apple/container hosts the DNS domain: a container on
+    /// a local domain resolves as `name.domain` across the Mac.
     private var networkingSection: some View {
         Section {
-            if availableDomains.isEmpty {
-                NoLocalDomainsRow()
-            } else {
-                Picker("DNS domain", selection: $domain) {
-                    Text("None").tag("")
-                    ForEach(availableDomains, id: \.self) { Text($0).tag($0) }
-                }
-                let trimmedName = name.trimmingCharacters(in: .whitespaces)
-                if !domain.isEmpty, !trimmedName.isEmpty {
-                    Text("Reachable as \(trimmedName).\(domain)")
-                        .font(.caption).foregroundStyle(.tertiary)
-                }
+            networkField
+            if session.host.isAppleContainer {
+                domainRows
             }
         } header: {
             Text("Networking")
+        }
+    }
+
+    @ViewBuilder
+    private var domainRows: some View {
+        if availableDomains.isEmpty {
+            NoLocalDomainsRow()
+        } else {
+            Picker("DNS domain", selection: $domain) {
+                Text("None").tag("")
+                ForEach(availableDomains, id: \.self) { Text($0).tag($0) }
+            }
+            if !domain.isEmpty, !trimmedName.isEmpty {
+                Text("Reachable as \(trimmedName).\(domain)")
+                    .font(.caption).foregroundStyle(.tertiary)
+            }
         }
     }
 
@@ -306,6 +340,264 @@ struct CreateContainerSheet: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    // MARK: - Header and recipes
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Text("New Container")
+                .font(.title2.weight(.semibold))
+            Spacer()
+            recipesMenu
+            copyMenu
+            Button {
+                showPasteSheet = true
+            } label: {
+                Label("Paste Command…", systemImage: "doc.on.clipboard")
+            }
+            .help("Fill the form from a docker run or container run command")
+        }
+        .padding()
+    }
+
+    private var recipesMenu: some View {
+        Menu {
+            Button("Save as Recipe…") {
+                recipeName = trimmedName.isEmpty ? ContainerForm.baseName(forImage: image) : trimmedName
+                showSavePrompt = true
+            }
+            .disabled(image.trimmingCharacters(in: .whitespaces).isEmpty)
+            if !store.recipes.isEmpty {
+                Divider()
+                Section("Fill from Recipe") {
+                    ForEach(store.recipes) { saved in
+                        Button(saved.name) {
+                            apply(saved.recipe)
+                            pasted = nil
+                        }
+                    }
+                }
+                Divider()
+                deleteRecipeMenu
+            }
+        } label: {
+            Label("Recipes", systemImage: "book.closed")
+        }
+        .fixedSize()
+        .help("Save the form as a recipe, or fill it from a saved recipe")
+    }
+
+    private var deleteRecipeMenu: some View {
+        Menu("Delete Recipe") {
+            ForEach(store.recipes) { saved in
+                Button(saved.name, role: .destructive) { store.delete(id: saved.id) }
+            }
+        }
+    }
+
+    private var copyMenu: some View {
+        Menu {
+            Button {
+                copyToPasteboard(RunCommandFormatter.command(for: currentRecipe, dialect: .docker))
+            } label: {
+                Text(verbatim: "docker run")
+            }
+            Button {
+                copyToPasteboard(RunCommandFormatter.command(for: currentRecipe, dialect: .appleContainer))
+            } label: {
+                Text(verbatim: "container run")
+            }
+        } label: {
+            Label("Copy as Command", systemImage: "terminal")
+        }
+        .fixedSize()
+        .disabled(image.trimmingCharacters(in: .whitespaces).isEmpty || commandError != nil)
+        .help("Copy the form as a command")
+    }
+
+    private func pastedSection(_ result: RunCommandParser.Result) -> some View {
+        Section {
+            RunCommandIssuesList(result: result, hostWarnings: [])
+        } header: {
+            HStack {
+                Text("From the Pasted Command")
+                Spacer()
+                Button {
+                    pasted = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .help("Hide this list")
+                .accessibilityLabel("Hide this list")
+            }
+        }
+    }
+
+    // MARK: - More sections
+
+    @ViewBuilder
+    private var envFileRows: some View {
+        ForEach(envFiles, id: \.self) { file in
+            HStack(spacing: 6) {
+                Label(file, systemImage: "doc.text")
+                    .font(.callout)
+                Spacer(minLength: 0)
+                Button {
+                    envFiles.removeAll { $0 == file }
+                } label: {
+                    Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .help("Remove row")
+                .accessibilityLabel("Remove row")
+            }
+        }
+        if !envFiles.isEmpty {
+            Text("Gantry does not read env files. Add their variables by hand.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var labelsSection: some View {
+        Section("Labels") {
+            editorRows(
+                $labels,
+                addLabel: "Add Label",
+                empty: { EnvRow() }
+            ) { $row in
+                TextField("Key", text: $row.key)
+                Text(verbatim: "=").foregroundStyle(.secondary)
+                TextField("Value", text: $row.value)
+            }
+        }
+    }
+
+    private var networkField: some View {
+        HStack(spacing: 6) {
+            TextField("Network", text: $network, prompt: Text("Default network"))
+                .textFieldStyle(.roundedBorder)
+            Menu {
+                ForEach(session.networks.map(\.name).sorted(), id: \.self) { name in
+                    Button(name) { network = name }
+                }
+            } label: {
+                Image(systemName: "chevron.down")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .disabled(session.networks.isEmpty)
+            .help("Choose a network")
+            .accessibilityLabel("Choose a network")
+        }
+    }
+
+    private var optionsSection: some View {
+        Section("Options") {
+            if session.host.capabilities.restartPolicy {
+                Picker("Restart Policy", selection: $restartPolicy) {
+                    ForEach(RestartPolicyOption.allCases) { Text($0.label).tag($0.rawValue) }
+                }
+            }
+            Toggle("Allocate a TTY", isOn: $tty)
+            Toggle("Keep stdin open (-i)", isOn: $interactive)
+            Toggle("Remove on exit (--rm)", isOn: $autoRemove)
+        }
+    }
+
+    private var resourcesSection: some View {
+        Section("Process and Limits") {
+            TextField("Working directory", text: $workdir, prompt: Text("The image's default"))
+                .textFieldStyle(.roundedBorder)
+            TextField("User", text: $user, prompt: Text("The image's default"))
+                .textFieldStyle(.roundedBorder)
+            TextField("CPUs", text: $cpus, prompt: Text("No limit"))
+                .textFieldStyle(.roundedBorder)
+            FieldError(message: currentRecipe.cpusIssue)
+            TextField("Memory", text: $memory, prompt: Text("No limit, for example 512m"))
+                .textFieldStyle(.roundedBorder)
+            FieldError(message: currentRecipe.memoryIssue)
+        }
+    }
+
+    @ViewBuilder
+    private var hostWarningsSection: some View {
+        let warnings = currentRecipe.hostWarnings(isAppleHost: session.host.isAppleContainer)
+        if !warnings.isEmpty || store.lastError != nil {
+            Section {
+                ForEach(warnings, id: \.self) { warning in
+                    Label(warning, systemImage: "exclamationmark.triangle")
+                        .font(.callout)
+                }
+                FieldError(message: store.lastError)
+            }
+        }
+    }
+
+    // MARK: - Recipe mapping
+
+    /// The form as a recipe.
+    private var currentRecipe: ContainerRecipe {
+        var recipe = ContainerRecipe(image: image.trimmingCharacters(in: .whitespaces))
+        recipe.name = trimmedName
+        recipe.command = (try? parsedCommand.get()) ?? []
+        recipe.entrypoint = entrypoint.trimmingCharacters(in: .whitespaces)
+        recipe.ports = ports.map { .init(hostIP: $0.hostIP, host: $0.host, container: $0.container, proto: $0.proto) }
+        recipe.env = env.map { .init(key: $0.key, value: $0.value) }
+        recipe.envFiles = envFiles
+        recipe.volumes = binds.map { .init(source: $0.host, target: $0.container, readOnly: $0.readOnly) }
+        recipe.labels = labels.map { .init(key: $0.key, value: $0.value) }
+        recipe.network = network.trimmingCharacters(in: .whitespaces)
+        recipe.restartPolicy = restartPolicy
+        recipe.cpus = cpus
+        recipe.memory = memory
+        recipe.workdir = workdir
+        recipe.user = user
+        recipe.tty = tty
+        recipe.interactive = interactive
+        recipe.autoRemove = autoRemove
+        recipe.detach = detach
+        if session.host.isAppleContainer {
+            recipe.dnsDomain = domain.trimmingCharacters(in: .whitespaces)
+            recipe.kernel = kernelPath.trimmingCharacters(in: .whitespaces)
+            recipe.kernelArgs = kernelArgs.map(\.value)
+        }
+        return recipe
+    }
+
+    /// Fills every field from `recipe`. An empty DNS domain keeps the
+    /// default domain the sheet picked.
+    private func apply(_ recipe: ContainerRecipe) {
+        image = recipe.image
+        name = recipe.name
+        command = ShellQuoting.join(recipe.command)
+        entrypoint = recipe.entrypoint
+        ports = recipe.ports.map { PortRow(hostIP: $0.hostIP, host: $0.host, container: $0.container, proto: $0.proto) }
+        env = recipe.env.map { EnvRow(key: $0.key, value: $0.value) }
+        envFiles = recipe.envFiles
+        binds = recipe.volumes.map { BindRow(host: $0.source, container: $0.target, readOnly: $0.readOnly) }
+        labels = recipe.labels.map { EnvRow(key: $0.key, value: $0.value) }
+        network = recipe.network
+        restartPolicy = ContainerRecipe.restartPolicies.contains(recipe.restartPolicy) ? recipe.restartPolicy : "no"
+        cpus = recipe.cpus
+        memory = recipe.memory
+        workdir = recipe.workdir
+        user = recipe.user
+        tty = recipe.tty
+        interactive = recipe.interactive
+        autoRemove = recipe.autoRemove
+        detach = recipe.detach
+        if !recipe.dnsDomain.isEmpty {
+            if !availableDomains.contains(recipe.dnsDomain) { availableDomains.append(recipe.dnsDomain) }
+            domain = recipe.dnsDomain
+        }
+        kernelPath = recipe.kernel
+        kernelArgs = recipe.kernelArgs.map { KernelArgRow(value: $0) }
+        errorText = nil
+        nameError = nil
     }
 
     // MARK: - Reusable editor list
@@ -383,65 +675,22 @@ struct CreateContainerSheet: View {
     }
 
     private func buildRequest() -> ContainerCreateRequest {
-        // `canCreate` blocks a command that does not parse.
-        let cmd: [String] = (try? parsedCommand.get()) ?? []
-
-        let envList: [String] = env
-            .filter { !$0.key.trimmingCharacters(in: .whitespaces).isEmpty }
-            .map { "\($0.key)=\($0.value)" }
-
-        let portMap = ContainerForm.portMap(portEntries)
-
-        let bindList: [String] = binds
-            .filter { !$0.host.isEmpty && !$0.container.isEmpty }
-            .map { $0.readOnly ? "\($0.host):\($0.container):ro" : "\($0.host):\($0.container)" }
-
-        let trimmedImage = image.trimmingCharacters(in: .whitespaces)
-        let trimmedDomain = domain.trimmingCharacters(in: .whitespaces)
-        // Record the domain as a label so the container's address view can show
-        // the resolvable hostname reliably later (matches Quick Run).
-        var labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
-
+        let recipe = currentRecipe
         // A DNS name needs a container name; auto-derive a unique one from the
         // image when a domain is assigned and the user left the name blank.
         let resolvedName: String?
         if !trimmedName.isEmpty {
             resolvedName = trimmedName
-        } else if !trimmedDomain.isEmpty {
-            resolvedName = session.uniqueContainerName(forImage: trimmedImage)
+        } else if session.host.isAppleContainer, !recipe.dnsDomain.isEmpty {
+            resolvedName = session.uniqueContainerName(forImage: recipe.image)
         } else {
             resolvedName = nil
         }
-
-        // Kernel options only exist on apple/container, and boot arguments only
-        // from 1.2 on — drop them rather than send a flag the CLI would reject.
-        let trimmedKernel = kernelPath.trimmingCharacters(in: .whitespaces)
-        let argList: [String] = (appleFeatures?.kernelArguments ?? true)
-            ? kernelArgs.map { $0.value.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-            : []
-        let appleOptions: ContainerCreateRequest.AppleOptions? = session.host.isAppleContainer
-            ? ContainerCreateRequest.AppleOptions(
-                kernel: trimmedKernel.isEmpty ? nil : trimmedKernel,
-                kernelArgs: argList
-            )
-            : nil
-        // Stamp the kernel options as labels too: inspect doesn't report them,
-        // so this is what lets a later recreate boot the same way.
-        labels.merge(appleOptions?.labels ?? [:]) { _, new in new }
-
-        return ContainerCreateRequest(
-            image: trimmedImage,
-            cmd: cmd.isEmpty ? nil : cmd,
-            env: envList,
-            ports: portMap,
-            binds: bindList,
-            restartPolicy: restartPolicy,
-            tty: tty,
-            labels: labels,
-            autoRemove: autoRemove,
-            domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
-            appleOptions: appleOptions,
-            name: resolvedName
+        // Boot arguments only exist from apple/container 1.2 on.
+        return recipe.createRequest(
+            name: resolvedName,
+            isAppleHost: session.host.isAppleContainer,
+            kernelArgsSupported: appleFeatures?.kernelArguments ?? true
         )
     }
 
@@ -540,6 +789,7 @@ enum PullStatusText {
 
 private struct PortRow: Identifiable {
     let id = UUID()
+    var hostIP = ""
     var host = ""
     var container = ""
     var proto = "tcp"

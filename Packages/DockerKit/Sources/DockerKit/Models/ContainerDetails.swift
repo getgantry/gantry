@@ -119,6 +119,9 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
         public var nanoCpus: Int64?
         public var privileged: Bool?
         public var autoRemove: Bool?
+        /// Requested port bindings keyed by `80/tcp`; set on stopped
+        /// containers too, unlike `NetworkSettings.Ports`.
+        public var portBindings: [String: [HostPort]?]?
 
         enum CodingKeys: String, CodingKey {
             case binds = "Binds"
@@ -128,6 +131,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             case nanoCpus = "NanoCpus"
             case privileged = "Privileged"
             case autoRemove = "AutoRemove"
+            case portBindings = "PortBindings"
         }
 
         public init() {}
@@ -141,6 +145,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             nanoCpus = try c.decodeIfPresent(Int64.self, forKey: .nanoCpus)
             privileged = try c.decodeIfPresent(Bool.self, forKey: .privileged)
             autoRemove = try c.decodeIfPresent(Bool.self, forKey: .autoRemove)
+            portBindings = try? c.decodeIfPresent([String: [HostPort]?].self, forKey: .portBindings)
         }
     }
 
@@ -165,6 +170,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
         public var tty: Bool
         public var workingDir: String?
         public var user: String?
+        public var openStdin: Bool
 
         enum CodingKeys: String, CodingKey {
             case hostname = "Hostname"
@@ -177,6 +183,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             case tty = "Tty"
             case workingDir = "WorkingDir"
             case user = "User"
+            case openStdin = "OpenStdin"
         }
 
         public init(from decoder: Decoder) throws {
@@ -191,6 +198,7 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             tty = try c.decodeIfPresent(Bool.self, forKey: .tty) ?? false
             workingDir = try c.decodeIfPresent(String.self, forKey: .workingDir)
             user = try c.decodeIfPresent(String.self, forKey: .user)
+            openStdin = try c.decodeIfPresent(Bool.self, forKey: .openStdin) ?? false
         }
     }
 

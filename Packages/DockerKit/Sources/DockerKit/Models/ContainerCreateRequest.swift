@@ -19,6 +19,10 @@ public struct ContainerCreateRequest: Encodable, Sendable {
     public var labels: [String: String]
     public var tty: Bool
     public var workingDir: String?
+    /// User (and optional group) the process runs as, `name|uid[:group|gid]`.
+    public var user: String?
+    /// Keeps stdin open (`docker run -i`).
+    public var openStdin: Bool?
     public var hostConfig: HostConfig?
     public var networkingConfig: NetworkingConfig?
     /// apple/container knobs that have no Docker equivalent. Only
@@ -41,6 +45,8 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         case labels = "Labels"
         case tty = "Tty"
         case workingDir = "WorkingDir"
+        case user = "User"
+        case openStdin = "OpenStdin"
         case hostConfig = "HostConfig"
         case networkingConfig = "NetworkingConfig"
         case appleOptions = "GantryAppleOptions"
