@@ -71,6 +71,7 @@ enum PaletteSource {
         var items = [PaletteCommand.addHost, .refreshAll, .settings].map { $0.item() }
         items.append(PaletteItem(kind: .section, title: String(localized: "Dashboard"), target: "dashboard",
                                  systemImage: "square.grid.2x2"))
+        items += PaletteCatalog.kubernetes(contexts: model.kubernetes.contexts)
         for session in model.sessions {
             items += hostItems(session)
         }
@@ -113,6 +114,8 @@ struct PaletteRunner {
     let model: AppModel
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
     let showDashboard: () -> Void
+    /// Opens the Kubernetes section, on the given context when not nil.
+    let showKubernetes: (String?) -> Void
     let showAddHost: () -> Void
     let openSettings: () -> Void
     let openHostTerminal: (UUID) -> Void
@@ -124,7 +127,13 @@ struct PaletteRunner {
             return
         }
         if item.kind == .section, item.hostID == nil {
-            showDashboard()
+            if item.target == PaletteCatalog.kubernetesTarget {
+                showKubernetes(nil)
+            } else if let context = PaletteCatalog.kubernetesContext(fromTarget: item.target) {
+                showKubernetes(context)
+            } else {
+                showDashboard()
+            }
             return
         }
         guard let hostID = item.hostID, let session = model.session(id: hostID) else { return }
