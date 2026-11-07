@@ -84,7 +84,7 @@ struct AppleSettingsView: View {
                 }
             }
         } header: {
-            Text("Services")
+            Text("System Services")
         } footer: {
             Text("The apple/container background services must be running for local containers to work.")
                 .font(.footnote)

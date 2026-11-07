@@ -524,7 +524,7 @@ enum ClusterKubeconfigPanel {
         let panel = NSSavePanel()
         panel.title = String(localized: "Write Kubeconfig")
         panel.message = String(localized: "The cluster context is added to this file. An existing file keeps its other contexts.")
-        panel.prompt = String(localized: "Write")
+        panel.prompt = String(localized: "Save")
         panel.nameFieldStringValue = suggested.lastPathComponent
         panel.canCreateDirectories = true
         let directory = suggested.deletingLastPathComponent()

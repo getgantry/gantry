@@ -178,50 +178,53 @@ struct AppleSystemOverviewPane: View {
         }
     }
 
+    /// A grid, so the label column takes the width of the longest label in
+    /// the current language instead of a fixed width that wraps.
     private var pathsCard: some View {
         AppleSystemCard(title: String(localized: "Paths"), systemImage: "folder") {
-            VStack(alignment: .leading, spacing: 8) {
+            Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 8) {
                 pathRow(String(localized: "Data"), status?.appRoot ?? AppleContainerControl.defaultAppRoot.path)
                 if let install = status?.installRoot { pathRow(String(localized: "Installation"), install) }
                 if let logs = status?.logRoot { pathRow(String(localized: "Logs"), logs) }
-                if let kernel {
-                    HStack(spacing: 8) {
-                        Text("Default kernel")
-                            .foregroundStyle(.secondary)
-                            .frame(width: 110, alignment: .leading)
-                        Text(kernel.kernelFile ?? String(localized: "Not installed"))
-                            .font(.system(.callout, design: .monospaced))
-                            .foregroundStyle(kernel.isInstalled ? Color.primary : Color.orange)
-                            .textSelection(.enabled)
-                        Spacer()
-                    }
-                    .font(.callout)
-                }
+                if let kernel { kernelRow(kernel) }
             }
+            .font(.callout)
+        }
+    }
+
+    private func kernelRow(_ kernel: AppleKernelInfo) -> some View {
+        GridRow {
+            Text("Default kernel")
+                .foregroundStyle(.secondary)
+            Text(kernel.kernelFile ?? String(localized: "Not installed"))
+                .font(.system(.callout, design: .monospaced))
+                .foregroundStyle(kernel.isInstalled ? Color.primary : Color.orange)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     private func pathRow(_ label: String, _ path: String) -> some View {
-        HStack(spacing: 8) {
+        GridRow {
             Text(label)
                 .foregroundStyle(.secondary)
-                .frame(width: 110, alignment: .leading)
-            Text(path)
-                .font(.system(.callout, design: .monospaced))
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .textSelection(.enabled)
-            Spacer()
-            Button {
-                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
-            } label: {
-                Image(systemName: "folder")
+            HStack(spacing: 8) {
+                Text(path)
+                    .font(.system(.callout, design: .monospaced))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+                Spacer()
+                Button {
+                    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
+                } label: {
+                    Image(systemName: "folder")
+                }
+                .buttonStyle(.borderless)
+                .help(String(localized: "Show in Finder"))
+                .accessibilityLabel(String(localized: "Show in Finder"))
             }
-            .buttonStyle(.borderless)
-            .help(String(localized: "Show in Finder"))
-            .accessibilityLabel(String(localized: "Show in Finder"))
         }
-        .font(.callout)
     }
 
     private func describe(_ component: AppleComponentVersion) -> String {

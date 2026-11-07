@@ -190,9 +190,9 @@ struct QuickRunSheet: View {
     private var portsSection: some View {
         Section {
             editorRows($ports, addLabel: "Add Port", empty: { PortRow() }) { $row in
-                TextField("Host", text: $row.host, prompt: Text("8080")).frame(width: 80)
+                portField("Host", text: $row.host, prompt: "8080")
                 Text(verbatim: ":").foregroundStyle(.secondary)
-                TextField("Container", text: $row.container, prompt: Text("80")).frame(width: 80)
+                portField("Container", text: $row.container, prompt: "80")
                 Picker("Protocol", selection: $row.proto) {
                     Text(verbatim: "tcp").tag("tcp")
                     Text(verbatim: "udp").tag("udp")
@@ -256,6 +256,17 @@ struct QuickRunSheet: View {
     }
 
     // MARK: - Reusable editor list
+
+    /// A port field with its label outside the fixed field width, so a long
+    /// label in another language does not wrap.
+    private func portField(_ label: LocalizedStringKey, text: Binding<String>, prompt: String) -> some View {
+        HStack(spacing: 6) {
+            Text(label).fixedSize()
+            TextField(label, text: text, prompt: Text(verbatim: prompt))
+                .labelsHidden()
+                .frame(width: 80)
+        }
+    }
 
     @ViewBuilder
     private func editorRows<Element: Identifiable, RowContent: View>(

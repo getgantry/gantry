@@ -66,7 +66,18 @@ struct AppleSystemView: View {
         .navigationTitle(String(localized: "System"))
     }
 
+    /// Segments when the titles fit; a pop-up menu in a narrow window or a
+    /// language with long titles, so the pane never gets wider than the window.
     private var paneSwitcher: some View {
+        ViewThatFits(in: .horizontal) {
+            panePicker.pickerStyle(.segmented)
+            panePicker.pickerStyle(.menu).fixedSize()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 10)
+    }
+
+    private var panePicker: some View {
         Picker(String(localized: "Pane"), selection: Binding(
             get: { pane },
             set: { selection = $0.rawValue }
@@ -75,10 +86,7 @@ struct AppleSystemView: View {
                 Label(pane.title, systemImage: pane.systemImage).tag(pane)
             }
         }
-        .pickerStyle(.segmented)
         .labelsHidden()
-        .padding(.horizontal)
-        .padding(.vertical, 10)
     }
 }
 
