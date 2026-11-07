@@ -40,6 +40,12 @@ enum PendingComposeOpens {
 /// App delegate handling file opens from Finder ("Open With → Gantry" and the
 /// `compose.yml` document type) and the Services / Quick Action provider.
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    /// The notification delegate must be in place before launch ends, so that
+    /// an action button that launched Gantry reaches it.
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        ContainerNotifier.shared.start()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Register the Services provider so the Finder Quick Action /
         // right-click → Services entry routes file URLs back to us.
@@ -51,7 +57,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// goes to the Build Image flow, anything else to Compose Up.
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
-            if DockerfileDetector.isDockerfile(url) {
+            if ControlRequestHandler.handles(url) {
+                ControlRequestHandler.handle(url)
+            } else if DockerfileDetector.isDockerfile(url) {
                 Self.openDockerfile(url)
             } else {
                 Self.openCompose(url)
