@@ -3,30 +3,32 @@ import Testing
 import DockerKit
 @testable import AppCore
 
-// Fixtures follow the shape of `kubectl get <kind> -o json` (kubectl 1.31),
+// Fixtures follow the shape of API list responses (Kubernetes 1.31),
 // trimmed to the fields the browser reads.
 
 private func json(_ text: String) -> Data { Data(text.utf8) }
 
 struct KubeConfigTests {
-    private let config = json("""
-    {
-      "kind": "Config",
-      "current-context": "docker-desktop",
-      "clusters": [
-        {"name": "docker-desktop", "cluster": {"server": "https://127.0.0.1:6443"}},
-        {"name": "dev", "cluster": {"server": "https://127.0.0.1:6445"}}
-      ],
-      "contexts": [
-        {"name": "docker-desktop", "context": {"cluster": "docker-desktop", "user": "docker-desktop"}},
-        {"name": "staging", "context": {"cluster": "staging", "user": "admin", "namespace": "web"}},
-        {"name": "dev", "context": {"cluster": "dev", "user": "dev"}}
-      ]
-    }
-    """)
+    private let config = """
+    apiVersion: v1
+    kind: Config
+    current-context: docker-desktop
+    clusters:
+    - name: docker-desktop
+      cluster: {server: "https://127.0.0.1:6443"}
+    - name: dev
+      cluster: {server: "https://127.0.0.1:6445"}
+    contexts:
+    - name: docker-desktop
+      context: {cluster: docker-desktop, user: docker-desktop}
+    - name: staging
+      context: {cluster: staging, user: admin, namespace: web}
+    - name: dev
+      context: {cluster: dev, user: dev}
+    """
 
     @Test func parsesContextsAppleFirst() throws {
-        let contexts = try KubeConfig.parseContexts(config, appleClusters: ["dev"])
+        let contexts = try KubeConfigFile(yaml: config, directory: "/k").contextList(appleClusters: ["dev"])
         #expect(contexts.map(\.name) == ["dev", "docker-desktop", "staging"])
         #expect(contexts[0].isAppleCluster)
         #expect(contexts[0].server == "https://127.0.0.1:6445")
@@ -36,7 +38,7 @@ struct KubeConfigTests {
     }
 
     @Test func preferredContextOrder() throws {
-        let contexts = try KubeConfig.parseContexts(config, appleClusters: ["dev"])
+        let contexts = try KubeConfigFile(yaml: config, directory: "/k").contextList(appleClusters: ["dev"])
         #expect(KubeConfig.preferredContext(contexts, remembered: "staging") == "staging")
         #expect(KubeConfig.preferredContext(contexts, remembered: "gone") == "docker-desktop")
         #expect(KubeConfig.preferredContext([], remembered: nil) == nil)
@@ -65,39 +67,6 @@ struct KubeConfigTests {
         let entries = ClusterKubeconfigStore.entries(file: file)
         #expect(entries.map(\.cluster) == ["b", "dev"])
         #expect(entries.map(\.path) == ["/k/b.yaml", "/k/dev.yaml"])
-    }
-}
-
-struct KubectlToolingTests {
-    @Test func findsOverrideThenKnownDirectoriesThenPath() {
-        let found = KubectlTooling.cliPath(
-            environment: ["PATH": "/custom/bin"], home: "/h",
-            isExecutable: { $0 == "/custom/bin/kubectl" }
-        )
-        #expect(found == "/custom/bin/kubectl")
-
-        let brew = KubectlTooling.cliPath(
-            environment: ["PATH": "/custom/bin"], home: "/h",
-            isExecutable: { $0 == "/custom/bin/kubectl" || $0 == "/opt/homebrew/bin/kubectl" }
-        )
-        #expect(brew == "/opt/homebrew/bin/kubectl")
-
-        let rancher = KubectlTooling.cliPath(environment: [:], home: "/h", isExecutable: { $0 == "/h/.rd/bin/kubectl" })
-        #expect(rancher == "/h/.rd/bin/kubectl")
-
-        let override = KubectlTooling.cliPath(
-            environment: ["GANTRY_KUBECTL": "/x/kubectl"], home: "/h", isExecutable: { _ in true }
-        )
-        #expect(override == "/x/kubectl")
-        #expect(KubectlTooling.cliPath(environment: [:], home: "/h", isExecutable: { _ in false }) == nil)
-    }
-
-    @Test func lineSplitterKeepsPartialLines() {
-        let splitter = KubeLineSplitter()
-        #expect(splitter.feed(Data("one\ntw".utf8)) == ["one"])
-        #expect(splitter.feed(Data("o\r\nthree".utf8)) == ["two"])
-        #expect(splitter.flush() == ["three"])
-        #expect(splitter.flush().isEmpty)
     }
 }
 
@@ -316,137 +285,5 @@ struct KubeSecretDataTests {
         #expect(yaml.contains("team: core"))
         #expect(yaml.contains("immutable: false"))
         #expect(yaml.contains("kind: Secret"))
-    }
-}
-
-struct KubectlClientTests {
-    private let client = KubectlClient(executable: "/bin/kubectl", kubeconfigPaths: ["/a", "/b"], context: "dev")
-    private let pod = KubeResource(kind: .pods, name: "web-1", namespace: "default", containers: ["app"])
-    private let deployment = KubeResource(kind: .deployments, name: "api", namespace: "web")
-
-    @Test func environmentJoinsKubeconfigs() {
-        #expect(client.environment["KUBECONFIG"] == "/a:/b")
-        #expect(client.environment["PATH"]?.hasPrefix("/bin:/opt/homebrew/bin:/usr/local/bin") == true)
-        #expect(client.environmentEntries.first == "KUBECONFIG=/a:/b")
-        #expect(KubectlClient(executable: "k", kubeconfigPaths: [], context: nil).environment["KUBECONFIG"] == nil)
-    }
-
-    @Test func listArguments() {
-        #expect(client.listArguments(.pods, namespace: nil)
-            == ["--context", "dev", "get", "pods", "--output", "json", "--request-timeout", "15s", "--all-namespaces"])
-        #expect(client.listArguments(.pods, namespace: "web").suffix(2) == ["--namespace", "web"])
-        #expect(!client.listArguments(.nodes, namespace: "web").contains("--namespace"))
-        #expect(!client.listArguments(.nodes, namespace: nil).contains("--all-namespaces"))
-    }
-
-    @Test func actionArguments() {
-        #expect(client.deleteArguments(deployment)
-            == ["--context", "dev", "--namespace", "web", "delete", "deployment/api", "--wait=false"])
-        #expect(client.scaleArguments(deployment, replicas: 4).suffix(4) == ["scale", "deployment/api", "--replicas", "4"])
-        #expect(client.scaleArguments(deployment, replicas: -1).last == "0")
-        #expect(client.restartArguments(deployment).suffix(3) == ["rollout", "restart", "deployment/api"])
-        #expect(client.applyArguments(namespace: nil) == ["--context", "dev", "apply", "--filename", "-"])
-        #expect(client.getArguments(pod, output: "yaml").contains("pod/web-1"))
-    }
-
-    @Test func streamingArguments() {
-        #expect(client.logsArguments(pod: pod, container: "app", follow: true, tail: 200)
-            == ["--context", "dev", "--namespace", "default", "logs", "web-1", "--container", "app",
-                "--follow", "--tail", "200", "--timestamps=false"])
-        let exec = client.execArguments(pod: pod, container: "app")
-        #expect(exec.prefix(8) == ["--context", "dev", "--namespace", "default", "exec", "--stdin", "--tty", "web-1"])
-        #expect(exec.contains("--"))
-        #expect(client.portForwardArguments(pod, localPort: 8080, remotePort: 80).suffix(4)
-            == ["--address", "127.0.0.1", "pod/web-1", "8080:80"])
-        #expect(client.portForwardArguments(pod, localPort: 0, remotePort: 80).last == ":80")
-    }
-
-    @Test func errorMessageDropsPrefix() {
-        let exit = ChildProcessExit(status: 1, signaled: false)
-        #expect(KubectlError.from(stderr: Data("error: context \"x\" does not exist\n".utf8), exit: exit)
-            == .failed("context \"x\" does not exist"))
-        #expect(KubectlError.from(stderr: Data("Error from server (NotFound): pods \"a\" not found".utf8), exit: exit)
-            == .failed("(NotFound): pods \"a\" not found"))
-    }
-
-    @Test func parsesPortForwardOutput() {
-        #expect(KubePortForward.parseLocalPort("Forwarding from 127.0.0.1:8080 -> 80") == 8080)
-        #expect(KubePortForward.parseLocalPort("Forwarding from [::1]:54321 -> 80") == 54321)
-        #expect(KubePortForward.parseLocalPort("Handling connection for 8080") == nil)
-    }
-}
-
-/// Runs the client against a shell script that stands in for kubectl.
-@MainActor
-struct KubernetesBrowserTests {
-    private func fakeKubectl(_ body: String) throws -> String {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("kubectl-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let path = dir.appendingPathComponent("kubectl").path
-        try ("#!/bin/sh\n" + body).write(toFile: path, atomically: true, encoding: .utf8)
-        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: path)
-        return path
-    }
-
-    private let script = #"""
-    case "$*" in
-      "config view --output json")
-        echo '{"current-context":"dev","contexts":[{"name":"dev","context":{"cluster":"dev","namespace":"web"}}]}' ;;
-      *"get namespaces"*) echo '{"items":[{"metadata":{"name":"web"}}]}' ;;
-      *"get pods"*) echo '{"items":[{"metadata":{"name":"p","namespace":"web","uid":"1"},"spec":{"containers":[]},"status":{"phase":"Running"}}]}' ;;
-      *"get deployments"*) echo 'error: the server is gone' >&2; exit 1 ;;
-      *) exit 2 ;;
-    esac
-    """#
-
-    @Test func loadsContextsAndResources() async throws {
-        let path = try fakeKubectl(script)
-        let defaults = UserDefaults(suiteName: "kube-\(UUID().uuidString)")!
-        let browser = KubernetesBrowser(defaults: defaults, locate: { path }, kubeconfigPaths: { [] })
-        await browser.prepare()
-        #expect(browser.availability == .ready(path))
-        #expect(browser.selectedContext == "dev")
-        #expect(browser.namespace == "web")
-        await browser.reload()
-        #expect(browser.namespaces == ["web"])
-        #expect(browser.resources.map(\.name) == ["p"])
-        #expect(browser.loadError == nil)
-
-        browser.kind = .deployments
-        #expect(browser.resources.isEmpty)
-        await browser.reload()
-        #expect(browser.loadError == "the server is gone")
-    }
-
-    @Test func missingKubectl() async {
-        let browser = KubernetesBrowser(defaults: UserDefaults(suiteName: "kube-\(UUID().uuidString)")!, locate: { nil })
-        await browser.prepare()
-        #expect(browser.availability == .missing)
-        #expect(browser.client == nil)
-    }
-
-    @Test func logStreamCollectsLines() async throws {
-        let path = try fakeKubectl("printf 'a\\nb\\nc'\n")
-        let stream = KubeLogStream(lineLimit: 2)
-        let client = KubectlClient(executable: path, kubeconfigPaths: [], context: "dev")
-        stream.start(client, pod: KubeResource(kind: .pods, name: "p", namespace: "web"), container: nil, follow: false)
-        for _ in 0..<100 where stream.isRunning { try await Task.sleep(for: .milliseconds(20)) }
-        try await Task.sleep(for: .milliseconds(50))
-        #expect(stream.lines == ["b", "c"])
-        #expect(stream.failure == nil)
-    }
-
-    @Test func portForwardBecomesActiveAndStops() async throws {
-        let path = try fakeKubectl("echo 'Forwarding from 127.0.0.1:41234 -> 80'\nexec sleep 30\n")
-        let forwards = KubePortForwards()
-        let client = KubectlClient(executable: path, kubeconfigPaths: [], context: "dev")
-        let id = forwards.start(client, resource: KubeResource(kind: .services, name: "web", namespace: "web"), localPort: 0, remotePort: 80)
-        for _ in 0..<100 where forwards.forwards.first?.state != .active { try await Task.sleep(for: .milliseconds(20)) }
-        #expect(forwards.forwards.first?.state == .active)
-        #expect(forwards.forwards.first?.localPort == 41234)
-        #expect(forwards.forwards.first?.target == "service/web")
-        #expect(forwards.activeCount == 1)
-        forwards.stop(id)
-        #expect(forwards.forwards.isEmpty)
     }
 }
