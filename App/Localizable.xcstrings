@@ -234365,6 +234365,156 @@
           }
         }
       }
+    },
+    "Recreate the image builder?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate the image builder?"
+          }
+        }
+      }
+    },
+    "Recreate Builder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate Builder"
+          }
+        }
+      }
+    },
+    "The builder container and its build cache are removed. A new builder starts with the image from the build.image property.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The builder container and its build cache are removed. A new builder starts with the image from the build.image property."
+          }
+        }
+      }
+    },
+    "Builder image is outdated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder image is outdated"
+          }
+        }
+      }
+    },
+    "The builder runs image %@. The build.image property names %@. Recreate the builder to use the new image.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The builder runs image %@. The build.image property names %@. Recreate the builder to use the new image."
+          }
+        }
+      }
+    },
+    "Recreate Builder…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate Builder…"
+          }
+        }
+      }
+    },
+    "DNS defaults for new containers and the builder. The --dns, --dns-search, --dns-option and --dns-domain options override them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS defaults for new containers and the builder. The --dns, --dns-search, --dns-option and --dns-domain options override them."
+          }
+        }
+      }
+    },
+    "DNS domain for container host names": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domain for container host names"
+          }
+        }
+      }
+    },
+    "DNS servers, for example 1.1.1.1": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS servers, for example 1.1.1.1"
+          }
+        }
+      }
+    },
+    "DNS search domains": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS search domains"
+          }
+        }
+      }
+    },
+    "Resolver options, for example ndots:2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolver options, for example ndots:2"
+          }
+        }
+      }
+    },
+    "Add Item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Item"
+          }
+        }
+      }
+    },
+    "Item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item"
+          }
+        }
+      }
+    },
+    "Remove Item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Item"
+          }
+        }
+      }
+    },
+    "Gantry writes the list to ~/.config/container/config.toml. An empty list removes the key. Restart the services to apply it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry writes the list to ~/.config/container/config.toml. An empty list removes the key. Restart the services to apply it."
+          }
+        }
+      }
     }
   }
 }

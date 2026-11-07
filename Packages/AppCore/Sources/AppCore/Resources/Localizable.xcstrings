@@ -47787,6 +47787,86 @@
           }
         }
       }
+    },
+    "The cluster services are not installed or not running.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cluster services are not installed or not running."
+          }
+        }
+      }
+    },
+    "This Homebrew build of container %@ lacks the cluster services. Install the signed package from github.com/apple/container/releases.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Homebrew build of container %@ lacks the cluster services. Install the signed package from github.com/apple/container/releases."
+          }
+        }
+      }
+    },
+    "This installation of container lacks the cluster services. Install the signed package from github.com/apple/container/releases.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This installation of container lacks the cluster services. Install the signed package from github.com/apple/container/releases."
+          }
+        }
+      }
+    },
+    "Restart the apple/container services, then try again. After an upgrade, a restart loads the new cluster service.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart the apple/container services, then try again. After an upgrade, a restart loads the new cluster service."
+          }
+        }
+      }
+    },
+    "“%@” is in the list two times.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is in the list two times."
+          }
+        }
+      }
+    },
+    "“%@” cannot contain spaces or commas.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” cannot contain spaces or commas."
+          }
+        }
+      }
+    },
+    "“%@” is not an IP address. Enter an address such as 1.1.1.1.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not an IP address. Enter an address such as 1.1.1.1."
+          }
+        }
+      }
+    },
+    "“%@” is not a domain name. Use letters, digits, dots and hyphens.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a domain name. Use letters, digits, dots and hyphens."
+          }
+        }
+      }
     }
   }
 }
