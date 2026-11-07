@@ -25951,6 +25951,178 @@
           }
         }
       }
+    },
+    "This container is a node of the Kubernetes cluster “%@”. Start, stop and remove the cluster in Clusters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This container is a node of the Kubernetes cluster “%@”. Start, stop and remove the cluster in Clusters."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Container ist ein Node des Kubernetes-Clusters „%@“. Starte, stoppe und entferne den Cluster unter „Cluster“."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce conteneur est un nœud du cluster Kubernetes « %@ ». Démarrez, arrêtez et supprimez le cluster dans Clusters."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este contenedor es un nodo del clúster de Kubernetes “%@”. Inicia, detén y elimina el clúster en Clústeres."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo container è un nodo del cluster Kubernetes “%@”. Avvia, arresta e rimuovi il cluster in Cluster."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este contentor é um nó do cluster Kubernetes “%@”. Inicie, pare e remova o cluster em Clusters."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze container is een node van het Kubernetes-cluster “%@”. Start, stop en verwijder het cluster in Clusters."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här containern är en nod i Kubernetes-klustret ”%@”. Starta, stoppa och ta bort klustret under Kluster."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne container er en node i Kubernetes-klyngen “%@”. Start, stop og fjern klyngen under Klynger."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne containeren er en node i Kubernetes-klyngen «%@». Start, stopp og fjern klyngen under Klynger."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä kontti on Kubernetes-klusterin ”%@” solmu. Käynnistä, pysäytä ja poista klusteri Klusterit-osiossa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten kontener jest węzłem klastra Kubernetes „%@”. Uruchamiaj, zatrzymuj i usuwaj klaster w sekcji Klastry."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento kontejner je uzlem clusteru Kubernetes „%@“. Cluster spouštějte, zastavujte a odstraňujte v sekci Clustery."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento kontajner je uzlom klastra Kubernetes „%@“. Klaster spúšťajte, zastavujte a odstraňujte v sekcii Klastre."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a konténer a(z) „%@” Kubernetes-klaszter egyik csomópontja. A klasztert a Klaszterek nézetben indíthatja el, állíthatja le és távolíthatja el."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest container este un nod al clusterului Kubernetes „%@”. Porniți, opriți și eliminați clusterul în Clustere."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Този контейнер е възел на клъстера на Kubernetes „%@“. Стартирайте, спирайте и премахвайте клъстера в раздела „Клъстери“."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτό το κοντέινερ είναι κόμβος του cluster Kubernetes «%@». Η έναρξη, η διακοπή και η αφαίρεση του cluster γίνονται στην ενότητα «Cluster»."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj kontejner je čvor Kubernetes klastera „%@”. Klaster pokrenite, zaustavite i uklonite u odjeljku Klasteri."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta vsebnik je vozlišče gruče Kubernetes „%@“. Gručo zaženite, ustavite in odstranite v razdelku Gruče."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Овај контејнер је чвор Kubernetes кластера „%@“. Кластер покрените, зауставите и уклоните у одељку Кластери."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj kontejner je čvor Kubernetes klastera „%@“. Klaster pokrenite, zaustavite i uklonite u odeljku Klasteri."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis konteineris yra Kubernetes klasterio „%@“ mazgas. Klasterį paleiskite, sustabdykite ir pašalinkite skyriuje „Klasteriai“."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis konteiners ir Kubernetes klastera „%@” mezgls. Startējiet, apturiet un noņemiet klasteri sadaļā Klasteri."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See konteiner on Kubernetese klastri „%@“ sõlm. Käivitage, peatage ja eemaldage klaster jaotises Klastrid."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей контейнер — вузол кластера Kubernetes «%@». Запускайте, зупиняйте та видаляйте кластер у розділі «Кластери»."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот контейнер — узел кластера Kubernetes «%@». Запускайте, останавливайте и удаляйте кластер в разделе «Кластеры»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此容器是 Kubernetes 集群“%@”的节点。请在“集群”中启动、停止和移除该集群。"
+          }
+        }
+      }
     }
   }
 }
