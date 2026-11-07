@@ -34295,6 +34295,5806 @@
           }
         }
       }
+    },
+    "Gantry cannot read the saved recipes file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry cannot read the saved recipes file."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kann die Datei mit den gesicherten Rezepten nicht lesen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne peut pas lire le fichier des modèles enregistrés."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no puede leer el archivo de recetas guardadas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non riesce a leggere il file delle ricette salvate."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não consegue ler o ficheiro de receitas guardadas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan het bestand met bewaarde recepten niet lezen."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan inte läsa filen med sparade recept."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan ikke læse filen med gemte opskrifter."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan ikke lese filen med lagrede oppskrifter."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei voi lukea tallennettujen reseptien tiedostoa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie może odczytać pliku zapisanych przepisów."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemůže přečíst soubor uložených receptů."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemôže prečítať súbor uložených receptov."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem tudja beolvasni a mentett receptek fájlját."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu poate citi fișierul cu rețetele salvate."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не може да прочете файла със запазените рецепти."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν μπορεί να διαβάσει το αρχείο των αποθηκευμένων συνταγών."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne može pročitati datoteku spremljenih recepata."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne more prebrati datoteke s shranjenimi recepti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не може да прочита датотеку сачуваних рецепата."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne može da pročita datoteku sačuvanih recepata."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry negali perskaityti įrašytų receptų failo."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nevar nolasīt saglabāto recepšu failu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei saa lugeda salvestatud retseptide faili."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не вдається прочитати файл збережених шаблонів."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не удаётся прочитать файл сохранённых шаблонов."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 无法读取已保存的预设文件。"
+          }
+        }
+      }
+    },
+    "Gantry cannot save the recipes file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry cannot save the recipes file."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kann die Rezeptdatei nicht sichern."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne peut pas enregistrer le fichier des modèles."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no puede guardar el archivo de recetas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non riesce a salvare il file delle ricette."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não consegue guardar o ficheiro de receitas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan het receptenbestand niet bewaren."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan inte spara receptfilen."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan ikke gemme opskriftsfilen."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan ikke lagre oppskriftsfilen."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei voi tallentaa reseptitiedostoa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie może zapisać pliku przepisów."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemůže uložit soubor receptů."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemôže uložiť súbor receptov."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem tudja menteni a receptek fájlját."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu poate salva fișierul cu rețete."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не може да запази файла с рецептите."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν μπορεί να αποθηκεύσει το αρχείο των συνταγών."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne može spremiti datoteku recepata."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne more shraniti datoteke z recepti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не може да сачува датотеку рецепата."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne može da sačuva datoteku recepata."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry negali įrašyti receptų failo."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nevar saglabāt recepšu failu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei saa retseptide faili salvestada."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не вдається зберегти файл шаблонів."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не удаётся сохранить файл шаблонов."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 无法保存预设文件。"
+          }
+        }
+      }
+    },
+    "This port mapping is not valid or not supported.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This port mapping is not valid or not supported."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Portzuordnung ist ungültig oder wird nicht unterstützt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce mappage de port n'est pas valide ou n'est pas pris en charge."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta asignación de puertos no es válida o no es compatible."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa mappatura delle porte non è valida o non è supportata."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este mapeamento de portas não é válido ou não é suportado."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze poorttoewijzing is ongeldig of wordt niet ondersteund."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här portmappningen är ogiltig eller stöds inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne porttilknytning er ugyldig eller understøttes ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne porttilordningen er ugyldig eller støttes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä porttimääritys ei kelpaa tai sitä ei tueta."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To mapowanie portu jest nieprawidłowe lub nieobsługiwane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toto mapování portu je neplatné nebo nepodporované."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toto mapovanie portu je neplatné alebo nepodporované."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a portleképezés érvénytelen vagy nem támogatott."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Această mapare de porturi nu este validă sau nu este acceptată."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Това съпоставяне на порт е невалидно или не се поддържа."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτή η αντιστοίχιση θυρών δεν είναι έγκυρη ή δεν υποστηρίζεται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovo mapiranje porta nije valjano ili nije podržano."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta preslikava vrat ni veljavna ali ni podprta."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ово мапирање порта није исправно или није подржано."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovo mapiranje porta nije ispravno ili nije podržano."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis prievadų susiejimas netinkamas arba nepalaikomas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis portu kartējums nav derīgs vai netiek atbalstīts."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See pordivastendus pole kehtiv või pole toetatud."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це зіставлення портів неправильне або не підтримується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это сопоставление портов указано неверно или не поддерживается."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此端口映射无效或不受支持。"
+          }
+        }
+      }
+    },
+    "%@ takes its value from your shell. Enter the value in the form.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ takes its value from your shell. Enter the value in the form."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ übernimmt den Wert aus deiner Shell. Gib den Wert im Formular ein."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ prend sa valeur dans votre shell. Saisissez la valeur dans le formulaire."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ toma su valor de tu shell. Introduce el valor en el formulario."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ prende il valore dalla tua shell. Inserisci il valore nel modulo."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ obtém o valor a partir da sua shell. Introduza o valor no formulário."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ haalt de waarde uit je shell. Voer de waarde in het formulier in."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hämtar sitt värde från ditt skal. Ange värdet i formuläret."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ henter sin værdi fra din shell. Angiv værdien i formularen."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ henter verdien fra skallet ditt. Skriv inn verdien i skjemaet."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ saa arvonsa komentotulkista. Syötä arvo lomakkeeseen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wartość %@ pochodzi z powłoki. Wprowadź wartość w formularzu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ přebírá hodnotu z vašeho shellu. Zadejte hodnotu do formuláře."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ preberá hodnotu z vášho shellu. Zadajte hodnotu vo formulári."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) %@ értéke a shellből származik. Adja meg az értéket az űrlapon."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ își ia valoarea din shellul dvs. Introduceți valoarea în formular."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ взема стойността си от вашата обвивка. Въведете стойността във формуляра."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η μεταβλητή %@ παίρνει την τιμή της από το shell σας. Εισαγάγετε την τιμή στη φόρμα."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ preuzima vrijednost iz vaše ljuske. Unesite vrijednost u obrazac."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ dobi vrednost iz vaše lupine. Vrednost vnesite v obrazec."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ узима вредност из ваше љуске. Унесите вредност у образац."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ uzima vrednost iz vaše ljuske. Unesite vrednost u obrazac."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ reikšmę gauna iš jūsų apvalkalo. Įveskite reikšmę formoje."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vērtību iegūst no jūsu čaulas. Ievadiet vērtību veidlapā."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ võtab väärtuse teie shellist. Sisestage väärtus vormi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ бере значення з вашої оболонки. Введіть значення у формі."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ берёт значение из вашей оболочки. Введите значение в форме."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的值来自你的 Shell。请在表单中输入该值。"
+          }
+        }
+      }
+    },
+    "The volume option “%@” is not used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The volume option “%@” is not used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Volume-Option „%@“ wird nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'option de volume « %@ » n'est pas utilisée."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La opción de volumen “%@” no se usa."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'opzione del volume “%@” non viene usata."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A opção de volume “%@” não é utilizada."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De volume-optie “%@” wordt niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volymalternativet ”%@” används inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume-indstillingen “%@” bruges ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumalternativet «%@» brukes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taltion asetusta ”%@” ei käytetä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcja woluminu „%@” nie jest używana."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost svazku „%@“ se nepoužije."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosť zväzku „%@“ sa nepoužije."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” kötetbeállítás figyelmen kívül marad."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunea de volum „%@” nu este folosită."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опцията за том „%@“ не се използва."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η επιλογή τόμου «%@» δεν χρησιμοποιείται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija volumena „%@” se ne koristi."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost nosilca „%@“ se ne uporabi."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опција волумена „%@“ се не користи."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija volumena „%@“ se ne koristi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomo parinktis „%@“ nenaudojama."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sējuma opcija „%@” netiek izmantota."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Köite valikut „%@“ ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметр тому «%@» не використовується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметр тома «%@» не используется."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未使用卷选项“%@”。"
+          }
+        }
+      }
+    },
+    "Anonymous volumes are not supported. Give a host path or a volume name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymous volumes are not supported. Give a host path or a volume name."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyme Volumes werden nicht unterstützt. Gib einen Host-Pfad oder einen Volume-Namen an."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les volumes anonymes ne sont pas pris en charge. Indiquez un chemin sur l'hôte ou un nom de volume."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los volúmenes anónimos no son compatibles. Indica una ruta del host o un nombre de volumen."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I volumi anonimi non sono supportati. Indica un percorso dell'host o il nome di un volume."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os volumes anónimos não são suportados. Indique um caminho do host ou um nome de volume."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonieme volumes worden niet ondersteund. Geef een hostpad of een volumenaam op."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyma volymer stöds inte. Ange en sökväg på värden eller ett volymnamn."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyme volumes understøttes ikke. Angiv en sti på værten eller et volume-navn."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyme volumer støttes ikke. Oppgi en bane på verten eller et volumnavn."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimettömiä taltioita ei tueta. Anna isännän polku tai taltion nimi."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimowe woluminy nie są obsługiwane. Podaj ścieżkę na hoście lub nazwę woluminu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymní svazky nejsou podporovány. Zadejte cestu na hostiteli nebo název svazku."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymné zväzky nie sú podporované. Zadajte cestu na hostiteľovi alebo názov zväzku."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A névtelen kötetek nem támogatottak. Adjon meg egy gazdagépen lévő útvonalat vagy egy kötetnevet."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumele anonime nu sunt acceptate. Indicați o cale de pe gazdă sau un nume de volum."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимните томове не се поддържат. Задайте път на хоста или име на том."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι ανώνυμοι τόμοι δεν υποστηρίζονται. Δώστε μια διαδρομή του host ή ένα όνομα τόμου."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni volumeni nisu podržani. Navedite putanju na hostu ili naziv volumena."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni nosilci niso podprti. Navedite pot na gostitelju ali ime nosilca."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимни волумени нису подржани. Наведите путању на хосту или име волумена."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni volumeni nisu podržani. Navedite putanju na hostu ili ime volumena."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anoniminiai tomai nepalaikomi. Nurodykite kelią serveryje arba tomo pavadinimą."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonīmi sējumi netiek atbalstīti. Norādiet ceļu resursdatorā vai sējuma nosaukumu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonüümsed köited pole toetatud. Sisestage hosti tee või köite nimi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонімні томи не підтримуються. Укажіть шлях на хості або назву тому."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимные тома не поддерживаются. Укажите путь на хосте или имя тома."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不支持匿名卷。请提供主机路径或卷名称。"
+          }
+        }
+      }
+    },
+    "This volume is not valid.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This volume is not valid."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Volume ist ungültig."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce volume n'est pas valide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este volumen no es válido."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo volume non è valido."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este volume não é válido."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit volume is ongeldig."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här volymen är ogiltig."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dette volume er ugyldigt."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dette volumet er ugyldig."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä taltio ei kelpaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten wolumin jest nieprawidłowy."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento svazek je neplatný."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento zväzok je neplatný."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a kötet érvénytelen."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest volum nu este valid."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Този том е невалиден."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτός ο τόμος δεν είναι έγκυρος."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj volumen nije valjan."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta nosilec ni veljaven."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Овај волумен није исправан."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj volumen nije ispravan."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis tomas netinkamas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis sējums nav derīgs."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See köide pole kehtiv."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей том указано неправильно."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот том указан неверно."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此卷无效。"
+          }
+        }
+      }
+    },
+    "The mount option “%@” is not used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The mount option “%@” is not used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Mount-Option „%@“ wird nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'option de montage « %@ » n'est pas utilisée."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La opción de montaje “%@” no se usa."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'opzione di montaggio “%@” non viene usata."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A opção de montagem “%@” não é utilizada."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De koppeloptie “%@” wordt niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monteringsalternativet ”%@” används inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mount-indstillingen “%@” bruges ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monteringsalternativet «%@» brukes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liitoksen asetusta ”%@” ei käytetä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcja montowania „%@” nie jest używana."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost připojení „%@“ se nepoužije."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosť pripojenia „%@“ sa nepoužije."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” csatolási beállítás figyelmen kívül marad."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunea de montare „%@” nu este folosită."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опцията за монтиране „%@“ не се използва."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η επιλογή προσάρτησης «%@» δεν χρησιμοποιείται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija montiranja „%@” se ne koristi."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost priklopa „%@“ se ne uporabi."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опција монтирања „%@“ се не користи."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija montiranja „%@“ se ne koristi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prijungimo parinktis „%@“ nenaudojama."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montējuma opcija „%@” netiek izmantota."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haakimise valikut „%@“ ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметр монтування «%@» не використовується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметр монтирования «%@» не используется."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未使用挂载选项“%@”。"
+          }
+        }
+      }
+    },
+    "Mounts of type “%@” are not supported.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mounts of type “%@” are not supported."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mounts vom Typ „%@“ werden nicht unterstützt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les montages de type « %@ » ne sont pas pris en charge."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los montajes de tipo “%@” no son compatibles."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I montaggi di tipo “%@” non sono supportati."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As montagens do tipo “%@” não são suportadas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koppelingen van het type “%@” worden niet ondersteund."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monteringar av typen ”%@” stöds inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mounts af typen “%@” understøttes ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monteringer av typen «%@» støttes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tyypin ”%@” liitoksia ei tueta."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montowania typu „%@” nie są obsługiwane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Připojení typu „%@“ nejsou podporována."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pripojenia typu „%@“ nie sú podporované."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” típusú csatolások nem támogatottak."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montările de tip „%@” nu sunt acceptate."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Монтиранията от тип „%@“ не се поддържат."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι προσαρτήσεις τύπου «%@» δεν υποστηρίζονται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montiranja vrste „%@” nisu podržana."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Priklopi vrste „%@“ niso podprti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Монтирања типа „%@“ нису подржана."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montiranja tipa „%@“ nisu podržana."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ tipo prijungimai nepalaikomi."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Montējumi ar tipu „%@” netiek atbalstīti."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haakimisi tüübiga „%@“ ei toetata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Монтування типу «%@» не підтримується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Монтирование типа «%@» не поддерживается."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不支持“%@”类型的挂载。"
+          }
+        }
+      }
+    },
+    "Only one network is supported. The first network is used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only one network is supported. The first network is used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur ein Netzwerk wird unterstützt. Das erste Netzwerk wird verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un seul réseau est pris en charge. Le premier réseau est utilisé."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo se admite una red. Se usa la primera red."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "È supportata una sola rete. Viene usata la prima rete."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só é suportada uma rede. É utilizada a primeira rede."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er wordt maar één netwerk ondersteund. Het eerste netwerk wordt gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bara ett nätverk stöds. Det första nätverket används."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun ét netværk understøttes. Det første netværk bruges."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare ett nettverk støttes. Det første nettverket brukes."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vain yhtä verkkoa tuetaan. Ensimmäistä verkkoa käytetään."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obsługiwana jest tylko jedna sieć. Używana jest pierwsza sieć."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podporována je jen jedna síť. Použije se první síť."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podporovaná je iba jedna sieť. Použije sa prvá sieť."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csak egy hálózat támogatott. A Gantry az első hálózatot használja."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este acceptată o singură rețea. Se folosește prima rețea."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поддържа се само една мрежа. Използва се първата мрежа."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Υποστηρίζεται μόνο ένα δίκτυο. Χρησιμοποιείται το πρώτο δίκτυο."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podržana je samo jedna mreža. Koristi se prva mreža."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podprto je samo eno omrežje. Uporabi se prvo omrežje."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подржана је само једна мрежа. Користи се прва мрежа."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podržana je samo jedna mreža. Koristi se prva mreža."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Palaikomas tik vienas tinklas. Naudojamas pirmasis tinklas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiek atbalstīts tikai viens tīkls. Tiek izmantots pirmais tīkls."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toetatud on ainult üks võrk. Kasutatakse esimest võrku."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримується лише одна мережа. Використовується перша."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поддерживается только одна сеть. Используется первая."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅支持一个网络。将使用第一个网络。"
+          }
+        }
+      }
+    },
+    "Network options after the name are not used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network options after the name are not used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzwerkoptionen nach dem Namen werden nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les options de réseau placées après le nom ne sont pas utilisées."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las opciones de red que van después del nombre no se usan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le opzioni di rete dopo il nome non vengono usate."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As opções de rede após o nome não são utilizadas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netwerkopties na de naam worden niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nätverksalternativ efter namnet används inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netværksindstillinger efter navnet bruges ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nettverksalternativer etter navnet brukes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimen jälkeisiä verkkoasetuksia ei käytetä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje sieci podane po nazwie nie są używane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti sítě uvedené za názvem se nepoužijí."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti siete uvedené za názvom sa nepoužijú."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A név utáni hálózati beállítások figyelmen kívül maradnak."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunile de rețea de după nume nu sunt folosite."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опциите на мрежата след името не се използват."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι επιλογές δικτύου μετά το όνομα δεν χρησιμοποιούνται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije mreže nakon naziva se ne koriste."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti omrežja za imenom se ne uporabijo."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опције мреже после имена се не користе."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije mreže posle imena se ne koriste."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tinklo parinktys po pavadinimo nenaudojamos."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tīkla opcijas pēc nosaukuma netiek izmantotas."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Võrgu valikuid pärast nime ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметри мережі після назви не використовуються."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметры сети после имени не используются."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称后的网络选项不会被使用。"
+          }
+        }
+      }
+    },
+    "The retry count %@ is not used. The policy restarts without a limit.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The retry count %@ is not used. The policy restarts without a limit."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Anzahl der Wiederholungen %@ wird nicht verwendet. Die Richtlinie startet ohne Limit neu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nombre de tentatives %@ n'est pas utilisé. La politique redémarre sans limite."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El número de reintentos %@ no se usa. La política reinicia sin límite."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il numero di tentativi %@ non viene usato. Il criterio riavvia senza limiti."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O número de tentativas %@ não é utilizado. A política reinicia sem limite."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het aantal pogingen %@ wordt niet gebruikt. Het beleid herstart zonder limiet."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antalet försök %@ används inte. Policyn startar om utan gräns."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antallet genforsøg %@ bruges ikke. Politikken genstarter uden grænse."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antall forsøk %@ brukes ikke. Regelen starter på nytt uten grense."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uusintakertojen määrää %@ ei käytetä. Käytäntö käynnistää uudelleen rajatta."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liczba ponownych prób %@ nie jest używana. Zasady uruchamiają ponownie bez limitu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Počet opakování %@ se nepoužije. Zásada restartuje bez omezení."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Počet opakovaní %@ sa nepoužije. Politika reštartuje bez obmedzenia."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) %@ újrapróbálkozási szám figyelmen kívül marad. A szabály korlát nélkül indít újra."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numărul de reîncercări %@ nu este folosit. Politica repornește fără limită."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Броят повторни опити %@ не се използва. Политиката рестартира без ограничение."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ο αριθμός επαναλήψεων %@ δεν χρησιμοποιείται. Η πολιτική επανεκκινεί χωρίς όριο."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Broj ponovnih pokušaja %@ se ne koristi. Pravilo ponovno pokreće bez ograničenja."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Število ponovnih poskusov %@ se ne uporabi. Pravilnik znova zaganja brez omejitve."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Број поновних покушаја %@ се не користи. Смерница поново покреће без ограничења."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Broj ponovnih pokušaja %@ se ne koristi. Smernica ponovo pokreće bez ograničenja."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pakartojimų skaičius %@ nenaudojamas. Politika paleidžia iš naujo be apribojimo."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atkārtojumu skaits %@ netiek izmantots. Politika restartē bez ierobežojuma."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korduskatsete arvu %@ ei kasutata. Poliitika taaskäivitab piiranguta."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кількість повторів %@ не використовується. Політика перезапускає контейнер без обмежень."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Число повторов %@ не используется. Политика перезапускает контейнер без ограничений."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未使用重试次数 %@。该策略会无限制地重启。"
+          }
+        }
+      }
+    },
+    "This restart policy is not valid.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This restart policy is not valid."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Neustartrichtlinie ist ungültig."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette politique de redémarrage n'est pas valide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta política de reinicio no es válida."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo criterio di riavvio non è valido."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta política de reinício não é válida."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit herstartbeleid is ongeldig."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här omstartspolicyn är ogiltig."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne genstartspolitik er ugyldig."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne omstartsregelen er ugyldig."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä uudelleenkäynnistyskäytäntö ei kelpaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te zasady ponownego uruchamiania są nieprawidłowe."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tato zásada restartu je neplatná."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táto politika reštartu je neplatná."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez az újraindítási szabály érvénytelen."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Această politică de repornire nu este validă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тази политика за рестартиране е невалидна."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτή η πολιτική επανεκκίνησης δεν είναι έγκυρη."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovo pravilo ponovnog pokretanja nije valjano."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta pravilnik ponovnega zagona ni veljaven."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ова смерница поновног покретања није исправна."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova smernica ponovnog pokretanja nije ispravna."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ši paleidimo iš naujo politika netinkama."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šī restartēšanas politika nav derīga."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See taaskäivituspoliitika pole kehtiv."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цю політику перезапуску вказано неправильно."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта политика перезапуска указана неверно."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此重启策略无效。"
+          }
+        }
+      }
+    },
+    "This CPU count is not valid.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This CPU count is not valid."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese CPU-Anzahl ist ungültig."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce nombre de CPU n'est pas valide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este número de CPU no es válido."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo numero di CPU non è valido."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este número de CPU não é válido."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit aantal CPU's is ongeldig."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det här antalet CPU:er är ogiltigt."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dette antal CPU'er er ugyldigt."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dette antallet CPU-er er ugyldig."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä CPU-määrä ei kelpaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta liczba CPU jest nieprawidłowa."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento počet CPU je neplatný."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento počet CPU je neplatný."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a CPU-szám érvénytelen."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest număr de CPU-uri nu este valid."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Този брой CPU е невалиден."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτός ο αριθμός CPU δεν είναι έγκυρος."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj broj CPU-ova nije valjan."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To število CPU-jev ni veljavno."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Овај број CPU-ова није исправан."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ovaj broj CPU-ova nije ispravan."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis CPU skaičius netinkamas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis CPU skaits nav derīgs."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See CPU-de arv pole kehtiv."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неправильна кількість CPU."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неверное количество CPU."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 CPU 数量无效。"
+          }
+        }
+      }
+    },
+    "This memory size is not valid.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This memory size is not valid."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Speichergröße ist ungültig."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette taille de mémoire n'est pas valide."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamaño de memoria no es válido."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa dimensione della memoria non è valida."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este tamanho de memória não é válido."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze geheugengrootte is ongeldig."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här minnesstorleken är ogiltig."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne hukommelsesstørrelse er ugyldig."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne minnestørrelsen er ugyldig."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä muistin koko ei kelpaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten rozmiar pamięci jest nieprawidłowy."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tato velikost paměti je neplatná."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táto veľkosť pamäte je neplatná."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a memóriaméret érvénytelen."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Această dimensiune a memoriei nu este validă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Този размер на паметта е невалиден."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτό το μέγεθος μνήμης δεν είναι έγκυρο."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova veličina memorije nije valjana."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta velikost pomnilnika ni veljavna."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ова величина меморије није исправна."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova veličina memorije nije ispravna."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis atminties dydis netinkamas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis atmiņas lielums nav derīgs."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See mälu suurus pole kehtiv."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неправильний обсяг пам’яті."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неверный объём памяти."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此内存大小无效。"
+          }
+        }
+      }
+    },
+    "Paste a docker run or container run command.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste a docker run or container run command."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setze einen docker run- oder container run-Befehl ein."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collez une commande docker run ou container run."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega un comando docker run o container run."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incolla un comando docker run o container run."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cole um comando docker run ou container run."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plak een docker run- of container run-commando."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klistra in ett docker run- eller container run-kommando."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indsæt en docker run- eller container run-kommando."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lim inn en docker run- eller container run-kommando."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sijoita docker run- tai container run -komento."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wklej polecenie docker run lub container run."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vložte příkaz docker run nebo container run."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vložte príkaz docker run alebo container run."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illesszen be egy docker run vagy container run parancsot."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lipiți o comandă docker run sau container run."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поставете команда docker run или container run."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επικολλήστε μια εντολή docker run ή container run."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zalijepite naredbu docker run ili container run."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prilepite ukaz docker run ali container run."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налепите команду docker run или container run."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nalepite komandu docker run ili container run."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įklijuokite docker run arba container run komandą."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ielīmējiet docker run vai container run komandu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleepige käsk docker run või container run."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставте команду docker run або container run."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставьте команду docker run или container run."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请粘贴 docker run 或 container run 命令。"
+          }
+        }
+      }
+    },
+    "“%@” is not a run command. Paste a docker run or container run command.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not a run command. Paste a docker run or container run command."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ist kein run-Befehl. Setze einen docker run- oder container run-Befehl ein."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » n'est pas une commande run. Collez une commande docker run ou container run."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” no es un comando run. Pega un comando docker run o container run."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” non è un comando run. Incolla un comando docker run o container run."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” não é um comando run. Cole um comando docker run ou container run."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is geen run-commando. Plak een docker run- of container run-commando."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” är inte ett run-kommando. Klistra in ett docker run- eller container run-kommando."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” er ikke en run-kommando. Indsæt en docker run- eller container run-kommando."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» er ikke en run-kommando. Lim inn en docker run- eller container run-kommando."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” ei ole run-komento. Sijoita docker run- tai container run -komento."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nie jest poleceniem run. Wklej polecenie docker run lub container run."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ není příkaz run. Vložte příkaz docker run nebo container run."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nie je príkaz run. Vložte príkaz docker run alebo container run."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nem run parancs. Illesszen be egy docker run vagy container run parancsot."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nu este o comandă run. Lipiți o comandă docker run sau container run."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ не е команда run. Поставете команда docker run или container run."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%@» δεν είναι εντολή run. Επικολλήστε μια εντολή docker run ή container run."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nije naredba run. Zalijepite naredbu docker run ili container run."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ni ukaz run. Prilepite ukaz docker run ali container run."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ није команда run. Налепите команду docker run или container run."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nije komanda run. Nalepite komandu docker run ili container run."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nėra run komanda. Įklijuokite docker run arba container run komandą."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nav run komanda. Ielīmējiet docker run vai container run komandu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ pole run-käsk. Kleepige käsk docker run või container run."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не команда run. Вставте команду docker run або container run."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не команда run. Вставьте команду docker run или container run."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是 run 命令。请粘贴 docker run 或 container run 命令。"
+          }
+        }
+      }
+    },
+    "The command has no image.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The command has no image."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Befehl enthält kein Image."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La commande ne contient pas d'image."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El comando no tiene imagen."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il comando non ha un'immagine."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O comando não tem imagem."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het commando bevat geen image."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommandot har ingen image."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommandoen har intet image."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommandoen har ikke noe image."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komennossa ei ole levykuvaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polecenie nie zawiera obrazu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Příkaz neobsahuje image."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Príkaz neobsahuje obraz."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A parancsban nincs image."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comanda nu are imagine."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Командата няма образ."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η εντολή δεν έχει εικόνα."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naredba nema sliku."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukaz ne vsebuje slike."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Команда нема слику."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komanda nema sliku."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komandoje nenurodytas atvaizdas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komandā nav attēla."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käsus pole tõmmist."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У команді не вказано образ."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В команде не указан образ."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该命令未指定镜像。"
+          }
+        }
+      }
+    },
+    "The option %@ has no value.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The option %@ has no value."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Option %@ hat keinen Wert."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'option %@ n'a pas de valeur."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La opción %@ no tiene valor."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'opzione %@ non ha un valore."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A opção %@ não tem valor."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De optie %@ heeft geen waarde."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternativet %@ har inget värde."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indstillingen %@ har ingen værdi."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternativet %@ har ingen verdi."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valinnalla %@ ei ole arvoa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcja %@ nie ma wartości."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost %@ nemá hodnotu."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosť %@ nemá hodnotu."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) %@ kapcsolónak nincs értéke."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunea %@ nu are valoare."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опцията %@ няма стойност."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η επιλογή %@ δεν έχει τιμή."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija %@ nema vrijednost."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnost %@ nima vrednosti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опција %@ нема вредност."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcija %@ nema vrednost."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parinkčiai %@ nenurodyta reikšmė."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcijai %@ nav vērtības."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valikul %@ pole väärtust."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметр %@ не має значення."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У параметра %@ нет значения."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选项 %@ 没有值。"
+          }
+        }
+      }
+    },
+    "The text has more than one command. Only the first command is used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text has more than one command. Only the first command is used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Text enthält mehr als einen Befehl. Nur der erste Befehl wird verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le texte contient plusieurs commandes. Seule la première est utilisée."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El texto tiene más de un comando. Solo se usa el primero."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il testo contiene più di un comando. Viene usato solo il primo."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O texto tem mais do que um comando. Só é utilizado o primeiro comando."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De tekst bevat meer dan één commando. Alleen het eerste commando wordt gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texten innehåller mer än ett kommando. Bara det första kommandot används."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teksten indeholder mere end én kommando. Kun den første kommando bruges."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teksten inneholder mer enn én kommando. Bare den første kommandoen brukes."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstissä on useampi kuin yksi komento. Vain ensimmäistä komentoa käytetään."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst zawiera więcej niż jedno polecenie. Używane jest tylko pierwsze polecenie."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text obsahuje více než jeden příkaz. Použije se jen první příkaz."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text obsahuje viac ako jeden príkaz. Použije sa iba prvý príkaz."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A szöveg több parancsot tartalmaz. A Gantry csak az első parancsot használja."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textul conține mai multe comenzi. Se folosește doar prima comandă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текстът съдържа повече от една команда. Използва се само първата команда."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το κείμενο περιέχει περισσότερες από μία εντολές. Χρησιμοποιείται μόνο η πρώτη εντολή."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst sadrži više od jedne naredbe. Koristi se samo prva naredba."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besedilo vsebuje več kot en ukaz. Uporabi se samo prvi ukaz."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст садржи више од једне команде. Користи се само прва команда."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst sadrži više od jedne komande. Koristi se samo prva komanda."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekste yra daugiau nei viena komanda. Naudojama tik pirmoji komanda."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstā ir vairāk nekā viena komanda. Tiek izmantota tikai pirmā komanda."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstis on rohkem kui üks käsk. Kasutatakse ainult esimest käsku."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У тексті більше ніж одна команда. Використовується лише перша."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В тексте больше одной команды. Используется только первая."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文本中有多个命令。仅使用第一个命令。"
+          }
+        }
+      }
+    },
+    "Global options are not used. Gantry uses the selected host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global options are not used. Gantry uses the selected host."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globale Optionen werden nicht verwendet. Gantry verwendet den ausgewählten Host."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les options globales ne sont pas utilisées. Gantry utilise l'hôte sélectionné."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las opciones globales no se usan. Gantry usa el host seleccionado."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le opzioni globali non vengono usate. Gantry usa l'host selezionato."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As opções globais não são utilizadas. O Gantry utiliza o host selecionado."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globale opties worden niet gebruikt. Gantry gebruikt de geselecteerde host."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globala alternativ används inte. Gantry använder den valda värden."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globale indstillinger bruges ikke. Gantry bruger den valgte vært."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globale alternativer brukes ikke. Gantry bruker den valgte verten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yleisiä valintoja ei käytetä. Gantry käyttää valittua isäntää."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje globalne nie są używane. Gantry używa wybranego hosta."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globální možnosti se nepoužijí. Gantry použije vybraného hostitele."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globálne možnosti sa nepoužijú. Gantry použije vybratého hostiteľa."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A globális beállítások figyelmen kívül maradnak. A Gantry a kiválasztott gazdagépet használja."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunile globale nu sunt folosite. Gantry folosește gazda selectată."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Глобалните опции не се използват. Gantry използва избрания хост."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι καθολικές επιλογές δεν χρησιμοποιούνται. Το Gantry χρησιμοποιεί τον επιλεγμένο host."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globalne opcije se ne koriste. Gantry koristi odabrani host."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globalne možnosti se ne uporabijo. Gantry uporabi izbranega gostitelja."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Глобалне опције се не користе. Gantry користи изабрани хост."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globalne opcije se ne koriste. Gantry koristi izabrani host."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visuotinės parinktys nenaudojamos. Gantry naudoja pasirinktą serverį."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globālās opcijas netiek izmantotas. Gantry izmanto atlasīto resursdatoru."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Globaalseid valikuid ei kasutata. Gantry kasutab valitud hosti."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Глобальні параметри не використовуються. Gantry використовує вибраний хост."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Глобальные параметры не используются. Gantry использует выбранный хост."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不使用全局选项。Gantry 将使用所选主机。"
+          }
+        }
+      }
+    },
+    "Not supported by the New Container form.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not supported by the New Container form."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vom Formular „Neuer Container“ nicht unterstützt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non pris en charge par le formulaire Nouveau conteneur."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No es compatible con el formulario Nuevo contenedor."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non supportato dal modulo Nuovo container."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não suportado pelo formulário Novo contentor."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet ondersteund door het formulier “Nieuwe container”."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stöds inte av formuläret Ny container."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Understøttes ikke af formularen Ny container."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Støttes ikke av skjemaet Ny container."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uusi kontti -lomake ei tue tätä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieobsługiwane przez formularz Nowy kontener."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formulář Nový kontejner toto nepodporuje."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formulár Nový kontajner toto nepodporuje."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az Új konténer űrlap ezt nem támogatja."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neacceptat de formularul Container nou."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не се поддържа от формуляра „Нов контейнер“."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Δεν υποστηρίζεται από τη φόρμα «Νέο κοντέινερ»."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazac Novi kontejner to ne podržava."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazec Nov vsebnik tega ne podpira."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образац „Нови контејнер“ ово не подржава."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazac „Novi kontejner“ ovo ne podržava."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forma „Naujas konteineris“ to nepalaiko."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veidlapa „Jauns konteiners” to neatbalsta."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorm „Uus konteiner“ seda ei toeta."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не підтримується у формі «Новий контейнер»."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не поддерживается в форме «Новый контейнер»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“新建容器”表单不支持此项。"
+          }
+        }
+      }
+    },
+    "Gantry does not read env files. Add the variables from %@ by hand.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry does not read env files. Add the variables from %@ by hand."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry liest keine env-Dateien. Füge die Variablen aus %@ manuell hinzu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne lit pas les fichiers env. Ajoutez à la main les variables de %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no lee archivos env. Añade a mano las variables de %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non legge i file env. Aggiungi a mano le variabili di %@."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não lê ficheiros env. Adicione manualmente as variáveis de %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry leest geen env-bestanden. Voeg de variabelen uit %@ handmatig toe."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry läser inte env-filer. Lägg till variablerna från %@ för hand."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry læser ikke env-filer. Tilføj variablerne fra %@ manuelt."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry leser ikke env-filer. Legg til variablene fra %@ manuelt."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei lue env-tiedostoja. Lisää tiedoston %@ muuttujat käsin."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie odczytuje plików env. Dodaj ręcznie zmienne z %@."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nečte soubory env. Přidejte proměnné ze souboru %@ ručně."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nečíta súbory env. Pridajte premenné zo súboru %@ ručne."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem olvassa be az env fájlokat. Adja hozzá kézzel a változókat innen: %@."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu citește fișierele env. Adăugați manual variabilele din %@."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не чете env файлове. Добавете ръчно променливите от %@."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν διαβάζει αρχεία env. Προσθέστε χειροκίνητα τις μεταβλητές από το %@."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne čita env datoteke. Ručno dodajte varijable iz datoteke %@."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne bere datotek env. Spremenljivke iz %@ dodajte ročno."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не чита env датотеке. Ручно додајте променљиве из датотеке %@."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ne čita env datoteke. Ručno dodajte promenljive iz datoteke %@."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry neskaito env failų. Kintamuosius iš %@ pridėkite rankiniu būdu."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nelasa env failus. Pievienojiet mainīgos no %@ manuāli."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei loe env-faile. Lisage failist %@ muutujad käsitsi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не читає env-файли. Додайте змінні з %@ вручну."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не читает env-файлы. Добавьте переменные из %@ вручную."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 不读取 env 文件。请手动添加 %@ 中的变量。"
+          }
+        }
+      }
+    },
+    "Enter a memory size, for example 512m or 2g.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a memory size, for example 512m or 2g."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib eine Speichergröße ein, zum Beispiel 512m oder 2g."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez une taille de mémoire, par exemple 512m ou 2g."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce un tamaño de memoria, por ejemplo 512m o 2g."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inserisci una dimensione della memoria, ad esempio 512m o 2g."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduza um tamanho de memória, por exemplo 512m ou 2g."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voer een geheugengrootte in, bijvoorbeeld 512m of 2g."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ange en minnesstorlek, till exempel 512m eller 2g."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angiv en hukommelsesstørrelse, f.eks. 512m eller 2g."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppgi en minnestørrelse, for eksempel 512m eller 2g."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anna muistin koko, esimerkiksi 512m tai 2g."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wprowadź rozmiar pamięci, na przykład 512m lub 2g."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadejte velikost paměti, například 512m nebo 2g."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadajte veľkosť pamäte, napríklad 512m alebo 2g."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjon meg egy memóriaméretet, például 512m vagy 2g."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduceți o dimensiune a memoriei, de exemplu 512m sau 2g."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Въведете размер на паметта, например 512m или 2g."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Εισαγάγετε μέγεθος μνήμης, για παράδειγμα 512m ή 2g."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite veličinu memorije, na primjer 512m ili 2g."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vnesite velikost pomnilnika, na primer 512m ali 2g."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Унесите величину меморије, на пример 512m или 2g."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite veličinu memorije, na primer 512m ili 2g."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įveskite atminties dydį, pavyzdžiui, 512m arba 2g."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ievadiet atmiņas lielumu, piemēram, 512m vai 2g."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sisestage mälu suurus, näiteks 512m või 2g."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть обсяг пам’яті, наприклад 512m або 2g."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите объём памяти, например 512m или 2g."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入内存大小，例如 512m 或 2g。"
+          }
+        }
+      }
+    },
+    "Enter a number of CPUs, for example 2 or 1.5.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a number of CPUs, for example 2 or 1.5."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib eine Anzahl von CPUs ein, zum Beispiel 2 oder 1.5."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez un nombre de CPU, par exemple 2 ou 1.5."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce un número de CPU, por ejemplo 2 o 1.5."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inserisci un numero di CPU, ad esempio 2 o 1.5."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduza um número de CPU, por exemplo 2 ou 1.5."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voer een aantal CPU's in, bijvoorbeeld 2 of 1.5."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ange ett antal CPU:er, till exempel 2 eller 1.5."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angiv et antal CPU'er, f.eks. 2 eller 1.5."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppgi et antall CPU-er, for eksempel 2 eller 1.5."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anna CPU:iden määrä, esimerkiksi 2 tai 1.5."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wprowadź liczbę CPU, na przykład 2 lub 1.5."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadejte počet CPU, například 2 nebo 1.5."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadajte počet CPU, napríklad 2 alebo 1.5."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adja meg a CPU-k számát, például 2 vagy 1.5."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduceți un număr de CPU-uri, de exemplu 2 sau 1.5."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Въведете брой CPU, например 2 или 1.5."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Εισαγάγετε αριθμό CPU, για παράδειγμα 2 ή 1.5."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite broj CPU-ova, na primjer 2 ili 1.5."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vnesite število CPU-jev, na primer 2 ali 1.5."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Унесите број CPU-ова, на пример 2 или 1.5."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite broj CPU-ova, na primer 2 ili 1.5."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įveskite CPU skaičių, pavyzdžiui, 2 arba 1.5."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ievadiet CPU skaitu, piemēram, 2 vai 1.5."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sisestage CPU-de arv, näiteks 2 või 1.5."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть кількість CPU, наприклад 2 або 1.5."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите количество CPU, например 2 или 1.5."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 CPU 数量，例如 2 或 1.5。"
+          }
+        }
+      }
+    },
+    "apple/container has no restart policies. The restart policy “%@” is not used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container has no restart policies. The restart policy “%@” is not used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container hat keine Neustartrichtlinien. Die Neustartrichtlinie „%@“ wird nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne prend pas en charge les politiques de redémarrage. La politique de redémarrage « %@ » n'est pas utilisée."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container no tiene políticas de reinicio. La política de reinicio “%@” no se usa."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container non ha criteri di riavvio. Il criterio di riavvio “%@” non viene usato."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O apple/container não tem políticas de reinício. A política de reinício “%@” não é utilizada."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container heeft geen herstartbeleid. Het herstartbeleid “%@” wordt niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container har inga omstartspolicyer. Omstartspolicyn ”%@” används inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container har ingen genstartspolitikker. Genstartspolitikken “%@” bruges ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container har ingen omstartsregler. Omstartsregelen «%@» brukes ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/containerissa ei ole uudelleenkäynnistyskäytäntöjä. Uudelleenkäynnistyskäytäntöä ”%@” ei käytetä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nie ma zasad ponownego uruchamiania. Zasady „%@” nie są używane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nemá zásady restartu. Zásada restartu „%@“ se nepoužije."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nemá politiky reštartu. Politika reštartu „%@“ sa nepoužije."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az apple/container nem ismer újraindítási szabályokat. A(z) „%@” újraindítási szabály figyelmen kívül marad."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nu are politici de repornire. Politica de repornire „%@” nu este folosită."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container няма политики за рестартиране. Политиката за рестартиране „%@“ не се използва."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το apple/container δεν έχει πολιτικές επανεκκίνησης. Η πολιτική επανεκκίνησης «%@» δεν χρησιμοποιείται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nema pravila ponovnog pokretanja. Pravilo ponovnog pokretanja „%@” se ne koristi."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nima pravilnikov ponovnega zagona. Pravilnik ponovnega zagona „%@“ se ne uporabi."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container нема смернице поновног покретања. Смерница поновног покретања „%@“ се не користи."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nema smernice ponovnog pokretanja. Smernica ponovnog pokretanja „%@“ se ne koristi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container neturi paleidimo iš naujo politikų. Paleidimo iš naujo politika „%@“ nenaudojama."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nav restartēšanas politiku. Restartēšanas politika „%@” netiek izmantota."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/containeril pole taaskäivituspoliitikaid. Taaskäivituspoliitikat „%@“ ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В apple/container немає політик перезапуску. Політика перезапуску «%@» не використовується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В apple/container нет политик перезапуска. Политика перезапуска «%@» не используется."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container 没有重启策略。未使用重启策略“%@”。"
+          }
+        }
+      }
+    },
+    "apple/container uses whole CPUs. The container gets %lld CPU.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uses whole CPUs. The container gets %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uses whole CPUs. The container gets %lld CPUs."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container verwendet nur ganze CPUs. Der Container erhält %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container verwendet nur ganze CPUs. Der Container erhält %lld CPUs."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container utilise des CPU entiers. Le conteneur obtient %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container utilise des CPU entiers. Le conteneur obtient %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container utilise des CPU entiers. Le conteneur obtient %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU enteras. El contenedor obtiene %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU enteras. El contenedor obtiene %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU enteras. El contenedor obtiene %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU intere. Il container riceve %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU intere. Il container riceve %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container usa CPU intere. Il container riceve %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O apple/container utiliza CPU inteiras. O contentor recebe %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O apple/container utiliza CPU inteiras. O contentor recebe %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O apple/container utiliza CPU inteiras. O contentor recebe %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container gebruikt alleen hele CPU's. De container krijgt %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container gebruikt alleen hele CPU's. De container krijgt %lld CPU's."
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container använder bara hela CPU:er. Containern får %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container använder bara hela CPU:er. Containern får %lld CPU:er."
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container bruger kun hele CPU'er. Containeren får %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container bruger kun hele CPU'er. Containeren får %lld CPU'er."
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container bruker bare hele CPU-er. Containeren får %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container bruker bare hele CPU-er. Containeren får %lld CPU-er."
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container käyttää vain kokonaisia CPU:ita. Kontti saa %lld CPU:n."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container käyttää vain kokonaisia CPU:ita. Kontti saa %lld CPU:ta."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container używa całych CPU. Kontener otrzyma CPU: %lld."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container używa całych CPU. Kontener otrzyma CPU: %lld."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container używa całych CPU. Kontener otrzyma CPU: %lld."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container używa całych CPU. Kontener otrzyma CPU: %lld."
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používá celé CPU. Kontejner dostane CPU: %lld."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používá celé CPU. Kontejner dostane CPU: %lld."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používá celé CPU. Kontejner dostane CPU: %lld."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používá celé CPU. Kontejner dostane CPU: %lld."
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používa celé CPU. Kontajner dostane CPU: %lld."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používa celé CPU. Kontajner dostane CPU: %lld."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používa celé CPU. Kontajner dostane CPU: %lld."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container používa celé CPU. Kontajner dostane CPU: %lld."
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Az apple/container csak egész CPU-kat használ. A konténer %lld CPU-t kap."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Az apple/container csak egész CPU-kat használ. A konténer %lld CPU-t kap."
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container folosește CPU-uri întregi. Containerul primește %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container folosește CPU-uri întregi. Containerul primește %lld CPU-uri."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container folosește CPU-uri întregi. Containerul primește %lld de CPU-uri."
+                }
+              }
+            }
+          }
+        },
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container използва само цели CPU. Контейнерът получава %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container използва само цели CPU. Контейнерът получава %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Το apple/container χρησιμοποιεί ακέραιο αριθμό CPU. Το κοντέινερ παίρνει %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Το apple/container χρησιμοποιεί ακέραιο αριθμό CPU. Το κοντέινερ παίρνει %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cijele CPU-ove. Kontejner dobiva %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cijele CPU-ove. Kontejner dobiva %lld CPU-a."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cijele CPU-ove. Kontejner dobiva %lld CPU-ova."
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uporablja samo cele CPU-je. Število CPU-jev vsebnika: %lld."
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uporablja samo cele CPU-je. Število CPU-jev vsebnika: %lld."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uporablja samo cele CPU-je. Število CPU-jev vsebnika: %lld."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container uporablja samo cele CPU-je. Število CPU-jev vsebnika: %lld."
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container користи само целе CPU-ове. Контејнер добија %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container користи само целе CPU-ове. Контејнер добија %lld CPU-а."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container користи само целе CPU-ове. Контејнер добија %lld CPU-ова."
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cele CPU-ove. Kontejner dobija %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cele CPU-ove. Kontejner dobija %lld CPU-a."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container koristi samo cele CPU-ove. Kontejner dobija %lld CPU-ova."
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container naudoja tik sveikus CPU. Konteineris gauna %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container naudoja tik sveikus CPU. Konteineris gauna %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container naudoja tik sveikus CPU. Konteineris gauna %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container naudoja tik sveikus CPU. Konteineris gauna %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container izmanto tikai veselus CPU. Konteiners saņem %lld CPU."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container izmanto tikai veselus CPU. Konteiners saņem %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container izmanto tikai veselus CPU. Konteiners saņem %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container kasutab ainult täisarvulisi CPU-sid. Konteiner saab %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container kasutab ainult täisarvulisi CPU-sid. Konteiner saab %lld CPU-d."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container використовує лише цілі CPU. Контейнер отримає %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container використовує лише цілі CPU. Контейнер отримає %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container використовує лише цілі CPU. Контейнер отримає %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container використовує лише цілі CPU. Контейнер отримає %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container использует только целые CPU. Контейнер получит %lld CPU."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container использует только целые CPU. Контейнер получит %lld CPU."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container использует только целые CPU. Контейнер получит %lld CPU."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container использует только целые CPU. Контейнер получит %lld CPU."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "apple/container 只使用整数个 CPU。该容器将获得 %lld 个 CPU。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "apple/container does not support the network mode “%@”. The default network is used.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container does not support the network mode “%@”. The default network is used."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container unterstützt den Netzwerkmodus „%@“ nicht. Das Standardnetzwerk wird verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne prend pas en charge le mode réseau « %@ ». Le réseau par défaut est utilisé."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container no admite el modo de red “%@”. Se usa la red predeterminada."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container non supporta la modalità di rete “%@”. Viene usata la rete predefinita."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O apple/container não suporta o modo de rede “%@”. É utilizada a rede predefinida."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ondersteunt netwerkmodus “%@” niet. Het standaardnetwerk wordt gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container stöder inte nätverksläget ”%@”. Standardnätverket används."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container understøtter ikke netværkstilstanden “%@”. Standardnetværket bruges."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container støtter ikke nettverksmodusen «%@». Standardnettverket brukes."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ei tue verkkotilaa ”%@”. Oletusverkkoa käytetään."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nie obsługuje trybu sieci „%@”. Używana jest sieć domyślna."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nepodporuje režim sítě „%@“. Použije se výchozí síť."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nepodporuje sieťový režim „%@“. Použije sa predvolená sieť."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az apple/container nem támogatja a(z) „%@” hálózati módot. A Gantry az alapértelmezett hálózatot használja."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nu acceptă modul de rețea „%@”. Se folosește rețeaua implicită."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не поддържа мрежовия режим „%@“. Използва се мрежата по подразбиране."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το apple/container δεν υποστηρίζει τη λειτουργία δικτύου «%@». Χρησιμοποιείται το προεπιλεγμένο δίκτυο."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne podržava mrežni način „%@”. Koristi se zadana mreža."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne podpira omrežnega načina „%@“. Uporabi se privzeto omrežje."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не подржава мрежни режим „%@“. Користи се подразумевана мрежа."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne podržava mrežni režim „%@“. Koristi se podrazumevana mreža."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nepalaiko tinklo režimo „%@“. Naudojamas numatytasis tinklas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container neatbalsta tīkla režīmu „%@”. Tiek izmantots noklusējuma tīkls."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ei toeta võrgurežiimi „%@“. Kasutatakse vaikevõrku."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не підтримує мережевий режим «%@». Використовується типова мережа."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не поддерживает сетевой режим «%@». Используется сеть по умолчанию."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container 不支持网络模式“%@”。将使用默认网络。"
+          }
+        }
+      }
+    },
+    "apple/container cannot pick a host port. Ports without a host port are not published.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container cannot pick a host port. Ports without a host port are not published."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container kann keinen Host-Port auswählen. Ports ohne Host-Port werden nicht veröffentlicht."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne peut pas choisir de port sur l'hôte. Les ports sans port d'hôte ne sont pas publiés."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container no puede elegir un puerto del host. Los puertos sin puerto del host no se publican."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container non può scegliere una porta dell'host. Le porte senza porta dell'host non vengono pubblicate."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O apple/container não consegue escolher uma porta do host. As portas sem porta do host não são publicadas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container kan geen hostpoort kiezen. Poorten zonder hostpoort worden niet gepubliceerd."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container kan inte välja en värdport. Portar utan värdport publiceras inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container kan ikke vælge en værtsport. Porte uden værtsport publiceres ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container kan ikke velge en vertsport. Porter uten vertsport publiseres ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ei voi valita isännän porttia. Portteja, joilla ei ole isännän porttia, ei julkaista."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nie może wybrać portu hosta. Porty bez portu hosta nie są publikowane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nedokáže zvolit port hostitele. Porty bez portu hostitele se nepublikují."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nedokáže zvoliť port hostiteľa. Porty bez portu hostiteľa sa nepublikujú."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az apple/container nem tud gazdagépportot választani. A gazdagépport nélküli portok nem lesznek közzétéve."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nu poate alege un port pe gazdă. Porturile fără port pe gazdă nu sunt publicate."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не може сам да избере порт на хоста. Портовете без порт на хоста не се публикуват."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το apple/container δεν μπορεί να επιλέξει θύρα του host. Οι θύρες χωρίς θύρα host δεν δημοσιεύονται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne može sam odabrati port hosta. Portovi bez porta hosta se ne objavljuju."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne more izbrati vrat gostitelja. Vrata brez vrat gostitelja niso objavljena."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не може сам да изабере порт хоста. Портови без порта хоста се не објављују."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ne može sam da izabere port hosta. Portovi bez porta hosta se ne objavljuju."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container negali pats parinkti serverio prievado. Prievadai be serverio prievado neskelbiami."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container nevar pats izvēlēties resursdatora portu. Porti bez resursdatora porta netiek publicēti."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container ei saa hosti porti ise valida. Ilma hosti pordita porte ei avaldata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не може сам вибрати порт хоста. Порти без порту хоста не публікуються."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container не может сам выбрать порт хоста. Порты без порта хоста не публикуются."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container 无法自动选择主机端口。未指定主机端口的端口不会发布。"
+          }
+        }
+      }
+    },
+    "The DNS domain is for apple/container only. It is not used on this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The DNS domain is for apple/container only. It is not used on this host."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die DNS-Domain gilt nur für apple/container. Sie wird auf diesem Host nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le domaine DNS est réservé à apple/container. Il n'est pas utilisé sur cet hôte."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dominio DNS es solo para apple/container. No se usa en este host."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il dominio DNS è solo per apple/container. Non viene usato su questo host."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O domínio DNS é só para o apple/container. Não é utilizado neste host."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het DNS-domein is alleen voor apple/container. Het wordt op deze host niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domänen gäller bara apple/container. Den används inte på den här värden."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domænet gælder kun apple/container. Det bruges ikke på denne vært."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domenet gjelder bare apple/container. Det brukes ikke på denne verten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-verkkotunnus on vain apple/containerille. Sitä ei käytetä tällä isännällä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domena DNS dotyczy tylko apple/container. Na tym hoście nie jest używana."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doména DNS je jen pro apple/container. Na tomto hostiteli se nepoužije."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doména DNS je iba pre apple/container. Na tomto hostiteli sa nepoužije."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A DNS-tartomány csak az apple/containerre vonatkozik. Ezen a gazdagépen nincs használatban."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domeniul DNS este doar pentru apple/container. Nu este folosit pe această gazdă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домейнът е само за apple/container. Не се използва на този хост."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ο τομέας DNS ισχύει μόνο για το apple/container. Δεν χρησιμοποιείται σε αυτόν τον host."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domena je samo za apple/container. Na ovom hostu se ne koristi."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domena DNS je samo za apple/container. Na tem gostitelju se ne uporabi."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домен је само за apple/container. На овом хосту се не користи."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domen je samo za apple/container. Na ovom hostu se ne koristi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domenas skirtas tik apple/container. Šiame serveryje jis nenaudojamas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domēns ir paredzēts tikai apple/container. Šajā resursdatorā tas netiek izmantots."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domeen on ainult apple/containeri jaoks. Selles hostis seda ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-домен призначений лише для apple/container. На цьому хості він не використовується."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-домен предназначен только для apple/container. На этом хосте он не используется."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS 域名仅适用于 apple/container，不会在此主机上使用。"
+          }
+        }
+      }
+    },
+    "Kernel options are for apple/container only. They are not used on this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kernel options are for apple/container only. They are not used on this host."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kernel-Optionen gelten nur für apple/container. Sie werden auf diesem Host nicht verwendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les options du noyau sont réservées à apple/container. Elles ne sont pas utilisées sur cet hôte."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las opciones del kernel son solo para apple/container. No se usan en este host."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le opzioni del kernel sono solo per apple/container. Non vengono usate su questo host."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As opções do kernel são só para o apple/container. Não são utilizadas neste host."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kernelopties zijn alleen voor apple/container. Ze worden op deze host niet gebruikt."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kärnalternativ gäller bara apple/container. De används inte på den här värden."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kerneindstillinger gælder kun apple/container. De bruges ikke på denne vært."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kjernealternativer gjelder bare apple/container. De brukes ikke på denne verten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ytimen asetukset ovat vain apple/containerille. Niitä ei käytetä tällä isännällä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje jądra dotyczą tylko apple/container. Na tym hoście nie są używane."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti jádra jsou jen pro apple/container. Na tomto hostiteli se nepoužijí."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti jadra sú iba pre apple/container. Na tomto hostiteli sa nepoužijú."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A kernelbeállítások csak az apple/containerre vonatkoznak. Ezen a gazdagépen nincsenek használatban."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiunile kernelului sunt doar pentru apple/container. Nu sunt folosite pe această gazdă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опциите на ядрото са само за apple/container. Не се използват на този хост."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι επιλογές πυρήνα ισχύουν μόνο για το apple/container. Δεν χρησιμοποιούνται σε αυτόν τον host."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije jezgre su samo za apple/container. Na ovom hostu se ne koriste."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti jedra so samo za apple/container. Na tem gostitelju se ne uporabijo."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опције језгра су само за apple/container. На овом хосту се не користе."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije jezgra su samo za apple/container. Na ovom hostu se ne koriste."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Branduolio parinktys skirtos tik apple/container. Šiame serveryje jos nenaudojamos."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodola opcijas ir paredzētas tikai apple/container. Šajā resursdatorā tās netiek izmantotas."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuuma valikud on ainult apple/containeri jaoks. Selles hostis neid ei kasutata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметри ядра призначені лише для apple/container. На цьому хості вони не використовуються."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметры ядра предназначены только для apple/container. На этом хосте они не используются."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内核选项仅适用于 apple/container，不会在此主机上使用。"
+          }
+        }
+      }
     }
   }
 }

@@ -168,6 +168,7 @@ struct ContainerDetailView: View {
             }
             .keyboardShortcut("p", modifiers: [.command, .option])
             ExplainMenuItem(session: session, container: container)
+            ContainerRunCopyItems(session: session, container: container)
         } label: {
             Label("More", systemImage: "ellipsis.circle")
         }

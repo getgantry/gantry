@@ -624,6 +624,7 @@ struct ContainerActionsMenu: View {
             Label("Copy as Prompt", systemImage: "text.badge.star")
         }
         ExplainMenuItem(session: session, container: container)
+        ContainerRunCopyItems(session: session, container: container)
 
         if session.supportsDebugShell, container.state.isRunning {
             Button {
