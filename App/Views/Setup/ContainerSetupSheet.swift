@@ -10,6 +10,7 @@ struct ContainerSetupSheet: View {
     let onClose: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppModel.self) private var model
 
     @State private var running = false
     @State private var done = false
@@ -135,12 +136,11 @@ struct ContainerSetupSheet: View {
         HStack {
             if running { ProgressView().controlSize(.small) }
             Spacer()
-            Button(done ? "Done" : "Later") { finish() }
+            // While brew runs, closing the sheet keeps it going in Activity.
+            Button(done ? "Done" : running ? "Continue in Background" : "Later") { finish() }
                 .keyboardShortcut(.cancelAction)
             if status.brewAvailable && !done {
-                Button(status.state.isOutdated ? "Update" : "Install") {
-                    Task { await runBrew() }
-                }
+                Button(status.state.isOutdated ? "Update" : "Install") { startBrew() }
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(.borderedProminent)
                 .disabled(running)
@@ -151,13 +151,25 @@ struct ContainerSetupSheet: View {
 
     private var brewVerb: String { status.state.isOutdated ? "upgrade" : "install" }
 
-    private func runBrew() async {
+    private func startBrew() {
         running = true
         failure = nil
         log.removeAll()
+        let title = "brew \(brewVerb) \(ContainerTooling.formula)"
+        model.operations.run(.brewInstall, title: title) { operation in
+            try await runBrew(operation)
+        }
+    }
+
+    private func runBrew(_ operation: LongOperation) async throws -> String? {
+        defer { running = false }
         do {
             let sink: @Sendable (String) -> Void = { line in
-                Task { @MainActor in log.append(line) }
+                Task { @MainActor in
+                    log.append(line)
+                    operation.append(log: line)
+                    operation.update(progress: line)
+                }
             }
             if status.state.isOutdated {
                 try await ContainerTooling.upgrade(progress: sink)
@@ -166,10 +178,11 @@ struct ContainerSetupSheet: View {
             }
             await ContainerTooling.invalidateVersionCache()
             done = true
+            return String(localized: "apple/container is installed and ready.")
         } catch {
             failure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            throw error
         }
-        running = false
     }
 
     private func finish() {

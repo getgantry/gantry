@@ -49,6 +49,26 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         center.add(request, withCompletionHandler: nil)
     }
 
+    /// Posts a notification when a long operation finishes while Gantry is
+    /// not the frontmost app. A cancel by the user posts nothing.
+    func presentOperation(_ operation: LongOperation) {
+        guard !NSApp.isActive, operation.state != .cancelled else { return }
+        let content = UNMutableNotificationContent()
+        switch operation.state {
+        case .failed(let message):
+            content.title = String(localized: "Failed: \(operation.title)")
+            content.body = ErrorPresentation.split(message).summary
+        case .succeeded(let summary):
+            content.title = String(localized: "Done: \(operation.title)")
+            content.body = summary ?? operation.hostName ?? ""
+        case .running, .cancelled:
+            return
+        }
+        content.sound = .default
+        content.threadIdentifier = "operations"
+        center.add(UNNotificationRequest(identifier: operation.id.uuidString, content: content, trigger: nil))
+    }
+
     // MARK: - UNUserNotificationCenterDelegate
 
     /// Show the banner even when Gantry is the frontmost app.
@@ -73,6 +93,9 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
             Task { @MainActor in
                 ContainerNotifier.shared.openContainer(hostID: hostID, containerID: containerID)
             }
+        } else {
+            // An operation notification: show the window with the activity list.
+            Task { @MainActor in MainWindowActivation.activate() }
         }
         completionHandler()
     }

@@ -26,7 +26,7 @@ struct VolumeListView: View {
     @Binding var selection: String?
 
     @State private var searchText = ""
-    @State private var removeTarget: Volume?
+    @State private var removeAction: DestructiveAction?
     @State private var showingNew = false
     @State private var pruneConfirm = false
     @State private var pruneOutcome: PruneOutcome?
@@ -71,6 +71,12 @@ struct VolumeListView: View {
         return ascending ? sorted : sorted.reversed()
     }
 
+    /// The Delete key removes the selected volume.
+    private func deleteSelected() -> DestructiveAction? {
+        guard let selection else { return nil }
+        return .removeVolume(name: selection, containers: session.containers, engine: .init(session.host))
+    }
+
     var body: some View {
         List(selection: $selection) {
             ForEach(displayed) { volume in
@@ -89,7 +95,9 @@ struct VolumeListView: View {
                         }
                         Divider()
                         Button(role: .destructive) {
-                            removeTarget = volume
+                            removeAction = .removeVolume(
+                                name: volume.name, containers: session.containers, engine: .init(session.host)
+                            )
                         } label: {
                             Label("Remove…", systemImage: "trash")
                         }
@@ -137,19 +145,8 @@ struct VolumeListView: View {
             Text("Removes all volumes not used by at least one container. This permanently deletes their data.")
         }
         .pruneResultAlert($pruneOutcome)
-        .confirmationDialog(
-            "Remove \(removeTarget?.name ?? String(localized: "volume"))?",
-            isPresented: Binding(presence: $removeTarget),
-            titleVisibility: .visible,
-            presenting: removeTarget
-        ) { volume in
-            Button("Remove", role: .destructive) {
-                removeTarget = nil
-                Task { await session.removeVolume(name: volume.name) }
-            }
-            Button("Cancel", role: .cancel) { removeTarget = nil }
-        } message: { _ in
-            Text("Removing a volume permanently deletes its data. Volumes in use by a container cannot be removed.")
+        .destructiveConfirmation($removeAction, onDelete: deleteSelected) { action, force in
+            for name in action.targets { await session.removeVolume(name: name, force: force) }
         }
     }
 

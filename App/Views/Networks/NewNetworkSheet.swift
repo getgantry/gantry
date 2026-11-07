@@ -22,7 +22,9 @@ struct NewNetworkSheet: View {
                 .pickerStyle(.menu)
             },
             create: { name, driver, labels in
-                await session.createNetwork(name: name, driver: driver, labels: labels) != nil
+                await session.attempt(fallback: String(localized: "Could not create the network.")) {
+                    await session.createNetwork(name: name, driver: driver, labels: labels) != nil
+                }
             }
         )
     }

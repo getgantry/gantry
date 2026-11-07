@@ -8,8 +8,9 @@ import SwiftUI
 struct NewResourceSheet<DriverControl: View>: View {
     let title: String
     @ViewBuilder let driverControl: (Binding<String>) -> DriverControl
-    /// Performs the creation; returns `true` on success (the sheet then dismisses).
-    let create: (_ name: String, _ driver: String, _ labels: [String: String]) async -> Bool
+    /// Performs the creation; returns nil on success (the sheet then
+    /// dismisses) or the error to show inline.
+    let create: (_ name: String, _ driver: String, _ labels: [String: String]) async -> String?
 
     @Environment(\.dismiss) private var dismiss
 
@@ -17,12 +18,13 @@ struct NewResourceSheet<DriverControl: View>: View {
     @State private var driver: String
     @State private var labels: [LabelPair] = []
     @State private var working = false
+    @State private var errorText: String?
 
     init(
         title: String,
         defaultDriver: String,
         @ViewBuilder driverControl: @escaping (Binding<String>) -> DriverControl,
-        create: @escaping (_ name: String, _ driver: String, _ labels: [String: String]) async -> Bool
+        create: @escaping (_ name: String, _ driver: String, _ labels: [String: String]) async -> String?
     ) {
         self.title = title
         self.driverControl = driverControl
@@ -43,6 +45,10 @@ struct NewResourceSheet<DriverControl: View>: View {
             }
             .disabled(working)
 
+            if let errorText {
+                InlineErrorText(message: errorText)
+            }
+
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
@@ -61,9 +67,9 @@ struct NewResourceSheet<DriverControl: View>: View {
         let nameValue = name.trimmingCharacters(in: .whitespaces)
         let labelDict = labels.asDictionary
         Task {
-            let ok = await create(nameValue, driver, labelDict)
+            errorText = await create(nameValue, driver, labelDict)
             working = false
-            if ok { dismiss() }
+            if errorText == nil { dismiss() }
         }
     }
 }

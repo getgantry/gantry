@@ -251,8 +251,9 @@ struct HostCleanupSheet: View {
     /// reported container and volume usage.
     private func trimDisks() async {
         let before = await session.systemDF()
-        guard let trimmed = await session.trimContainerDisks() else {
-            results[.trimDisks] = session.lastError ?? String(localized: "Trim failed.")
+        let (count, error) = await session.attempt { await session.trimContainerDisks() }
+        guard let trimmed = count else {
+            results[.trimDisks] = error ?? String(localized: "Trim failed.")
             return
         }
         let after = await session.systemDF()

@@ -15,6 +15,7 @@ struct AppleSystemOverviewPane: View {
     @State private var busy = false
     @State private var errorText: String?
     @State private var showKernelInstall = false
+    @State private var serviceAction: DestructiveAction?
 
     private var cli: String? { session.appleCLIOverride }
     private var running: Bool { status?.isRunning == true }
@@ -65,6 +66,17 @@ struct AppleSystemOverviewPane: View {
         .sheet(isPresented: $showKernelInstall, onDismiss: { Task { await reload() } }) {
             AppleKernelInstallSheet(cliOverride: session.appleCLIOverride, request: .recommended)
         }
+        .destructiveConfirmation($serviceAction) { action, _ in
+            if action.kind == .stopServices {
+                act { try await AppleContainerControl.stopServices(cliOverride: cli) }
+            } else {
+                act { try await AppleContainerControl.restartServices(cliOverride: cli) }
+            }
+        }
+    }
+
+    private var runningContainers: Int {
+        session.containers.filter { $0.state.isRunning }.count
     }
 
     private var statusBadge: (text: String, tint: Color)? {
@@ -80,13 +92,13 @@ struct AppleSystemOverviewPane: View {
             if busy || loading { ProgressView().controlSize(.small) }
             if running {
                 Button {
-                    act { try await AppleContainerControl.restartServices(cliOverride: cli) }
+                    serviceAction = .services(.restartServices, runningContainers: runningContainers)
                 } label: {
                     Label(String(localized: "Restart"), systemImage: "arrow.clockwise.circle")
                 }
                 .help(String(localized: "Stop and start the services. Running containers stop."))
                 Button {
-                    act { try await AppleContainerControl.stopServices(cliOverride: cli) }
+                    serviceAction = .services(.stopServices, runningContainers: runningContainers)
                 } label: {
                     Label(String(localized: "Stop"), systemImage: "stop.fill")
                 }

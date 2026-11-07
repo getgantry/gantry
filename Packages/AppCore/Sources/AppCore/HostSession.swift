@@ -62,15 +62,36 @@ public final class HostSession: Identifiable {
     @ObservationIgnored
     var discoverDockerSocket: () -> String? = { DockerSocketDiscovery.discover() }
 
-    /// Last error surfaced to the UI; settable so a view can dismiss it.
+    /// The last action error, shown in the content-area banner; settable so
+    /// a view can dismiss it. Sheets read their errors with ``attempt(_:)``.
     public var lastError: String?
 
-    /// Routes an error into the user-facing alert, swallowing cancellations:
-    /// a SwiftUI task cancelled by navigation is not a failure.
-    private func surface(_ error: Error) {
+    /// Where this session reports long operations (cluster creation). Set
+    /// by ``AppModel``.
+    @ObservationIgnored public weak var operations: OperationCenter?
+
+    /// Routes an error to the user, swallowing cancellations: a SwiftUI task
+    /// cancelled by navigation is not a failure. See ``report(_:)``.
+    func surface(_ error: Error) {
         if error is CancellationError { return }
         if let docker = error as? DockerError, case .cancelled = docker { return }
-        lastError = error.localizedDescription
+        report(error.localizedDescription)
+    }
+
+    /// A banner action that works makes the older banner error stale (#35).
+    /// Work inside ``attempt(_:)`` belongs to a sheet and leaves it alone.
+    func clearStaleError() {
+        if ErrorCaptureScope.current == nil { lastError = nil }
+    }
+
+    /// Sends an action error to the sheet that runs it inside ``attempt(_:)``,
+    /// or else to the content-area banner (``lastError``).
+    func report(_ message: String) {
+        if let capture = ErrorCaptureScope.current {
+            capture.message = message
+        } else {
+            lastError = message
+        }
     }
 
     /// True while the daemon event stream is delivering live updates; false
@@ -851,7 +872,11 @@ public final class HostSession: Identifiable {
         async let networksResult = fetch { try await client.listNetworks() }
         async let infoResult = fetch { try await client.systemInfo() }
 
-        if let value = await containersResult { containers = value }
+        if let value = await containersResult {
+            containers = value
+            // A refresh that works makes an older action error stale (#35).
+            lastError = nil
+        }
         if let value = await imagesResult { images = value }
         if let value = await volumesResult { volumes = value }
         if let value = await networksResult { networks = value }
@@ -925,7 +950,7 @@ public final class HostSession: Identifiable {
             let cleaned = try await AppleContainerControl.cleanContainers(targets, cliOverride: machineCLIOverride)
             return cleaned.count
         } catch {
-            lastError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            report(Self.message(for: error))
             return nil
         }
     }
@@ -952,7 +977,7 @@ public final class HostSession: Identifiable {
             await refreshMachines()
             return true
         } catch {
-            lastError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            report(Self.message(for: error))
             await refreshMachines()
             return false
         }
@@ -1044,6 +1069,8 @@ public final class HostSession: Identifiable {
     }
 
     private var clusterCreationTasks: [String: Task<Void, Never>] = [:]
+    /// The operation-center entry of each running creation.
+    private var clusterOperations: [String: LongOperation] = [:]
     /// Creations that found the name free right before the CLI started:
     /// only their nodes may be deleted on cancel.
     private var ownedClusterCreations: Set<String> = []
@@ -1090,6 +1117,15 @@ public final class HostSession: Identifiable {
         if clusterCreations.contains(where: { $0.id == name && $0.isRunning }) { return false }
         clusterCreations.removeAll { $0.id == name }
         clusterCreations.append(ClusterCreation(options: options))
+        clusterOperations[name] = operations?.begin(
+            .clusterCreate,
+            title: String(localized: "Create cluster \(name)", bundle: .module),
+            host: host.name,
+            cancelConfirmation: String(
+                localized: "The nodes that this creation made so far are deleted.", bundle: .module
+            ),
+            cancel: { [weak self] in Task { await self?.cancelClusterCreation(name) } }
+        )
         let cli = machineCLIOverride
         clusterCreationTasks[name] = Task { [weak self] in
             do {
@@ -1136,8 +1172,10 @@ public final class HostSession: Identifiable {
         guard let index = clusterCreations.firstIndex(where: { $0.id == name }) else { return }
         if let progress = ClusterCreateProgress.parse(line) {
             clusterCreations[index].progress = progress
+            clusterOperations[name]?.update(progress: progress.message, fraction: progress.fraction)
             return
         }
+        clusterOperations[name]?.append(log: line)
         clusterCreations[index].log.append(line)
         if clusterCreations[index].log.count > 200 {
             clusterCreations[index].log.removeFirst(clusterCreations[index].log.count - 200)
@@ -1151,6 +1189,14 @@ public final class HostSession: Identifiable {
 
     private func finishClusterCreation(_ name: String, error: Error?) async {
         clusterCreationTasks[name] = nil
+        if let operation = clusterOperations.removeValue(forKey: name) {
+            let state: OperationState = switch error {
+            case nil: .succeeded(nil)
+            case is CancellationError: .cancelled
+            case let error?: .failed(Self.message(for: error))
+            }
+            operations?.finish(operation, state)
+        }
         // A cancelled creation stays owned until cancelClusterCreation cleans up.
         if !(error is CancellationError) { ownedClusterCreations.remove(name) }
         if let error, !(error is CancellationError) {
@@ -1387,11 +1433,12 @@ public final class HostSession: Identifiable {
         _ body: (DockerClient) async throws -> Void
     ) async -> Bool {
         guard let client else {
-            lastError = "Not connected"
+            report("Not connected")
             return false
         }
         do {
             try await body(client)
+            clearStaleError()
             await refresh()
             return true
         } catch {
@@ -1407,11 +1454,12 @@ public final class HostSession: Identifiable {
         _ body: (DockerClient) async throws -> T
     ) async -> T? {
         guard let client else {
-            lastError = "Not connected"
+            report("Not connected")
             return nil
         }
         do {
             let value = try await body(client)
+            clearStaleError()
             await refresh()
             return value
         } catch {

@@ -270,6 +270,7 @@ private struct RunningRow: View {
 
     @Environment(\.openWindow) private var openWindow
     @State private var busy = false
+    @State private var errorText: String?
 
     /// Best directly-reachable endpoint (apple DNS/IP, or a local published
     /// port). Nil for SSH hosts and not-yet-resolved apple containers.
@@ -309,6 +310,7 @@ private struct RunningRow: View {
                 await run(.restart)
             }
         }
+        .modifier(InlineActionError(message: $errorText))
         .contextMenu {
             if let endpoint {
                 if let url = endpoint.url {
@@ -380,7 +382,9 @@ private struct RunningRow: View {
 
     private func run(_ action: ContainerAction) async {
         busy = true
-        _ = await session.perform(action, on: container.id)
+        errorText = await session.attempt(fallback: String(localized: "The action failed.")) {
+            await session.perform(action, on: container.id)
+        }
         busy = false
     }
 }
@@ -401,6 +405,7 @@ private struct ExitedRow: View {
     var session: HostSession
 
     @State private var busy = false
+    @State private var errorText: String?
 
     var body: some View {
         HStack(spacing: 6) {
@@ -416,10 +421,49 @@ private struct ExitedRow: View {
 
             ActionButton(systemImage: "play.fill", help: "Start", busy: busy) {
                 busy = true
-                _ = await session.perform(.start, on: container.id)
+                errorText = await session.attempt(fallback: String(localized: "The action failed.")) {
+                    await session.perform(.start, on: container.id)
+                }
                 busy = false
             }
         }
+        .modifier(InlineActionError(message: $errorText))
+    }
+}
+
+/// A failed menu bar action: the error under its row, until dismissed. The
+/// menu bar has no banner, and an alert would close the panel.
+private struct InlineActionError: ViewModifier {
+    @Binding var message: String?
+
+    func body(content: Content) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            content
+            if let message {
+                errorRow(message)
+            }
+        }
+    }
+
+    private func errorRow(_ message: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.red)
+            Text(ErrorPresentation.split(message).summary)
+                .foregroundStyle(.red)
+                .textSelection(.enabled)
+                .lineLimit(3)
+                .help(message)
+            Spacer(minLength: 2)
+            Button {
+                self.message = nil
+            } label: {
+                Label(String(localized: "Dismiss"), systemImage: "xmark")
+            }
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+        }
+        .font(.caption2)
+        .padding(.leading, 13)
     }
 }
 

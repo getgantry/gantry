@@ -76,16 +76,18 @@ struct CommitImageSheet: View {
         errorText = nil
         isWorking = true
         defer { isWorking = false }
-        let ok = await session.commit(
-            containerID: container.id,
-            repo: repo.trimmingCharacters(in: .whitespaces),
-            tag: tag.trimmingCharacters(in: .whitespaces).isEmpty ? "latest" : tag,
-            comment: comment
-        )
-        if ok {
-            dismiss()
+        let error = await session.attempt(fallback: String(localized: "Commit failed")) {
+            await session.commit(
+                containerID: container.id,
+                repo: repo.trimmingCharacters(in: .whitespaces),
+                tag: tag.trimmingCharacters(in: .whitespaces).isEmpty ? "latest" : tag,
+                comment: comment
+            )
+        }
+        if let error {
+            errorText = error
         } else {
-            errorText = session.lastError ?? "Commit failed"
+            dismiss()
         }
     }
 }

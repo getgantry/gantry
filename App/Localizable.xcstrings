@@ -66,6 +66,38 @@
         }
       }
     },
+    "%@ error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ error"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 错误"
+          }
+        }
+      }
+    },
+    "%@ failed for %lld of %lld containers.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ failed for %lld of %lld containers."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 在 %3$lld 个容器中的 %2$lld 个上失败。"
+          }
+        }
+      }
+    },
     "%@ GB": {
       "localizations": {
         "en": {
@@ -290,6 +322,22 @@
         }
       }
     },
+    "%@ written": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ written"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已写入 %@"
+          }
+        }
+      }
+    },
     "%@ — Terminal": {
       "localizations": {
         "en": {
@@ -318,6 +366,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@:latest"
+          }
+        }
+      }
+    },
+    "%lld containers use this image. Use Force Remove to remove it anyway.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld containers use this image. Use Force Remove to remove it anyway."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个容器使用此镜像。可使用强制移除仍将其移除。"
+          }
+        }
+      }
+    },
+    "%lld containers use this volume.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld containers use this volume."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个容器使用此卷。"
           }
         }
       }
@@ -554,6 +634,38 @@
         }
       }
     },
+    "%lld running containers will stop.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld running containers will stop."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个正在运行的容器将停止。"
+          }
+        }
+      }
+    },
+    "%lld services running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld services running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个服务正在运行"
+          }
+        }
+      }
+    },
     "%lld running of %@": {
       "localizations": {
         "en": {
@@ -618,6 +730,38 @@
         }
       }
     },
+    "1 container uses this image. Use Force Remove to remove it anyway.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 container uses this image. Use Force Remove to remove it anyway."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个容器使用此镜像。可使用强制移除仍将其移除。"
+          }
+        }
+      }
+    },
+    "1 container uses this volume.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 container uses this volume."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个容器使用此卷。"
+          }
+        }
+      }
+    },
     "1 control plane · %lld workers": {
       "localizations": {
         "en": {
@@ -646,6 +790,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 个控制平面 · 1 个工作节点"
+          }
+        }
+      }
+    },
+    "1 running container will stop.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 running container will stop."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个正在运行的容器将停止。"
           }
         }
       }
@@ -726,6 +886,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "关于"
+          }
+        }
+      }
+    },
+    "Activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活动"
           }
         }
       }
@@ -874,6 +1050,22 @@
         }
       }
     },
+    "All nodes of the cluster and its kubeconfig context are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All nodes of the cluster and its kubeconfig context are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集群的所有节点及其 kubeconfig 上下文将被删除。"
+          }
+        }
+      }
+    },
     "All Systems Running": {
       "localizations": {
         "en": {
@@ -966,6 +1158,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apple Container"
+          }
+        }
+      }
+    },
+    "Apple container": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container"
           }
         }
       }
@@ -1322,6 +1530,22 @@
         }
       }
     },
+    "Build %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建 %@"
+          }
+        }
+      }
+    },
     "Build an image from a Dockerfile on this host": {
       "localizations": {
         "en": {
@@ -1530,6 +1754,54 @@
         }
       }
     },
+    "Cancel %@?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消 %@？"
+          }
+        }
+      }
+    },
+    "Cancel Install": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Install"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消安装"
+          }
+        }
+      }
+    },
+    "Cancelled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消"
+          }
+        }
+      }
+    },
     "Cancelling and removing the nodes…": {
       "localizations": {
         "en": {
@@ -1542,6 +1814,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在取消并移除节点…"
+          }
+        }
+      }
+    },
+    "Cancel…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消…"
           }
         }
       }
@@ -1802,6 +2090,22 @@
         }
       }
     },
+    "Clear Finished": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Finished"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除已完成"
+          }
+        }
+      }
+    },
     "Clear search": {
       "localizations": {
         "en": {
@@ -2026,6 +2330,22 @@
         }
       }
     },
+    "Commit failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commit failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提交失败"
+          }
+        }
+      }
+    },
     "Commit to Image": {
       "localizations": {
         "en": {
@@ -2070,6 +2390,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Compose 文件"
+          }
+        }
+      }
+    },
+    "Compose up %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose up %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose 启动 %@"
           }
         }
       }
@@ -2458,6 +2794,38 @@
         }
       }
     },
+    "Containers can no longer use this local domain.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers can no longer use this local domain."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器将无法再使用此本地域名。"
+          }
+        }
+      }
+    },
+    "Containers cannot run until the services start again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers cannot run until the services start again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在服务重新启动之前，容器无法运行。"
+          }
+        }
+      }
+    },
     "Containers that have exited and aren't coming back on their own.": {
       "localizations": {
         "en": {
@@ -2470,6 +2838,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已退出且不会自行恢复的容器。"
+          }
+        }
+      }
+    },
+    "Continue in Background": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue in Background"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在后台继续"
           }
         }
       }
@@ -2762,6 +3146,22 @@
         }
       }
     },
+    "Copy the full error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the full error"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制完整错误"
+          }
+        }
+      }
+    },
     "Copy the full JSON to the clipboard": {
       "localizations": {
         "en": {
@@ -2794,6 +3194,70 @@
         }
       }
     },
+    "Could not connect to %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not connect to %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法连接到 %@。"
+          }
+        }
+      }
+    },
+    "Could not create the machine.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create the machine."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建虚拟机。"
+          }
+        }
+      }
+    },
+    "Could not create the network.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create the network."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建网络。"
+          }
+        }
+      }
+    },
+    "Could not create the volume.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create the volume."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法创建卷。"
+          }
+        }
+      }
+    },
     "Could not load container details.": {
       "localizations": {
         "en": {
@@ -2822,6 +3286,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法开始创建集群。"
+          }
+        }
+      }
+    },
+    "Could not start the tunnel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start the tunnel."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法启动隧道。"
+          }
+        }
+      }
+    },
+    "Could not tag the image.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not tag the image."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法为镜像添加标签。"
           }
         }
       }
@@ -2982,6 +3478,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建机器"
+          }
+        }
+      }
+    },
+    "Create machine %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create machine %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建虚拟机 %@"
           }
         }
       }
@@ -3210,6 +3722,22 @@
         }
       }
     },
+    "Data that is not in a volume is lost. Force Remove also stops a running container.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data that is not in a volume is lost. Force Remove also stops a running container."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不在卷中的数据会丢失。强制移除也会停止正在运行的容器。"
+          }
+        }
+      }
+    },
     "Dead": {
       "localizations": {
         "en": {
@@ -3338,6 +3866,22 @@
         }
       }
     },
+    "Delete cluster “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete cluster “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除集群“%@”？"
+          }
+        }
+      }
+    },
     "Delete domain (requires admin)": {
       "localizations": {
         "en": {
@@ -3350,6 +3894,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除域名（需要管理员权限）"
+          }
+        }
+      }
+    },
+    "Delete local domain “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete local domain “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除本地域名“%@”？"
+          }
+        }
+      }
+    },
+    "Delete machine “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete machine “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除虚拟机“%@”？"
           }
         }
       }
@@ -3418,6 +3994,22 @@
         }
       }
     },
+    "Details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详细信息"
+          }
+        }
+      }
+    },
     "Disabled": {
       "localizations": {
         "en": {
@@ -3430,6 +4022,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已禁用"
+          }
+        }
+      }
+    },
+    "Discard Changes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Changes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放弃更改"
           }
         }
       }
@@ -3686,6 +4294,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "完成"
+          }
+        }
+      }
+    },
+    "Done: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成：%@"
           }
         }
       }
@@ -4026,6 +4650,22 @@
         }
       }
     },
+    "Export %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出 %@"
+          }
+        }
+      }
+    },
     "Export Filesystem…": {
       "localizations": {
         "en": {
@@ -4070,6 +4710,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Expose port %@) of %@ to the internet"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败"
           }
         }
       }
@@ -4266,6 +4922,38 @@
         }
       }
     },
+    "Forget": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记"
+          }
+        }
+      }
+    },
+    "Forget the saved secret for “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget the saved secret for “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记“%@”已保存的密钥？"
+          }
+        }
+      }
+    },
     "Forget…": {
       "localizations": {
         "en": {
@@ -4390,6 +5078,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gantry 可通过 Apple 的 `container` 运行时在 Mac 上原生管理 Linux 容器 — 但尚未安装。"
+          }
+        }
+      }
+    },
+    "Gantry disconnects and removes the host. Containers on the host do not change.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry disconnects and removes the host. Containers on the host do not change."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 会断开并移除此主机。主机上的容器不会改变。"
           }
         }
       }
@@ -5210,6 +5914,22 @@
         }
       }
     },
+    "Keep Running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续运行"
+          }
+        }
+      }
+    },
     "Items with the same name in %@ are overwritten: %@.": {
       "localizations": {
         "en": {
@@ -5686,6 +6406,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已登录 Cloudflare"
+          }
+        }
+      }
+    },
+    "Long operations: pulls, builds, deploys and installs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long operations: pulls, builds, deploys and installs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长时间操作：拉取、构建、部署和安装"
           }
         }
       }
@@ -6294,6 +7030,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一个匹配"
+          }
+        }
+      }
+    },
+    "No Activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Activity"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无活动"
           }
         }
       }
@@ -7818,6 +8570,22 @@
         }
       }
     },
+    "Pull %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pull %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拉取 %@"
+          }
+        }
+      }
+    },
     "Pull an image from a registry or build one from a Dockerfile.": {
       "localizations": {
         "en": {
@@ -7914,6 +8682,22 @@
         }
       }
     },
+    "Pulling %@ and booting…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulling %@ and booting…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拉取 %@ 并启动…"
+          }
+        }
+      }
+    },
     "Pulling %@…": {
       "localizations": {
         "en": {
@@ -7974,6 +8758,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在拉取节点镜像。这可能需要几分钟。"
+          }
+        }
+      }
+    },
+    "Pulls, builds, deploys and installs show here while they run.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulls, builds, deploys and installs show here while they run."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拉取、构建、部署和安装在运行时显示在这里。"
           }
         }
       }
@@ -8442,6 +9242,22 @@
         }
       }
     },
+    "Remove %lld containers?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %lld containers?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 %lld 个容器？"
+          }
+        }
+      }
+    },
     "Remove all stopped containers?": {
       "localizations": {
         "en": {
@@ -8474,6 +9290,22 @@
         }
       }
     },
+    "Remove host “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove host “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除主机“%@”？"
+          }
+        }
+      }
+    },
     "Remove Host…": {
       "localizations": {
         "en": {
@@ -8486,6 +9318,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除主机…"
+          }
+        }
+      }
+    },
+    "Remove image “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove image “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除镜像“%@”？"
+          }
+        }
+      }
+    },
+    "Remove network “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove network “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除网络“%@”？"
           }
         }
       }
@@ -8518,6 +9382,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除此主机？"
+          }
+        }
+      }
+    },
+    "Remove volume “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove volume “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除卷“%@”？"
+          }
+        }
+      }
+    },
+    "Remove “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除“%@”？"
           }
         }
       }
@@ -8892,6 +9788,54 @@
         }
       }
     },
+    "Restart All": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部重启"
+          }
+        }
+      }
+    },
+    "Restart all containers in “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart all containers in “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启“%@”中的所有容器？"
+          }
+        }
+      }
+    },
+    "Restart apple/container services?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart apple/container services?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启 apple/container 服务？"
+          }
+        }
+      }
+    },
     "Restart Container": {
       "localizations": {
         "en": {
@@ -8952,6 +9896,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "重启服务以为新容器应用名称解析。"
+          }
+        }
+      }
+    },
+    "Restart Services…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart Services…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启服务…"
           }
         }
       }
@@ -9244,6 +10204,22 @@
         }
       }
     },
+    "Save and Apply": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save and Apply"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存并应用"
+          }
+        }
+      }
+    },
     "Save in Keychain": {
       "localizations": {
         "en": {
@@ -9256,6 +10232,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存到钥匙串"
+          }
+        }
+      }
+    },
+    "Saved %@ to %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved %@ to %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已将 %1$@ 保存到 %2$@"
           }
         }
       }
@@ -9948,6 +10940,22 @@
         }
       }
     },
+    "Standalone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standalone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独立"
+          }
+        }
+      }
+    },
     "Stack logs · %@": {
       "localizations": {
         "en": {
@@ -10220,6 +11228,70 @@
         }
       }
     },
+    "Stop All": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部停止"
+          }
+        }
+      }
+    },
+    "Stop all containers in “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop all containers in “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止“%@”中的所有容器？"
+          }
+        }
+      }
+    },
+    "Stop and Delete Nodes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop and Delete Nodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止并删除节点"
+          }
+        }
+      }
+    },
+    "Stop apple/container services?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop apple/container services?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止 apple/container 服务？"
+          }
+        }
+      }
+    },
     "Stop Container": {
       "localizations": {
         "en": {
@@ -10236,6 +11308,22 @@
         }
       }
     },
+    "Stop creating cluster “%@”?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop creating cluster “%@”?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止创建集群“%@”？"
+          }
+        }
+      }
+    },
     "Stop forward": {
       "localizations": {
         "en": {
@@ -10248,6 +11336,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止转发"
+          }
+        }
+      }
+    },
+    "Stop Services": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Services"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止服务"
           }
         }
       }
@@ -10316,6 +11420,22 @@
         }
       }
     },
+    "Stopping…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopping…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在停止…"
+          }
+        }
+      }
+    },
     "Stops a running container on a Docker host.": {
       "localizations": {
         "en": {
@@ -10328,6 +11448,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止 Docker 主机上正在运行的容器。"
+          }
+        }
+      }
+    },
+    "Stop…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止…"
           }
         }
       }
@@ -10588,6 +11724,22 @@
         }
       }
     },
+    "The action failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The action failed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作失败。"
+          }
+        }
+      }
+    },
     "The apple/container background services must be running for local containers to work.": {
       "localizations": {
         "en": {
@@ -10616,6 +11768,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法确认主机 “%@” 的真实性。在信任此服务器前，请核验下方指纹。"
+          }
+        }
+      }
+    },
+    "The build keeps running. Follow it in Activity.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The build keeps running. Follow it in Activity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建会继续运行。可在“活动”中查看。"
           }
         }
       }
@@ -10684,6 +11852,22 @@
         }
       }
     },
+    "The deploy keeps running. Follow it in Activity.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The deploy keeps running. Follow it in Activity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部署会继续运行。可在“活动”中查看。"
+          }
+        }
+      }
+    },
     "The Docker engine on this Mac: Docker Desktop, OrbStack, Colima, Rancher Desktop or Podman.": {
       "localizations": {
         "en": {
@@ -10728,6 +11912,182 @@
           "stringUnit": {
             "state": "translated",
             "value": "Homebrew 版本的 apple/container 不包含虚拟机 API 服务器。要使用虚拟机，请安装 Apple 签名的安装包。"
+          }
+        }
+      }
+    },
+    "The image is deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image is deleted from this host."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像将从此主机删除。"
+          }
+        }
+      }
+    },
+    "The install keeps running. Follow it in Activity.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The install keeps running. Follow it in Activity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装会继续运行。可在“活动”中查看。"
+          }
+        }
+      }
+    },
+    "The kernel is installed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The kernel is installed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内核已安装。"
+          }
+        }
+      }
+    },
+    "The machine and its disk are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The machine and its disk are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟机及其磁盘将被删除。"
+          }
+        }
+      }
+    },
+    "The machine is running and will stop.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The machine is running and will stop."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟机正在运行，将会停止。"
+          }
+        }
+      }
+    },
+    "The network is deleted from this host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The network is deleted from this host."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络将从此主机删除。"
+          }
+        }
+      }
+    },
+    "The nodes that this creation made so far are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The nodes that this creation made so far are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此次创建已生成的节点将被删除。"
+          }
+        }
+      }
+    },
+    "The password or passphrase is deleted from the Keychain. Gantry asks for it on the next connection.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The password or passphrase is deleted from the Keychain. Gantry asks for it on the next connection."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码或密钥口令将从钥匙串中删除。下次连接时 Gantry 会再次询问。"
+          }
+        }
+      }
+    },
+    "The pull keeps running. Follow it in Activity.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The pull keeps running. Follow it in Activity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拉取会继续运行。可在“活动”中查看。"
+          }
+        }
+      }
+    },
+    "The services stop and start again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The services stop and start again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务将停止并重新启动。"
+          }
+        }
+      }
+    },
+    "The volume and all its data are deleted.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The volume and all its data are deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卷及其所有数据将被删除。"
           }
         }
       }
@@ -10892,6 +12252,22 @@
         }
       }
     },
+    "Trim container disks": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim container disks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修剪容器磁盘"
+          }
+        }
+      }
+    },
     "Trim Disk": {
       "localizations": {
         "en": {
@@ -10904,6 +12280,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "修剪磁盘"
+          }
+        }
+      }
+    },
+    "Trim disk of %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim disk of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修剪 %@ 的磁盘"
           }
         }
       }
@@ -10936,6 +12328,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "已修剪 %lld 个容器"
+          }
+        }
+      }
+    },
+    "Trimmed %lld disks.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trimmed %lld disks."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已修剪 %lld 个磁盘。"
+          }
+        }
+      }
+    },
+    "Trimmed 1 disk.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trimmed 1 disk."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已修剪 1 个磁盘。"
           }
         }
       }
@@ -11484,6 +12908,22 @@
         }
       }
     },
+    "Working…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在处理…"
+          }
+        }
+      }
+    },
     "Write": {
       "localizations": {
         "en": {
@@ -11528,6 +12968,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "写入 Kubeconfig…"
+          }
+        }
+      }
+    },
+    "Writes the YAML to the file, then uses it for Up.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writes the YAML to the file, then uses it for Up."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将 YAML 写入文件，然后用于启动。"
           }
         }
       }
