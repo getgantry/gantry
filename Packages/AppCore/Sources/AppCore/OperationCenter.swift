@@ -15,6 +15,7 @@ public enum OperationKind: String, Sendable, CaseIterable {
     case brewInstall
     /// One action on several selected items.
     case bulk
+    case kubernetes
     case other
 }
 

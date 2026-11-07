@@ -20,6 +20,7 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case stopServices
         case restartServices
         case cancelClusterCreation
+        case deleteKubeResource
     }
 
     /// What else happens when the action runs.
@@ -148,6 +149,11 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
             names: [],
             impact: runningContainers > 0 ? .runningContainersStop(runningContainers) : .none
         )
+    }
+
+    /// Deletes a Kubernetes object; `targets` holds its id.
+    public static func deleteKubeResource(_ resource: KubeResource) -> DestructiveAction {
+        DestructiveAction(kind: .deleteKubeResource, targets: [resource.id], names: [resource.reference])
     }
 
     public static func deleteMachine(_ machine: ContainerMachine) -> DestructiveAction {
