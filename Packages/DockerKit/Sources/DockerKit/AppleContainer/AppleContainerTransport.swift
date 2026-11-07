@@ -546,6 +546,12 @@ public actor AppleContainerTransport: DockerTransport {
         if let workingDir = json["WorkingDir"] as? String, !workingDir.isEmpty {
             arguments += ["--workdir", workingDir]
         }
+        if let user = json["User"] as? String, !user.isEmpty {
+            arguments += ["--user", user]
+        }
+        if (json["OpenStdin"] as? Bool) == true {
+            arguments.append("--interactive")
+        }
         // A DNS domain makes the container resolvable as `<name>.<domain>` once
         // that local domain exists (`container system dns create`).
         if let domain = json["Domainname"] as? String, !domain.isEmpty {
