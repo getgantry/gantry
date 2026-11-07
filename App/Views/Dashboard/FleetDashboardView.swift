@@ -22,10 +22,7 @@ struct FleetDashboardView: View {
             VStack(alignment: .leading, spacing: Spacing.m) {
                 fleetBanner
                 FleetIssuesView(navigate: navigate)
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 380), spacing: Spacing.m, alignment: .top)],
-                    spacing: Spacing.m
-                ) {
+                LazyVGrid(columns: hostColumns, spacing: Spacing.m) {
                     ForEach(model.sessions) { session in
                         HostCard(session: session, navigate: navigate)
                     }
@@ -36,6 +33,13 @@ struct FleetDashboardView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("Dashboard")
+    }
+
+    /// One host fills the width. Several hosts share it, at least 380 pt each.
+    private var hostColumns: [GridItem] {
+        model.sessions.count == 1
+            ? [GridItem(.flexible(), alignment: .top)]
+            : [GridItem(.adaptive(minimum: 380), spacing: Spacing.m, alignment: .top)]
     }
 
     // MARK: Fleet banner

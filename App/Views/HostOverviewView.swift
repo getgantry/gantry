@@ -100,7 +100,7 @@ struct HostOverviewView: View {
     private var samples: [LoadSample] { session.loadHistory }
 
     private func metricsGrid(info: SystemInfo) -> some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: Spacing.m, alignment: .top)], spacing: Spacing.m) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 200), spacing: Spacing.m, alignment: .top)], spacing: Spacing.m) {
             cpuCard(info: info)
             memoryCard(info: info)
             MetricChartCard(
@@ -158,7 +158,7 @@ struct HostOverviewView: View {
         // The container list is the one source for these counts; the daemon's
         // own totals include the hidden apple builder and lag behind events.
         let counts = session.containerCounts
-        return LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: Spacing.m)], spacing: Spacing.m) {
+        return HStack(spacing: Spacing.m) {
             StatTile(
                 value: "\(counts.running)",
                 label: String(localized: "tile.running", defaultValue: "Running", comment: "Label under a count of containers"),

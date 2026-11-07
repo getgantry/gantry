@@ -217,6 +217,7 @@ struct KubeKindList: View {
             ForEach(KubeResourceKind.allCases) { kind in
                 Label(kind.title, systemImage: kind.systemImage)
                     .tag(kind)
+                    .listRowSeparator(.hidden)
             }
         }
         // Not .sidebar: outside the window sidebar that style draws the

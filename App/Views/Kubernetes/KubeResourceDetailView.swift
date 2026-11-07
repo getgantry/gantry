@@ -72,7 +72,7 @@ struct KubeDetailHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: resource.name)
                     .font(.title2.weight(.bold))
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
                 HStack(spacing: 6) {
