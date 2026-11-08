@@ -205,7 +205,7 @@ extension AppleContainerControl {
             let child = ChildProcess(
                 executable: cli,
                 arguments: arguments,
-                environment: ["NO_COLOR": "1"],
+                environment: ["NO_COLOR": "1"].merging(AppleDataRootStore.shared.load().cliEnvironment) { _, new in new },
                 mergeOutput: true
             )
             let splitter = LineSplitter()

@@ -176,11 +176,13 @@ struct CreateContainerSheet: View {
                         .buttonStyle(.borderless)
                         .help("Choose a host folder")
                         .accessibilityLabel("Choose a host folder")
+                        BindSourceMenu(session: session) { row.host = $0 }
                         Text(verbatim: ":").foregroundStyle(.secondary)
                         TextField("Container path", text: $row.container)
                         Toggle("ro", isOn: $row.readOnly)
                             .toggleStyle(.checkbox)
                     }
+                    BindMountWarnings(session: session, paths: binds.map(\.host))
                     if let note = socketMountNote {
                         Label(note, systemImage: "point.3.connected.trianglepath.dotted")
                             .font(.caption)
@@ -201,6 +203,12 @@ struct CreateContainerSheet: View {
                 }
 
                 hostWarningsSection
+
+                if let wait = session.diskAccessWait {
+                    Section {
+                        DiskAccessHint(message: wait.message) { wait.cancel() }
+                    }
+                }
 
                 if let errorText {
                     Section {

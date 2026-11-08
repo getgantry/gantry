@@ -149,6 +149,7 @@ struct GantryApp: App {
         notificationsConfigured = true
         ContainerNotifier.shared.start()
         SystemIntegration.shared.attach(model)
+        DiskMountWatcher.shared.start(model: model)
         model.containerAlertHandler = { alert in
             ContainerNotifier.shared.present(alert)
         }

@@ -25,6 +25,10 @@ enum DestructiveActionText {
         case .restartServices: return String(localized: "Restart apple/container services?")
         case .cancelClusterCreation: return String(localized: "Stop creating cluster “\(name)”?")
         case .deleteKubeResource: return String(localized: "Delete “\(name)”?")
+        case .moveDataRoot: return String(localized: "Move the container data to “\(name)”?")
+        case .deleteOldDataRoot: return String(localized: "Delete the old copy of the container data?")
+        case .switchVolume: return String(localized: "Use the new location of “\(name)”?")
+        case .forgetFolderVolume: return String(localized: "Remove folder volume “\(name)” from Gantry?")
         }
     }
 
@@ -33,6 +37,11 @@ enum DestructiveActionText {
         let text = [base, impact(action.impact)]
             .compactMap { $0 }
             .joined(separator: " ")
+        switch action.kind {
+        case .switchVolume: return text + "\n\n" + action.names.dropFirst().joined(separator: "\n")
+        case .deleteOldDataRoot, .moveDataRoot: return text + "\n\n" + (action.targets.first ?? "")
+        default: break
+        }
         guard isBulk(action) else { return text }
         return text + "\n\n" + nameList(action)
     }
@@ -81,6 +90,10 @@ enum DestructiveActionText {
         case .stopServices: String(localized: "Stop Services")
         case .restartServices: String(localized: "Restart Services")
         case .cancelClusterCreation: String(localized: "Stop and Delete Nodes")
+        case .moveDataRoot: String(localized: "Stop Services and Move")
+        case .deleteOldDataRoot: String(localized: "Delete Old Copy")
+        case .switchVolume: String(localized: "Recreate Containers")
+        case .forgetFolderVolume: String(localized: "Remove from Gantry")
         }
     }
 
@@ -111,6 +124,14 @@ enum DestructiveActionText {
         case .restartServices: String(localized: "The services stop and start again.")
         case .deleteKubeResource:
             String(localized: "Kubernetes deletes the object from the cluster. A controller can create a replacement.")
+        case .moveDataRoot:
+            String(localized: "The services stop while Gantry copies the data. The original stays until you delete it.")
+        case .deleteOldDataRoot:
+            String(localized: "The old folder and all its files are deleted. The services use the new copy.")
+        case .switchVolume:
+            String(localized: "Gantry removes these containers and makes them again with the new location. Data that is not in a volume is lost.")
+        case .forgetFolderVolume:
+            String(localized: "The folder and its files stay on the disk.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }

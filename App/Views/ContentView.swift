@@ -872,7 +872,11 @@ struct ContentView: View {
         // Action errors: a non-modal banner titled by host kind, not a modal
         // alert. Sheets show their own errors inline (HostSession.attempt).
         .safeAreaInset(edge: .top, spacing: 0) {
-            ActionErrorBanner(session: session)
+            VStack(spacing: 0) {
+                HostStorageBanner(session: session)
+                DiskAccessBanner(session: session)
+                ActionErrorBanner(session: session)
+            }
         }
         .animation(.snappy, value: session.lastError)
         .modifier(AppleMissingKernelAlert(session: session))

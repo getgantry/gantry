@@ -5,10 +5,13 @@ private struct CreateRequest: Encodable {
     var name: String
     var driver: String
     var labels: [String: String]
+    /// Volume driver options; nil for networks.
+    var driverOpts: [String: String]?
     enum CodingKeys: String, CodingKey {
         case name = "Name"
         case driver = "Driver"
         case labels = "Labels"
+        case driverOpts = "DriverOpts"
     }
 }
 
@@ -19,9 +22,13 @@ extension DockerClient {
     public func createVolume(
         name: String,
         driver: String = "local",
-        labels: [String: String] = [:]
+        labels: [String: String] = [:],
+        driverOptions: [String: String] = [:]
     ) async throws -> Volume {
-        let body = try JSONEncoder().encode(CreateRequest(name: name, driver: driver, labels: labels))
+        let body = try JSONEncoder().encode(CreateRequest(
+            name: name, driver: driver, labels: labels,
+            driverOpts: driverOptions.isEmpty ? nil : driverOptions
+        ))
         let response = try await requestData(
             method: .post,
             path: "/volumes/create",

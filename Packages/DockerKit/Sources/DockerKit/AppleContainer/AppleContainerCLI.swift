@@ -104,8 +104,10 @@ public struct AppleContainerProcessRunner: AppleContainerCLIRunning {
     }
 
     /// The CLI talks XPC to container-apiserver; the inherited environment
-    /// (for HOME) plus `NO_COLOR` is all it needs.
-    private static let environment = ["NO_COLOR": "1"]
+    /// (for HOME), `NO_COLOR` and the chosen data root are all it needs.
+    static var environment: [String: String] {
+        ["NO_COLOR": "1"].merging(AppleDataRootStore.shared.load().cliEnvironment) { _, new in new }
+    }
 
     public func run(_ arguments: [String]) async throws -> AppleCLIResult {
         let result: ChildProcessResult
@@ -212,6 +214,8 @@ final class PipeProcess: AppleCLIInteractiveProcess, @unchecked Sendable {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
+        process.environment = ProcessInfo.processInfo.environment
+            .merging(AppleContainerProcessRunner.environment) { _, new in new }
         let stdinPipe = Pipe()
         let stdoutPipe = Pipe()
         let stderrPipe = Pipe()
@@ -312,6 +316,7 @@ final class PTYProcess: AppleCLIInteractiveProcess, @unchecked Sendable {
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
         var environment = ProcessInfo.processInfo.environment
+            .merging(AppleContainerProcessRunner.environment) { _, new in new }
         environment["TERM"] = "xterm-256color"
         process.environment = environment
         process.standardInput = slaveHandle

@@ -21,7 +21,8 @@ struct HostUnavailableView: View {
             ProgressView("Connecting to \(session.host.name)…")
                 .controlSize(.large)
         case .failed(let message):
-            unavailable(reason: message)
+            // A missing disk is the reason, not a broken host.
+            unavailable(reason: session.dataRootBlock()?.hostMessage ?? message)
         default:
             if session.dockerNotInstalled {
                 dockerMissing

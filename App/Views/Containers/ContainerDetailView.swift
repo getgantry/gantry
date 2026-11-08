@@ -43,6 +43,8 @@ struct ContainerDetailView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
                 .padding([.horizontal, .top])
+            ContainerStorageBanner(session: session, container: container)
+                .padding([.horizontal, .top])
 
             Picker("Section", selection: $tab) {
                 ForEach(DetailTab.allCases) { Text($0.title).tag($0) }
@@ -74,7 +76,7 @@ struct ContainerDetailView: View {
         .onscreenContainer(hostID: session.id, containerID: container.id, name: container.displayName)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                actionButton(.start, systemImage: "play.fill", enabled: !isRunning)
+                actionButton(.start, systemImage: "play.fill", enabled: !isRunning && session.storageBlock(for: container) == nil)
                 actionButton(.stop, systemImage: "stop.fill", enabled: isRunning)
                 actionButton(.restart, systemImage: "arrow.clockwise", enabled: isRunning)
                 overflowMenu

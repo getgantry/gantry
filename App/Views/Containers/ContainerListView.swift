@@ -716,7 +716,7 @@ struct ContainerActionsMenu: View {
             }
             .disabled(true)
         } else {
-            button(.start, enabled: !isRunning)
+            button(.start, enabled: !isRunning && session.storageBlock(for: container) == nil)
             button(.stop, enabled: isRunning)
             button(.restart, enabled: isRunning)
             if caps.pauseResume {

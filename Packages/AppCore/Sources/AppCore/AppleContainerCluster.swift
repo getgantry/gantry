@@ -300,7 +300,7 @@ extension AppleContainerControl {
         output: @escaping @Sendable (String) -> Void
     ) async throws {
         guard let cli = cliPath(override: cliOverride) else { throw AppleControlError.cliNotFound }
-        var env = ["NO_COLOR": "1"]
+        var env = ["NO_COLOR": "1"].merging(AppleDataRootStore.shared.load().cliEnvironment) { _, new in new }
         env.merge(environment) { _, new in new }
         let child = ChildProcess(executable: cli, arguments: arguments, environment: env, mergeOutput: true)
         let splitter = ClusterLineSplitter(output: output)

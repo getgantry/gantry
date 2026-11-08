@@ -91,6 +91,13 @@ struct ImageListView: View {
                 Label("Load into Cluster", systemImage: "steeringwheel")
             }
         }
+        if session.usesLocalPaths, let reference = clusterReference(image) {
+            Button {
+                ImageArchiveActions.save(session: session, reference: reference)
+            } label: {
+                Label("Save to Archive…", systemImage: "square.and.arrow.down.on.square")
+            }
+        }
         Divider()
         Button(role: .destructive) {
             removeAction = removeAction(for: image)
@@ -169,6 +176,10 @@ struct ImageListView: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Menu {
+                    if session.usesLocalPaths {
+                        Button("Load from Archive…") { ImageArchiveActions.load(session: session) }
+                        Divider()
+                    }
                     Button("Prune Dangling Images…") { pruneConfirm = .dangling }
                     Button("Prune All Unused…") { pruneConfirm = .allUnused }
                 } label: {

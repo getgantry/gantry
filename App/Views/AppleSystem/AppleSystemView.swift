@@ -5,6 +5,7 @@ import AppCore
 /// an apple host manages.
 enum AppleSystemPane: String, CaseIterable, Identifiable {
     case overview
+    case storage
     case builder
     case registries
     case kernel
@@ -16,6 +17,7 @@ enum AppleSystemPane: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .overview: String(localized: "Status & Version")
+        case .storage: String(localized: "Storage")
         case .builder: String(localized: "Image Builder")
         case .registries: String(localized: "Registry Logins")
         case .kernel: String(localized: "Kernel")
@@ -27,6 +29,7 @@ enum AppleSystemPane: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .overview: String(localized: "Services, versions, paths and resources")
+        case .storage: String(localized: "Where the data is and how much space it uses")
         case .builder: String(localized: "The BuildKit container for image builds")
         case .registries: String(localized: "Credentials for pushing and pulling")
         case .kernel: String(localized: "The Linux kernel that containers boot")
@@ -38,6 +41,7 @@ enum AppleSystemPane: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .overview: "info.circle"
+        case .storage: "internaldrive"
         case .builder: "hammer"
         case .registries: "person.badge.key"
         case .kernel: "cpu"
@@ -99,6 +103,7 @@ struct AppleSystemDetailView: View {
         Group {
             switch AppleSystemPane(rawValue: paneID) {
             case .overview: AppleSystemOverviewPane(session: session)
+            case .storage: StoragePane(session: session)
             case .builder: AppleBuilderPane(session: session)
             case .registries: AppleRegistriesPane(session: session)
             case .kernel: AppleKernelPane(session: session)

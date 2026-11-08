@@ -16,6 +16,8 @@ public enum OperationKind: String, Sendable, CaseIterable {
     /// One action on several selected items.
     case bulk
     case kubernetes
+    /// Data moves, volume copies and archives.
+    case storage
     case other
 }
 

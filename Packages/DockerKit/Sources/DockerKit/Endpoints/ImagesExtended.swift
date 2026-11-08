@@ -119,3 +119,31 @@ extension DockerClient {
         }
     }
 }
+
+extension DockerClient {
+    // MARK: - Image archives
+
+    /// `GET /images/get?names=…`: the images as one tar stream.
+    public func saveImages(references: [String]) async throws -> DockerByteStream {
+        let query = references.map { URLQueryItem(name: "names", value: $0) }
+        let stream = try await byteStream(method: .get, path: "/images/get", query: query)
+        guard stream.status == 200 else {
+            throw DockerError.apiError(status: stream.status, message: "Could not save the image")
+        }
+        return stream
+    }
+
+    /// `POST /images/load` with a tar archive. Returns the daemon's text.
+    @discardableResult
+    public func loadImages(archive: Data) async throws -> String {
+        let response = try await requestData(
+            method: .post,
+            path: "/images/load",
+            query: [URLQueryItem(name: "quiet", value: "1")],
+            headers: ["Content-Type": "application/x-tar"],
+            body: archive,
+            expecting: [200]
+        )
+        return String(decoding: response.body, as: UTF8.self)
+    }
+}

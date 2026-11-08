@@ -1,4 +1,5 @@
 import Foundation
+import DockerKit
 
 /// The guest architecture a default kernel is installed for.
 public enum AppleKernelArchitecture: String, Sendable, CaseIterable {
@@ -97,8 +98,7 @@ extension AppleContainerControl {
 
     /// The apple/container application root when the CLI cannot report one.
     public static var defaultAppRoot: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/com.apple.container", isDirectory: true)
+        URL(fileURLWithPath: AppleDataRootStore.shared.load().effectivePath, isDirectory: true)
     }
 
     /// Whether a default kernel is installed: the services keep it as the

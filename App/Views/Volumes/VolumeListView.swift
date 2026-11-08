@@ -38,6 +38,7 @@ struct VolumeListView: View {
     @State private var showingNew = false
     @State private var pruneConfirm = false
     @State private var pruneOutcome: PruneOutcome?
+    @State private var volumeMove: VolumeMove?
     @AppStorage("volumeSort") private var sort: VolumeSort = .name
     @AppStorage("volumeSortAscending") private var ascending = true
 
@@ -97,6 +98,7 @@ struct VolumeListView: View {
             } label: {
                 Label("Copy Name", systemImage: "doc.on.doc")
             }
+            if session.usesLocalPaths { storageItems(name) }
             Divider()
             Button(role: .destructive) {
                 removeAction = .removeVolume(name: name, containers: session.containers, engine: .init(session.host))
@@ -106,8 +108,30 @@ struct VolumeListView: View {
         }
     }
 
+    /// Move, export and import; host paths only exist on this Mac.
+    @ViewBuilder
+    private func storageItems(_ name: String) -> some View {
+        Divider()
+        Button {
+            volumeMove = .toFolder(volume: name)
+        } label: {
+            Label("Move to a Disk…", systemImage: "externaldrive.badge.plus")
+        }
+        Button {
+            VolumeArchiveActions.export(session: session, volume: .named(name), name: name)
+        } label: {
+            Label("Export to Archive…", systemImage: "square.and.arrow.up")
+        }
+        Button {
+            VolumeArchiveActions.importArchive(session: session, into: .named(name), name: name)
+        } label: {
+            Label("Import from Archive…", systemImage: "square.and.arrow.down")
+        }
+    }
+
     var body: some View {
         List(selection: $selection) {
+            FolderVolumeSection(session: session)
             ForEach(displayed) { volume in
                 VolumeRow(
                     volume: volume,
@@ -141,6 +165,9 @@ struct VolumeListView: View {
         .onSectionCommand(.refresh, .volumes) { Task { await refresh() } }
         .sheet(isPresented: $showingNew) {
             NewVolumeSheet(session: session)
+        }
+        .sheet(item: $volumeMove) { move in
+            VolumeTransferSheet(session: session, move: move)
         }
         .confirmationDialog(
             "Prune Unused Volumes?",
@@ -304,6 +331,9 @@ struct VolumeDetailView: View {
                             Fact("Scope", volume.scope)
                             Fact("Name", volume.name, monospaced: true, copyable: true)
                             Fact("Mountpoint", volume.mountpoint, monospaced: true, copyable: !volume.mountpoint.isEmpty)
+                            if let folder = FolderVolumeRules.dockerBindPath(options: volume.options) {
+                                Fact("Folder", folder, monospaced: true, copyable: true)
+                            }
                             if let size = volumeSize, size >= 0 {
                                 Fact("Size", Formatters.bytes(size, style: .file))
                             }
