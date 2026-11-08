@@ -19,8 +19,7 @@ final class MachineShellSession: TerminalSession, LocalProcessDelegate {
     private var process: LocalProcess!
     private var windowSize = winsize(ws_row: 24, ws_col: 80, ws_xpixel: 0, ws_ypixel: 0)
 
-    /// `extraEnvironment` entries (`KEY=value`) go after SwiftTerm's defaults;
-    /// the kubectl exec shell uses it for `KUBECONFIG`.
+    /// `extraEnvironment` entries (`KEY=value`) go after SwiftTerm's defaults.
     init(executable: String, args: [String], extraEnvironment: [String] = []) {
         (stream, continuation) = AsyncThrowingStream<Data, Error>.makeStream()
         process = LocalProcess(delegate: self)

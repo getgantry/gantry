@@ -1,10 +1,10 @@
 import SwiftUI
 import AppCore
 
-/// `kubectl logs` of a pod container, with follow, tail and copy.
+/// The logs of a pod container, with follow, tail and copy.
 struct KubeLogsView: View {
     let pod: KubeResource
-    let client: KubectlClient
+    let client: KubeAPIClient
 
     @State private var stream = KubeLogStream()
     @State private var container: String?
@@ -12,7 +12,7 @@ struct KubeLogsView: View {
     @State private var previous = false
     @State private var tail = 500
 
-    init(pod: KubeResource, client: KubectlClient) {
+    init(pod: KubeResource, client: KubeAPIClient) {
         self.pod = pod
         self.client = client
         _container = State(initialValue: pod.containers.first)
@@ -106,13 +106,13 @@ struct KubeLogLines: View {
     }
 }
 
-/// An interactive shell in a pod container (`kubectl exec -it`).
+/// An interactive shell in a pod container, over the exec WebSocket.
 struct KubeTerminalView: View {
     let pod: KubeResource
-    let client: KubectlClient
+    let client: KubeAPIClient
     @State private var container: String?
 
-    init(pod: KubeResource, client: KubectlClient) {
+    init(pod: KubeResource, client: KubeAPIClient) {
         self.pod = pod
         self.client = client
         _container = State(initialValue: pod.containers.first)
@@ -146,11 +146,7 @@ struct KubeTerminalView: View {
             subtitle: target ?? "shell",
             connectionID: "\(pod.id)#\(target ?? "")",
             connect: {
-                MachineShellSession(
-                    executable: client.executable,
-                    args: client.execArguments(pod: pod, container: target),
-                    extraEnvironment: client.environmentEntries
-                )
+                try await KubePodShellSession.connect(client, pod: pod, container: target)
             }
         )
     }
@@ -159,7 +155,7 @@ struct KubeTerminalView: View {
 /// The keys of a Secret. A value shows only after Reveal.
 struct KubeSecretDataView: View {
     let resource: KubeResource
-    let client: KubectlClient
+    let client: KubeAPIClient
 
     @State private var entries: [KubeSecretEntry] = []
     @State private var revealed: Set<String> = []

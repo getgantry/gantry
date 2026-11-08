@@ -4,7 +4,7 @@ import AppCore
 /// The detail of one resource: overview, YAML and, for pods, logs and a shell.
 struct KubeResourceDetailView: View {
     let resource: KubeResource
-    let client: KubectlClient
+    let client: KubeAPIClient
     let actions: KubeResourceActions
 
     @State private var tab: Tab = .overview
@@ -139,7 +139,7 @@ struct KubeOverview: View {
 /// The YAML of the resource, loaded when the tab opens. Secret values are hidden.
 struct KubeYAMLView: View {
     let resource: KubeResource
-    let client: KubectlClient
+    let client: KubeAPIClient
 
     @State private var text: String?
     @State private var error: String?

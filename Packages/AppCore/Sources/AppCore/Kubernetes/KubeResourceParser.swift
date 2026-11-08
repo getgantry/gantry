@@ -26,14 +26,14 @@ public enum KubeFieldLabel {
     public static var count: String { String(localized: "Count", bundle: .module) }
 }
 
-/// Parses `kubectl get <kind> -o json` output into ``KubeResource`` values.
+/// Parses API list JSON (`GET /api/v1/pods`) into ``KubeResource`` values.
 public enum KubeResourceParser {
     typealias Object = [String: Any]
 
     /// Parses a `List` (or one object) of `kind`. Events come newest first.
     public static func parse(_ data: Data, kind: KubeResourceKind) throws -> [KubeResource] {
         guard let root = try JSONSerialization.jsonObject(with: data) as? Object else {
-            throw KubectlError.unexpectedOutput
+            throw KubeAPIError.unexpectedResponse
         }
         let items = root["items"] as? [Object] ?? (root["metadata"] != nil ? [root] : [])
         let resources = items.map { resource(from: $0, kind: kind) }
@@ -43,10 +43,10 @@ public enum KubeResourceParser {
         return resources
     }
 
-    /// Parses `kubectl get namespaces -o json` into sorted names.
+    /// Parses a namespace list into sorted names.
     public static func namespaces(_ data: Data) throws -> [String] {
         guard let root = try JSONSerialization.jsonObject(with: data) as? Object else {
-            throw KubectlError.unexpectedOutput
+            throw KubeAPIError.unexpectedResponse
         }
         return (root["items"] as? [Object] ?? [])
             .compactMap { ($0["metadata"] as? Object)?["name"] as? String }
@@ -110,7 +110,7 @@ public enum KubeResourceParser {
         ]
     }
 
-    /// The status text that `kubectl get pods` prints, and its health.
+    /// The pod status text (as kubectl shows it), and its health.
     static func podStatus(metadata: Object, status: Object, ready: Int, total: Int) -> (String, KubeHealth) {
         if metadata["deletionTimestamp"] != nil { return ("Terminating", .progressing) }
         let phase = status["phase"] as? String ?? "Unknown"

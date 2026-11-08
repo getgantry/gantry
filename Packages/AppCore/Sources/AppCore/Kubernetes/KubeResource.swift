@@ -15,8 +15,8 @@ public enum KubeResourceKind: String, CaseIterable, Identifiable, Hashable, Send
 
     public var id: String { rawValue }
 
-    /// The resource name for `kubectl get`.
-    public var kubectlName: String {
+    /// The plural resource name in API paths (`/api/v1/pods`).
+    public var resourceName: String {
         switch self {
         case .pods: "pods"
         case .deployments: "deployments"
@@ -31,7 +31,7 @@ public enum KubeResourceKind: String, CaseIterable, Identifiable, Hashable, Send
         }
     }
 
-    /// The prefix of a `kubectl` object reference (`deployment/web`).
+    /// The prefix of an object reference (`deployment/web`).
     public var singularName: String {
         switch self {
         case .pods: "pod"
@@ -77,10 +77,19 @@ public enum KubeResourceKind: String, CaseIterable, Identifiable, Hashable, Send
         }
     }
 
+    /// The API group and version path: `/api/v1` or `/apis/apps/v1`.
+    public var apiPrefix: String {
+        switch self {
+        case .pods, .services, .configMaps, .secrets, .nodes, .events: "/api/v1"
+        case .deployments, .statefulSets, .daemonSets: "/apis/apps/v1"
+        case .ingresses: "/apis/networking.k8s.io/v1"
+        }
+    }
+
     /// False for cluster-wide resources.
     public var isNamespaced: Bool { self != .nodes }
     public var canScale: Bool { self == .deployments || self == .statefulSets }
-    /// `kubectl rollout restart` works for these.
+    /// A rollout restart works for these.
     public var canRestart: Bool { self == .deployments || self == .statefulSets || self == .daemonSets }
     public var canDelete: Bool { self != .events }
     public var hasLogs: Bool { self == .pods }
@@ -121,7 +130,7 @@ public struct KubePort: Hashable, Sendable {
     }
 }
 
-/// One object of a `kubectl get -o json` list, reduced for the browser.
+/// One object of an API list, reduced for the browser.
 public struct KubeResource: Identifiable, Hashable, Sendable {
     public var kind: KubeResourceKind
     public var name: String
@@ -143,7 +152,7 @@ public struct KubeResource: Identifiable, Hashable, Sendable {
 
     public var id: String { uid.isEmpty ? "\(namespace ?? "")/\(kind.rawValue)/\(name)" : uid }
 
-    /// `deployment/web`, for kubectl commands.
+    /// `deployment/web`, for titles and messages.
     public var reference: String { "\(kind.singularName)/\(name)" }
 
     public init(

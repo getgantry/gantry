@@ -39,7 +39,7 @@ public struct KubeContext: Identifiable, Hashable, Sendable {
 public enum KubeConfig {
     /// The files for `KUBECONFIG`: the value of the app environment (or
     /// `~/.kube/config`), then the files of apple/container clusters.
-    /// Missing files are dropped; kubectl reads them in this order.
+    /// Missing files are dropped. The first file that defines a name wins.
     public static func paths(
         environment: [String: String] = ProcessInfo.processInfo.environment,
         home: String = NSHomeDirectory(),
@@ -58,39 +58,6 @@ public enum KubeConfig {
             if !path.isEmpty, !result.contains(path), fileExists(path) { result.append(path) }
         }
         return result
-    }
-
-    /// Parses `kubectl config view -o json`. Contexts of apple/container
-    /// clusters (by name in `appleClusters`) come first, the rest keep the
-    /// file order.
-    public static func parseContexts(_ data: Data, appleClusters: Set<String> = []) throws -> [KubeContext] {
-        guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw KubectlError.unexpectedOutput
-        }
-        let current = root["current-context"] as? String
-        var servers: [String: String] = [:]
-        for cluster in root["clusters"] as? [[String: Any]] ?? [] {
-            if let name = cluster["name"] as? String,
-               let server = (cluster["cluster"] as? [String: Any])?["server"] as? String {
-                servers[name] = server
-            }
-        }
-        let contexts: [KubeContext] = (root["contexts"] as? [[String: Any]] ?? []).compactMap { item in
-            guard let name = item["name"] as? String, !name.isEmpty else { return nil }
-            let body = item["context"] as? [String: Any] ?? [:]
-            let cluster = body["cluster"] as? String ?? ""
-            let namespace = (body["namespace"] as? String).flatMap { $0.isEmpty ? nil : $0 }
-            return KubeContext(
-                name: name,
-                cluster: cluster,
-                user: body["user"] as? String ?? "",
-                namespace: namespace,
-                server: servers[cluster],
-                isCurrent: name == current,
-                isAppleCluster: appleClusters.contains(name) || appleClusters.contains(cluster)
-            )
-        }
-        return contexts.filter(\.isAppleCluster) + contexts.filter { !$0.isAppleCluster }
     }
 
     /// The context to show first: the remembered one, the current one, then

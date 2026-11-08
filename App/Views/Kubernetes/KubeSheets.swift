@@ -3,7 +3,8 @@ import AppKit
 import UniformTypeIdentifiers
 import AppCore
 
-/// Applies a pasted or opened manifest with `kubectl apply -f -`.
+/// Applies a pasted or opened manifest with server-side apply and shows
+/// the result of each object.
 struct KubeApplySheet: View {
     let browser: KubernetesBrowser
     @Environment(AppModel.self) private var model
@@ -11,12 +12,13 @@ struct KubeApplySheet: View {
 
     @State private var manifest = ""
     @State private var error: String?
+    @State private var results: [KubeApplyResult] = []
     @State private var running = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Apply YAML").font(.title2.weight(.semibold))
-            Text("Context: \(browser.selectedContext ?? "—"). Objects without a namespace go to \(targetNamespace).")
+            Text("Context: \(browser.selectedContext ?? "—"). Objects without a namespace go to \(browser.targetNamespace).")
                 .font(.callout)
                 .foregroundStyle(.secondary)
             TextEditor(text: $manifest)
@@ -31,13 +33,10 @@ struct KubeApplySheet: View {
                     .textSelection(.enabled)
                     .lineLimit(8)
             }
+            if !results.isEmpty { KubeApplyResultList(results: results) }
             buttons
         }
         .padding(20)
-    }
-
-    private var targetNamespace: String {
-        browser.namespace ?? browser.currentContext?.namespace ?? "default"
     }
 
     private var buttons: some View {
@@ -66,10 +65,55 @@ struct KubeApplySheet: View {
     private func apply() {
         running = true
         error = nil
+        results = []
         Task {
-            error = await browser.apply(manifest, operations: model.operations)
+            do {
+                results = try await browser.apply(manifest, operations: model.operations)
+                if results.allSatisfy(\.succeeded) { dismiss() }
+            } catch {
+                self.error = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
             running = false
-            if error == nil { dismiss() }
+        }
+    }
+}
+
+/// One line per applied object: an icon and a text for the state.
+struct KubeApplyResultList: View {
+    let results: [KubeApplyResult]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(results) { KubeApplyResultRow(result: $0) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxHeight: 160)
+    }
+}
+
+struct KubeApplyResultRow: View {
+    let result: KubeApplyResult
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            KubeHealthIcon(health: result.succeeded ? .ok : .failed)
+            Text(verbatim: result.namespace.map { "\(result.reference) (\($0))" } ?? result.reference)
+                .font(.system(.callout, design: .monospaced))
+            Text(outcome)
+                .font(.callout)
+                .foregroundStyle(result.succeeded ? Color.secondary : Color.red)
+                .textSelection(.enabled)
+                .lineLimit(4)
+        }
+    }
+
+    private var outcome: String {
+        switch result.outcome {
+        case .created: String(localized: "Created")
+        case .configured: String(localized: "Applied")
+        case .failed(let message): message
         }
     }
 }
@@ -114,7 +158,7 @@ struct KubeScaleSheet: View {
     }
 }
 
-/// Starts `kubectl port-forward` for a pod or a service.
+/// Starts a port forward to a pod or a service.
 struct KubePortForwardSheet: View {
     let resource: KubeResource
     let browser: KubernetesBrowser
@@ -144,7 +188,7 @@ struct KubePortForwardSheet: View {
                     TextField("Port", value: $remotePort, format: .number.grouping(.never))
                 }
                 TextField("Local Port", value: $localPort, format: .number.grouping(.never))
-                Text("Use 0 to let kubectl pick a free port. Gantry listens on 127.0.0.1 only.")
+                Text("Use 0 to pick a free port. Gantry listens on 127.0.0.1 only.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -203,11 +247,13 @@ struct KubePortForwardRow: View {
                 Text(verbatim: "127.0.0.1:\(forward.localPort == 0 ? "…" : String(forward.localPort)) → \(forward.target):\(forward.remotePort)")
                     .font(.callout)
                     .textSelection(.enabled)
-                Text(verbatim: [forward.context, forward.namespace].compactMap { $0 }.joined(separator: " · "))
+                Text(verbatim: [forward.context, forward.namespace, forward.pod].compactMap { $0 }.joined(separator: " · "))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if case .failed(let message) = forward.state {
                     Text(verbatim: message).font(.caption).foregroundStyle(.red).lineLimit(3)
+                } else if let message = forward.lastConnectionError {
+                    Text(verbatim: message).font(.caption).foregroundStyle(.orange).lineLimit(3)
                 }
             }
             Spacer()
