@@ -72,7 +72,7 @@ struct KubeDetailHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: resource.name)
                     .font(.title2.weight(.bold))
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
                 HStack(spacing: 6) {
@@ -84,29 +84,20 @@ struct KubeDetailHeader: View {
                 }
             }
             Spacer()
-            buttons
         }
         .padding([.horizontal, .top])
-    }
-
-    @ViewBuilder
-    private var buttons: some View {
-        HStack(spacing: 8) {
-            if resource.kind.canScale {
-                Button { actions.scale(resource) } label: { Label("Scale…", systemImage: "plusminus") }
-            }
-            if resource.kind.canRestart {
-                Button { actions.restart(resource) } label: { Label("Restart", systemImage: "arrow.clockwise") }
-            }
-            if resource.kind.canPortForward {
-                Button { actions.forward(resource) } label: { Label("Forward Port…", systemImage: "arrow.left.arrow.right") }
-            }
-            if resource.kind.canDelete {
-                Button(role: .destructive) { actions.delete(resource) } label: { Label("Delete…", systemImage: "trash") }
+        .toolbar {
+            // The resource actions go in one More menu in the window
+            // toolbar. The row context menu has the same items.
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    KubeResourceMenu(resource: resource, actions: actions)
+                } label: {
+                    Label("More", systemImage: "ellipsis")
+                }
+                .help("Actions for \(resource.reference)")
             }
         }
-        .labelStyle(.iconOnly)
-        .help("Actions for \(resource.reference)")
     }
 }
 
@@ -128,7 +119,7 @@ struct KubeOverview: View {
                 if let created = resource.createdAt {
                     Fact(String(localized: "Created"), created.formatted(date: .abbreviated, time: .standard))
                 }
-                if !resource.uid.isEmpty { Fact("UID", resource.uid) }
+                if !resource.uid.isEmpty { Fact("UID", resource.uid, monospaced: true, copyable: true) }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -14,7 +14,6 @@ struct KubeResourceList: View {
             Divider()
             footer
         }
-        .searchable(text: $filter, placement: .toolbar, prompt: Text("Filter by Name"))
     }
 
     private var visible: [KubeResource] {
@@ -86,11 +85,13 @@ struct KubeResourceRow: View {
                 Text(verbatim: resource.name)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                    .help(resource.name)
                 Text(verbatim: subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+            .layoutPriority(1)
             Spacer(minLength: 4)
             VStack(alignment: .trailing, spacing: 2) {
                 Text(verbatim: resource.status)

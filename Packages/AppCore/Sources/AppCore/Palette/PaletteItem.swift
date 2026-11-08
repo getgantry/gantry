@@ -69,6 +69,8 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
     case restart
     case logs
     case shell
+    /// Opens the Kubernetes section on the context of a cluster.
+    case browseResources
     case remove
 
     /// The menu title for this action on a result of `kind`.
@@ -84,6 +86,7 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
         case .restart: String(localized: "Restart", bundle: .module)
         case .logs: String(localized: "Show Logs", bundle: .module)
         case .shell: String(localized: "Open Shell", bundle: .module)
+        case .browseResources: String(localized: "Browse Resources", bundle: .module)
         case .remove:
             switch kind {
             case .machine, .cluster: String(localized: "Delete…", bundle: .module)
@@ -100,6 +103,7 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
         case .restart: "arrow.clockwise"
         case .logs: "text.alignleft"
         case .shell: "terminal"
+        case .browseResources: "helm"
         case .remove: "trash"
         }
     }

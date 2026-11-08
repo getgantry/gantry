@@ -170,7 +170,7 @@ struct ContainerDetailView: View {
             ExplainMenuItem(session: session, container: container)
             ContainerRunCopyItems(session: session, container: container)
         } label: {
-            Label("More", systemImage: "ellipsis.circle")
+            Label("More", systemImage: "ellipsis")
         }
     }
 
@@ -306,6 +306,7 @@ private struct ContainerOverview: View {
     private func stateSection(_ d: ContainerDetails) -> some View {
         DetailSection("State") {
             FactGrid {
+                Fact("ID", String(container.id.prefix(12)), monospaced: true, copyText: container.id)
                 Fact("Status", d.state.status.label)
                 if let date = Formatters.date(fromRFC3339: d.state.startedAt) {
                     Fact("Started", Formatters.relative(date))
@@ -373,13 +374,13 @@ private struct ContainerOverview: View {
         DetailSection("Config") {
             FactGrid {
                 if let entry = d.config.entrypoint, !entry.isEmpty {
-                    Fact("Entrypoint", entry.joined(separator: " "))
+                    Fact("Entrypoint", entry.joined(separator: " "), monospaced: true, copyable: true)
                 }
                 if let cmd = d.config.cmd, !cmd.isEmpty {
-                    Fact("Command", cmd.joined(separator: " "))
+                    Fact("Command", cmd.joined(separator: " "), monospaced: true, copyable: true)
                 }
                 if let workdir = d.config.workingDir, !workdir.isEmpty {
-                    Fact("Working Dir", workdir)
+                    Fact("Working Dir", workdir, monospaced: true)
                 }
                 if let user = d.config.user, !user.isEmpty {
                     Fact("User", user)

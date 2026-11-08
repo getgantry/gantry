@@ -17,8 +17,12 @@ struct KubernetesBrowserView: View {
     var body: some View {
         content
             .toolbar { toolbarContent }
+            // On the whole browser, not the middle column, so that the search
+            // field gets its own place at the trailing end of the toolbar.
+            .searchable(text: $filter, placement: .toolbar, prompt: Text("Filter by Name"))
             .task(id: browser.selectionKey) { await browser.watch() }
             .onChange(of: browser.selectionKey) { selection = nil }
+            .onChange(of: browser.resources.map(\.id)) { _, ids in selectFirstIfNeeded(ids) }
             .sheet(isPresented: $showingApply) { KubeApplySheet(browser: browser) }
             .sheet(item: $scaleTarget) { KubeScaleSheet(resource: $0, browser: browser) }
             .sheet(item: $forwardTarget) { KubePortForwardSheet(resource: $0, browser: browser) }
@@ -73,9 +77,9 @@ struct KubernetesBrowserView: View {
             KubeKindList(selection: $browser.kind)
                 .frame(minWidth: 150, idealWidth: 180, maxWidth: 240)
             KubeResourceList(browser: browser, selection: $selection, filter: $filter, actions: actions)
-                .frame(minWidth: 280, idealWidth: 380)
+                .frame(minWidth: 320, idealWidth: 440)
             detail
-                .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
+                .frame(minWidth: 360, maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -108,6 +112,13 @@ struct KubernetesBrowserView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// Shows the first resource when nothing is selected, so the detail
+    /// column has content. A selection that is still listed stays.
+    private func selectFirstIfNeeded(_ ids: [KubeResource.ID]) {
+        if let selection, ids.contains(selection) { return }
+        selection = ids.first
+    }
+
     private func deleteSelection() -> DestructiveAction? {
         guard let resource = browser.resources.first(where: { $0.id == selection }), resource.kind.canDelete else { return nil }
         return .deleteKubeResource(resource)
@@ -119,13 +130,16 @@ struct KubernetesBrowserView: View {
             KubeContextPicker(browser: browser)
             KubeNamespacePicker(browser: browser)
         }
-        ToolbarItemGroup(placement: .primaryAction) {
+        ToolbarItem(placement: .primaryAction) {
             Button {
                 Task { _ = await browser.reload() }
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .help("Reload the list. The list also updates live.")
+        }
+        ToolbarSpacer(.fixed, placement: .primaryAction)
+        ToolbarItemGroup(placement: .primaryAction) {
             Button {
                 showingForwards.toggle()
             } label: {
@@ -203,9 +217,12 @@ struct KubeKindList: View {
             ForEach(KubeResourceKind.allCases) { kind in
                 Label(kind.title, systemImage: kind.systemImage)
                     .tag(kind)
+                    .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.sidebar)
+        // Not .sidebar: outside the window sidebar that style draws the
+        // selected row as a solid dark fill instead of the normal highlight.
+        .listStyle(.inset)
     }
 }
 

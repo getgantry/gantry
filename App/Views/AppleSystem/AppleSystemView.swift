@@ -149,10 +149,13 @@ struct AppleSystemPaneHeader<Actions: View>: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            // The actions keep their full size. The pane title gives way
+            // first, because the window title repeats it.
             actions
+                .fixedSize()
         }
         .padding([.horizontal, .top])
-        .padding(.bottom, 8)
+        .padding(.bottom, Spacing.xs)
     }
 }
 
@@ -192,13 +195,8 @@ struct AppleSystemCard<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label(title, systemImage: systemImage)
-                .font(.headline)
+        DashboardCard(title, systemImage: systemImage) {
             content
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }

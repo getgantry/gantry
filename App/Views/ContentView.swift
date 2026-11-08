@@ -367,6 +367,11 @@ struct ContentView: View {
         content
         .onReceive(NotificationCenter.default.publisher(for: .gantryShowPalette)) { _ in
             showingPalette = true
+            // The Kubernetes section loads the contexts when it opens. Load
+            // them here too, so that the palette shows them before that.
+            if model.kubernetes.contexts.isEmpty {
+                Task { await model.kubernetes.prepare() }
+            }
         }
         .background(WindowReader { window in if hostWindow !== window { hostWindow = window } })
         .onReceive(NotificationCenter.default.publisher(for: .gantryOpenLink)) { _ in
@@ -410,6 +415,10 @@ struct ContentView: View {
             model: model,
             navigate: navigate,
             showDashboard: { selection = .dashboard },
+            showKubernetes: { context in
+                if let context { model.kubernetes.selectedContext = context }
+                selection = .kubernetes
+            },
             showAddHost: { showingAddHost = true },
             openSettings: { openSettings() },
             openHostTerminal: { openWindow(id: "hostTerminal", value: $0) },

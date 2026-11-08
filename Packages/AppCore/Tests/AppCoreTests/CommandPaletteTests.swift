@@ -174,7 +174,7 @@ import DockerKit
     }
 
     @Test func machineActionsFollowState() {
-        #expect(PaletteCatalog.machineActions(isRunning: true) == [.open, .stop, .remove])
+        #expect(PaletteCatalog.machineActions(isRunning: true) == [.open, .shell, .stop, .remove])
         #expect(PaletteCatalog.machineActions(isRunning: false) == [.open, .start, .remove])
     }
 
@@ -218,7 +218,7 @@ import DockerKit
         let apple = PaletteCatalog.Host(id: UUID(), name: "Mac", isAppleContainer: true, isConnected: true)
         let items = PaletteCatalog.items(host: apple, machines: [machine], clusters: [cluster])
         #expect(items.map(\.kind) == [.machine, .cluster])
-        #expect(items.first?.actions == [.open, .stop, .remove])
+        #expect(items.first?.actions == [.open, .shell, .stop, .remove])
     }
 
     @Test func itemIDsAreStable() {
@@ -227,5 +227,55 @@ import DockerKit
         #expect(first.id == second.id)
         #expect(first.defaultAction == .open)
         #expect(PaletteItem(kind: .command, title: "c", target: "c", actions: []).actions == [.open])
+    }
+}
+
+@Suite struct PaletteKubernetesTests {
+    @Test func sectionItemComesFirstThenOneItemPerContext() {
+        let items = PaletteCatalog.kubernetes(contexts: [
+            KubeContext(name: "gtest", cluster: "gtest", server: "https://127.0.0.1:6445", isCurrent: true),
+            KubeContext(name: "prod", cluster: "eks-prod")
+        ])
+        #expect(items.count == 3)
+        #expect(items[0].target == PaletteCatalog.kubernetesTarget)
+        #expect(items[0].kind == .section)
+        #expect(items[0].hostID == nil)
+        #expect(items[1].title == "gtest")
+        #expect(items[1].status != nil)
+        #expect(items[2].status == nil)
+        #expect(items[2].keywords.contains("eks-prod"))
+        #expect(Set(items.map(\.id)).count == 3)
+    }
+
+    @Test func sectionItemWithoutContexts() {
+        let items = PaletteCatalog.kubernetes(contexts: [])
+        #expect(items.map(\.target) == [PaletteCatalog.kubernetesTarget])
+    }
+
+    @Test func contextNameRoundTripsThroughTheTarget() {
+        let item = PaletteCatalog.kubernetes(contexts: [KubeContext(name: "kind-dev")])[1]
+        #expect(PaletteCatalog.kubernetesContext(fromTarget: item.target) == "kind-dev")
+        #expect(PaletteCatalog.kubernetesContext(fromTarget: PaletteCatalog.kubernetesTarget) == nil)
+        #expect(PaletteCatalog.kubernetesContext(fromTarget: "dashboard") == nil)
+        #expect(PaletteCatalog.kubernetesContext(fromTarget: PaletteCatalog.kubernetesContextPrefix) == nil)
+    }
+
+    @Test func kubernetesItemIsFoundBySearch() {
+        let items = PaletteCatalog.kubernetes(contexts: [])
+        #expect(FuzzyMatch.bestScore("kube", in: [items[0].title] + items[0].keywords) != nil)
+        #expect(FuzzyMatch.bestScore("k8s", in: [items[0].title] + items[0].keywords) != nil)
+    }
+}
+
+@Suite struct PaletteMovedActionsTests {
+    @Test func runningClusterOffersBrowseResources() {
+        #expect(PaletteCatalog.clusterActions(isRunning: true) == [.open, .browseResources, .remove])
+        #expect(PaletteCatalog.clusterActions(isRunning: false) == [.open, .remove])
+    }
+
+    @Test func browseResourcesHasTitleAndSymbol() {
+        #expect(!PaletteAction.browseResources.title(for: .cluster).isEmpty)
+        #expect(PaletteAction.browseResources.systemImage == "helm")
+        #expect(!PaletteAction.browseResources.isDestructive)
     }
 }

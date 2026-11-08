@@ -5,18 +5,31 @@ struct Fact: Identifiable {
     let id = UUID()
     let label: Text
     let value: String
+    /// Monospaced value, for ids, versions, addresses and paths.
+    var monospaced = false
+    /// Shows a copy button next to the value.
+    var copyable = false
+    /// The text that the copy button copies, when it differs from the value
+    /// (a full ID behind a short one).
+    var copyText: String?
 
     /// A literal label is a catalog key.
-    init(_ label: LocalizedStringKey, _ value: String) {
+    init(_ label: LocalizedStringKey, _ value: String, monospaced: Bool = false, copyable: Bool = false, copyText: String? = nil) {
         self.label = Text(label)
         self.value = value
+        self.monospaced = monospaced
+        self.copyable = copyable || copyText != nil
+        self.copyText = copyText
     }
 
     /// A label that is already localized, for example from `String(localized:)`.
     @_disfavoredOverload
-    init<S: StringProtocol>(_ label: S, _ value: String) {
+    init<S: StringProtocol>(_ label: S, _ value: String, monospaced: Bool = false, copyable: Bool = false, copyText: String? = nil) {
         self.label = Text(verbatim: String(label))
         self.value = value
+        self.monospaced = monospaced
+        self.copyable = copyable || copyText != nil
+        self.copyText = copyText
     }
 }
 
@@ -35,12 +48,24 @@ struct FactGrid: View {
                     fact.label
                         .foregroundStyle(.secondary)
                         .gridColumnAlignment(.leading)
-                    Text(fact.value)
-                        .textSelection(.enabled)
+                    value(fact)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(.callout)
             }
+        }
+    }
+}
+
+extension FactGrid {
+    @ViewBuilder
+    fileprivate func value(_ fact: Fact) -> some View {
+        if fact.copyable {
+            CopyableValue(value: fact.value, copyText: fact.copyText, monospaced: fact.monospaced)
+        } else {
+            Text(verbatim: fact.value)
+                .font(fact.monospaced ? .callout.monospaced() : .callout)
+                .textSelection(.enabled)
         }
     }
 }

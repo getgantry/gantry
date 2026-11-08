@@ -45,6 +45,43 @@ public enum PaletteCatalog {
         return items
     }
 
+    /// Target of the app-wide Kubernetes section item.
+    public static let kubernetesTarget = "kubernetes"
+    /// Prefix of the target of a kubectl context item; the rest is the name.
+    public static let kubernetesContextPrefix = "kubernetes-context:"
+
+    /// The Kubernetes section and one item per kubectl context. App-wide:
+    /// contexts do not belong to a host.
+    public static func kubernetes(contexts: [KubeContext]) -> [PaletteItem] {
+        var items = [PaletteItem(
+            kind: .section,
+            title: String(localized: "Kubernetes", bundle: .module),
+            target: kubernetesTarget,
+            keywords: ["k8s", "kubectl", "pods"],
+            systemImage: "helm"
+        )]
+        items += contexts.map { context in
+            var keywords = [context.cluster, "k8s", "kubectl"]
+            if let server = context.server { keywords.append(server) }
+            return PaletteItem(
+                kind: .section,
+                title: context.name,
+                target: kubernetesContextPrefix + context.name,
+                status: context.isCurrent ? String(localized: "Current context", bundle: .module) : nil,
+                keywords: keywords,
+                systemImage: "helm"
+            )
+        }
+        return items
+    }
+
+    /// The context name of a Kubernetes context item, or nil for any other target.
+    public static func kubernetesContext(fromTarget target: String) -> String? {
+        guard target.hasPrefix(kubernetesContextPrefix) else { return nil }
+        let name = String(target.dropFirst(kubernetesContextPrefix.count))
+        return name.isEmpty ? nil : name
+    }
+
     // MARK: - Actions
 
     /// Container actions in menu order. Logs and the shell need the
@@ -70,7 +107,12 @@ public enum PaletteCatalog {
     }
 
     public static func machineActions(isRunning: Bool) -> [PaletteAction] {
-        isRunning ? [.open, .stop, .remove] : [.open, .start, .remove]
+        isRunning ? [.open, .shell, .stop, .remove] : [.open, .start, .remove]
+    }
+
+    /// A running cluster can be browsed in the Kubernetes section.
+    public static func clusterActions(isRunning: Bool) -> [PaletteAction] {
+        isRunning ? [.open, .browseResources, .remove] : [.open, .remove]
     }
 
     // MARK: - Builders
@@ -174,7 +216,7 @@ public enum PaletteCatalog {
             status: String(localized: "\(running) of \(cluster.nodes.count) nodes running", bundle: .module),
             isActive: running > 0,
             keywords: cluster.nodes.map(\.name),
-            actions: [.open, .remove]
+            actions: clusterActions(isRunning: cluster.isRunning)
         )
     }
 

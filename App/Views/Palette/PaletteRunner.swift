@@ -71,6 +71,7 @@ enum PaletteSource {
         var items = [PaletteCommand.addHost, .refreshAll, .settings].map { $0.item() }
         items.append(PaletteItem(kind: .section, title: String(localized: "Dashboard"), target: "dashboard",
                                  systemImage: "square.grid.2x2"))
+        items += PaletteCatalog.kubernetes(contexts: model.kubernetes.contexts)
         for session in model.sessions {
             items += hostItems(session)
         }
@@ -113,6 +114,8 @@ struct PaletteRunner {
     let model: AppModel
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
     let showDashboard: () -> Void
+    /// Opens the Kubernetes section, on the given context when not nil.
+    let showKubernetes: (String?) -> Void
     let showAddHost: () -> Void
     let openSettings: () -> Void
     let openHostTerminal: (UUID) -> Void
@@ -124,7 +127,13 @@ struct PaletteRunner {
             return
         }
         if item.kind == .section, item.hostID == nil {
-            showDashboard()
+            if item.target == PaletteCatalog.kubernetesTarget {
+                showKubernetes(nil)
+            } else if let context = PaletteCatalog.kubernetesContext(fromTarget: item.target) {
+                showKubernetes(context)
+            } else {
+                showDashboard()
+            }
             return
         }
         guard let hostID = item.hostID, let session = model.session(id: hostID) else { return }
@@ -190,6 +199,7 @@ struct PaletteRunner {
         case .stop: Task { _ = await session.perform(.stop, on: id) }
         case .restart: Task { _ = await session.perform(.restart, on: id) }
         case .remove: confirm(.removeContainers([container], engine: .init(session.host)), hostID)
+        case .browseResources: navigate(hostID, .containers, .container(id))
         }
     }
 
@@ -241,6 +251,7 @@ struct PaletteRunner {
         switch action {
         case .start: Task { _ = await session.startMachine(id) }
         case .stop: Task { _ = await session.stopMachine(id) }
+        case .shell: AppleContainerControl.openShellInTerminal(for: id, cliOverride: session.host.socketPathOverride)
         case .remove: confirm(.deleteMachine(machine), session.host.id)
         default: navigate(session.host.id, .machines, .machine(id))
         }
@@ -249,6 +260,8 @@ struct PaletteRunner {
     private func runCluster(_ name: String, _ action: PaletteAction, _ session: HostSession) {
         if action == .remove {
             confirm(DestructiveAction(kind: .deleteCluster, targets: [name]), session.host.id)
+        } else if action == .browseResources, let cluster = session.clusters.first(where: { $0.name == name }) {
+            showKubernetes(cluster.kubectlContext)
         } else {
             navigate(session.host.id, .clusters, .cluster(name))
         }
