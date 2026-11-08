@@ -25,7 +25,7 @@ description: "Task list for external drives for containers, images and volumes"
 
 - [x] T001 Read the 1.7.1 source in /Volumes/SanDisk2Tb/builds/gantry-027/ac17/upstream/c171 (read only) and find how `--app-root`, `--install-root` and `--log-root` persist. Write the result in /Volumes/SanDisk2Tb/builds/gantry-027/storage/REPORT.md
 - [x] T002 [P] Find the volume options (`--opt`) in the 1.7.1 source that could place a volume elsewhere, and write the result in the report
-- [ ] T003 [P] Test bind mounts from `/Volumes` (virtiofs sharing, permissions, case sensitivity) in /Volumes/SanDisk2Tb/builds/gantry-027/storage/live/ with `gstore-` containers, and write the result in the report
+- [x] T003 [P] Test bind mounts from `/Volumes` (virtiofs sharing, permissions, case sensitivity) in /Volumes/SanDisk2Tb/builds/gantry-027/storage/live/ with `gstore-` containers, and write the result in the report
 - [x] T004 [P] Compare `ditto`, `cp -c` and `rsync --sparse` on a sparse test image in the scratch folder. Select the tool that keeps sparse files, owners and extended attributes.
 
 ---
@@ -112,7 +112,7 @@ description: "Task list for external drives for containers, images and volumes"
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T038 Write the gated live test for bind volumes and a volume move in Packages/AppCore/Tests/AppCoreTests/LiveStorageTests.swift, and remove all `gstore-` objects after it
+- [x] T038 Write the gated live test for bind volumes and a volume move in Packages/AppCore/Tests/AppCoreTests/LiveStorageTests.swift, and remove all `gstore-` objects after it
 - [x] T039 [P] Write the list of new string keys to /Volumes/SanDisk2Tb/builds/gantry-027/storage/new-strings.txt
 - [x] T040 Translate the new strings into all supported UI languages and run scripts/check-localization.py
 - [x] T041 Run `swift test` in AppCore and DockerKit with `--scratch-path /Volumes/SanDisk2Tb/builds/gantry-027/storage/<Package>`
@@ -142,3 +142,9 @@ Task: "Compare copy tools on a sparse image"
 2. Add User Stories 3 and 4.
 3. Add User Story 5, then User Story 6 last, because it has the most risk.
 4. Phase 9.
+
+## Live results (2026-11-08, container 1.7.1, SanDisk2Tb APFS)
+
+- T003: a bind mount from `/Volumes/SanDisk2Tb/...` works after the user allows the removable volume prompt. The VM sees the files as root (uid 0). Files that the VM writes belong to the user on the Mac. The disk is case-insensitive, so `/data/hello.txt` finds `Hello.txt`. Before the prompt is answered, `container run` waits with no output.
+- T038: `GANTRY_STORAGE_LIVE_DIR=... GANTRY_STORAGE_LIVE_APPLE=1 swift test --filter 'Live.*Storage'` passes 4 tests (folder volume, copy, export, import, image save and load, fake root move). No `gstore-` object stays.
+- T042 stays open. The Volumes section and the Storage pane were checked in the Debug build. The move sheet, the transfer sheets and the disk access hint still need a check, because `gantry-ctl` cannot open sheets yet.
