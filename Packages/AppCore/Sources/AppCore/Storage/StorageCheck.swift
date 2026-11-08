@@ -103,8 +103,12 @@ public struct StorageCheck: Sendable, Equatable {
 
 /// Byte formatting shared by the storage texts.
 public enum StorageFormat {
+    /// "0 KB", not "Zero KB", next to other sizes.
     public static func bytes(_ value: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
+        return formatter.string(fromByteCount: value)
     }
 }
 

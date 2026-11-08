@@ -142,6 +142,7 @@ Task: "Compare copy tools on a sparse image"
 2. Add User Stories 3 and 4.
 3. Add User Story 5, then User Story 6 last, because it has the most risk.
 4. Phase 9.
+- [x] T044 Show "0 KB" instead of "Zero KB" in the Storage pane: `StorageFormat.bytes` in Packages/AppCore/Sources/AppCore/Storage/StorageCheck.swift, test `StorageFormatTests`
 
 ## Live results (2026-11-08, container 1.7.1, SanDisk2Tb APFS)
 
