@@ -11,6 +11,31 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.27.0](https://github.com/getgantry/gantry/compare/v0.26.0...v0.27.0) (2026-11-08)
+
+
+### Features
+
+* act on several selected items at once ([#52](https://github.com/getgantry/gantry/issues/52)) ([1da675b](https://github.com/getgantry/gantry/commit/1da675bb2fee7a5bc3f758ebbf53776ab121ff4f))
+* add a command palette ([#51](https://github.com/getgantry/gantry/issues/51)) ([4292960](https://github.com/getgantry/gantry/commit/4292960652d5d7eb06bf3eecd49156edbc1eff93))
+* add a kubernetes browser ([#54](https://github.com/getgantry/gantry/issues/54)) ([55866c6](https://github.com/getgantry/gantry/commit/55866c6b38c90e64057adeb18d38598d8c063519))
+* add notification actions, spotlight, siri and a fleet widget ([#49](https://github.com/getgantry/gantry/issues/49)) ([3ede5f1](https://github.com/getgantry/gantry/commit/3ede5f15ec7c4a7ff2c7b4b7a2d839b783798550))
+* browse kubernetes without kubectl ([#58](https://github.com/getgantry/gantry/issues/58)) ([d38d2c3](https://github.com/getgantry/gantry/commit/d38d2c37a9bed97a135a96ba4a6fde28767f1475))
+* complete apple container 1.7.1 support ([#57](https://github.com/getgantry/gantry/issues/57)) ([316240b](https://github.com/getgantry/gantry/commit/316240be42f458f3ee900688ccf62b470bdca63c))
+* create a container from a pasted run command ([#53](https://github.com/getgantry/gantry/issues/53)) ([ba80923](https://github.com/getgantry/gantry/commit/ba8092316a4e5cf7df240d5c6ad0f700fd777fc0))
+* explain container failures with apple intelligence ([#48](https://github.com/getgantry/gantry/issues/48)) ([1470b07](https://github.com/getgantry/gantry/commit/1470b0741e4245597cf6d9f6bd281648d1ecb8a2))
+* keep container data, volumes and images on external drives ([#60](https://github.com/getgantry/gantry/issues/60)) ([50b2242](https://github.com/getgantry/gantry/commit/50b22420e20e7e808fabd348348fbbd02ce71a09))
+* open places with gantry links ([#55](https://github.com/getgantry/gantry/issues/55)) ([94c2486](https://github.com/getgantry/gantry/commit/94c24866d1e1ad2450f487aa6c56acdc5f663ebb))
+* redesign the app along the apple human interface guidelines ([#59](https://github.com/getgantry/gantry/issues/59)) ([f121c46](https://github.com/getgantry/gantry/commit/f121c4668ea2136077fa05de65dfba1a18712efe))
+* support apple container 1.7 clusters ([#50](https://github.com/getgantry/gantry/issues/50)) ([987b1b1](https://github.com/getgantry/gantry/commit/987b1b1e17c28156a31c2cebbe6b2c87228c7774))
+
+
+### Fixes
+
+* native image size and neutral count labels ([#47](https://github.com/getgantry/gantry/issues/47)) ([26dff42](https://github.com/getgantry/gantry/commit/26dff42cbe4f10695f7ce3175539c816d892f5db))
+* **release:** find the universal gantry-mcp build with show-bin-path ([#45](https://github.com/getgantry/gantry/issues/45)) ([7296444](https://github.com/getgantry/gantry/commit/72964446e0008d0a987febd5a085fd9abadabd62))
+* **storage:** show 0 KB instead of zero KB ([#61](https://github.com/getgantry/gantry/issues/61)) ([875ceb7](https://github.com/getgantry/gantry/commit/875ceb7db30c9431a51f89c2c6f785503799ac72))
+
 ## [0.26.0](https://github.com/getgantry/gantry/compare/v0.25.1...v0.26.0) (2026-11-07)
 
 
