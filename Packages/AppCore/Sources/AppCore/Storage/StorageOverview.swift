@@ -10,6 +10,8 @@ public struct StorageOverview: Sendable, Equatable {
     /// The disk of the root; nil when the disk is not connected.
     public var disk: StorageDisk?
     public var usage: StorageUsage?
+    /// The disk name when macOS still asks for access to the root's disk.
+    public var permissionPending: String?
 
     /// True when the services run on a different root than Gantry starts.
     public var rootMismatch: Bool {
@@ -22,9 +24,15 @@ public struct StorageOverview: Sendable, Equatable {
         serviceRoot: String?,
         store: AppleDataRootStore = .shared,
         disks: any StorageDiskReading = SystemStorageDiskReader(),
-        sizing: any StorageSizing = FileSystemStorageSizing()
+        sizing: any StorageSizing = FileSystemStorageSizing(),
+        gate: DiskAccessGate = .shared
     ) async -> StorageOverview {
         let root = store.load()
+        if case .waitingForPermission(let name) = await gate.check(root.effectivePath) {
+            var overview = StorageOverview(configuredRoot: root, serviceRoot: serviceRoot)
+            overview.permissionPending = name
+            return overview
+        }
         return await Task.detached {
             let path = root.effectivePath
             let disk = disks.disk(containing: path)

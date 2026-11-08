@@ -47,6 +47,46 @@ extension HostSession {
         return monitor.presence.missingDisk(for: root).map { StorageBlock(disks: [$0]) }
     }
 
+    // MARK: - Disk access
+
+    /// Host paths a container mounts, with the folders of folder volumes.
+    func storagePaths(of container: ContainerSummary, monitor: StorageMonitor = .shared) -> [String] {
+        let folders = monitor.folderVolumes.paths(for: host.id)
+        return DiskPresence.hostSources(of: container)
+            + container.mounts.compactMap { folders[$0.name ?? $0.source] }
+    }
+
+    /// The host sources of the binds of a create request.
+    func bindSources(of config: ContainerCreateRequest) -> [String] {
+        (config.hostConfig?.binds ?? []).compactMap { bind in
+            let source = String(bind.split(separator: ":", maxSplits: 1).first ?? "")
+            return source.hasPrefix("/") ? source : nil
+        }
+    }
+
+    /// Waits until the external disks of `paths` can be used. After the
+    /// gate's timeout ``diskAccessWait`` is set, so the UI shows the macOS
+    /// permission hint and a Cancel button. Throws `DiskAccessCancelled`.
+    public func awaitDiskAccess(_ paths: [String]) async throws {
+        guard usesLocalPaths, paths.contains(where: diskAccessGate.needsProbe) else { return }
+        do {
+            try await diskAccessGate.waitForAccess(paths, onSlow: { [weak self] wait in
+                await MainActor.run { self?.diskAccessWait = wait }
+            }, onDone: { [weak self] wait in
+                await MainActor.run {
+                    if self?.diskAccessWait?.id == wait.id { self?.diskAccessWait = nil }
+                }
+            })
+        } catch is CancellationError {
+            throw DiskAccessCancelled()
+        }
+    }
+
+    /// The text for an action that stopped at a disk access.
+    static func diskAccessFailure(_ error: Error) -> String {
+        (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+    }
+
     // MARK: - Helper containers
 
     /// Runs a helper job to the end. Throws with the job's output on failure.
@@ -125,7 +165,8 @@ extension HostSession {
             throw FolderVolumeError.nameTaken(name)
         }
         let path = FolderVolumeRules.folder(named: name, in: parent)
-        try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
+        try await awaitDiskAccess([parent])
+        try await Task.detached { try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true) }.value
         if host.isAppleContainer {
             try monitor.folderVolumes.add(name: name, path: path, hostID: host.id, takenNames: taken)
             return
@@ -165,6 +206,7 @@ extension HostSession {
             return
         }
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        try await awaitDiskAccess([path])
         let stream = try await client.saveImages(references: references)
         FileManager.default.createFile(atPath: path, contents: nil)
         guard let handle = FileHandle(forWritingAtPath: path) else {
@@ -187,9 +229,20 @@ extension HostSession {
             )
         } else {
             guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
-            let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
+            try await awaitDiskAccess([path])
+            let data = try await Task.detached {
+                try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
+            }.value
             try await client.loadImages(archive: data)
         }
         await refreshImages()
+    }
+}
+
+/// A wait for disk access that the user cancelled.
+public struct DiskAccessCancelled: LocalizedError, Sendable, Equatable {
+    public init() {}
+    public var errorDescription: String? {
+        String(localized: "Cancelled while macOS asked for access to the disk.", bundle: .module)
     }
 }

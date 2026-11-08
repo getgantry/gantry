@@ -204,6 +204,12 @@ struct CreateContainerSheet: View {
 
                 hostWarningsSection
 
+                if let wait = session.diskAccessWait {
+                    Section {
+                        DiskAccessHint(message: wait.message) { wait.cancel() }
+                    }
+                }
+
                 if let errorText {
                     Section {
                         Label(errorText, systemImage: "exclamationmark.triangle.fill")

@@ -241247,6 +241247,16 @@
           }
         }
       }
+    },
+    "Open Privacy Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Privacy Settings"
+          }
+        }
+      }
     }
   }
 }

@@ -58292,6 +58292,26 @@
           }
         }
       }
+    },
+    "macOS is asking for permission to use the disk “%@”. Answer the dialog, or allow access in System Settings > Privacy & Security > Files and Folders.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS is asking for permission to use the disk “%@”. Answer the dialog, or allow access in System Settings > Privacy & Security > Files and Folders."
+          }
+        }
+      }
+    },
+    "Cancelled while macOS asked for access to the disk.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled while macOS asked for access to the disk."
+          }
+        }
+      }
     }
   }
 }

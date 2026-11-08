@@ -874,6 +874,7 @@ struct ContentView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 HostStorageBanner(session: session)
+                DiskAccessBanner(session: session)
                 ActionErrorBanner(session: session)
             }
         }

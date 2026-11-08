@@ -13,11 +13,13 @@ public enum StorageIssue: Sendable, Equatable, Hashable {
     case notEnoughSpace(needed: Int64, available: Int64)
     /// The disk is not connected.
     case missing(String)
+    /// The first access did not finish in time: macOS asks for access.
+    case waitingForPermission(String)
 
     /// A refusal stops the action; a warning only informs.
     public var isBlocking: Bool {
         switch self {
-        case .unsupportedFileSystem, .readOnly, .notEnoughSpace, .missing: true
+        case .unsupportedFileSystem, .readOnly, .notEnoughSpace, .missing, .waitingForPermission: true
         case .networkDisk, .removable, .ignoresOwnership: false
         }
     }
@@ -38,6 +40,8 @@ public enum StorageIssue: Sendable, Equatable, Hashable {
             String(localized: "Not enough free space: \(StorageFormat.bytes(needed)) is necessary, \(StorageFormat.bytes(available)) is free.", bundle: .module)
         case .missing(let name):
             String(localized: "The disk “\(name)” is not connected.", bundle: .module)
+        case .waitingForPermission(let name):
+            DiskAccessWait(path: "/Volumes/" + name).message
         }
     }
 }
@@ -107,17 +111,34 @@ public enum StorageFormat {
 /// Disk checks off the main thread: a file call on an external disk can
 /// wait a long time (for example while macOS asks for access).
 public enum StorageCheckLoader {
-    public static func folderVolume(path: String, disks: any StorageDiskReading = SystemStorageDiskReader()) async -> StorageCheck {
-        await Task.detached { StorageCheck.folderVolume(on: disks.disk(containing: path), path: path) }.value
+    public static func folderVolume(
+        path: String,
+        disks: any StorageDiskReading = SystemStorageDiskReader(),
+        gate: DiskAccessGate = .shared
+    ) async -> StorageCheck {
+        if case .waitingForPermission(let name) = await gate.check(path) {
+            return StorageCheck(issues: [.waitingForPermission(name)])
+        }
+        return await Task.detached { StorageCheck.folderVolume(on: disks.disk(containing: path), path: path) }.value
     }
 
     /// Findings for bind sources under `/Volumes`; paths without issues are left out.
     public static func bindMounts(
         paths: [String],
         presence: DiskPresence,
-        disks: any StorageDiskReading = SystemStorageDiskReader()
+        disks: any StorageDiskReading = SystemStorageDiskReader(),
+        gate: DiskAccessGate = .shared
     ) async -> [(path: String, check: StorageCheck)] {
-        await Task.detached {
+        var waiting: [(path: String, check: StorageCheck)] = []
+        for path in Set(paths.map { $0.trimmingCharacters(in: .whitespaces) }).sorted()
+        where path.hasPrefix("/Volumes/") && presence.isConnected(path) {
+            if case .waitingForPermission(let name) = await gate.check(path) {
+                waiting.append((path, StorageCheck(issues: [.waitingForPermission(name)])))
+            }
+        }
+        let skip = Set(waiting.map(\.path))
+        let paths = paths.filter { !skip.contains($0.trimmingCharacters(in: .whitespaces)) }
+        return waiting + (await Task.detached {
             var seen = Set<String>()
             return paths
                 .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -127,7 +148,7 @@ public enum StorageCheckLoader {
                     return (path, StorageCheck.bindMount(on: disk, path: path))
                 }
                 .filter { !$0.1.issues.isEmpty }
-        }.value
+        }.value)
     }
 
     /// Mounted disks other than the boot disk.

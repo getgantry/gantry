@@ -69,6 +69,12 @@ public final class HostSession: Identifiable {
     /// a view can dismiss it. Sheets read their errors with ``attempt(_:)``.
     public var lastError: String?
 
+    /// A disk access that waits for a macOS permission dialog; the UI shows
+    /// a hint with a Cancel button while it is set.
+    public var diskAccessWait: DiskAccessWait?
+    /// Checks first access to external disks (a seam for tests).
+    @ObservationIgnored public var diskAccessGate = DiskAccessGate.shared
+
     /// Where this session reports long operations (cluster creation). Set
     /// by ``AppModel``.
     @ObservationIgnored public weak var operations: OperationCenter?
@@ -1342,10 +1348,17 @@ public final class HostSession: Identifiable {
         }
         // A bind mount from a disk that is not connected cannot start.
         if action == .start || action == .restart,
-           let container = containers.first(where: { $0.id == id }),
-           let block = storageBlock(for: container) {
-            report(block.startMessage)
-            return false
+           let container = containers.first(where: { $0.id == id }) {
+            if let block = storageBlock(for: container) {
+                report(block.startMessage)
+                return false
+            }
+            do {
+                try await awaitDiskAccess(storagePaths(of: container))
+            } catch {
+                report(Self.diskAccessFailure(error))
+                return false
+            }
         }
         // A user-driven stop/restart/kill/remove makes the container's exit
         // expected, so its `die` event is not reported as a crash.
@@ -1633,6 +1646,7 @@ extension HostSession {
     @discardableResult
     public func createAndRun(_ config: ContainerCreateRequest) async throws -> String {
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        try await awaitDiskAccess(bindSources(of: config))
         let id = try await client.createContainer(config: config, name: config.name)
         try await client.startContainer(id: id)
         await refreshContainers()
@@ -1672,6 +1686,7 @@ extension HostSession {
     @discardableResult
     public func createContainer(_ config: ContainerCreateRequest) async throws -> String {
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        try await awaitDiskAccess(bindSources(of: config))
         let id = try await client.createContainer(config: config, name: config.name)
         await refreshContainers()
         return id

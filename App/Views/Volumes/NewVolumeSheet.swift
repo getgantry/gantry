@@ -154,10 +154,14 @@ struct StorageIssueList: View {
 
     var body: some View {
         ForEach(check.issues, id: \.self) { issue in
-            Label(issue.message, systemImage: issue.isBlocking ? "xmark.octagon" : "exclamationmark.triangle")
-                .font(.caption)
-                .foregroundStyle(issue.isBlocking ? .red : .orange)
-                .fixedSize(horizontal: false, vertical: true)
+            if case .waitingForPermission = issue {
+                DiskAccessHint(message: issue.message)
+            } else {
+                Label(issue.message, systemImage: issue.isBlocking ? "xmark.octagon" : "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(issue.isBlocking ? .red : .orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }

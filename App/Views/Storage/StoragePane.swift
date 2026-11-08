@@ -44,6 +44,9 @@ struct StoragePane: View {
             if let errorText {
                 AppleSystemErrorBanner(message: errorText) { self.errorText = nil }
             }
+            if let name = overview?.permissionPending {
+                DiskAccessHint(message: StorageIssue.waitingForPermission(name).message)
+            }
             if let overview {
                 StorageLocationCard(overview: overview)
                 if let usage = overview.usage {
@@ -133,7 +136,7 @@ struct StorageLocationCard: View {
             }
             if let disk = overview.disk {
                 StorageDiskSummary(disk: disk)
-            } else {
+            } else if overview.permissionPending == nil {
                 Label(missingText, systemImage: "externaldrive.trianglebadge.exclamationmark")
                     .foregroundStyle(.orange)
             }
