@@ -234373,6 +234373,168 @@
             "state": "translated",
             "value": "Recreate the image builder?"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image-Builder neu erstellen?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recréer le builder d'images ?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Volver a crear el builder de imágenes?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricreare il builder di immagini?"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recriar o builder de imagens?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De image-builder opnieuw aanmaken?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vill du skapa om image-byggaren?"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret image-builderen igen?"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vil du opprette image-byggeren på nytt?"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luodaanko levykuvien koontityökalu uudelleen?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utworzyć builder obrazów od nowa?"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znovu vytvořit builder imagů?"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova vytvoriť builder obrazov?"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Újra létrehozza az image-buildert?"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreați builderul de imagini?"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Да се пресъздаде ли билдърът на образи?"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναδημιουργία του builder εικόνων;"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovno stvoriti builder slika?"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Želite znova ustvariti graditelja slik?"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поново креирати билдер слика?"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovo kreirati bilder slika?"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iš naujo sukurti atvaizdų kūrimo įrankį?"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vai atkārtoti izveidot attēlu būvētāju?"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kas luua tõmmisekoostaja uuesti?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторно створити збирач образів?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пересоздать сборщик образов?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建镜像构建器？"
+          }
         }
       }
     },
@@ -234382,6 +234544,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recreate Builder"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder neu erstellen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recréer le builder"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a crear builder"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricrea builder"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recriar builder"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maak builder opnieuw aan"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skapa om byggare"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret builder igen"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opprett bygger på nytt"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luo koontityökalu uudelleen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz builder od nowa"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znovu vytvořit builder"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova vytvoriť builder"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder újralétrehozása"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreează builderul"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пресъздай билдъра"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναδημιουργία builder"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovno stvori builder"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova ustvari graditelja"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поново креирај билдер"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovo kreiraj bilder"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iš naujo sukurti kūrimo įrankį"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atkārtoti izveidot būvētāju"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loo koostaja uuesti"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторно створити збирач"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пересоздать сборщик"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建构建器"
           }
         }
       }
@@ -234393,6 +234717,168 @@
             "state": "translated",
             "value": "The builder container and its build cache are removed. A new builder starts with the image from the build.image property."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Builder-Container und sein Build-Cache werden entfernt. Ein neuer Builder startet mit dem Image aus der Eigenschaft build.image."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le conteneur du builder et son cache de build sont supprimés. Un nouveau builder démarre avec l'image de la propriété build.image."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se eliminan el contenedor del builder y su caché de compilación. Un nuevo builder se inicia con la imagen de la propiedad build.image."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il container del builder e la relativa cache di build vengono rimossi. Un nuovo builder si avvia con l'immagine della proprietà build.image."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O contentor do builder e a respetiva cache de compilação são removidos. Um novo builder é iniciado com a imagem da propriedade build.image."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De buildercontainer en de buildcache ervan worden verwijderd. Een nieuwe builder start met de image uit de eigenschap build.image."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggarens container och dess byggcache tas bort. En ny byggare startar med imagen från egenskapen build.image."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder-containeren og dens build-cache fjernes. En ny builder starter med imaget fra egenskaben build.image."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggercontaineren og byggebufferen dens fjernes. En ny bygger starter med imaget fra egenskapen build.image."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koontityökalun kontti ja sen koontivälimuisti poistetaan. Uusi koontityökalu käynnistyy ominaisuuden build.image levykuvalla."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontener buildera i jego pamięć podręczna budowania zostaną usunięte. Nowy builder uruchomi się z obrazem z właściwości build.image."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner builderu a jeho mezipaměť sestavení budou odstraněny. Nový builder se spustí s imagem z vlastnosti build.image."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontajner buildera a jeho vyrovnávacia pamäť zostavení sa odstránia. Nový builder sa spustí s obrazom z vlastnosti build.image."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A builder konténer és a build-gyorsítótára törlődik. Az új builder a build.image tulajdonságban megadott image-ből indul."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containerul builderului și cache-ul său de build sunt eliminate. Un builder nou pornește cu imaginea din proprietatea build.image."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнерът на билдъра и неговият кеш на изграждането се премахват. Нов билдър се стартира с образа от свойството build.image."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το κοντέινερ του builder και η κρυφή μνήμη δόμησής του αφαιρούνται. Ένας νέος builder ξεκινά με την εικόνα από την ιδιότητα build.image."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner buildera i njegova predmemorija izgradnje uklanjaju se. Novi builder pokreće se sa slikom iz svojstva build.image."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vsebnik graditelja in njegov predpomnilnik gradnje bosta odstranjena. Nov graditelj se zažene s sliko iz lastnosti build.image."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контејнер билдера и његов кеш изградње се уклањају. Нови билдер се покреће са сликом из својства build.image."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner bildera i njegov keš izgradnje se uklanjaju. Novi bilder se pokreće sa slikom iz svojstva build.image."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kūrimo įrankio konteineris ir jo kūrimo podėlis pašalinami. Naujas kūrimo įrankis paleidžiamas su atvaizdu iš savybės build.image."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Būvētāja konteiners un tā būvēšanas kešatmiņa tiek noņemti. Jauns būvētājs tiek startēts ar attēlu no rekvizīta build.image."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koostaja konteiner ja selle koostamise vahemälu eemaldatakse. Uus koostaja käivitub atribuudis build.image määratud tõmmisega."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнер збирача та його кеш збірки буде вилучено. Новий збирач запуститься з образом із властивості build.image."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнер сборщика и его кэш сборки будут удалены. Новый сборщик запустится с образом из свойства build.image."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建器容器及其构建缓存将被移除。新的构建器会使用 build.image 属性中的镜像启动。"
+          }
         }
       }
     },
@@ -234402,6 +234888,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Builder image is outdated"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder-Image ist veraltet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'image du builder est obsolète"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La imagen del builder está desactualizada"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'immagine del builder non è aggiornata"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A imagem do builder está desatualizada"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder-image is verouderd"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggarens image är inaktuell"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder-imaget er forældet"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggerens image er utdatert"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koontityökalun levykuva on vanhentunut"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obraz buildera jest nieaktualny"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image builderu je zastaralý"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obraz buildera je zastaraný"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A builder image-e elavult"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaginea builderului este învechită"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образът на билдъра е остарял"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η εικόνα του builder δεν είναι ενημερωμένη"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika buildera je zastarjela"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika graditelja je zastarela"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слика билдера је застарела"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika bildera je zastarela"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kūrimo įrankio atvaizdas pasenęs"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Būvētāja attēls ir novecojis"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koostaja tõmmis on aegunud"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образ збирача застарів"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образ сборщика устарел"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建器镜像已过时"
           }
         }
       }
@@ -234413,6 +235061,168 @@
             "state": "translated",
             "value": "The builder runs image %@. The build.image property names %@. Recreate the builder to use the new image."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Builder verwendet das Image %@. Die Eigenschaft build.image nennt %@. Erstelle den Builder neu, um das neue Image zu verwenden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le builder exécute l'image %@. La propriété build.image indique %@. Recréez le builder pour utiliser la nouvelle image."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El builder ejecuta la imagen %@. La propiedad build.image indica %@. Vuelve a crear el builder para usar la nueva imagen."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il builder esegue l'immagine %@. La proprietà build.image indica %@. Ricrea il builder per usare la nuova immagine."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O builder executa a imagem %@. A propriedade build.image indica %@. Recrie o builder para utilizar a nova imagem."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De builder draait image %@. De eigenschap build.image noemt %@. Maak de builder opnieuw aan om de nieuwe image te gebruiken."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggaren kör imagen %@. Egenskapen build.image anger %@. Skapa om byggaren för att använda den nya imagen."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builderen kører imaget %@. Egenskaben build.image angiver %@. Opret builderen igen for at bruge det nye image."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Byggeren kjører imaget %@. Egenskapen build.image angir %@. Opprett byggeren på nytt for å bruke det nye imaget."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koontityökalu käyttää levykuvaa %@. Ominaisuus build.image nimeää levykuvan %@. Luo koontityökalu uudelleen, jotta se käyttää uutta levykuvaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder używa obrazu %@. Właściwość build.image wskazuje obraz %@. Utwórz builder od nowa, aby używać nowego obrazu."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder používá image %@. Vlastnost build.image určuje image %@. Chcete-li použít nový image, vytvořte builder znovu."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder používa obraz %@. Vlastnosť build.image určuje obraz %@. Ak chcete použiť nový obraz, vytvorte builder znova."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A builder a(z) %@ image-et futtatja. A build.image tulajdonság a(z) %@ image-et adja meg. Az új image használatához hozza létre újra a buildert."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builderul rulează imaginea %@. Proprietatea build.image indică %@. Recreați builderul pentru a folosi noua imagine."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Билдърът използва образа %@. Свойството build.image посочва %@. Пресъздайте билдъра, за да използва новия образ."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ο builder εκτελεί την εικόνα %@. Η ιδιότητα build.image ορίζει την %@. Αναδημιουργήστε τον builder για να χρησιμοποιήσει τη νέα εικόνα."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder pokreće sliku %@. Svojstvo build.image navodi %@. Ponovno stvorite builder kako bi koristio novu sliku."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Graditelj uporablja sliko %@. Lastnost build.image navaja sliko %@. Znova ustvarite graditelja, da bo uporabljal novo sliko."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Билдер покреће слику %@. Својство build.image наводи %@. Поново креирајте билдер да би користио нову слику."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder pokreće sliku %@. Svojstvo build.image navodi %@. Ponovo kreirajte bilder da bi koristio novu sliku."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kūrimo įrankis vykdo atvaizdą %@. Savybėje build.image nurodytas %@. Sukurkite kūrimo įrankį iš naujo, kad būtų naudojamas naujas atvaizdas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Būvētājs izmanto attēlu %@. Rekvizītā build.image norādīts %@. Atkārtoti izveidojiet būvētāju, lai tas izmantotu jauno attēlu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koostaja kasutab tõmmist %@. Atribuut build.image määrab %@. Uue tõmmise kasutamiseks looge koostaja uuesti."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збирач працює на образі %@. У властивості build.image указано образ %@. Повторно створіть збирач, щоб використовувати новий образ."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сборщик работает на образе %@. В свойстве build.image указан образ %@. Пересоздайте сборщик, чтобы использовать новый образ."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建器正在运行镜像 %@，而 build.image 属性指定的是 %@。请重建构建器以使用新镜像。"
+          }
         }
       }
     },
@@ -234422,6 +235232,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recreate Builder…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder neu erstellen…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recréer le builder…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a crear builder…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricrea builder…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recriar builder…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maak builder opnieuw aan…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skapa om byggare…"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret builder igen…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opprett bygger på nytt…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luo koontityökalu uudelleen…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz builder od nowa…"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znovu vytvořit builder…"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova vytvoriť builder…"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Builder újralétrehozása…"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreează builderul…"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пресъздай билдъра…"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναδημιουργία builder…"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovno stvori builder…"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova ustvari graditelja…"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поново креирај билдер…"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovo kreiraj bilder…"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iš naujo sukurti kūrimo įrankį…"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atkārtoti izveidot būvētāju…"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loo koostaja uuesti…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторно створити збирач…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пересоздать сборщик…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建构建器…"
           }
         }
       }
@@ -234433,6 +235405,168 @@
             "state": "translated",
             "value": "DNS defaults for new containers and the builder. The --dns, --dns-search, --dns-option and --dns-domain options override them."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-Standardwerte für neue Container und den Builder. Die Optionen --dns, --dns-search, --dns-option und --dns-domain überschreiben sie."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valeurs DNS par défaut pour les nouveaux conteneurs et le builder. Les options --dns, --dns-search, --dns-option et --dns-domain les remplacent."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valores DNS predeterminados para los contenedores nuevos y el builder. Las opciones --dns, --dns-search, --dns-option y --dns-domain los anulan."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valori DNS predefiniti per i nuovi container e per il builder. Le opzioni --dns, --dns-search, --dns-option e --dns-domain li sostituiscono."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valores DNS predefinidos para os novos contentores e para o builder. As opções --dns, --dns-search, --dns-option e --dns-domain substituem-nos."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-standaarden voor nieuwe containers en de builder. De opties --dns, --dns-search, --dns-option en --dns-domain overschrijven ze."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-standardvärden för nya containrar och byggaren. Alternativen --dns, --dns-search, --dns-option och --dns-domain åsidosätter dem."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-standarder for nye containere og builderen. Indstillingerne --dns, --dns-search, --dns-option og --dns-domain tilsidesætter dem."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-standarder for nye containere og byggeren. Alternativene --dns, --dns-search, --dns-option og --dns-domain overstyrer dem."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-oletukset uusille konteille ja koontityökalulle. Valinnat --dns, --dns-search, --dns-option ja --dns-domain ohittavat ne."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domyślne ustawienia DNS dla nowych kontenerów i buildera. Opcje --dns, --dns-search, --dns-option i --dns-domain mają przed nimi pierwszeństwo."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Výchozí nastavení DNS pro nové kontejnery a builder. Volby --dns, --dns-search, --dns-option a --dns-domain je přepíšou."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predvolené nastavenia DNS pre nové kontajnery a builder. Možnosti --dns, --dns-search, --dns-option a --dns-domain ich prepíšu."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-alapértékek az új konténerekhez és a builderhez. A --dns, --dns-search, --dns-option és --dns-domain kapcsoló felülírja őket."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valori DNS implicite pentru containerele noi și pentru builder. Opțiunile --dns, --dns-search, --dns-option și --dns-domain le înlocuiesc."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS настройки по подразбиране за нови контейнери и билдъра. Опциите --dns, --dns-search, --dns-option и --dns-domain имат предимство пред тях."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Προεπιλογές DNS για νέα κοντέινερ και για τον builder. Οι επιλογές --dns, --dns-search, --dns-option και --dns-domain τις παρακάμπτουν."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadane DNS postavke za nove kontejnere i builder. Opcije --dns, --dns-search, --dns-option i --dns-domain imaju prednost pred njima."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privzete nastavitve DNS za nove vsebnike in graditelja. Možnosti --dns, --dns-search, --dns-option in --dns-domain jih preglasijo."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подразумевана DNS подешавања за нове контејнере и билдер. Опције --dns, --dns-search, --dns-option и --dns-domain имају предност над њима."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podrazumevana DNS podešavanja za nove kontejnere i bilder. Opcije --dns, --dns-search, --dns-option i --dns-domain imaju prednost nad njima."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numatytieji DNS nustatymai naujiems konteineriams ir kūrimo įrankiui. Parinktys --dns, --dns-search, --dns-option ir --dns-domain juos pakeičia."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS noklusējumi jauniem konteineriem un būvētājam. Opcijas --dns, --dns-search, --dns-option un --dns-domain tos aizstāj."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-i vaikeväärtused uutele konteineritele ja koostajale. Valikud --dns, --dns-search, --dns-option ja --dns-domain alistavad need."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Типові параметри DNS для нових контейнерів і збирача. Параметри --dns, --dns-search, --dns-option і --dns-domain їх перевизначають."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значения DNS по умолчанию для новых контейнеров и сборщика. Параметры --dns, --dns-search, --dns-option и --dns-domain переопределяют их."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新容器和构建器的默认 DNS 设置。--dns、--dns-search、--dns-option 和 --dns-domain 选项会覆盖这些设置。"
+          }
         }
       }
     },
@@ -234442,6 +235576,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "DNS domain for container host names"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-Domain für Container-Hostnamen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaine DNS pour les noms d'hôte des conteneurs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dominio DNS para los nombres de host de los contenedores"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dominio DNS per i nomi host dei container"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domínio DNS para os nomes de host dos contentores"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domein voor hostnamen van containers"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domän för containrarnas värdnamn"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domæne til containeres værtsnavne"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-domene for vertsnavn til containere"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-verkkotunnus konttien isäntänimille"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domena DNS dla nazw hostów kontenerów"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doména DNS pro názvy hostitelů kontejnerů"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doména DNS pre názvy hostiteľov kontajnerov"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-tartomány a konténerek gazdagépneveihez"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domeniu DNS pentru numele de gazdă ale containerelor"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домейн за имената на хостове на контейнерите"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Τομέας DNS για τα ονόματα host των κοντέινερ"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domena za nazive hostova kontejnera"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domena DNS za imena gostiteljev vsebnikov"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домен за имена хостова контејнера"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domen za imena hostova kontejnera"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konteinerių serverių vardų DNS domenas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domēns konteineru resursdatoru nosaukumiem"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konteinerite hostinimede DNS-domeen"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-домен для імен хостів контейнерів"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-домен для имён хостов контейнеров"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器主机名使用的 DNS 域"
           }
         }
       }
@@ -234453,6 +235749,168 @@
             "state": "translated",
             "value": "DNS servers, for example 1.1.1.1"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-Server, zum Beispiel 1.1.1.1"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveurs DNS, par exemple 1.1.1.1"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidores DNS, por ejemplo 1.1.1.1"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server DNS, ad esempio 1.1.1.1"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidores DNS, por exemplo 1.1.1.1"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-servers, bijvoorbeeld 1.1.1.1"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-servrar, till exempel 1.1.1.1"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-servere, for eksempel 1.1.1.1"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-servere, for eksempel 1.1.1.1"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-palvelimet, esimerkiksi 1.1.1.1"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serwery DNS, na przykład 1.1.1.1"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery DNS, například 1.1.1.1"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servery DNS, napríklad 1.1.1.1"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-kiszolgálók, például 1.1.1.1"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servere DNS, de exemplu 1.1.1.1"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS сървъри, например 1.1.1.1"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Διακομιστές DNS, για παράδειγμα 1.1.1.1"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS poslužitelji, na primjer 1.1.1.1"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strežniki DNS, na primer 1.1.1.1"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS сервери, на пример 1.1.1.1"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS serveri, na primer 1.1.1.1"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS serveriai, pavyzdžiui, 1.1.1.1"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS serveri, piemēram, 1.1.1.1"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-serverid, näiteks 1.1.1.1"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-сервери, наприклад 1.1.1.1"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-серверы, например 1.1.1.1"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS 服务器，例如 1.1.1.1"
+          }
         }
       }
     },
@@ -234462,6 +235920,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "DNS search domains"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-Suchdomains"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaines de recherche DNS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dominios de búsqueda DNS"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domini di ricerca DNS"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domínios de pesquisa DNS"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-zoekdomeinen"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-sökdomäner"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-søgedomæner"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-søkedomener"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-hakuverkkotunnukset"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domeny wyszukiwania DNS"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyhledávací domény DNS"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyhľadávacie domény DNS"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-keresési tartományok"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domenii de căutare DNS"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домейни за търсене"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Τομείς αναζήτησης DNS"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domene pretraživanja"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iskalne domene DNS"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS домени претраге"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS domeni pretrage"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS paieškos domenai"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS meklēšanas domēni"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS-i otsingudomeenid"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Домени пошуку DNS"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Домены поиска DNS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS 搜索域"
           }
         }
       }
@@ -234473,6 +236093,168 @@
             "state": "translated",
             "value": "Resolver options, for example ndots:2"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolver-Optionen, zum Beispiel ndots:2"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options du résolveur, par exemple ndots:2"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opciones del resolvedor, por ejemplo ndots:2"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opzioni del resolver, ad esempio ndots:2"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opções do resolvedor, por exemplo ndots:2"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolveropties, bijvoorbeeld ndots:2"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolveralternativ, till exempel ndots:2"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolver-indstillinger, for eksempel ndots:2"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolver-alternativer, for eksempel ndots:2"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selvittimen valinnat, esimerkiksi ndots:2"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje resolvera, na przykład ndots:2"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti resolveru, například ndots:2"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti resolvera, napríklad ndots:2"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feloldási beállítások, például ndots:2"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opțiuni de rezolvare, de exemplu ndots:2"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опции на резолвера, например ndots:2"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επιλογές resolver, για παράδειγμα ndots:2"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije razrješivača, na primjer ndots:2"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Možnosti razreševalnika, na primer ndots:2"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опције разрешавача, на пример ndots:2"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcije razrešavača, na primer ndots:2"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprendiklio parinktys, pavyzdžiui, ndots:2"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atrisinātāja opcijas, piemēram, ndots:2"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lahendaja valikud, näiteks ndots:2"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметри резолвера, наприклад ndots:2"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметры резолвера, например ndots:2"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解析器选项，例如 ndots:2"
+          }
         }
       }
     },
@@ -234482,6 +236264,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add Item"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag hinzufügen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un élément"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir elemento"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi elemento"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar elemento"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voeg onderdeel toe"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till objekt"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj emne"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til element"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisää kohde"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj element"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat položku"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pridať položku"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elem hozzáadása"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaugă element"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добави елемент"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Προσθήκη στοιχείου"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj stavku"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj element"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додај ставку"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj stavku"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pridėti elementą"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pievienot vienumu"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisa üksus"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати елемент"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить элемент"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加项目"
           }
         }
       }
@@ -234493,6 +236437,168 @@
             "state": "translated",
             "value": "Item"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderdeel"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objekt"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emne"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kohde"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Položka"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Položka"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elem"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Елемент"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Στοιχείο"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stavka"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ставка"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stavka"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elementas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vienums"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Üksus"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Елемент"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "项目"
+          }
         }
       }
     },
@@ -234503,6 +236609,168 @@
             "state": "translated",
             "value": "Remove Item"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag entfernen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer l'élément"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar elemento"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rimuovi elemento"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover elemento"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijder onderdeel"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta bort objekt"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern emne"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern element"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poista kohde"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń element"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odstranit položku"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odstrániť položku"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elem eltávolítása"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimină elementul"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Премахни елемента"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αφαίρεση στοιχείου"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukloni stavku"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odstrani element"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уклони ставку"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukloni stavku"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pašalinti elementą"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noņemt vienumu"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eemalda üksus"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вилучити елемент"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить элемент"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除项目"
+          }
         }
       }
     },
@@ -234512,6 +236780,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gantry writes the list to ~/.config/container/config.toml. An empty list removes the key. Restart the services to apply it."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry schreibt die Liste in ~/.config/container/config.toml. Eine leere Liste entfernt den Schlüssel. Starte die Dienste neu, um sie anzuwenden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry écrit la liste dans ~/.config/container/config.toml. Une liste vide supprime la clé. Redémarrez les services pour l'appliquer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry escribe la lista en ~/.config/container/config.toml. Una lista vacía elimina la clave. Reinicia los servicios para aplicarla."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry scrive l'elenco in ~/.config/container/config.toml. Un elenco vuoto rimuove la chiave. Riavvia i servizi per applicarlo."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry escreve a lista em ~/.config/container/config.toml. Uma lista vazia remove a chave. Reinicie os serviços para a aplicar."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry schrijft de lijst naar ~/.config/container/config.toml. Een lege lijst verwijdert de sleutel. Herstart de services om deze toe te passen."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry skriver listan till ~/.config/container/config.toml. En tom lista tar bort nyckeln. Starta om tjänsterna för att tillämpa den."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry skriver listen til ~/.config/container/config.toml. En tom liste fjerner nøglen. Genstart tjenesterne for at anvende den."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry skriver listen til ~/.config/container/config.toml. En tom liste fjerner nøkkelen. Start tjenestene på nytt for å ta den i bruk."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kirjoittaa luettelon tiedostoon ~/.config/container/config.toml. Tyhjä luettelo poistaa avaimen. Ota se käyttöön käynnistämällä palvelut uudelleen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry zapisuje listę w ~/.config/container/config.toml. Pusta lista usuwa klucz. Aby ją zastosować, uruchom ponownie usługi."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry zapíše seznam do ~/.config/container/config.toml. Prázdný seznam klíč odstraní. Chcete-li změnu použít, restartujte služby."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry zapíše zoznam do ~/.config/container/config.toml. Prázdny zoznam kľúč odstráni. Ak ho chcete použiť, reštartujte služby."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry a listát a ~/.config/container/config.toml fájlba írja. Az üres lista eltávolítja a kulcsot. Az alkalmazásához indítsa újra a szolgáltatásokat."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry scrie lista în ~/.config/container/config.toml. O listă goală elimină cheia. Reporniți serviciile pentru a o aplica."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry записва списъка в ~/.config/container/config.toml. Празен списък премахва ключа. Рестартирайте услугите, за да го приложите."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry γράφει τη λίστα στο ~/.config/container/config.toml. Μια κενή λίστα αφαιρεί το κλειδί. Επανεκκινήστε τις υπηρεσίες για να εφαρμοστεί."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry zapisuje popis u ~/.config/container/config.toml. Prazan popis uklanja ključ. Za primjenu ponovno pokrenite servise."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry zapiše seznam v ~/.config/container/config.toml. Prazen seznam odstrani ključ. Da začne veljati, znova zaženite storitve."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry уписује листу у ~/.config/container/config.toml. Празна листа уклања кључ. Поново покрените сервисе да бисте је применили."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry upisuje listu u ~/.config/container/config.toml. Prazna lista uklanja ključ. Ponovo pokrenite servise da biste je primenili."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry įrašo sąrašą į ~/.config/container/config.toml. Tuščias sąrašas pašalina raktą. Kad jis būtų pritaikytas, paleiskite paslaugas iš naujo."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ieraksta sarakstu failā ~/.config/container/config.toml. Tukšs saraksts noņem atslēgu. Lai to lietotu, restartējiet pakalpojumus."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kirjutab loendi faili ~/.config/container/config.toml. Tühi loend eemaldab võtme. Rakendamiseks taaskäivitage teenused."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry записує список у ~/.config/container/config.toml. Порожній список вилучає ключ. Щоб застосувати зміни, перезапустіть служби."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry записывает список в ~/.config/container/config.toml. Пустой список удаляет ключ. Чтобы применить изменения, перезапустите службы."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 会将该列表写入 ~/.config/container/config.toml。列表为空时会移除该键。重启服务后生效。"
           }
         }
       }

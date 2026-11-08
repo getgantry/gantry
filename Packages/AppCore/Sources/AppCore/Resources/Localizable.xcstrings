@@ -47795,6 +47795,168 @@
             "state": "translated",
             "value": "The cluster services are not installed or not running."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Cluster-Dienste sind nicht installiert oder laufen nicht."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les services de cluster ne sont pas installés ou ne sont pas en cours d'exécution."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los servicios de clúster no están instalados o no se están ejecutando."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I servizi del cluster non sono installati o non sono in esecuzione."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os serviços de cluster não estão instalados ou não estão em execução."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De clusterservices zijn niet geïnstalleerd of niet actief."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klustertjänsterna är inte installerade eller körs inte."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klyngetjenesterne er ikke installeret eller kører ikke."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klyngetjenestene er ikke installert eller kjører ikke."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klusteripalveluja ei ole asennettu tai ne eivät ole käynnissä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usługi klastra nie są zainstalowane lub nie działają."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Služby clusteru nejsou nainstalované nebo neběží."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Služby klastra nie sú nainštalované alebo nie sú spustené."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A klaszterszolgáltatások nincsenek telepítve, vagy nem futnak."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serviciile de cluster nu sunt instalate sau nu rulează."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Услугите на клъстера не са инсталирани или не работят."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι υπηρεσίες cluster δεν είναι εγκατεστημένες ή δεν εκτελούνται."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servisi klastera nisu instalirani ili ne rade."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storitve gruče niso nameščene ali se ne izvajajo."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервиси кластера нису инсталирани или не раде."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servisi klastera nisu instalirani ili ne rade."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasterio paslaugos neįdiegtos arba neveikia."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klastera pakalpojumi nav instalēti vai nedarbojas."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klastri teenused pole installitud või ei tööta."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Служби кластера не інстальовано або не запущено."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Службы кластера не установлены или не запущены."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "集群服务未安装或未运行。"
+          }
         }
       }
     },
@@ -47804,6 +47966,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "This Homebrew build of container %@ lacks the cluster services. Install the signed package from github.com/apple/container/releases."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diesem Homebrew-Build von container %@ fehlen die Cluster-Dienste. Installiere das signierte Paket von github.com/apple/container/releases."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version Homebrew de container %@ ne comprend pas les services de cluster. Installez le paquet signé depuis github.com/apple/container/releases."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta compilación de Homebrew de container %@ no incluye los servicios de clúster. Instala el paquete firmado desde github.com/apple/container/releases."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa build Homebrew di container %@ non include i servizi del cluster. Installa il pacchetto firmato da github.com/apple/container/releases."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta compilação Homebrew do container %@ não inclui os serviços de cluster. Instale o pacote assinado a partir de github.com/apple/container/releases."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze Homebrew-build van container %@ bevat de clusterservices niet. Installeer het ondertekende pakket van github.com/apple/container/releases."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här Homebrew-versionen av container %@ saknar klustertjänsterna. Installera det signerade paketet från github.com/apple/container/releases."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dette Homebrew-build af container %@ mangler klyngetjenesterne. Installer den signerede pakke fra github.com/apple/container/releases."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne Homebrew-versjonen av container %@ mangler klyngetjenestene. Installer den signerte pakken fra github.com/apple/container/releases."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tästä containerin Homebrew-koonnista %@ puuttuvat klusteripalvelut. Asenna allekirjoitettu paketti osoitteesta github.com/apple/container/releases."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta kompilacja container %@ z Homebrew nie zawiera usług klastra. Zainstaluj podpisany pakiet z github.com/apple/container/releases."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toto sestavení container %@ z Homebrew neobsahuje služby clusteru. Nainstalujte podepsaný balíček z github.com/apple/container/releases."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toto zostavenie container %@ z Homebrew neobsahuje služby klastra. Nainštalujte podpísaný balík z github.com/apple/container/releases."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A container %@ Homebrew-buildjéből hiányoznak a klaszterszolgáltatások. Telepítse az aláírt csomagot innen: github.com/apple/container/releases."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest build Homebrew al container %@ nu include serviciile de cluster. Instalați pachetul semnat de pe github.com/apple/container/releases."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тази Homebrew компилация на container %@ няма услугите на клъстера. Инсталирайте подписания пакет от github.com/apple/container/releases."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτή η έκδοση Homebrew του container %@ δεν διαθέτει τις υπηρεσίες cluster. Εγκαταστήστε το υπογεγραμμένο πακέτο από το github.com/apple/container/releases."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova Homebrew verzija alata container %@ nema servise klastera. Instalirajte potpisani paket s github.com/apple/container/releases."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta različica container %@ iz Homebrew nima storitev gruče. Namestite podpisani paket z github.com/apple/container/releases."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ова Homebrew верзија алатке container %@ нема сервисе кластера. Инсталирајте потписани пакет са github.com/apple/container/releases."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova Homebrew verzija alatke container %@ nema servise klastera. Instalirajte potpisani paket sa github.com/apple/container/releases."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šiame container %@ Homebrew leidime nėra klasterio paslaugų. Įdiekite pasirašytą paketą iš github.com/apple/container/releases."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šajā container %@ Homebrew būvējumā nav klastera pakalpojumu. Instalējiet parakstīto pakotni no github.com/apple/container/releases."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selles Homebrew' container %@ versioonis puuduvad klastri teenused. Installige allkirjastatud pakett aadressilt github.com/apple/container/releases."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У цій збірці container %@ з Homebrew немає служб кластера. Інсталюйте підписаний пакет із github.com/apple/container/releases."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этой сборке container %@ из Homebrew нет служб кластера. Установите подписанный пакет с github.com/apple/container/releases."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Homebrew 版本的 container %@ 缺少集群服务。请从 github.com/apple/container/releases 安装已签名的安装包。"
           }
         }
       }
@@ -47815,6 +48139,168 @@
             "state": "translated",
             "value": "This installation of container lacks the cluster services. Install the signed package from github.com/apple/container/releases."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Installation von container fehlen die Cluster-Dienste. Installiere das signierte Paket von github.com/apple/container/releases."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette installation de container ne comprend pas les services de cluster. Installez le paquet signé depuis github.com/apple/container/releases."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta instalación de container no incluye los servicios de clúster. Instala el paquete firmado desde github.com/apple/container/releases."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa installazione di container non include i servizi del cluster. Installa il pacchetto firmato da github.com/apple/container/releases."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta instalação do container não inclui os serviços de cluster. Instale o pacote assinado a partir de github.com/apple/container/releases."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze installatie van container bevat de clusterservices niet. Installeer het ondertekende pakket van github.com/apple/container/releases."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här installationen av container saknar klustertjänsterna. Installera det signerade paketet från github.com/apple/container/releases."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne installation af container mangler klyngetjenesterne. Installer den signerede pakke fra github.com/apple/container/releases."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne installasjonen av container mangler klyngetjenestene. Installer den signerte pakken fra github.com/apple/container/releases."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tästä containerin asennuksesta puuttuvat klusteripalvelut. Asenna allekirjoitettu paketti osoitteesta github.com/apple/container/releases."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta instalacja container nie zawiera usług klastra. Zainstaluj podpisany pakiet z github.com/apple/container/releases."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tato instalace container neobsahuje služby clusteru. Nainstalujte podepsaný balíček z github.com/apple/container/releases."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táto inštalácia container neobsahuje služby klastra. Nainštalujte podpísaný balík z github.com/apple/container/releases."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A container ezen telepítéséből hiányoznak a klaszterszolgáltatások. Telepítse az aláírt csomagot innen: github.com/apple/container/releases."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Această instalare a container nu include serviciile de cluster. Instalați pachetul semnat de pe github.com/apple/container/releases."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тази инсталация на container няма услугите на клъстера. Инсталирайте подписания пакет от github.com/apple/container/releases."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτή η εγκατάσταση του container δεν διαθέτει τις υπηρεσίες cluster. Εγκαταστήστε το υπογεγραμμένο πακέτο από το github.com/apple/container/releases."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova instalacija alata container nema servise klastera. Instalirajte potpisani paket s github.com/apple/container/releases."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta namestitev container nima storitev gruče. Namestite podpisani paket z github.com/apple/container/releases."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ова инсталација алатке container нема сервисе кластера. Инсталирајте потписани пакет са github.com/apple/container/releases."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova instalacija alatke container nema servise klastera. Instalirajte potpisani paket sa github.com/apple/container/releases."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šiame container įdiegime nėra klasterio paslaugų. Įdiekite pasirašytą paketą iš github.com/apple/container/releases."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šajā container instalācijā nav klastera pakalpojumu. Instalējiet parakstīto pakotni no github.com/apple/container/releases."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selles container'i installatsioonis puuduvad klastri teenused. Installige allkirjastatud pakett aadressilt github.com/apple/container/releases."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У цій інсталяції container немає служб кластера. Інсталюйте підписаний пакет із github.com/apple/container/releases."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этой установке container нет служб кластера. Установите подписанный пакет с github.com/apple/container/releases."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 container 安装缺少集群服务。请从 github.com/apple/container/releases 安装已签名的安装包。"
+          }
         }
       }
     },
@@ -47824,6 +48310,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "Restart the apple/container services, then try again. After an upgrade, a restart loads the new cluster service."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starte die apple/container-Dienste neu und versuche es dann erneut. Nach einem Upgrade lädt ein Neustart den neuen Cluster-Dienst."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redémarrez les services apple/container, puis réessayez. Après une mise à niveau, un redémarrage charge le nouveau service de cluster."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reinicia los servicios de apple/container y vuelve a intentarlo. Después de una actualización, el reinicio carga el nuevo servicio de clúster."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riavvia i servizi di apple/container, poi riprova. Dopo un aggiornamento, il riavvio carica il nuovo servizio del cluster."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reinicie os serviços do apple/container e tente novamente. Após uma atualização, o reinício carrega o novo serviço de cluster."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herstart de apple/container-services en probeer het opnieuw. Na een upgrade laadt een herstart de nieuwe clusterservice."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starta om apple/container-tjänsterna och försök sedan igen. Efter en uppgradering läser en omstart in den nya klustertjänsten."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genstart apple/container-tjenesterne, og prøv derefter igen. Efter en opgradering indlæser en genstart den nye klyngetjeneste."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start apple/container-tjenestene på nytt, og prøv igjen. Etter en oppgradering laster en omstart inn den nye klyngetjenesten."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käynnistä apple/container-palvelut uudelleen ja yritä sitten uudelleen. Päivityksen jälkeen uudelleenkäynnistys lataa uuden klusteripalvelun."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uruchom ponownie usługi apple/container i spróbuj ponownie. Po uaktualnieniu ponowne uruchomienie wczytuje nową usługę klastra."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restartujte služby apple/container a zkuste to znovu. Po upgradu restart načte novou službu clusteru."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reštartujte služby apple/container a skúste to znova. Po aktualizácii reštart načíta novú službu klastra."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indítsa újra az apple/container szolgáltatásait, majd próbálja újra. Frissítés után az újraindítás betölti az új klaszterszolgáltatást."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reporniți serviciile apple/container, apoi încercați din nou. După un upgrade, repornirea încarcă noul serviciu de cluster."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рестартирайте услугите на apple/container и опитайте отново. След надграждане рестартирането зарежда новата услуга на клъстера."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επανεκκινήστε τις υπηρεσίες apple/container και δοκιμάστε ξανά. Μετά από αναβάθμιση, η επανεκκίνηση φορτώνει τη νέα υπηρεσία cluster."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovno pokrenite servise apple/container, zatim pokušajte ponovno. Nakon nadogradnje ponovno pokretanje učitava novi servis klastera."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znova zaženite storitve apple/container in poskusite znova. Po nadgradnji ponovni zagon naloži novo storitev gruče."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поново покрените apple/container сервисе, па покушајте поново. После надоградње поновно покретање учитава нови сервис кластера."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ponovo pokrenite apple/container servise, pa pokušajte ponovo. Posle nadogradnje ponovno pokretanje učitava novi servis klastera."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paleiskite apple/container paslaugas iš naujo ir bandykite dar kartą. Po atnaujinimo paleidimas iš naujo įkelia naują klasterio paslaugą."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restartējiet apple/container pakalpojumus un mēģiniet vēlreiz. Pēc jaunināšanas restartēšana ielādē jauno klastera pakalpojumu."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taaskäivitage apple/containeri teenused ja proovige uuesti. Pärast uuendamist laadib taaskäivitus uue klastriteenuse."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перезапустіть служби apple/container і спробуйте ще раз. Після оновлення перезапуск завантажує нову службу кластера."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перезапустите службы apple/container и повторите попытку. После обновления перезапуск загружает новую службу кластера."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请重启 apple/container 服务，然后重试。升级后，重启会载入新的集群服务。"
           }
         }
       }
@@ -47835,6 +48483,168 @@
             "state": "translated",
             "value": "“%@” is in the list two times."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ steht zweimal in der Liste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » figure deux fois dans la liste."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” aparece dos veces en la lista."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” compare due volte nell'elenco."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” aparece duas vezes na lista."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” staat twee keer in de lijst."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” finns två gånger i listan."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” står to gange på listen."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» står to ganger i listen."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” on luettelossa kaksi kertaa."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” występuje na liście dwa razy."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ je v seznamu dvakrát."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ je v zozname dvakrát."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” kétszer szerepel a listában."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” apare de două ori în listă."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ е в списъка два пъти."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%@» υπάρχει δύο φορές στη λίστα."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” se na popisu nalazi dvaput."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ je na seznamu dvakrat."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ се у листи налази два пута."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ se u listi nalazi dva puta."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ sąraše yra du kartus."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” sarakstā ir divreiz."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ on loendis kaks korda."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» є в списку двічі."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» указано в списке два раза."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”在列表中出现了两次。"
+          }
         }
       }
     },
@@ -47844,6 +48654,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@” cannot contain spaces or commas."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ darf keine Leerzeichen oder Kommas enthalten."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » ne peut pas contenir d'espaces ni de virgules."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” no puede contener espacios ni comas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” non può contenere spazi o virgole."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” não pode conter espaços nem vírgulas."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” mag geen spaties of komma's bevatten."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” får inte innehålla mellanslag eller kommatecken."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” må ikke indeholde mellemrum eller kommaer."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» kan ikke inneholde mellomrom eller komma."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” ei voi sisältää välilyöntejä tai pilkkuja."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nie może zawierać spacji ani przecinków."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nesmí obsahovat mezery ani čárky."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nemôže obsahovať medzery ani čiarky."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nem tartalmazhat szóközt vagy vesszőt."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nu poate conține spații sau virgule."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ не може да съдържа интервали или запетаи."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%@» δεν μπορεί να περιέχει κενά ή κόμματα."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” ne smije sadržavati razmake ni zareze."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ne sme vsebovati presledkov ali vejic."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ не сме да садржи размаке ни зарезе."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ne sme da sadrži razmake ni zareze."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ negali būti tarpų ar kablelių."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nedrīkst saturēt atstarpes vai komatus."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ei tohi sisaldada tühikuid ega komasid."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» не може містити пробілів або ком."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» не может содержать пробелы или запятые."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不能包含空格或逗号。"
           }
         }
       }
@@ -47855,6 +48827,168 @@
             "state": "translated",
             "value": "“%@” is not an IP address. Enter an address such as 1.1.1.1."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ist keine IP-Adresse. Gib eine Adresse wie 1.1.1.1 ein."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » n'est pas une adresse IP. Saisissez une adresse comme 1.1.1.1."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” no es una dirección IP. Introduce una dirección como 1.1.1.1."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” non è un indirizzo IP. Inserisci un indirizzo come 1.1.1.1."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” não é um endereço IP. Introduza um endereço como 1.1.1.1."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is geen IP-adres. Voer een adres in zoals 1.1.1.1."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” är inte en IP-adress. Ange en adress som 1.1.1.1."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” er ikke en IP-adresse. Indtast en adresse som 1.1.1.1."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» er ikke en IP-adresse. Skriv inn en adresse som 1.1.1.1."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” ei ole IP-osoite. Anna osoite, kuten 1.1.1.1."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nie jest adresem IP. Wprowadź adres, na przykład 1.1.1.1."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ není adresa IP. Zadejte adresu, například 1.1.1.1."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nie je adresa IP. Zadajte adresu, napríklad 1.1.1.1."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nem IP-cím. Adjon meg egy címet, például 1.1.1.1."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nu este o adresă IP. Introduceți o adresă precum 1.1.1.1."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ не е IP адрес. Въведете адрес като 1.1.1.1."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%@» δεν είναι διεύθυνση IP. Εισαγάγετε μια διεύθυνση όπως 1.1.1.1."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nije IP adresa. Unesite adresu poput 1.1.1.1."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ni naslov IP. Vnesite naslov, na primer 1.1.1.1."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ није IP адреса. Унесите адресу као што је 1.1.1.1."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nije IP adresa. Unesite adresu kao što je 1.1.1.1."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nėra IP adresas. Įveskite adresą, pavyzdžiui, 1.1.1.1."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nav IP adrese. Ievadiet adresi, piemēram, 1.1.1.1."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ei ole IP-aadress. Sisestage aadress, näiteks 1.1.1.1."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не IP-адреса. Введіть адресу, наприклад 1.1.1.1."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не IP-адрес. Введите адрес, например 1.1.1.1."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是 IP 地址。请输入类似 1.1.1.1 的地址。"
+          }
         }
       }
     },
@@ -47864,6 +48998,168 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@” is not a domain name. Use letters, digits, dots and hyphens."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ist kein Domainname. Verwende Buchstaben, Ziffern, Punkte und Bindestriche."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » n'est pas un nom de domaine. Utilisez des lettres, des chiffres, des points et des traits d'union."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” no es un nombre de dominio. Usa letras, dígitos, puntos y guiones."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” non è un nome di dominio. Usa lettere, cifre, punti e trattini."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” não é um nome de domínio. Utilize letras, algarismos, pontos e hífenes."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is geen domeinnaam. Gebruik letters, cijfers, punten en koppeltekens."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” är inte ett domännamn. Använd bokstäver, siffror, punkter och bindestreck."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” er ikke et domænenavn. Brug bogstaver, tal, punktummer og bindestreger."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» er ikke et domenenavn. Bruk bokstaver, sifre, punktum og bindestreker."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%@” ei ole verkkotunnus. Käytä kirjaimia, numeroita, pisteitä ja yhdysmerkkejä."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nie jest nazwą domeny. Używaj liter, cyfr, kropek i łączników."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ není název domény. Použijte písmena, číslice, tečky a pomlčky."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nie je názov domény. Použite písmená, číslice, bodky a spojovníky."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nem tartománynév. Használjon betűket, számjegyeket, pontokat és kötőjeleket."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nu este un nume de domeniu. Folosiți litere, cifre, puncte și cratime."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ не е име на домейн. Използвайте букви, цифри, точки и тирета."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%@» δεν είναι όνομα τομέα. Χρησιμοποιήστε γράμματα, ψηφία, τελείες και παύλες."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nije naziv domene. Koristite slova, znamenke, točke i crtice."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ni ime domene. Uporabite črke, števke, pike in vezaje."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ није име домена. Користите слова, цифре, тачке и цртице."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nije ime domena. Koristite slova, cifre, tačke i crtice."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ nėra domeno vardas. Naudokite raides, skaitmenis, taškus ir brūkšnelius."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@” nav domēna nosaukums. Izmantojiet burtus, ciparus, punktus un defises."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ ei ole domeeninimi. Kasutage tähti, numbreid, punkte ja sidekriipse."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не доменне ім’я. Використовуйте літери, цифри, крапки й дефіси."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» — не доменное имя. Используйте буквы, цифры, точки и дефисы."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”不是域名。请使用字母、数字、点和连字符。"
           }
         }
       }
