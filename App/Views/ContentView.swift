@@ -369,7 +369,7 @@ struct ContentView: View {
             showingPalette = true
             // The Kubernetes section loads the contexts when it opens. Load
             // them here too, so that the palette shows them before that.
-            if model.kubernetes.availability == .unknown {
+            if model.kubernetes.contexts.isEmpty {
                 Task { await model.kubernetes.prepare() }
             }
         }
