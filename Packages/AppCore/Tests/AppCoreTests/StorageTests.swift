@@ -547,3 +547,10 @@ struct VolumeTransferTests {
         #expect(VolumeTransferPlan.users(of: .folder("/Volumes/Fast/db/"), in: [a, b, c]).map(\.id) == ["b"])
     }
 }
+
+struct StorageFormatTests {
+    @Test func zeroIsANumber() {
+        #expect(StorageFormat.bytes(0).first?.isNumber == true)
+        #expect(!StorageFormat.bytes(0).localizedCaseInsensitiveContains("zero"))
+    }
+}
