@@ -74,7 +74,7 @@ extension GantryTools {
                 inputSchema: Schema.object(properties: [
                     "host_id": appleHostID,
                     "key": Schema.string("Property key, e.g. container.memory or build.rosetta."),
-                    "value": Schema.string("New value, e.g. 4g, 8, true.")
+                    "value": Schema.string("New value, e.g. 4g, 8, true. A list (container.dns.nameservers) takes comma-separated items, e.g. 1.1.1.1, 8.8.8.8.")
                 ], required: ["host_id", "key", "value"]),
                 annotations: .init(readOnlyHint: false, destructiveHint: false, openWorldHint: false)
             ),
@@ -240,6 +240,7 @@ extension GantryTools {
         guard property.kind == .unknown else { return property.kind }
         // A key without a schema keeps the type the services report.
         switch property.effective ?? property.user {
+        case .strings?: return .stringList
         case .bool?: return .bool
         case .integer?: return .integerValue
         case .number?: return .numberValue

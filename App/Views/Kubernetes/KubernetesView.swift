@@ -21,6 +21,10 @@ struct KubernetesView: View {
         }
         .navigationTitle(Text("Kubernetes"))
         .task {
+            // Fresh cluster lists also find a cluster service that does not answer.
+            for session in model.sessions where session.supportsClusters {
+                await session.refreshClusters()
+            }
             browser.appleClusters = appleClusterNames
             await browser.prepare()
         }

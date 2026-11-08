@@ -41,6 +41,11 @@ indirect enum TOMLValue: Equatable, Sendable {
         }
     }
 
+    var isString: Bool {
+        if case .string = self { return true }
+        return false
+    }
+
     /// The value as a Foundation object for `JSONSerialization`.
     var foundationObject: Any {
         switch self {
@@ -785,6 +790,11 @@ extension ConfigTOMLDocument {
         if let entry = entries.first(where: { $0.path == path && !$0.inArrayOfTables }) {
             if let literal {
                 switch entry.value {
+                case .array(let items) where items.allSatisfy(\.isString) && literal.hasPrefix("["):
+                    // A string array is replaced as a whole; comments in it would be lost.
+                    guard !Self.hasComment(bytes[entry.valueRange]) else {
+                        throw ConfigTOMLError.unsupported("\(display) has comments inside its array in config.toml. Edit it by hand.")
+                    }
                 case .array, .table, .datetime:
                     throw ConfigTOMLError.unsupported("\(display) holds an array, a table or a date in config.toml. Edit it by hand.")
                 default: break
@@ -839,6 +849,22 @@ extension ConfigTOMLDocument {
         default:
             throw ConfigTOMLError.unsupported("\(section.joined(separator: ".")) is not a table in config.toml.")
         }
+    }
+
+    /// Whether TOML value bytes hold a `#` comment outside a string.
+    static func hasComment(_ bytes: ArraySlice<UInt8>) -> Bool {
+        var quote: UInt8?
+        var escaped = false
+        for byte in bytes {
+            if let open = quote {
+                if escaped { escaped = false } else if open == 0x22, byte == 0x5C { escaped = true } else if byte == open { quote = nil }
+            } else if byte == 0x22 || byte == 0x27 {
+                quote = byte
+            } else if byte == UInt8(ascii: "#") {
+                return true
+            }
+        }
+        return false
     }
 
     /// Inserts a line at a line start (or at the end of the file).

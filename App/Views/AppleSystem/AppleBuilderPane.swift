@@ -13,6 +13,9 @@ struct AppleBuilderPane: View {
     @State private var errorText: String?
     @State private var progress: [String] = []
     @State private var confirmDelete = false
+    @State private var confirmRecreate = false
+    /// The `build.image` system property: the image a new builder uses.
+    @State private var configuredImage: String?
 
     @State private var cpus = 2
     @State private var memoryGB = 2
@@ -40,6 +43,9 @@ struct AppleBuilderPane: View {
                     if pluginMissing {
                         pluginMissingCard
                     } else if loaded {
+                        if let update = builder?.imageUpdate(configuredImage: configuredImage) {
+                            outdatedCard(update)
+                        }
                         statusCard
                         startCard
                     }
@@ -63,6 +69,29 @@ struct AppleBuilderPane: View {
             Button(String(localized: "Cancel"), role: .cancel) {}
         } message: {
             Text("The builder container and its build cache are removed. The next build creates a new builder.")
+        }
+        .confirmationDialog(
+            String(localized: "Recreate the image builder?"),
+            isPresented: $confirmRecreate
+        ) {
+            Button(String(localized: "Recreate Builder"), role: .destructive) { start() }
+            Button(String(localized: "Cancel"), role: .cancel) {}
+        } message: {
+            Text("The builder container and its build cache are removed. A new builder starts with the image from the build.image property.")
+        }
+    }
+
+    private func outdatedCard(_ update: String) -> some View {
+        AppleSystemCard(title: String(localized: "Builder image is outdated"), systemImage: "exclamationmark.arrow.circlepath") {
+            Text(String(localized: "The builder runs image \(AppleBuilderStatus.imageTag(builder?.image ?? "")). The build.image property names \(AppleBuilderStatus.imageTag(update)). Recreate the builder to use the new image."))
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(verbatim: update)
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+            Button(String(localized: "Recreate Builder…")) { confirmRecreate = true }
+                .disabled(busy)
         }
     }
 
@@ -246,13 +275,17 @@ struct AppleBuilderPane: View {
             errorText = error.localizedDescription
         }
         loaded = true
+        let properties = builder == nil && !seedOptions ? nil : try? await AppleContainerControl.listProperties(cliOverride: cli)
+        if let properties, case .string(let image)? = properties.first(where: { $0.key == "build.image" })?.effective {
+            configuredImage = image
+        }
         guard seedOptions else { return }
         if let builder, let current = builder.cpus {
             cpus = min(max(current, 1), maxCPU)
             if let memory = builder.memoryBytes {
                 memoryGB = min(max(Int((Double(memory) / 1_073_741_824).rounded()), 1), maxMemGB)
             }
-        } else if let properties = try? await AppleContainerControl.listProperties(cliOverride: cli) {
+        } else if let properties {
             if case .integer(let value) = properties.first(where: { $0.key == "build.cpus" })?.effective {
                 cpus = min(max(value, 1), maxCPU)
             }

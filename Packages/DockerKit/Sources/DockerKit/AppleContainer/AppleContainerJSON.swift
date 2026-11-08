@@ -649,12 +649,31 @@ enum AppleContainerJSON {
         // Without a previous sample the decoder would compute a meaningless
         // percent from zeroed precpu counters; pinning precpu to the current
         // values makes the first sample report exactly 0%, like docker's CLI.
-        let baseline = previous ?? (cpuTotal: cpuTotal, system: system)
+        var baseline = previous ?? (cpuTotal: cpuTotal, system: system)
+        if let utilization = cpuUtilization(element) {
+            // CLI 1.7.1+ measures CPU itself: a fraction of one core over its
+            // own sampling window. Pin precpu to a 1-second window that gives
+            // the decoder exactly `utilization × 100` percent.
+            let window = Int64(1_000_000_000)
+            baseline = (
+                cpuTotal: cpuTotal - Int64((utilization * Double(window)).rounded()),
+                system: system - window * Int64(cpus)
+            )
+        }
         body["precpu_stats"] = [
             "cpu_usage": ["total_usage": baseline.cpuTotal],
             "system_cpu_usage": baseline.system
         ]
         return try encode(body)
+    }
+
+    /// `cpuUtilization` of a stats entry (apple/container 1.7.1+): a fraction
+    /// of one core, 2.5 is two and a half cores. Nil when absent or invalid.
+    static func cpuUtilization(_ element: [String: Any]) -> Double? {
+        guard let number = element["cpuUtilization"] as? NSNumber,
+              CFGetTypeID(number) != CFBooleanGetTypeID() else { return nil }
+        let value = number.doubleValue
+        return value.isFinite && value >= 0 ? value : nil
     }
 
     /// Picks the entry for `id` out of the CLI's all-containers stats array.

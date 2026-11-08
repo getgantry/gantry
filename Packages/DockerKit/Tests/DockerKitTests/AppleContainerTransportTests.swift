@@ -1020,3 +1020,19 @@ private let multiVariantImageJSON = """
     let inspects = runner.recordedCalls().filter { $0.starts(with: ["image", "inspect"]) }
     #expect(inspects.count == 1)
 }
+
+// MARK: - Stats on apple/container 1.7.1
+
+@Test func appleStatsIgnoreClusterNodeRows() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["stats"], stdout: liveStats171JSON)
+    // A listed container that has no stats row is a 404, not a node's row.
+    do {
+        _ = try await client.containerStatsOnce(id: "web")
+        Issue.record("expected 404")
+    } catch let DockerError.apiError(status, _) {
+        #expect(status == 404)
+    }
+    let node = try await client.containerStatsOnce(id: "gtest-worker-1")
+    #expect(abs(node.cpuPercent - 2.8161277675011816) < 0.0001)
+}

@@ -47,11 +47,24 @@ struct KubernetesBrowserView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
             }
+            clusterServiceNotice
             if browser.contexts.isEmpty {
                 noContexts
             } else {
                 split
             }
+        }
+    }
+
+    /// The container tool's cluster services do not answer (see ClusterServiceDiagnosis).
+    @ViewBuilder
+    private var clusterServiceNotice: some View {
+        if let session = model.sessions.first(where: { $0.host.isAppleContainer && $0.clusterServiceProblem != nil }),
+           let problem = session.clusterServiceProblem,
+           ClusterServiceDiagnosis.showsKubernetesNotice(contexts: browser.contexts, selectedContext: browser.selectedContext) {
+            ClusterServiceProblemNotice(problem: problem, session: session)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
         }
     }
 

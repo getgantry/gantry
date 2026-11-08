@@ -363,3 +363,64 @@ private let dfFixture = Data("""
     #expect(entries.first?.text == "hi")
     #expect(entries.first?.stream == .stdout)
 }
+
+// MARK: - Stats on apple/container 1.7.1
+
+/// `stats --no-stream --format json` from a live 1.7.1 host
+/// (/Volumes/SanDisk2Tb/builds/gantry-027/ac171/live-1.7.1/stats.json): only the two nodes of
+/// the cluster `gtest`, which `container list` hides, and `cpuUtilization`.
+let liveStats171JSON = #"[{"blockReadBytes":788164608,"blockWriteBytes":559792128,"cpuUsageUsec":18318088,"cpuUtilization":0.11966164052968623,"id":"gtest","memoryLimitBytes":3221225472,"memoryUsageBytes":1733218304,"networkRxBytes":0,"networkTxBytes":0,"numProcesses":206},{"blockReadBytes":456302592,"blockWriteBytes":180789248,"cpuUsageUsec":4032320,"cpuUtilization":0.028161277675011816,"id":"gtest-worker-1","memoryLimitBytes":2147483648,"memoryUsageBytes":759992320,"networkRxBytes":0,"networkTxBytes":0,"numProcesses":76}]"#
+
+@Test func appleStatsUseCPUUtilizationWhenPresent() throws {
+    let entries = try #require(try AppleContainerJSON.decode(Data(liveStats171JSON.utf8)) as? [[String: Any]])
+    let body = try AppleContainerJSON.statsBody(fromAppleStats: entries[0], onlineCPUs: 8, monotonicNanoseconds: 5_000_000_000)
+    let sample = try JSONDecoder().decode(ContainerStatsSample.self, from: body)
+    // 0.1197 of one core is 11.97 %, also on the first sample.
+    #expect(abs(sample.cpuPercent - 11.966164052968623) < 0.0001)
+    #expect(sample.cpuTotalUsage == 18_318_088_000)
+    #expect(sample.pids == 206)
+    // A previous baseline does not override the CLI's own measure.
+    let again = try AppleContainerJSON.statsBody(
+        fromAppleStats: entries[0], onlineCPUs: 8, monotonicNanoseconds: 9_000_000_000,
+        previous: (cpuTotal: 1, system: 1)
+    )
+    #expect(abs(try JSONDecoder().decode(ContainerStatsSample.self, from: again).cpuPercent - 11.966164052968623) < 0.0001)
+}
+
+@Test func appleStatsFallBackWithoutCPUUtilization() throws {
+    let entry: [String: Any] = ["id": "c1", "cpuUsageUsec": 2_000_000]
+    #expect(AppleContainerJSON.cpuUtilization(entry) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": true]) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": -1.0]) == nil)
+    #expect(AppleContainerJSON.cpuUtilization(["cpuUtilization": 2.5]) == 2.5)
+    // 1 s of CPU over 1 s of wall time on 4 CPUs: one core, 100 %.
+    let body = try AppleContainerJSON.statsBody(
+        fromAppleStats: entry, onlineCPUs: 4, monotonicNanoseconds: 2_000_000_000,
+        previous: (cpuTotal: 1_000_000_000, system: 4_000_000_000)
+    )
+    #expect(abs(try JSONDecoder().decode(ContainerStatsSample.self, from: body).cpuPercent - 100) < 0.0001)
+}
+
+@Test func appleStatsWithoutCPUUtilizationKeepTheCounterMath() throws {
+    // The real pre-1.7.1 shape (no cpuUtilization; 1.6.1 prints the same keys):
+    // the first sample is 0 % and the next one uses the counter delta.
+    let entry = try #require(AppleContainerJSON.array(try AppleContainerJSON.decode(statsFixture)).first)
+    #expect(AppleContainerJSON.cpuUtilization(entry) == nil)
+    let first = try AppleContainerJSON.statsBody(fromAppleStats: entry, onlineCPUs: 4, monotonicNanoseconds: 1_000_000_000)
+    #expect(try JSONDecoder().decode(ContainerStatsSample.self, from: first).cpuPercent == 0)
+    let next = try AppleContainerJSON.statsBody(
+        fromAppleStats: entry, onlineCPUs: 4, monotonicNanoseconds: 2_000_000_000,
+        previous: (cpuTotal: 4_238_000 - 500_000_000, system: 4_000_000_000)
+    )
+    // cpuΔ = 0.5e9, systemΔ = 4e9 → 0.125 × 4 × 100 = 50 %.
+    #expect(abs(try JSONDecoder().decode(ContainerStatsSample.self, from: next).cpuPercent - 50) < 0.001)
+}
+
+@Test func appleStatsClusterNodeRowsMatchOnlyTheirOwnIDs() throws {
+    // `container list` hides the nodes gtest and gtest-worker-1, but stats
+    // reports them. A lookup by a listed id never picks a node row.
+    let data = Data(liveStats171JSON.utf8)
+    #expect(try AppleContainerJSON.statsEntry(forID: "web", inAppleStats: data) == nil)
+    #expect(try AppleContainerJSON.statsEntry(forID: "gtest", inAppleStats: data).map { AppleContainerJSON.string($0["id"]) } == "gtest")
+    #expect(try AppleContainerJSON.statsEntry(forID: "gtest-worker", inAppleStats: data) == nil)
+}

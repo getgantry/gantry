@@ -44,6 +44,9 @@ public final class HostSession: Identifiable {
     public private(set) var clusterListError: String?
     /// Cluster creations that run or that failed, in start order.
     public private(set) var clusterCreations: [ClusterCreation] = []
+    /// Set when a cluster command found the cluster service unreachable
+    /// (missing plugin or services not running); nil after a listing that worked.
+    public private(set) var clusterServiceProblem: ClusterServiceProblem?
     /// The CLI features for clusters; nil until ``loadClusterSupport()`` runs.
     public private(set) var clusterFeatures: ContainerTooling.Features?
 
@@ -1097,10 +1100,21 @@ public final class HostSession: Identifiable {
                 cliOverride: machineCLIOverride
             )
             clusterListError = nil
+            clusterServiceProblem = nil
         } catch {
             guard !(error is CancellationError) else { return }
             clusterListError = Self.message(for: error)
+            noteClusterError(Self.message(for: error))
         }
+    }
+
+    /// Records why the cluster service is unreachable, when `message` says so.
+    func noteClusterError(_ message: String) {
+        guard let problem = ClusterServiceDiagnosis.problem(
+            forError: message,
+            cliPath: AppleContainerControl.cliPath(override: machineCLIOverride)
+        ) else { return }
+        clusterServiceProblem = problem
     }
 
     private func clusterAction(_ body: (String) async throws -> Void) async -> Bool {
@@ -1111,6 +1125,7 @@ public final class HostSession: Identifiable {
             return true
         } catch {
             surface(error)
+            noteClusterError(Self.message(for: error))
             await refreshClusters()
             return false
         }
@@ -1215,6 +1230,7 @@ public final class HostSession: Identifiable {
             if let index = clusterCreations.firstIndex(where: { $0.id == name }) {
                 clusterCreations[index].failure = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
+            noteClusterError(Self.message(for: error))
         } else {
             clusterCreations.removeAll { $0.id == name }
         }
