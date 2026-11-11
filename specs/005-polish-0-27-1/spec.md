@@ -65,15 +65,15 @@ The command palette (⌘K) is open. A `gantry://open/...` link arrives from a sc
 
 ### User Story 4 - gantry-ctl finds the app every time (Priority: P3)
 
-A developer runs `scripts/gantry-ctl` from a shell, an agent or a script. The tool finds the running Debug build of Gantry. Today `pgrep -f` can match the shell that runs the tool, because the pattern is in the command line of that shell. Then the tool says that no socket exists.
+A developer runs `scripts/gantry-ctl` from a shell, an agent or a script. The tool finds the running Debug build of Gantry. Today `pgrep -n -f` can match another process whose command line contains the pattern, for example the shell of a parallel agent command or a `tail` of the app log. On macOS, `pgrep` already skips itself and its ancestors, but it does not skip these other processes. When such a process is newer than the app, the tool selects it and says that no socket exists.
 
 **Why this priority**: Only developers and agents use the tool. Constitution engineering rules say that UI checks use it, so a defect slows each UI check.
 
-**Independent Test**: Run `zsh -c 'scripts/gantry-ctl state /tmp/s.json; echo Debug/Gantry.app/Contents/MacOS/Gantry'` while a Debug build runs. The command writes the state file.
+**Independent Test**: While a Debug build runs, start `sh -c 'sleep 20; : Debug/Gantry.app/Contents/MacOS/Gantry' &`, then run `zsh -c 'scripts/gantry-ctl state <path>; : Debug/Gantry.app/Contents/MacOS/Gantry'`. The command writes the state file.
 
 **Acceptance Scenarios**:
 
-1. **Given** a Debug build runs, **When** the calling command line contains the app path, **Then** gantry-ctl sends to the pid of the app.
+1. **Given** a Debug build runs, **When** the calling command line or another newer process contains the app path, **Then** gantry-ctl sends to the pid of the app.
 2. **Given** two Debug builds run and `GANTRY_APP` names one, **When** the developer runs gantry-ctl, **Then** the tool sends to that build.
 3. **Given** a running process has the pattern in its command line but no automation socket, **When** the developer runs gantry-ctl, **Then** the tool skips that process.
 
@@ -97,6 +97,7 @@ A developer runs `scripts/gantry-ctl` from a shell, an agent or a script. The to
 - **FR-005**: `scripts/gantry-ctl` MUST select only a process whose automation socket exists, and MUST ignore its own shell and its parents.
 - **FR-006**: The fix of FR-003 MUST come with a Swift Testing test of the rule "which link closes the palette".
 - **FR-007**: All new user-facing strings MUST have translations for all supported UI languages.
+- **FR-008**: The debug link `state` MUST answer after each navigation. The main window reader of ContentView MUST keep its window when SwiftUI makes the split view again (Dashboard and Containers use different columns).
 
 ### Key Entities
 
@@ -109,7 +110,7 @@ A developer runs `scripts/gantry-ctl` from a shell, an agent or a script. The to
 - **SC-001**: The accessibility tree shows 0 Explain buttons without a name, in English and in Russian.
 - **SC-002**: On snapshots of the Stats tab at 3 window widths, 0 time labels touch.
 - **SC-003**: In 10 runs of "open palette, send link, read state", the state shows the palette closed 10 times.
-- **SC-004**: In 20 runs of gantry-ctl from a shell whose command line contains the pattern, the tool reaches the app 20 times.
+- **SC-004**: In 20 runs of gantry-ctl from a shell whose command line contains the pattern, while another newer process with the pattern runs, the tool reaches the app 20 times.
 
 ## Assumptions
 

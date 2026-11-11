@@ -8,14 +8,32 @@
 #   scripts/gantry-ctl appearance dark               # light | dark | system
 #
 # GANTRY_APP selects the copy when several Debug builds run (a path fragment
-# of the .app); the default is the newest Debug process.
+# of the .app); the default is the newest Debug process with a socket.
 set -euo pipefail
 
 pattern="${GANTRY_APP:-Debug/Gantry.app/Contents/MacOS/Gantry}"
-pid="$(pgrep -n -f "$pattern" || true)"
-[ -n "$pid" ] || { echo "no running Gantry matches: $pattern" >&2; exit 1; }
-sock="$(getconf DARWIN_USER_TEMP_DIR)gantry-automation-$pid.sock"
-[ -S "$sock" ] || { echo "no automation socket for pid $pid (Debug build only)" >&2; exit 1; }
+tmp="$(getconf DARWIN_USER_TEMP_DIR)"
+
+# pgrep -f also matches other shells that hold the pattern; keep only a pid
+# with a socket.
+ancestors=" "
+p=$$
+while [ -n "$p" ] && [ "$p" -gt 1 ]; do
+  ancestors+="$p "
+  p="$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ' || true)"
+done
+
+matched=0 pid="" sock=""
+for candidate in $(pgrep -f "$pattern" | sort -rn || true); do
+  case "$ancestors" in *" $candidate "*) continue ;; esac
+  matched=1
+  if [ -S "${tmp}gantry-automation-$candidate.sock" ]; then
+    pid="$candidate" sock="${tmp}gantry-automation-$candidate.sock"
+    break
+  fi
+done
+[ "$matched" = 1 ] || { echo "no running Gantry matches: $pattern" >&2; exit 1; }
+[ -n "$pid" ] || { echo "no automation socket for a Gantry that matches: $pattern (Debug build only)" >&2; exit 1; }
 
 cmd="${1:?usage: gantry-ctl <command> [arg]}"
 case "$cmd" in
