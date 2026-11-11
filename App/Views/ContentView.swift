@@ -763,6 +763,7 @@ struct ContentView: View {
 
     /// Opens the place that a `gantry://` link names (see `AppLink`).
     private func apply(_ link: AppLink) {
+        if link.closesPalette { showingPalette = false }
         switch link {
         case .open(let target, let hostName, let item):
             if target == "dashboard" { selection = .dashboard; return }

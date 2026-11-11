@@ -33,9 +33,9 @@ description: "Task list for the polish fixes of 0.27.1"
 
 ## Phase 4: User Story 3 - A link closes the palette (P2)
 
-- [ ] T006 [P] [US3] Add `AppLink.closesPalette` in Packages/AppCore/Sources/AppCore/AppLink.swift (true for `.open` and `.settings`)
-- [ ] T007 [P] [US3] Add tests for `closesPalette` for each case in Packages/AppCore/Tests/AppCoreTests/AppLinkTests.swift
-- [ ] T008 [US3] In `apply(_:)` of App/Views/ContentView.swift, set `showingPalette = false` when `link.closesPalette`
+- [x] T006 [P] [US3] Add `AppLink.closesPalette` in Packages/AppCore/Sources/AppCore/AppLink.swift (true for `.open` and `.settings`)
+- [x] T007 [P] [US3] Add tests for `closesPalette` for each case in Packages/AppCore/Tests/AppCoreTests/AppLinkTests.swift
+- [x] T008 [US3] In `apply(_:)` of App/Views/ContentView.swift, set `showingPalette = false` when `link.closesPalette`
 - [ ] T015 [US3] In App/AppLinks/AppLinkHandler.swift, make `WindowReader` report the window from `viewDidMoveToWindow` and never nil, so `gantry-ctl state` answers after a link changes the split view layout (FR-008)
 - [ ] T009 [US3] Live check: palette, link, state, 10 times (SC-003); a debug link keeps the palette open
 
