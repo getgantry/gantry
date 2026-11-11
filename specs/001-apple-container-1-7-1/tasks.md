@@ -14,7 +14,7 @@ description: "Task list for full Apple container 1.7.1 support"
 
 **Organization**: Tasks are grouped by user story.
 
-**Status note**: The implementation started before this list was written. All tasks are open, because nobody checked the code against this list yet. Tick a task only after you check its code on branch `feat/apple-container-1-7-1`.
+**Status note**: The implementation started before this list was written. The code was checked against this list on 2026-11-11, during the review of PR #63 (apple/container 1.7.1). T035 stays open (see the note under it).
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -125,7 +125,10 @@ description: "Task list for full Apple container 1.7.1 support"
 - [x] T033 Run `swift test` in AppCore, DockerKit, GantryMCP, SSHKit and GantryShared with `--scratch-path /Volumes/SanDisk2Tb/builds/gantry-027/ac171/<Package>`
 - [x] T034 Build the Debug app with `-derivedDataPath /Volumes/SanDisk2Tb/builds/gantry-027/ac171/DerivedData`
 - [ ] T035 Check the Clusters notice, the DNS list editor and the Builder card in the running Debug app with scripts/gantry-ctl, in light and dark mode
+  - 2026-11-11, live CLI 1.7.1: the Builder card "Builder image is outdated" (0.13.2 to 0.13.3) shows correctly in light and dark mode. System Properties shows the `[container.dns]` section. The CPU value of a busy container is 98 % when the CLI reports `cpuUtilization` 1.0.
+  - Open: the DNS list editor sheet was not opened, because `gantry-ctl` cannot click. The Clusters notice was not seen, because the cluster services on this Mac work. To check it, use a host with a broken cluster setup.
 - [x] T036 Check that a 1.6.1 host shows no DNS keys and keeps the old stats calculation (fixtures)
+- [x] T037 Add the 1.7.1 features (DNS defaults, outdated builder image, cluster services check, CPU utilization) to the apple/container section of README.md
 
 ---
 

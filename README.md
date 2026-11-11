@@ -184,6 +184,16 @@ Website: **[Gantry — native Docker & apple/container app for Mac](https://getg
   the New Container sheet. Useful for kernel features the stock command line
   leaves off, such as enabling the BPF LSM. Arguments need apple/container
   1.2+; the kernel path works on any supported CLI
+- **DNS defaults for new containers** (apple/container 1.7+) — edit the
+  `[container.dns]` name servers, search domains and options in System ▸
+  Properties; Gantry keeps the comments and other keys of `config.toml`
+- **Outdated builder image** — the Image Builder pane tells you when the builder
+  runs an older image than the CLI expects and offers to recreate it
+- **Cluster services check** — when `container cluster` commands fail because
+  the cluster services are missing (for example a Homebrew build without them)
+  or stopped, the Clusters section says why and offers the fix
+- CPU use comes from the CLI's own `cpuUtilization` value on apple/container
+  1.7.1+, so it shows from the first sample; older CLIs use the counter math
 - Features the platform does not offer (pause, rename, commit, restart
   policies, network attach, image history, file *download*) are hidden
   for these hosts instead of erroring
