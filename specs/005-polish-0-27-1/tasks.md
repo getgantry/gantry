@@ -28,7 +28,7 @@ description: "Task list for the polish fixes of 0.27.1"
 
 ## Phase 3: User Story 1 - Explain button label (P1)
 
-- [ ] T004 [P] [US1] Add `.accessibilityLabel` and `.accessibilityHint` to `ExplainFailureButton` and `ExplainOperationButton` in App/Views/Explain/ExplainEntryPoints.swift
+- [x] T004 [P] [US1] Add `.accessibilityLabel` and `.accessibilityHint` to `ExplainFailureButton` and `ExplainOperationButton` in App/Views/Explain/ExplainEntryPoints.swift
 - [ ] T005 [US1] Live check: a failed `gfix-` container, read the accessibility tree of the header in English and Russian (SC-001)
 
 ## Phase 4: User Story 3 - A link closes the palette (P2)
