@@ -331,27 +331,36 @@ struct StatsView: View {
 
 /// Shared sparse time axis for all stat charts.
 private struct TimeAxis: ViewModifier {
-    let axis: StatsTimeAxis
+    let axis: StatsTimeAxis?
 
     init(_ samples: [ContainerStatsSample]) {
-        axis = StatsTimeAxis(samplesFrom: samples.first?.readAt, to: samples.last?.readAt)
+        axis = samples.first.flatMap { first in samples.last.map { StatsTimeAxis(from: first.readAt, to: $0.readAt) } }
     }
 
     func body(content: Content) -> some View {
-        content.chartXAxis {
-            AxisMarks(values: values) {
-                AxisGridLine()
-                AxisValueLabel(format: format)
-            }
+        if let axis {
+            content
+                .chartXScale(domain: axis.start...axis.end)
+                .chartXAxis {
+                    AxisMarks(values: axis.ticks) { value in
+                        AxisGridLine()
+                        AxisValueLabel(format: format(axis), anchor: anchor(axis, value.as(Date.self)))
+                    }
+                }
+        } else {
+            content
         }
     }
 
-    private var values: AxisMarkValues {
-        if let minutes = axis.stepMinutes { return .stride(by: .minute, count: minutes) }
-        return .stride(by: .second, count: axis.stepSeconds)
+    private func format(_ axis: StatsTimeAxis) -> Date.FormatStyle {
+        axis.showsSeconds ? .dateTime.hour().minute().second() : .dateTime.hour().minute()
     }
 
-    private var format: Date.FormatStyle {
-        axis.showsSeconds ? .dateTime.hour().minute().second() : .dateTime.hour().minute()
+    private func anchor(_ axis: StatsTimeAxis, _ tick: Date?) -> UnitPoint {
+        switch tick.map { axis.anchor(for: $0) } ?? .center {
+        case .leading: .topLeading
+        case .center: .top
+        case .trailing: .topTrailing
+        }
     }
 }
