@@ -46,7 +46,7 @@ description: "Task list for the polish fixes of 0.27.1"
 
 ## Phase 6: Polish
 
-- [ ] T012 Run `swift test` for AppCore with `--scratch-path /Volumes/SanDisk2Tb/builds/gantry/polish-0-27-1/AppCore` and `scripts/check-localization.py`
+- [x] T012 Run `swift test` for AppCore with `--scratch-path /Volumes/SanDisk2Tb/builds/gantry/polish-0-27-1/AppCore` and `scripts/check-localization.py`
 - [ ] T013 Remove the `gfix-` test containers and the Debug app process
 - [ ] T014 Open the pull request `fix: polish accessibility, charts, links and gantry-ctl for 0.27.1`
 
