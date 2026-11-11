@@ -41,7 +41,7 @@ description: "Task list for the polish fixes of 0.27.1"
 
 ## Phase 5: User Story 2 - Clear time labels (P2)
 
-- [ ] T010 [P] [US2] Add `StatsTimeAxis` (step from the sample span, at most 4 labels) with tests in Packages/AppCore/Sources/AppCore/StatsTimeAxis.swift and Packages/AppCore/Tests/AppCoreTests/StatsTimeAxisTests.swift; use it in `TimeAxis` in App/Views/Containers/StatsView.swift (stride marks, `hour().minute()` for steps of 1 min or more)
+- [x] T010 [P] [US2] Add `StatsTimeAxis` (step from the sample span, at most 4 labels) with tests in Packages/AppCore/Sources/AppCore/StatsTimeAxis.swift and Packages/AppCore/Tests/AppCoreTests/StatsTimeAxisTests.swift; use it in `TimeAxis` in App/Views/Containers/StatsView.swift (stride marks, `hour().minute()` for steps of 1 min or more)
 - [ ] T011 [US2] Live check: snapshots of Stats at the minimum, medium and wide window width, with 10 s and 1 min of samples (SC-002)
 
 ## Phase 6: Polish

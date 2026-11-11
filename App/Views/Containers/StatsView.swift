@@ -124,7 +124,7 @@ struct StatsView: View {
             }
             .chartYScale(domain: 0...upper)
             .chartYAxis { AxisMarks { AxisGridLine(); AxisValueLabel(format: percentAxis) } }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
     }
 
@@ -177,7 +177,7 @@ struct StatsView: View {
                     }
                 }
             }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
         .accessibilityLabel("Memory usage \(memoryValue)")
     }
@@ -253,7 +253,7 @@ struct StatsView: View {
                     }
                 }
             }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
     }
 
@@ -331,12 +331,27 @@ struct StatsView: View {
 
 /// Shared sparse time axis for all stat charts.
 private struct TimeAxis: ViewModifier {
+    let axis: StatsTimeAxis
+
+    init(_ samples: [ContainerStatsSample]) {
+        axis = StatsTimeAxis(samplesFrom: samples.first?.readAt, to: samples.last?.readAt)
+    }
+
     func body(content: Content) -> some View {
         content.chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) {
+            AxisMarks(values: values) {
                 AxisGridLine()
-                AxisValueLabel(format: .dateTime.hour().minute().second())
+                AxisValueLabel(format: format)
             }
         }
+    }
+
+    private var values: AxisMarkValues {
+        if let minutes = axis.stepMinutes { return .stride(by: .minute, count: minutes) }
+        return .stride(by: .second, count: axis.stepSeconds)
+    }
+
+    private var format: Date.FormatStyle {
+        axis.showsSeconds ? .dateTime.hour().minute().second() : .dateTime.hour().minute()
     }
 }
