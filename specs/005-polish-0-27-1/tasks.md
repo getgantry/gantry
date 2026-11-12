@@ -48,6 +48,7 @@ description: "Task list for the polish fixes of 0.27.1"
 
 - [x] T012 Run `swift test` for AppCore with `--scratch-path /Volumes/SanDisk2Tb/builds/gantry/polish-0-27-1/AppCore` and `scripts/check-localization.py`
 - [x] T013 Remove the `gfix-` test containers and the Debug app process
+- [x] T016 Make `slowWaitShowsAHintThenFinishes` in Packages/AppCore/Tests/AppCoreTests/DiskAccessGateTests.swift deterministic: the probe blocks until the gate reports the slow wait (on a busy CI runner the 30 ms timer ran after the 0.3 s probe, so no hint came and the test failed)
 - [x] T014 Open the pull request `fix: polish accessibility, charts, links and gantry-ctl for 0.27.1`
 
 ## Dependencies
