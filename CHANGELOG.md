@@ -11,6 +11,18 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.27.1](https://github.com/getgantry/gantry/compare/v0.27.0...v0.27.1) (2026-11-12)
+
+
+### Fixes
+
+* polish accessibility, charts, links and gantry-ctl for 0.27.1 ([#64](https://github.com/getgantry/gantry/issues/64)) ([3856dec](https://github.com/getgantry/gantry/commit/3856dec8b0a1200de76fd036e8d26c17b7153f7c))
+
+
+### Documentation
+
+* **specs:** add spec 005 for the 0.27.1 polish fixes ([#62](https://github.com/getgantry/gantry/issues/62)) ([563f333](https://github.com/getgantry/gantry/commit/563f3336670b2b3cafad57d721c19f610963ccd2))
+
 ## [0.27.0](https://github.com/getgantry/gantry/compare/v0.26.0...v0.27.0) (2026-11-08)
 
 
