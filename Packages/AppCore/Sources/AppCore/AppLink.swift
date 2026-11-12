@@ -17,6 +17,14 @@ public enum AppLink: Equatable, Sendable {
     /// Debug builds only: `light`, `dark` or `system`.
     case appearance(String)
 
+    /// Debug links keep the palette, so a script can take a snapshot of it.
+    public var closesPalette: Bool {
+        switch self {
+        case .open, .settings: true
+        case .palette, .snapshot, .state, .appearance: false
+        }
+    }
+
     /// Targets that do not belong to a host.
     public static let globalTargets: Set<String> = ["dashboard", "kubernetes"]
     /// Host section names, the same as `HostSection.rawValue` in the app.

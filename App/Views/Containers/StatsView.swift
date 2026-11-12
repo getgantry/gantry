@@ -124,7 +124,7 @@ struct StatsView: View {
             }
             .chartYScale(domain: 0...upper)
             .chartYAxis { AxisMarks { AxisGridLine(); AxisValueLabel(format: percentAxis) } }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
     }
 
@@ -177,7 +177,7 @@ struct StatsView: View {
                     }
                 }
             }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
         .accessibilityLabel("Memory usage \(memoryValue)")
     }
@@ -253,7 +253,7 @@ struct StatsView: View {
                     }
                 }
             }
-            .modifier(TimeAxis())
+            .modifier(TimeAxis(samples))
         }
     }
 
@@ -331,12 +331,36 @@ struct StatsView: View {
 
 /// Shared sparse time axis for all stat charts.
 private struct TimeAxis: ViewModifier {
+    let axis: StatsTimeAxis?
+
+    init(_ samples: [ContainerStatsSample]) {
+        axis = samples.first.flatMap { first in samples.last.map { StatsTimeAxis(from: first.readAt, to: $0.readAt) } }
+    }
+
     func body(content: Content) -> some View {
-        content.chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) {
-                AxisGridLine()
-                AxisValueLabel(format: .dateTime.hour().minute().second())
-            }
+        if let axis {
+            content
+                .chartXScale(domain: axis.start...axis.end)
+                .chartXAxis {
+                    AxisMarks(values: axis.ticks) { value in
+                        AxisGridLine()
+                        AxisValueLabel(format: format(axis), anchor: anchor(axis, value.as(Date.self)))
+                    }
+                }
+        } else {
+            content
+        }
+    }
+
+    private func format(_ axis: StatsTimeAxis) -> Date.FormatStyle {
+        axis.showsSeconds ? .dateTime.hour().minute().second() : .dateTime.hour().minute()
+    }
+
+    private func anchor(_ axis: StatsTimeAxis, _ tick: Date?) -> UnitPoint {
+        switch tick.map { axis.anchor(for: $0) } ?? .center {
+        case .leading: .topLeading
+        case .center: .top
+        case .trailing: .topTrailing
         }
     }
 }

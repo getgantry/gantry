@@ -24,6 +24,16 @@ private final class FakeProbe: DiskAccessProbing, @unchecked Sendable {
     }
 }
 
+/// A probe that blocks until `release()` (or a 5 s safety limit), so a test
+/// does not depend on when a busy runner schedules the timeout task.
+private final class GatedProbe: DiskAccessProbing, @unchecked Sendable {
+    private let gate = DispatchSemaphore(value: 0)
+    func release() { gate.signal() }
+    func probe(_ path: String) throws {
+        _ = gate.wait(timeout: .now() + 5)
+    }
+}
+
 private struct ProbeError: Error {}
 
 /// Collects the waits that the gate reports as slow.
@@ -73,11 +83,12 @@ struct DiskAccessGateTests {
     }
 
     @Test func slowWaitShowsAHintThenFinishes() async throws {
-        let gate = DiskAccessGate(probe: FakeProbe(delay: 0.3), timeout: .milliseconds(30))
+        let probe = GatedProbe()
+        let gate = DiskAccessGate(probe: probe, timeout: .milliseconds(30))
         let log = WaitLog()
         try await gate.waitForAccess(
             ["/Volumes/Fast/a", "/Volumes/Fast/b"],
-            onSlow: { log.addSlow($0) },
+            onSlow: { log.addSlow($0); probe.release() },
             onDone: { log.addDone($0) }
         )
         #expect(log.slowWaits.count == 1, "one hint per disk")

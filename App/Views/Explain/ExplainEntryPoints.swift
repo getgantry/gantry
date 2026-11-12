@@ -18,6 +18,8 @@ struct ExplainFailureButton: View {
                 Label(String(localized: "Explain"), systemImage: "apple.intelligence")
             }
             .help(String(localized: "Explain this failure with Apple Intelligence"))
+            .accessibilityLabel(String(localized: "Explain"))
+            .accessibilityHint(String(localized: "Explain this failure with Apple Intelligence"))
         }
     }
 }
@@ -55,6 +57,8 @@ struct ExplainOperationButton: View {
             }
             .controlSize(.small)
             .help(String(localized: "Explain this failure with Apple Intelligence"))
+            .accessibilityLabel(String(localized: "Explain"))
+            .accessibilityHint(String(localized: "Explain this failure with Apple Intelligence"))
         }
     }
 

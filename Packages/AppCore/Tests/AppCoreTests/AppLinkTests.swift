@@ -37,6 +37,18 @@ struct AppLinkTests {
         #expect(parse("gantry://debug/appearance?mode=blue") == nil)
     }
 
+    @Test func placesClosePaletteButPaletteAndDebugLinksKeepIt() {
+        #expect(AppLink.open(target: "containers", host: nil, item: nil).closesPalette)
+        #expect(AppLink.open(target: "dashboard", host: "Local", item: "web").closesPalette)
+        #expect(AppLink.settings.closesPalette)
+        #expect(!AppLink.palette.closesPalette)
+        #expect(!AppLink.snapshot(path: "/tmp/a.png").closesPalette)
+        #expect(!AppLink.state(path: "/tmp/s.json").closesPalette)
+        #expect(!AppLink.appearance("dark").closesPalette)
+        #expect(parse("gantry://open/containers")?.closesPalette == true)
+        #expect(parse("gantry://debug/state?path=/tmp/s.json")?.closesPalette == false)
+    }
+
     @Test func resolvesHostsByIDOrName() {
         let a = UUID(), b = UUID()
         let hosts = [(id: a, name: "Local"), (id: b, name: "Apple Container")]

@@ -99,15 +99,34 @@ enum AppLinkTarget {
     }
 }
 
-/// Gives a SwiftUI view its NSWindow.
+/// Gives a SwiftUI view its NSWindow. A new view (the split view changes its
+/// columns) has no window yet, so report on move and never report nil.
 struct WindowReader: NSViewRepresentable {
-    let onChange: (NSWindow?) -> Void
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async { onChange(view.window) }
+    let onChange: (NSWindow) -> Void
+
+    func makeNSView(context: Context) -> ReaderView {
+        let view = ReaderView()
+        view.onChange = onChange
         return view
     }
-    func updateNSView(_ view: NSView, context: Context) {
-        DispatchQueue.main.async { onChange(view.window) }
+
+    func updateNSView(_ view: ReaderView, context: Context) {
+        view.onChange = onChange
+        view.report()
+    }
+
+    final class ReaderView: NSView {
+        var onChange: ((NSWindow) -> Void)?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            report()
+        }
+
+        func report() {
+            guard let window else { return }
+            let onChange = onChange
+            DispatchQueue.main.async { onChange?(window) }
+        }
     }
 }
