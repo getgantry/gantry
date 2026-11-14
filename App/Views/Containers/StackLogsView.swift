@@ -25,13 +25,22 @@ struct StackLogsView: View {
     @State private var regexSearch = false
     @State private var minLevel: LogLevel?
     @State private var hiddenServices: Set<String> = []
+    @State private var showTimestamps = false
+    @State private var timeRange: LogTimeRange = .all
+    @State private var exporting = false
+    @State private var exportError: String?
 
     private struct StackLine: Identifiable, Sendable {
         var id: UInt64
         let service: String
+        let timestamp: Date?
         let plain: String
         let level: LogLevel?
         let spans: [ANSISpan]
+
+        var exportLine: LogExportLine {
+            LogExportLine(text: plain, timestamp: timestamp, level: level, source: service)
+        }
     }
 
     /// Distinct service names in stable (sorted) order, for the legend, the
@@ -51,23 +60,52 @@ struct StackLogsView: View {
 
     private var isSearching: Bool { !search.isEmpty }
 
+    /// The stack view always narrows to matches; Copy Visible Lines and
+    /// Export Logs use the same filter.
+    private var filter: LogLineFilter {
+        LogLineFilter(
+            minLevel: minLevel,
+            query: search,
+            regex: regexSearch,
+            matchesOnly: true,
+            hiddenSources: hiddenServices,
+            timeRange: hasTimestamps ? timeRange : .all
+        )
+    }
+
     private var visibleLines: [StackLine] {
-        lines.filter { line in
-            if hiddenServices.contains(line.service) { return false }
-            if let minLevel, (line.level?.severity ?? -1) < minLevel.severity { return false }
-            if isSearching, !LogSearch.matches(line.plain, query: search, regex: regexSearch) { return false }
-            return true
-        }
+        filter.apply(lines, now: .now) { $0.exportLine }
+    }
+
+    private var hasTimestamps: Bool { lines.contains { $0.timestamp != nil } }
+
+    private var exportFormat: LogExportFormat {
+        LogExportFormat(timestamps: showTimestamps && hasTimestamps, sources: true)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Divider()
+            if let exportError {
+                Label(exportError, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Divider()
+            }
             content
         }
         .frame(minWidth: 760, idealWidth: 980, minHeight: 460, idealHeight: 640)
         .task(id: project) { await consumeAll() }
+        .logExporter(isPresented: $exporting, item: exportItem, error: $exportError)
+        .focusedSceneValue(\.logExportTarget, LogExportTarget(
+            visibleCount: visibleLines.count,
+            export: startExport,
+            copy: copyVisible
+        ))
     }
 
     // MARK: - Header
@@ -101,12 +139,11 @@ struct StackLogsView: View {
                 Button { lines.removeAll(); held.reset() } label: { Image(systemName: "trash") }
                     .help("Clear")
                     .accessibilityLabel("Clear")
-                Button { copyAll() } label: { Image(systemName: "doc.on.doc") }
-                    .help("Copy all")
-                    .accessibilityLabel("Copy all")
+                LogExportButtons(visibleCount: visibleLines.count, copy: copyVisible, export: startExport)
 
                 levelMenu
                 servicesMenu
+                LogDisplayMenu(showTimestamps: $showTimestamps, timeRange: $timeRange, hasTimestamps: hasTimestamps)
 
                 Text("\(visibleLines.count) lines")
                     .font(.caption.monospacedDigit())
@@ -223,6 +260,11 @@ struct StackLogsView: View {
 
     private func row(for line: StackLine) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
+            if exportFormat.timestamps, let timestamp = line.timestamp {
+                Text(LogTimeLabel.text(timestamp))
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
             Text(line.service)
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .foregroundStyle(color(for: line.service))
@@ -309,6 +351,7 @@ struct StackLogsView: View {
                 continuation.yield(StackLine(
                     id: 0,
                     service: service,
+                    timestamp: entry.timestamp,
                     plain: plain,
                     level: LogLevel.detect(plain),
                     spans: spans
@@ -319,8 +362,22 @@ struct StackLogsView: View {
         }
     }
 
-    private func copyAll() {
-        let text = visibleLines.map { "\($0.service)  \($0.plain)" }.joined(separator: "\n")
-        copyToPasteboard(text)
+    private func copyVisible() {
+        copyToPasteboard(exportFormat.text(visibleLines.map(\.exportLine)))
+    }
+
+    private func startExport() {
+        exportError = nil
+        exporting = true
+    }
+
+    /// Reads the visible lines when the save panel asks for the file.
+    private var exportItem: LogExportItem {
+        LogExportItem(
+            fileName: LogExportFileName.make(base: project, date: .now),
+            snapshot: { [self] in
+                LogExportSnapshot(lines: visibleLines.map(\.exportLine), format: exportFormat)
+            }
+        )
     }
 }

@@ -202,6 +202,7 @@ struct PaletteRunner {
         switch action {
         case .open: navigate(hostID, .containers, .container(id))
         case .logs: ContainerTabRequest.open(.logs, hostID: hostID, containerID: id)
+        case .exportLogs: ContainerTabRequest.open(.exportLogs, hostID: hostID, containerID: id)
         case .shell: ContainerTabRequest.open(.terminal, hostID: hostID, containerID: id)
         case .start: Task { _ = await session.perform(.start, on: id) }
         case .stop: Task { _ = await session.perform(.stop, on: id) }
