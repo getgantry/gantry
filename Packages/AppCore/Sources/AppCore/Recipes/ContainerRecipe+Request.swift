@@ -16,10 +16,15 @@ extension ContainerRecipe {
     /// name (nil lets the runtime pick one). On a Docker host the apple-only
     /// fields are left out; on an apple host the restart policy is left out,
     /// because the CLI has none. ``hostWarnings(isAppleHost:)`` tells the user.
+    ///
+    /// `secretValues` holds the values of secret rows by secret name (from
+    /// ``EnvSecrets/resolve(_:isAppleHost:store:authorize:)``); a secret row
+    /// without a value is left out.
     public func createRequest(
         name: String?,
         isAppleHost: Bool,
-        kernelArgsSupported: Bool = true
+        kernelArgsSupported: Bool = true,
+        secretValues: [String: String] = [:]
     ) -> ContainerCreateRequest {
         let domain = isAppleHost ? dnsDomain.trimmingCharacters(in: .whitespaces) : ""
         var allLabels: [String: String] = [:]
@@ -38,7 +43,7 @@ extension ContainerRecipe {
             cmd: commandWords.isEmpty ? nil : commandWords,
             entrypoint: trimmedEntrypoint.isEmpty ? nil : [trimmedEntrypoint],
             domainname: domain.isEmpty ? nil : domain,
-            env: env.filter { !$0.key.trimmingCharacters(in: .whitespaces).isEmpty }.map { "\($0.key)=\($0.value)" },
+            env: [],
             exposedPorts: nil,
             labels: allLabels,
             tty: tty,
@@ -54,7 +59,23 @@ extension ContainerRecipe {
         }
         request.user = nonEmpty(user)
         request.openStdin = interactive ? true : nil
+        EnvSecrets.apply(env, values: secretValues, to: &request, isAppleHost: isAppleHost)
         return request
+    }
+
+    /// The create request with the secret rows read from `store` first.
+    /// Throws ``SecretError`` (names only) when a secret cannot be used.
+    public func resolvedCreateRequest(
+        name: String?,
+        isAppleHost: Bool,
+        kernelArgsSupported: Bool = true,
+        store: any SecretStore,
+        authorize: (@Sendable () async -> Bool)? = nil
+    ) async throws -> ContainerCreateRequest {
+        let values = try await EnvSecrets.resolve(env, isAppleHost: isAppleHost, store: store, authorize: authorize)
+        return createRequest(
+            name: name, isAppleHost: isAppleHost, kernelArgsSupported: kernelArgsSupported, secretValues: values
+        )
     }
 
     private func nonEmpty(_ text: String) -> String? {

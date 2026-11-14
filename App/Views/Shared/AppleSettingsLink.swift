@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The Settings window tabs. Stored so a link can open Settings on a tab.
 enum SettingsTab: String {
-    case general, hosts, apple, agents, about
+    case general, hosts, apple, secrets, agents, about
 
     static let storageKey = "settingsTab"
 }
