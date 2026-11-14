@@ -67,10 +67,15 @@ enum PaletteCommand: String, CaseIterable {
 /// Builds the palette results from every host the app knows.
 @MainActor
 enum PaletteSource {
+    static let usageTarget = "usage"
+
     static func items(model: AppModel) -> [PaletteItem] {
         var items = [PaletteCommand.addHost, .refreshAll, .settings].map { $0.item() }
         items.append(PaletteItem(kind: .section, title: String(localized: "Dashboard"), target: "dashboard",
                                  systemImage: "square.grid.2x2"))
+        items.append(PaletteItem(kind: .section, title: String(localized: "Resource Usage"), target: usageTarget,
+                                 keywords: ["activity", "top", "stats", "cpu", "memory"],
+                                 systemImage: "chart.bar.xaxis"))
         items += PaletteCatalog.kubernetes(contexts: model.kubernetes.contexts)
         for session in model.sessions {
             items += hostItems(session)
@@ -114,6 +119,7 @@ struct PaletteRunner {
     let model: AppModel
     let navigate: (UUID, HostSection, DetailSelection?) -> Void
     let showDashboard: () -> Void
+    let showUsage: () -> Void
     /// Opens the Kubernetes section, on the given context when not nil.
     let showKubernetes: (String?) -> Void
     let showAddHost: () -> Void
@@ -131,6 +137,8 @@ struct PaletteRunner {
                 showKubernetes(nil)
             } else if let context = PaletteCatalog.kubernetesContext(fromTarget: item.target) {
                 showKubernetes(context)
+            } else if item.target == PaletteSource.usageTarget {
+                showUsage()
             } else {
                 showDashboard()
             }

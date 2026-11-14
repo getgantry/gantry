@@ -8,6 +8,7 @@ Gantry opens `gantry://` links. Use them in Shortcuts, scripts or other apps:
 | --- | --- |
 | `gantry://open/dashboard` | Opens the dashboard. |
 | `gantry://open/kubernetes` | Opens the Kubernetes browser. |
+| `gantry://open/usage` | Opens Resource Usage: the running containers of all hosts in one table. |
 | `gantry://open/<section>?host=<name>&item=<id or name>` | Opens a host section and selects an item. The sections are `overview`, `containers`, `images`, `volumes`, `networks`, `machines`, `clusters`, `files` and `system`. |
 | `gantry://palette` | Opens the command palette. |
 | `gantry://settings` | Opens the settings. |

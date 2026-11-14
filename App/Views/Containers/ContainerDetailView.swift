@@ -105,6 +105,9 @@ struct ContainerDetailView: View {
         case .logs:
             _ = ContainerTabRequest.take(container.id)
             tab = .logs
+        case .stats:
+            _ = ContainerTabRequest.take(container.id)
+            tab = .stats
         case .terminal:
             _ = ContainerTabRequest.take(container.id)
             tab = .terminal
