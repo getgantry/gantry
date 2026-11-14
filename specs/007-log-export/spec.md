@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented; live checks open (see tasks.md)
+**Status**: Implemented; the Docker host live check is open (see tasks.md)
 
 **Input**: User description: "Export the logs that the log view shows, respecting the current filter/search, time range and timestamps toggle, to a .log or .txt file via the standard save panel (fileExporter), plus Copy Visible Lines. Works for containers on Docker and Apple hosts and compose projects if the log view supports them. Large logs must stream to the file, not build one huge string in memory. Formatting/filter logic in AppCore with tests. Add the action to the palette and to the menu with a shortcut that follows HIG."
 
