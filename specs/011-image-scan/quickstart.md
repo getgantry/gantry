@@ -11,10 +11,23 @@
 ```sh
 swift test --package-path Packages/AppCore \
   --scratch-path /Volumes/SanDisk2Tb/builds/gantry/image-scan/AppCore \
-  --filter ImageScan
+  --filter "ScannerDetectionTests|ImageScanPlanTests|ScanReportParserTests|ImageScanModelTests"
 ```
 
 Expected: all tests pass. The parser tests agree with the counts of the fixtures: Trivy `postgres:16-alpine` sample and Grype sample (see `ImageScanFixtures.swift`).
+
+## Live pipeline test (no GUI)
+
+```sh
+GANTRY_SCAN_LIVE=1 TMPDIR=/Volumes/SanDisk2Tb/builds/gantry/image-scan/tmp/ \
+  TRIVY_CACHE_DIR=/Volumes/SanDisk2Tb/builds/gantry/image-scan/cache/trivy \
+  GRYPE_DB_CACHE_DIR=/Volumes/SanDisk2Tb/builds/gantry/image-scan/cache/grype \
+  GANTRY_TRIVY=/path/to/trivy GANTRY_GRYPE=/path/to/grype \
+  swift test --package-path Packages/AppCore \
+  --scratch-path /Volumes/SanDisk2Tb/builds/gantry/image-scan/AppCore --filter LiveImageScanTests
+```
+
+Expected: the real export, unpack, scan and SBOM export pass for both scanners, and a cancel leaves no `gantry-scan-` folder.
 
 ## Live check
 

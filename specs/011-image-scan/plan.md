@@ -16,7 +16,7 @@ Gantry finds Trivy or Grype on the Mac and runs it on one image. The logic is in
 5. `ImageScanModel.swift`: an `@Observable` model for the sheet. It detects scanners, runs export, unpack and scan, exports SBOMs, cancels and removes the temporary folder. Side effects are behind `ScanProcessRunning`, `ScanFileSystem` and an export closure, so tests do not touch the system.
 6. `HostSession+ImageScan.swift`: makes the plan for an image of the session and the export closure (`container image save --platform` for Apple hosts, `saveImages` for the local Docker host).
 
-The app gets `App/Views/Images/ImageScanSheet.swift` (with small helper views) and the action "Scan for Vulnerabilities…" in the image context menu and the image detail toolbar.
+The app gets `App/Views/Images/ImageScanSheet.swift` and `ImageScanFindingsView.swift` (small helper views) and the action "Scan for Vulnerabilities…" in the image context menu and the image detail toolbar.
 
 ## Technical Context
 
@@ -79,6 +79,7 @@ Packages/AppCore/Tests/AppCoreTests/
 └── ImageScanFixtures.swift
 App/Views/Images/
 ├── ImageScanSheet.swift
+├── ImageScanFindingsView.swift
 └── ImageListView.swift        (menu and toolbar entries)
 ```
 
