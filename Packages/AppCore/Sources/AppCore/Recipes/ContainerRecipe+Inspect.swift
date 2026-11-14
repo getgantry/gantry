@@ -134,7 +134,7 @@ extension ContainerRecipe {
         }
         for mount in details.mounts where !result.contains(where: { $0.target == mount.destination }) {
             let type = mount.type ?? ""
-            // apple/container reports binds as `virtiofs`; tmpfs has no source.
+            // Older translations of apple/container mounts wrote binds as `virtiofs`; tmpfs has no source.
             guard !["tmpfs", "npipe", "image", "cluster"].contains(type) else { continue }
             let source = type == "volume" ? (mount.name ?? mount.source) : mount.source
             guard !source.isEmpty, !mount.destination.isEmpty else { continue }

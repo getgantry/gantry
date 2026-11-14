@@ -340,7 +340,7 @@ private struct ContainerOverview: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(d.mounts, id: \.self) { mount in
                         HStack(spacing: 6) {
-                            Text(mount.source.isEmpty ? (mount.name ?? "—") : mount.source)
+                            Text(mount.displaySource ?? "—")
                             Image(systemName: "arrow.right")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)

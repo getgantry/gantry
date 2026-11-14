@@ -130,4 +130,14 @@ public struct MountPoint: Hashable, Codable, Sendable {
         mode = try c.decodeIfPresent(String.self, forKey: .mode)
         rw = try c.decodeIfPresent(Bool.self, forKey: .rw)
     }
+
+    /// What a mount row shows as its source: the name of a named volume
+    /// (its `Source` is a host path such as `…/_data` or `…/volume.img`),
+    /// else the host path, else the name. `nil` when there is neither.
+    public var displaySource: String? {
+        if type == "volume", let name, !name.isEmpty { return name }
+        if !source.isEmpty { return source }
+        if let name, !name.isEmpty { return name }
+        return nil
+    }
 }
