@@ -104,7 +104,9 @@ private let logsFailed = """
         cli.on(list, DockerCLIResult(exitCode: 0, stdout: lsLines))
         cli.on(["buildx", "history", "inspect", "--format", "json", "o4kn3a8tluispaxrrvdsh5ypt"],
                DockerCLIResult(exitCode: 0, stdout: inspectFailed))
-        cli.on(["buildx", "history", "logs", "o4kn3a8tluispaxrrvdsh5ypt"], DockerCLIResult(exitCode: 0, stdout: logsFailed))
+        // buildx prints the logs on stderr.
+        cli.on(["buildx", "history", "logs", "o4kn3a8tluispaxrrvdsh5ypt"],
+               DockerCLIResult(exitCode: 0, stdout: "", stderr: logsFailed))
         let record = try #require(try await BuildxHistoryService.records(runner: cli, hostID: UUID()).first)
         let detail = try await BuildxHistoryService.detail(of: record, runner: cli)
         #expect(detail.dockerfile == "Dockerfile.fail")

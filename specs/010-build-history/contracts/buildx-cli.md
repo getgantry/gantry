@@ -8,7 +8,7 @@ All commands are read-only. Gantry never runs `history rm`, `export`, `import` o
 | `docker buildx version` | open Builds on a Docker host (cached per session) | `github.com/docker/buildx v0.29.1 <commit>` |
 | `docker buildx history ls --format json --no-trunc` | open and refresh | one JSON object per line, or a JSON array |
 | `docker buildx history inspect --format json <id>` | select a record | one JSON object |
-| `docker buildx history logs <id>` | select a record | BuildKit plain progress |
+| `docker buildx history logs <id>` | select a record | BuildKit plain progress on stderr (buildx 0.29.1 and 0.35.0) |
 
 `<id>` is the last part of `ref`. Gantry accepts only `[A-Za-z0-9]` in it before it puts it in a command.
 

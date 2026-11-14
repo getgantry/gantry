@@ -192,10 +192,12 @@ public enum BuildxHistoryService {
         }
         let logs = try await runner.run(["buildx", "history", "logs", id])
         guard logs.exitCode == 0 else { throw BuildxCommandError(logs) }
-        let capped = BuildLogLimit.cap(logs.stdout)
+        // buildx prints the progress on stderr (0.29.1, 0.35.0).
+        let text = logs.stdout.isEmpty ? logs.stderr : logs.stdout
+        let capped = BuildLogLimit.cap(text)
         detailed.log = capped.log
         detailed.logTruncated = capped.truncated
-        detailed.steps = BuildProgressParser.steps(fromLog: logs.stdout, failed: detailed.status == .failed)
+        detailed.steps = BuildProgressParser.steps(fromLog: text, failed: detailed.status == .failed)
         return detailed
     }
 

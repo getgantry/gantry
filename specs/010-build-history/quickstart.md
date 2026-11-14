@@ -17,7 +17,16 @@ Live test against the installed `container` CLI (builds and removes `gbh-live:*`
 GANTRY_BUILD_HISTORY_LIVE=1 swift test --package-path Packages/AppCore --scratch-path /Volumes/SanDisk2Tb/builds/gantry/build-history/AppCore --filter LiveBuildHistory
 ```
 
+Live test against an SSH Docker host with buildx. It builds `gbh-live-*` images, then removes them and their buildx records:
+
+```sh
+GANTRY_BUILDX_SSH_HOST=user@host swift test --package-path Packages/AppCore --scratch-path /Volumes/SanDisk2Tb/builds/gantry/build-history/AppCore --filter LiveBuildxSSH
+```
+
 ## Live check (Apple host)
+
+Start the Debug build with `GANTRY_HOSTS_PATH=/Volumes/SanDisk2Tb/builds/gantry/build-history/live/hosts.json`. This file has an Apple host and the SSH Docker host. The real host list does not change.
+
 
 1. Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/build-history/DerivedData`.
 2. Start it, set `GANTRY_APP` to the build, and open `gantry://host/<apple-host>/builds` with `scripts/gantry-ctl`.

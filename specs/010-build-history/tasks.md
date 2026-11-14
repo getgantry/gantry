@@ -71,6 +71,8 @@ description: "Task list for the build history"
 - [ ] T023 Live check on the Apple host with `scripts/gantry-ctl` (quickstart.md): three records, restart keeps them, Clear History
 - [x] T026 [US1] Make a relative Dockerfile path absolute against the context before `container build --file` in Packages/DockerKit/Sources/DockerKit/AppleContainer/AppleContainerTransport.swift, with tests in Packages/DockerKit/Tests/DockerKitTests/AppleContainerTransportTests.swift (found by T027: the CLI resolves `--file` against the working directory of the process, so each Build Image sheet build on an Apple host failed)
 - [x] T027 [US1] Add the gated live test `LiveBuildHistoryTests` (`GANTRY_BUILD_HISTORY_LIVE=1`) in Packages/AppCore/Tests/AppCoreTests/LiveBuildHistoryTests.swift: three real `container build` runs give a failed, a cached and a succeeded record
+- [x] T028 [US2] Read the logs of `docker buildx history logs` from stderr when stdout is empty. Code in Packages/AppCore/Sources/AppCore/Builds/BuildxHistory.swift. Test in Packages/AppCore/Tests/AppCoreTests/BuildxHistoryServiceTests.swift. T029 found it: buildx 0.35.0 prints the progress on stderr.
+- [x] T029 [US2] Add the gated live test `LiveBuildxSSHTests` (`GANTRY_BUILDX_SSH_HOST=user@host`) in Packages/AppCore/Tests/AppCoreTests/LiveBuildxSSHTests.swift. On an SSH Docker host (Docker 29.6.2, buildx 0.35.0) it checks the buildx gate, the list, the detail counts and the record of a Gantry classic build. It removes its `gbh-live-*` images and buildx records.
 - [x] T024 Remove the `gbh-` containers and images (no Debug app process was started)
 - [x] T025 Open the pull request `feat: show the build history with steps and cache use` (#73)
 
