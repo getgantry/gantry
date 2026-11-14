@@ -67,4 +67,4 @@ description: "Task list for the Compose export of containers"
 - [x] T025 Build the Debug app into /Volumes/SanDisk2Tb/builds/gantry/compose-export/DerivedData
 - [ ] T026 Live check with `scripts/gantry-ctl` on the Apple host: open the sheet for the `gce-web` container, read the YAML and the warnings, Copy; then remove the `gce-` test resources
   - Status 2026-11-14: partly done. The screen was locked, so the sheet was not opened. A link cannot open a sheet, and a menu needs a click. Done: the Debug build ran, `gantry-ctl open/containers?item=gce-web` selected the container, and the snapshot showed it. The live test `liveComposeExportOfAppleContainer` (GANTRY_APPLE_CONTAINER_LIVE=1) exported a real `gce-live` container through `HostSession` and passed. The `gce-` test resources are removed. Still open: open the sheet, read the YAML and the warnings, and press Copy.
-- [ ] T027 Rebase on `origin/main`, open the pull request "feat: export a running container as a compose file"
+- [x] T027 Rebase on `origin/main`, open the pull request "feat: export a running container as a compose file"
