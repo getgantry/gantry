@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Draft
+**Status**: Implemented. The live GUI check is open.
 
 **Input**: User description: "Extend the existing Explain this failure feature (Foundation Models) so the user can attach images (drag and drop, paste, or pick a file; e.g. a screenshot of a browser error) that go to the on-device model as image input on macOS 27. Gate with #available and on model capability; on macOS 26 or when image input is unavailable, hide the attach control. Keep the existing privacy rules (on-device only, only suggest commands). Limit size/count, downscale before sending."
 
