@@ -269,26 +269,33 @@ enum AppleContainerJSON {
         ]
     }
 
-    /// Tolerant mount mapping: apple/container spells the fields differently
-    /// across mount types, so several key candidates are tried.
+    /// apple/container 1.7.1 writes `type` as `{"virtiofs": {}}` or
+    /// `{"volume": {"name": …}}` and read-only as `"options": ["ro"]`.
+    /// Older shapes (string `type`, `readOnly` bool, top-level `name`) still work.
     static func mountJSON(fromAppleMount mount: [String: Any]) -> [String: Any] {
-        // type may be a string or a {"kind": {...}} discriminator object.
-        var type = string(mount["type"])
-        if type.isEmpty, let typeObject = mount["type"] as? [String: Any] {
-            type = typeObject.keys.sorted().first ?? ""
+        var kind = string(mount["type"])
+        var body: [String: Any] = [:]
+        if kind.isEmpty, let typeObject = mount["type"] as? [String: Any],
+           let key = typeObject.keys.sorted().first {
+            kind = key
+            body = object(typeObject[key])
         }
+        let type = kind == "virtiofs" ? "bind" : kind
         let source = [string(mount["source"]), string(mount["name"])]
             .first { !$0.isEmpty } ?? ""
         let destination = [string(mount["destination"]), string(mount["target"]), string(mount["path"])]
             .first { !$0.isEmpty } ?? ""
+        let options = (mount["options"] as? [String]) ?? []
+        let readOnly = options.contains("ro")
+            || (mount["readOnly"] as? Bool ?? mount["readonly"] as? Bool ?? false)
         var row: [String: Any] = [
             "Source": source,
-            "Destination": destination
+            "Destination": destination,
+            "RW": !readOnly
         ]
         if !type.isEmpty { row["Type"] = type }
-        if let readOnly = mount["readOnly"] as? Bool ?? mount["readonly"] as? Bool {
-            row["RW"] = !readOnly
-        }
+        let name = [string(body["name"]), string(mount["name"])].first { !$0.isEmpty } ?? ""
+        if !name.isEmpty { row["Name"] = name }
         return row
     }
 
