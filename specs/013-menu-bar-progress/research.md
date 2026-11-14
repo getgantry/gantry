@@ -27,9 +27,9 @@
 
 ## R5. Compose down and Compose pull
 
-- Decision: reuse `HostSession.performBulk` with a new kind and title. Down plans `.remove(force: true)` on the project containers, then removes the networks with the label `com.docker.compose.project=<project>`. Pull plans `.pull` on the image references of the project containers. A reference that is an image id (`sha256:`) is skipped.
+- Decision: reuse `HostSession.performBulk` with a new kind and title. Down plans the new bulk action `.down` (graceful stop, then remove without force, as `ComposeDown` for Shortcuts does) on the project containers, then removes the networks with the label `com.docker.compose.project=<project>`. Pull plans `.pull` on the image references of the project containers. A reference that is an image id (`sha256:`) is skipped.
 - Rationale: the bulk engine gives concurrency, cancel, per-item log, failure report and refresh.
-- Alternatives considered: run `docker compose`. Gantry has no required dependency on the Compose CLI, and apple/container has none.
+- Alternatives considered: `.remove(force: true)`. A force remove kills the process (SIGKILL), which can damage a database; rejected. Reuse of `ComposeDown.run` (the Shortcuts action): it has no progress and no cancel. Run `docker compose`. Gantry has no required dependency on the Compose CLI, and apple/container has none.
 
 ## R6. Menu bar label
 

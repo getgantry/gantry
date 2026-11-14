@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Draft
+**Status**: Implemented. The live check is open.
 
 **Input**: User description: "Show running long operations (image pull, build, compose up/down/pull) in the MenuBarExtra with progress (bytes/layers or steps), elapsed time, Cancel, and a notification on finish or failure using the existing notification actions. The menu bar icon shows activity while something runs. Reuse the existing OperationCenter/LongOperation activity model. Logic in AppCore with tests. Live Activities out of scope: ActivityKit in the macOS 27.2 SDK is @available(macOS, unavailable)."
 
@@ -20,8 +20,9 @@ Today an operation has only a text line and an optional fraction. The pull sheet
 layers and the bytes, but the Activity list gets only the last status line. A build and
 Compose up have no fraction.
 
-Compose down and Compose pull do not exist in Gantry today. A user can only stop or restart
-all containers of a Compose group. This feature adds these two actions on the Compose group,
+In the container list, a user can only stop or restart all containers of a Compose group.
+Compose down exists only as a Shortcuts action (`ComposeDownIntent`), without progress.
+Compose pull does not exist. This feature adds the two actions on the Compose group header,
 because the menu bar must show them as operations.
 
 Live Activities: in the macOS 27.2 SDK, every ActivityKit API is marked
@@ -45,7 +46,7 @@ The Activity section shows the pull with layers, bytes and a time that goes up.
 
 **Acceptance Scenarios**:
 
-1. **Given** a pull runs, **When** the user opens the menu bar panel, **Then** the panel shows the pull with a progress bar, "N of M layers", "X of Y" bytes and the elapsed time.
+1. **Given** a pull runs, **When** the user opens the menu bar panel, **Then** the panel shows the pull with a progress bar, "Layers: N of M", "X of Y" bytes and the elapsed time.
 2. **Given** a build runs, **When** the build output reports steps, **Then** the panel shows "Step N of M" and a progress bar with that fraction.
 3. **Given** no operation runs and none finished recently, **When** the user opens the panel, **Then** the panel shows no Activity section.
 4. **Given** two operations run on two hosts, **When** the user opens the panel, **Then** the panel shows both, the newest first, each with its host name.
@@ -154,7 +155,7 @@ project has no containers and no project networks.
 - **FR-008**: The menu bar item MUST show the count of running operations next to the icon while one runs, and its accessibility label MUST name the count.
 - **FR-009**: The end of an operation MUST post the existing operation notification with the Show action, for all operation kinds of this feature, and MUST NOT post for a cancel.
 - **FR-010**: The Compose group header MUST offer Pull Images and Compose Down. Compose Down MUST use the shared destructive confirmation.
-- **FR-011**: Compose Down MUST remove the containers of the project, then the networks with the project label. It MUST NOT remove volumes.
+- **FR-011**: Compose Down MUST stop each container of the project gracefully, then remove it, then remove the networks with the project label. It MUST NOT remove volumes or images.
 - **FR-012**: All new user-facing strings MUST be in the String Catalogs with all 28 languages.
 - **FR-013**: The Activity section MUST work the same for Docker hosts and apple/container hosts.
 

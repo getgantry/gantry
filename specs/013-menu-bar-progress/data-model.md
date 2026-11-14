@@ -8,7 +8,7 @@
 | `items` | `ItemProgress?` | `done` from 0 to `total`; `total` above 0 |
 | `bytes` | `ByteProgress?` | `done` from 0 to `total`; `total` above 0 |
 | `fraction` | computed `Double?` | bytes fraction first, then items fraction |
-| `detailText` | computed `String?` | "3 of 7 layers · 12 MB of 45 MB" |
+| `detailText` | computed `String?` | "Layers: 3 of 7 · 12 MB of 45 MB" |
 
 `ItemProgress.Unit`: `layers`, `steps`, `services`, `items`. Each unit has its own plural string.
 

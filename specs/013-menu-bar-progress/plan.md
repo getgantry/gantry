@@ -17,7 +17,8 @@ The menu bar panel gets an Activity section that reads the existing `OperationCe
    and `composePull`.
 2. AppCore: `HostSession.composeDown(project:)` and `composePull(project:)`. They reuse the
    bulk engine (`performBulk`) with their own kind and title, so progress, cancel, failure
-   reports and the refresh are the same as for bulk actions. Down then removes the networks
+   reports and the refresh are the same as for bulk actions. Down uses a new bulk action
+   `.down`: a graceful stop, then a remove without force. Down then removes the networks
    with the label `com.docker.compose.project=<project>`. A new `DestructiveAction.Kind`
    `composeDown` gives the shared confirmation.
 3. App: `MenuBarActivitySection` in `App/Views/MenuBar`, a label view for the

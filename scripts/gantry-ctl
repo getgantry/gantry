@@ -6,6 +6,10 @@
 #   scripts/gantry-ctl snapshot /abs/path.png        # PNG of the main window
 #   scripts/gantry-ctl state /abs/path.json          # selection as JSON
 #   scripts/gantry-ctl appearance dark               # light | dark | system
+#   scripts/gantry-ctl 'debug/activity?path=/abs/a.json'  # menu bar activity as JSON
+#   scripts/gantry-ctl 'debug/menubar?path=/abs/m.png'    # PNG of the menu bar panel
+#   scripts/gantry-ctl 'debug/pull?ref=alpine:3.20'       # start a pull operation
+#   scripts/gantry-ctl debug/cancel                       # cancel the newest operation
 #
 # GANTRY_APP selects the copy when several Debug builds run (a path fragment
 # of the .app); the default is the newest Debug process with a socket.
