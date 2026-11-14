@@ -84,18 +84,18 @@ public enum PaletteCatalog {
 
     // MARK: - Actions
 
-    /// Container actions in menu order. Logs and the shell need the
-    /// container to exist; the shell needs it running.
+    /// Container actions in menu order. Logs, log export and the shell need
+    /// the container to exist; the shell needs it running.
     public static func containerActions(_ state: ContainerState) -> [PaletteAction] {
         switch state {
         case .running, .restarting:
-            [.open, .logs, .shell, .stop, .restart, .remove]
+            [.open, .logs, .exportLogs, .shell, .stop, .restart, .remove]
         case .paused:
-            [.open, .logs, .stop, .remove]
+            [.open, .logs, .exportLogs, .stop, .remove]
         case .removing:
             [.open]
         case .created, .exited, .dead, .unknown:
-            [.open, .start, .logs, .remove]
+            [.open, .start, .logs, .exportLogs, .remove]
         }
     }
 

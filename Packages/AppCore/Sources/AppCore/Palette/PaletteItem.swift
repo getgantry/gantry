@@ -68,6 +68,8 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
     case stop
     case restart
     case logs
+    /// Opens the Logs tab and the save panel for its visible lines.
+    case exportLogs
     case shell
     /// Opens the Kubernetes section on the context of a cluster.
     case browseResources
@@ -85,6 +87,7 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
         case .stop: String(localized: "Stop", bundle: .module)
         case .restart: String(localized: "Restart", bundle: .module)
         case .logs: String(localized: "Show Logs", bundle: .module)
+        case .exportLogs: String(localized: "Export Logs…", bundle: .module)
         case .shell: String(localized: "Open Shell", bundle: .module)
         case .browseResources: String(localized: "Browse Resources", bundle: .module)
         case .remove:
@@ -102,6 +105,7 @@ public enum PaletteAction: String, Sendable, CaseIterable, Hashable {
         case .stop: "stop.fill"
         case .restart: "arrow.clockwise"
         case .logs: "text.alignleft"
+        case .exportLogs: "square.and.arrow.up"
         case .shell: "terminal"
         case .browseResources: "helm"
         case .remove: "trash"
