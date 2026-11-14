@@ -129,6 +129,16 @@ enum AppleContainerJSON {
         }
     }
 
+    /// Docker's list status. A running container with a start date gets
+    /// Docker's uptime text ("Up 3 hours"), so the lists and the activity
+    /// table read the uptime the same way for both host kinds.
+    static func dockerStatusText(forDockerState state: String, startedDate: Any?, now: Date) -> String {
+        let started = unixSeconds(fromAppleDate: startedDate)
+        guard state == "running", started > 0 else { return dockerStatusText(forDockerState: state) }
+        let uptime = max(now.timeIntervalSince1970 - TimeInterval(started), 0)
+        return "Up " + DockerHumanDuration.string(uptime)
+    }
+
     static func dockerStatusText(forDockerState state: String) -> String {
         switch state {
         case "running": "Up"
@@ -188,11 +198,11 @@ enum AppleContainerJSON {
     /// `container list --format json` → `GET /containers/json` body.
     /// `all: false` keeps only running containers (the CLI is always asked
     /// with `--all` so one code path serves both).
-    static func containersListBody(fromAppleList data: Data, all: Bool) throws -> Data {
+    static func containersListBody(fromAppleList data: Data, all: Bool, now: Date = .now) throws -> Data {
         let apple = array(try decode(data))
         var rows: [[String: Any]] = []
         for element in apple {
-            let row = containerSummaryJSON(fromAppleContainer: element)
+            let row = containerSummaryJSON(fromAppleContainer: element, now: now)
             if !all, string(row["State"]) != "running" { continue }
             rows.append(row)
         }
@@ -212,7 +222,7 @@ enum AppleContainerJSON {
     }
 
     /// One element of the CLI list → one `/containers/json` row.
-    static func containerSummaryJSON(fromAppleContainer element: [String: Any]) -> [String: Any] {
+    static func containerSummaryJSON(fromAppleContainer element: [String: Any], now: Date = .now) -> [String: Any] {
         let config = object(element["configuration"])
         let id = string(config["id"])
         let runtime = runtimeState(element)
@@ -254,7 +264,7 @@ enum AppleContainerJSON {
             "Ports": ports,
             "Labels": AppleLabelEscaping.decodeContainerLabels((config["labels"] as? [String: String]) ?? [:]),
             "State": state,
-            "Status": dockerStatusText(forDockerState: state),
+            "Status": dockerStatusText(forDockerState: state, startedDate: runtime.startedDate, now: now),
             "Mounts": mounts
         ]
     }

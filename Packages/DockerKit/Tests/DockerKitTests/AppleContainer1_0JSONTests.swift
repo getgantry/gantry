@@ -33,14 +33,18 @@ private let statsFixture1_0 = Data("""
 // MARK: - Containers
 
 @Test func appleContainersList1_0TranslatesToDockerShape() throws {
-    let body = try AppleContainerJSON.containersListBody(fromAppleList: containersListFixture1_0, all: true)
+    // 90 seconds after the startedDate of the fixture, 2026-06-09T08:28:08Z.
+    let started = try #require(ISO8601DateFormatter().date(from: "2026-06-09T08:28:08Z"))
+    let body = try AppleContainerJSON.containersListBody(
+        fromAppleList: containersListFixture1_0, all: true, now: started.addingTimeInterval(90)
+    )
     let summaries = try JSONDecoder().decode([ContainerSummary].self, from: body)
     #expect(summaries.count == 2)
 
     let running = try #require(summaries.first { $0.id == "gantry-t1" })
     #expect(running.image == "docker.io/library/alpine:latest")
     #expect(running.state == .running)
-    #expect(running.status == "Up")
+    #expect(running.status == "Up About a minute")
     #expect(running.command == "sleep 600")
     #expect(running.labels["com.example.role"] == "smoke")
     // 2026-06-09T08:28:05Z, parsed from the ISO creationDate.
