@@ -307,6 +307,19 @@ private struct UnavailableHostLine: View {
 
     var body: some View {
         HStack(spacing: Spacing.xs) {
+            description
+            Spacer(minLength: Spacing.xs)
+            if host.state.canRetry {
+                Button("Retry", action: retry)
+                    .controlSize(.small)
+            }
+        }
+        .font(.callout)
+    }
+
+    /// One element for VoiceOver; the Retry button stays a separate control.
+    private var description: some View {
+        HStack(spacing: Spacing.xs) {
             Image(systemName: symbol)
                 .foregroundStyle(tint)
                 .accessibilityHidden(true)
@@ -320,13 +333,7 @@ private struct UnavailableHostLine: View {
                     .truncationMode(.tail)
                     .help(reason)
             }
-            Spacer(minLength: Spacing.xs)
-            if host.state.canRetry {
-                Button("Retry", action: retry)
-                    .controlSize(.small)
-            }
         }
-        .font(.callout)
         .accessibilityElement(children: .combine)
     }
 
