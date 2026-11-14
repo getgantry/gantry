@@ -15,13 +15,21 @@ struct ImageScanRequest: Identifiable {
         guard let model = session.makeImageScanModel(for: image) else { return nil }
         self.imageName = image.displayName
         self.model = model
+        model.startDetection()
     }
 }
 
 extension View {
     /// Presents the scan sheet of `request`.
     func imageScanSheet(_ request: Binding<ImageScanRequest?>) -> some View {
-        sheet(item: request) { request in
+        sheet(item: Binding(
+            get: { request.wrappedValue },
+            set: { new in
+                // Close the old model here too: a hidden window can skip onDisappear.
+                if let old = request.wrappedValue, old.id != new?.id { old.model.close() }
+                request.wrappedValue = new
+            }
+        )) { request in
             ImageScanSheet(model: request.model, imageName: request.imageName)
         }
     }
@@ -44,7 +52,6 @@ struct ImageScanSheet: View {
         }
         .padding(20)
         .frame(minWidth: 620, idealWidth: 700, minHeight: 480, idealHeight: 560)
-        .task { await model.detect() }
         .onDisappear { model.close() }
     }
 }

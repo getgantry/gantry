@@ -84,7 +84,13 @@ description: "Task list for image scan and SBOM"
 - [x] T022 Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/image-scan/DerivedData` and run the AppCore tests with `--filter "ScannerDetectionTests|ImageScanPlanTests|ScanReportParserTests|ImageScanModelTests"`
 - [x] T025 Add the gated live test (real `container image save`, Trivy 0.76.2 and Grype 0.121.3 on `alpine:latest`, CycloneDX and SPDX export, cancel) in Packages/AppCore/Tests/AppCoreTests/LiveImageScanTests.swift
 - [x] T026 Add the gated live Docker test over SSH (`saveImages` archive with both scanners, the registry plan of an SSH host with both scanners) in Packages/AppCore/Tests/AppCoreTests/LiveImageScanTests.swift
-- [ ] T023 Live check of quickstart.md steps 2 to 6 with `scripts/gantry-ctl` and `GANTRY_APP` set to this build
+- [x] T023 Live check of quickstart.md steps 2 to 6 with `scripts/gantry-ctl` and `GANTRY_APP` set to this build
+  - Setup (2026-11-14): Debug build, Apple CLI 1.7.1, test host list.
+  - Result: `alpine:latest` with Trivy showed 1 Medium (CVE-2026-4738, zlib) with a link. CycloneDX 1.7 and SPDX-2.3 files came from the save panel. `postgres:16-alpine` showed 1 Critical, 44 High, 38 Medium, 3 Low and 2 Unknown.
+  - Result: on `metabase/metabase:v0.65.3.6` with Grype, the sheet showed "Unpacking the image…" and "Scanning with Grype…" with the elapsed time. Stop showed "Scan Cancelled". The `grype` process stopped, and the temporary folder was gone.
+  - Result: the app started with `PATH=/usr/bin:/bin:/usr/sbin:/sbin` and without the overrides. The sheet showed the install help with the Homebrew commands, two install links and Check Again.
+  - Bug found: the window went to another Space. Then a new sheet stayed on "Looking for Trivy and Grype…". A closed sheet also kept its temporary folder. Fixed in T027.
+- [x] T027 Start the detection from the model (`ImageScanModel.startDetection()`) when the sheet request is made, not from `.task`. Close the old model when the request changes or the detail view shows another image. Test `startDetectionRunsOnceWithoutTheView` in Packages/AppCore/Tests/AppCoreTests/ImageScanTests.swift. Live: a link that selects another image during an open sheet now removes the temporary folder.
 - [x] T024 Rebase on `origin/main`, open the pull request "feat: scan images for vulnerabilities with trivy or grype"
 
 ## Dependencies

@@ -377,6 +377,16 @@ struct ImageScanModelTests {
         )
     }
 
+    @Test func startDetectionRunsOnceWithoutTheView() async {
+        let model = model()
+        model.startDetection()
+        model.startDetection()
+        await model.waitUntilIdle()
+        #expect(model.state == .ready)
+        #expect(model.selectedKind == .trivy)
+        #expect(runner.calls.filter { $0.1 == ["--version"] }.count == 1)
+    }
+
     @Test func noScanner() async {
         let model = model(installed: [])
         await model.detect()

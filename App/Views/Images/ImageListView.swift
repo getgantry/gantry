@@ -434,6 +434,11 @@ struct ImageDetailView: View {
             TagImageSheet(image: image, session: session)
         }
         .imageScanSheet($scanRequest)
+        .onChange(of: image.id) {
+            // A link can select another image while the sheet is open.
+            scanRequest?.model.close()
+            scanRequest = nil
+        }
     }
 
     private var overview: some View {

@@ -122,6 +122,7 @@ public final class ImageScanModel {
     @ObservationIgnored private var preparedSource: ScanSource?
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var closed = false
+    @ObservationIgnored private var detection: Task<Void, Never>?
 
     /// - Parameter export: writes the image archive; nil for a registry plan.
     public init(
@@ -170,6 +171,13 @@ public final class ImageScanModel {
         state = scanners.isEmpty ? .noScanner : .ready
     }
 
+    /// Starts the detection one time. The sheet calls it when it makes the
+    /// model, so the detection does not depend on the view lifecycle.
+    public func startDetection() {
+        guard detection == nil else { return }
+        detection = Task { await detect() }
+    }
+
     // MARK: - Scan
 
     /// Starts a scan with the selected scanner.
@@ -186,6 +194,7 @@ public final class ImageScanModel {
 
     /// Waits for the running task. For tests and for the sheet's close.
     public func waitUntilIdle() async {
+        await detection?.value
         await task?.value
     }
 
