@@ -13,6 +13,7 @@ struct ContainerDetailView: View {
     @State private var showCommitSheet = false
     @State private var showRename = false
     @State private var renameText = ""
+    @State private var composeExportTarget: ComposeExportTarget?
 
     enum DetailTab: String, CaseIterable, Identifiable {
         case overview = "Overview"
@@ -85,6 +86,7 @@ struct ContainerDetailView: View {
         .sheet(isPresented: $showCommitSheet) {
             CommitImageSheet(session: session, container: container)
         }
+        .composeExportSheet($composeExportTarget, session: session)
         .alert("Rename Container", isPresented: $showRename) {
             TextField("Name", text: $renameText)
             Button("Rename") {
@@ -174,6 +176,7 @@ struct ContainerDetailView: View {
             .keyboardShortcut("p", modifiers: [.command, .option])
             ExplainMenuItem(session: session, container: container)
             ContainerRunCopyItems(session: session, container: container)
+            ComposeExportMenuItem(containerIDs: [container.id], target: $composeExportTarget)
         } label: {
             Label("More", systemImage: "ellipsis")
         }
