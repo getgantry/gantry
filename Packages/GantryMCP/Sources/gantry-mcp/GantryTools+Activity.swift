@@ -77,12 +77,22 @@ extension GantryTools {
 
     /// Counters of the running, visible containers; a failed sample is left out.
     private static func counters(_ client: DockerClient, _ containers: [ContainerSummary]) async -> [String: ContainerCounters] {
-        var result: [String: ContainerCounters] = [:]
-        for container in containers where container.state.isRunning && ContainerCounts.isUserVisible(container) {
-            guard let sample = try? await client.containerStatsOnce(id: container.id) else { continue }
-            result[container.id] = ContainerCounters(sample, date: .now)
+        let ids = containers
+            .filter { $0.state.isRunning && ContainerCounts.isUserVisible($0) }
+            .map(\.id)
+        return await withTaskGroup(of: (String, ContainerCounters)?.self) { group in
+            for id in ids {
+                group.addTask {
+                    guard let sample = try? await client.containerStatsOnce(id: id) else { return nil }
+                    return (id, ContainerCounters(sample, date: .now))
+                }
+            }
+            var result: [String: ContainerCounters] = [:]
+            for await pair in group {
+                if let (id, counters) = pair { result[id] = counters }
+            }
+            return result
         }
-        return result
     }
 }
 

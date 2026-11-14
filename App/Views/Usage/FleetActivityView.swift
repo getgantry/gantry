@@ -97,15 +97,15 @@ private struct FleetActivityTable: View {
         TableColumn("Host", sortUsing: FleetActivity.Comparator(.host)) { row in
             TruncatedText(text: row.hostName)
         }
-        .width(min: 80, ideal: 120)
+        .width(min: 80, ideal: 110)
         TableColumn("Name", sortUsing: FleetActivity.Comparator(.name)) { row in
             TruncatedText(text: row.name)
         }
-        .width(min: 100, ideal: 160)
+        .width(min: 90, ideal: 130)
         TableColumn("Image", sortUsing: FleetActivity.Comparator(.image)) { row in
             TruncatedText(text: row.image, secondary: true)
         }
-        .width(min: 100, ideal: 180)
+        .width(min: 90, ideal: 130)
     }
 
     @TableColumnBuilder<FleetActivity.Row, FleetActivity.Comparator>
@@ -113,23 +113,23 @@ private struct FleetActivityTable: View {
         TableColumn("CPU", sortUsing: FleetActivity.Comparator(.cpu)) { row in
             MetricCell(title: String(localized: "CPU"), value: row.cpuPercent.map(ActivityFormat.cpu))
         }
-        .width(min: 56, ideal: 70)
+        .width(min: 52, ideal: 56)
         TableColumn("Memory", sortUsing: FleetActivity.Comparator(.memory)) { row in
             MetricCell(title: String(localized: "Memory"), value: row.memoryBytes.map { Formatters.bytes($0) })
         }
-        .width(min: 64, ideal: 84)
+        .width(min: 60, ideal: 72)
         TableColumn("Network I/O", sortUsing: FleetActivity.Comparator(.network)) { row in
             RateCell(kind: .network, load: row.load)
         }
-        .width(min: 110, ideal: 150)
+        .width(min: 120, ideal: 140)
         TableColumn("Disk I/O", sortUsing: FleetActivity.Comparator(.disk)) { row in
             RateCell(kind: .disk, load: row.load)
         }
-        .width(min: 110, ideal: 150)
+        .width(min: 120, ideal: 140)
         TableColumn("Uptime", sortUsing: FleetActivity.Comparator(.uptime)) { row in
             MetricCell(title: String(localized: "Uptime"), value: row.uptime.map(ActivityFormat.uptime))
         }
-        .width(min: 56, ideal: 72)
+        .width(min: 52, ideal: 60)
     }
 }
 
@@ -203,6 +203,8 @@ private struct RateCell: View {
                     Label(Formatters.rate(second), systemImage: kind == .network ? "arrow.up" : "arrow.up.doc")
                 }
                 .labelStyle(CompactRateLabelStyle())
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(kind == .network ? String(localized: "Network I/O") : String(localized: "Disk I/O"))
                 .accessibilityValue(accessibilityValue(first, second))
