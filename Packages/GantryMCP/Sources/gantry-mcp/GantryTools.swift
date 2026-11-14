@@ -19,6 +19,7 @@ actor GantryTools {
             + volumeNetworkTools()
             + systemAppleTools()
             + sessionTools()
+            + activityTools()
     }
 
     private func coreTools() -> [Tool] {
@@ -141,6 +142,7 @@ actor GantryTools {
             if let result = try await handleVolumesNetworks(name, args) { return result }
             if let result = try await handleSystemApple(name, args) { return result }
             if let result = try await handleSessions(name, args) { return result }
+            if let result = try await handleActivity(name, args) { return result }
             return .failure("Unknown tool '\(name)'.")
         } catch let error as LocalizedError {
             return .failure(error.errorDescription ?? "\(error)")
