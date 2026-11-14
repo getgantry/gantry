@@ -37,6 +37,14 @@ struct AppLinkTests {
         #expect(parse("gantry://debug/appearance?mode=dark") == .appearance("dark"))
         #expect(parse("gantry://debug/state?path=/tmp/s.json") == .state(path: "/tmp/s.json"))
         #expect(parse("gantry://debug/appearance?mode=blue") == nil)
+        #expect(parse("gantry://debug/activity?path=/tmp/a.json") == .activity(path: "/tmp/a.json"))
+        #expect(parse("gantry://debug/activity?path=a.json") == nil)
+        #expect(parse("gantry://debug/menubar?path=/tmp/m.png") == .menuBarSnapshot(path: "/tmp/m.png"))
+        #expect(parse("gantry://debug/pull?ref=alpine:3.20&host=Apple") == .debugPull(reference: "alpine:3.20", host: "Apple"))
+        #expect(parse("gantry://debug/pull?ref=alpine") == .debugPull(reference: "alpine", host: nil))
+        #expect(parse("gantry://debug/pull") == nil)
+        #expect(parse("gantry://debug/cancel") == .cancelNewestOperation)
+        #expect(parse("gantry://debug/cancel")?.closesPalette == false)
     }
 
     @Test func placesClosePaletteButPaletteAndDebugLinksKeepIt() {

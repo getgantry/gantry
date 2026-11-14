@@ -29,6 +29,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case switchVolume
         /// Forget a folder volume; the folder stays on the disk.
         case forgetFolderVolume
+        /// Remove the containers and networks of a Compose project.
+        case composeDown
     }
 
     /// What else happens when the action runs.
@@ -145,6 +147,18 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
             targets: containers.map(\.id),
             names: [project],
             impact: running.isEmpty ? .none : .runningContainersStop(running.count)
+        )
+    }
+
+    /// Compose down on a project: all its containers go, running ones stop.
+    public static func composeDown(project: String, containers: [ContainerSummary]) -> DestructiveAction {
+        let members = ComposeProjectPlan.members(project, in: containers)
+        let running = members.filter { $0.state.isRunning }.count
+        return DestructiveAction(
+            kind: .composeDown,
+            targets: members.map(\.id),
+            names: [project],
+            impact: running > 0 ? .runningContainersStop(running) : .none
         )
     }
 

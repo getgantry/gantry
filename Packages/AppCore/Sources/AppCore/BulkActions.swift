@@ -39,6 +39,8 @@ public enum BulkAction: Hashable, Sendable {
     case remove(force: Bool)
     /// Pull the image tag again (images only).
     case pull
+    /// Stop a container, then remove it (Compose down; not in the menus).
+    case down
 
     /// The actions of a list, without Remove (it has its own confirmation).
     /// Pause and Resume only show when the host engine supports them.
@@ -62,6 +64,7 @@ public enum BulkAction: Hashable, Sendable {
         case .unpause: String(localized: "Resume", bundle: .module)
         case .remove: String(localized: "Remove", bundle: .module)
         case .pull: String(localized: "Pull Latest", bundle: .module)
+        case .down: String(localized: "Compose Down", bundle: .module)
         }
     }
 
@@ -74,6 +77,7 @@ public enum BulkAction: Hashable, Sendable {
         case .unpause: "play"
         case .remove: "trash"
         case .pull: "arrow.down.circle"
+        case .down: "square.stack.3d.down.right"
         }
     }
 
@@ -117,7 +121,7 @@ public struct BulkPlan: Equatable, Sendable {
             case .start: !state.isRunning && state != .paused
             case .stop, .restart, .pause: state.isRunning
             case .unpause: state == .paused
-            case .remove: true
+            case .remove, .down: true
             case .pull: false
             }
             return (item, ok)

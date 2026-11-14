@@ -7,6 +7,10 @@ public enum OperationKind: String, Sendable, CaseIterable {
     case pull
     case build
     case composeUp
+    /// Removes the containers and networks of a Compose project.
+    case composeDown
+    /// Pulls the images of a Compose project again.
+    case composePull
     case clusterCreate
     case machineCreate
     case kernelInstall
@@ -49,6 +53,8 @@ public final class LongOperation: Identifiable {
     public private(set) var progressText: String?
     /// 0...1 when the work knows how far it is; nil shows an indefinite bar.
     public private(set) var fraction: Double?
+    /// Layers, steps or services done, and bytes, when the work reports them.
+    public private(set) var progress: OperationProgress = .none
     /// The last output lines.
     public private(set) var log: [String] = []
     /// When set, the UI asks with this text before it cancels.
@@ -78,6 +84,15 @@ public final class LongOperation: Identifiable {
         guard !state.isFinished else { return }
         progressText = progress
         self.fraction = fraction.map { min(max($0, 0), 1) }
+    }
+
+    /// Reports structured progress. The fraction comes from `progress` when
+    /// it knows one, else from `fraction`. The status text stays when nil.
+    public func report(_ progress: OperationProgress, status: String? = nil, fraction: Double? = nil) {
+        guard !state.isFinished else { return }
+        self.progress = progress
+        if let status { progressText = status }
+        self.fraction = (progress.fraction ?? fraction).map { min(max($0, 0), 1) }
     }
 
     public func append(log line: String) {
