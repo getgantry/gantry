@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented. The live check without GUI control is done; the GUI check is open.
+**Status**: Implemented. The live checks are done, except the in-row cancel question (T028).
 
 **Input**: User description: "Show running long operations (image pull, build, compose up/down/pull) in the MenuBarExtra with progress (bytes/layers or steps), elapsed time, Cancel, and a notification on finish or failure using the existing notification actions. The menu bar icon shows activity while something runs. Reuse the existing OperationCenter/LongOperation activity model. Logic in AppCore with tests. Live Activities out of scope: ActivityKit in the macOS 27.2 SDK is @available(macOS, unavailable)."
 
@@ -57,7 +57,7 @@ The Activity section shows the pull with layers, bytes and a time that goes up.
 
 The user sees a pull that takes too long and clicks Cancel in the menu bar panel. The pull
 stops. The row shows "Stopping…" and then "Cancelled". An operation that asks before it
-stops (Compose up) asks in the panel, not in an alert, because an alert closes the panel.
+stops (cluster creation, data root move) asks in the panel, not in an alert, because an alert closes the panel.
 
 **Why this priority**: The brief asks for Cancel. A progress row without Cancel forces the
 user to open the main window.
@@ -68,7 +68,7 @@ operation with `gantry-ctl` or in the Activity list.
 **Acceptance Scenarios**:
 
 1. **Given** a pull runs, **When** the user clicks Cancel in the panel, **Then** the pull stops and the row shows that it was cancelled.
-2. **Given** Compose up runs, **When** the user clicks Cancel, **Then** the row asks "Stop" or "Keep Running" in place, and only "Stop" cancels.
+2. **Given** an operation with a cancel confirmation runs (cluster creation or data root move), **When** the user clicks Cancel, **Then** the row asks "Stop" or "Keep Running" in place, and only "Stop" cancels. Compose up has no cancel confirmation: Cancel stops it at once, the same as in the Activity list.
 3. **Given** an operation cannot be cancelled, **When** the user looks at its row, **Then** the row has no Cancel button.
 
 ---

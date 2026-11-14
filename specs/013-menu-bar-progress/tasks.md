@@ -60,13 +60,14 @@
 - [x] T024 AppCore tests pass (`swift test` with the scratch path on the external disk)
 - [x] T025 Debug build of the app succeeds (`xcodebuild -jobs 3`)
 - [x] T026 Live check per `quickstart.md` with `scripts/gantry-ctl`, without GUI control, on a Docker host over SSH (`nettop`, Docker 29.6.2) and on the apple/container host, from a test host list (`GANTRY_HOSTS_PATH`). Pull: layers and bytes go up, the panel PNG shows the row, Cancel gives `cancelled`. Compose pull and Compose down (`debug/compose`) succeed on both hosts; down removes the containers and the project network, the volume and the images stay. Test containers `gmbp-*`, their images and the volume are removed
-- [ ] T027 Open. The shared GUI was not given to this agent. GUI check: a click on Cancel in the real menu bar panel and the in-row Stop or Keep Running question, the Compose Down confirmation from the group header, the count next to the icon in the menu bar, and the notification while Gantry is in the background
+- [x] T027 GUI check with real clicks on the Debug build, on the Docker host `nettop`. The menu bar item showed the icon and "1" while a pull ran, with the accessibility name "Gantry, running operations: 1", and only the icon after the end. A click on the item opened the panel with the row, the bar, the detail and the time. A click on Cancel in the row cancelled the pull and the panel stayed open. Compose up from Docker > Open Compose File showed "Services: N of 3" in the panel, and Cancel gave "Stopping…". Compose Down from the group header showed the shared confirmation (project, "Volumes and images stay", "3 running containers will stop"). After the confirmation, with Finder in front, the operation ended with `3 of 3` and a notification "Done: Compose down gmbp-gui" came. The containers and the network of the project were removed. All test containers and images were removed
+- [ ] T028 Open. Live check of the in-row Stop or Keep Running question. Only cluster creation and the data root move have a cancel confirmation, and the check did not start them on the shared Mac. Compose up has no confirmation (spec corrected)
 
 ## Dependencies
 
 - T002 and T003 block all stories. T005 to T007 can run in parallel.
 - US2 and US3 need T012. US5 needs T011.
-- T022 to T027 come last.
+- T022 to T028 come last.
 
 ## Implementation Strategy
 
