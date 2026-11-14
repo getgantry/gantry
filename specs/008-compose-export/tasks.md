@@ -19,8 +19,8 @@ description: "Task list for the Compose export of containers"
 
 ## Phase 1: Setup
 
-- [ ] T001 Create the spec folder `specs/008-compose-export/` with spec.md, plan.md and tasks.md, and point `.specify/feature.json` at it
-- [ ] T002 Capture a live `container inspect` (CLI 1.7.1) of a `gce-` test container with a port, a named volume, a read-only bind, a tmpfs mount, a network, labels, limits and a capability, for the Apple fixture
+- [x] T001 Create the spec folder `specs/008-compose-export/` with spec.md, plan.md and tasks.md, and point `.specify/feature.json` at it
+- [x] T002 Capture a live `container inspect` (CLI 1.7.1) of a `gce-` test container with a port, a named volume, a read-only bind, a tmpfs mount, a network, labels, limits and a capability, for the Apple fixture
 
 ## Phase 2: Foundational
 
@@ -65,6 +65,6 @@ description: "Task list for the Compose export of containers"
 - [x] T023 Add the new strings with translations for 28 languages; `scripts/check-localization.py` reports 0 problems (FR-014, SC-004)
 - [x] T024 Run the AppCore tests of the feature and the full AppCore test suite one time (744 tests. One failure: `freePortIsActuallyBindable`, a port race with other processes on the shared Mac. It passed 3 times when run again. It has no relation to this feature.)
 - [x] T025 Build the Debug app into /Volumes/SanDisk2Tb/builds/gantry/compose-export/DerivedData
-- [ ] T026 Live check with `scripts/gantry-ctl` on the Apple host: open the sheet for the `gce-web` container, read the YAML and the warnings, Copy; then remove the `gce-` test resources
-  - Status 2026-11-14: partly done. The screen was locked, so the sheet was not opened. A link cannot open a sheet, and a menu needs a click. Done: the Debug build ran, `gantry-ctl open/containers?item=gce-web` selected the container, and the snapshot showed it. The live test `liveComposeExportOfAppleContainer` (GANTRY_APPLE_CONTAINER_LIVE=1) exported a real `gce-live` container through `HostSession` and passed. The `gce-` test resources are removed. Still open: open the sheet, read the YAML and the warnings, and press Copy.
+- [x] T026 Live check with `scripts/gantry-ctl` on the Apple host: open the sheet for the `gce-web` container, read the YAML and the warnings, Copy; then remove the `gce-` test resources
+  - Result 2026-11-14 (Debug build, Apple `container` 1.7.1): the sheet opened from the context menu of one container, from the More menu of the detail view and from the context menu of two selected containers. The YAML had the image, the port, the named volume, the bind with `:ro`, tmpfs, the network, the labels, the limits and the capability. `DB_PASSWORD` showed as `${DB_PASSWORD}`, and `$5` showed as `$$5`. The warning list showed the CPU and memory warning for each service. Copy put the YAML on the pasteboard. With the secret turned on, the preview showed the value, and Save… wrote `docker-compose.yml` with mode `0600`. With all secrets masked, Save… wrote the file with mode `0644`. Done closed the sheet. No defect was found. The `gce-` test resources are removed.
 - [x] T027 Rebase on `origin/main`, open the pull request "feat: export a running container as a compose file"

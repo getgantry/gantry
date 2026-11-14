@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented (live check of the sheet open, see tasks.md T026)
+**Status**: Implemented
 
 **Input**: User description: "From a container (and from a set of selected containers) generate a docker-compose.yml from inspect data: image, command, entrypoint, env (mask values that look like secrets and let the user choose to include them), ports, volumes and binds, networks, restart policy, labels, healthcheck, resources. Show a preview sheet with the YAML, warnings for fields that compose cannot express, then Save or Copy. For Apple container hosts, map what is possible and warn about the rest. Generation logic in AppCore with fixture tests (round-trip sanity: generated YAML parses). Optional: a short comment header via Foundation Models only if already used in the app and gated on availability; not required."
 
