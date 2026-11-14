@@ -148,20 +148,26 @@ public struct ContainerCreateRequest: Encodable, Sendable {
         /// (`--kernel-arg`, repeatable). Needs CLI 1.2 or newer — see
         /// `ContainerTooling.kernelArgumentsVersion`.
         public var kernelArgs: [String]
+        /// Variables whose values are Keychain secrets. The transport passes
+        /// them as `--env KEY` with the value in the environment of the CLI
+        /// process, so the value is never in the process arguments.
+        public var secretEnvKeys: [String]
 
         enum CodingKeys: String, CodingKey {
             case kernel = "Kernel"
             case kernelArgs = "KernelArgs"
+            case secretEnvKeys = "SecretEnvKeys"
         }
 
         /// Whether nothing is actually set, so the key can be omitted.
         public var isEmpty: Bool {
-            (kernel?.isEmpty ?? true) && kernelArgs.isEmpty
+            (kernel?.isEmpty ?? true) && kernelArgs.isEmpty && secretEnvKeys.isEmpty
         }
 
-        public init(kernel: String? = nil, kernelArgs: [String] = []) {
+        public init(kernel: String? = nil, kernelArgs: [String] = [], secretEnvKeys: [String] = []) {
             self.kernel = kernel
             self.kernelArgs = kernelArgs
+            self.secretEnvKeys = secretEnvKeys
         }
 
         // MARK: - Label round-trip
@@ -198,6 +204,9 @@ public struct ContainerCreateRequest: Encodable, Sendable {
                 .split(separator: "\n")
                 .map(String.init)
                 .filter { !$0.isEmpty }
+            // The secret label is written for every host kind; here it tells a
+            // recreate which variables must stay out of the process arguments.
+            self.secretEnvKeys = SecretEnvLabel.references(in: labels).keys.sorted()
         }
 
         /// Boot arguments are `key=value`, which apple/container rejects in a
@@ -215,6 +224,7 @@ public struct ContainerCreateRequest: Encodable, Sendable {
             var c = encoder.container(keyedBy: CodingKeys.self)
             if let kernel, !kernel.isEmpty { try c.encode(kernel, forKey: .kernel) }
             if !kernelArgs.isEmpty { try c.encode(kernelArgs, forKey: .kernelArgs) }
+            if !secretEnvKeys.isEmpty { try c.encode(secretEnvKeys, forKey: .secretEnvKeys) }
         }
     }
 
