@@ -448,13 +448,19 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
 
     let build = try #require(runner.recordedCalls().first { $0.first == "build" })
     #expect(build.contains("--tag") && build.contains("myproj-api:latest"))
-    #expect(build.contains("--file") && build.contains("Dockerfile.prod"))
+    // A relative Dockerfile is resolved against the context, not the process directory.
+    #expect(build.contains("--file") && build.contains("/tmp/myproj/api/Dockerfile.prod"))
     #expect(build.contains("--build-arg") && build.contains("VERSION=1.2"))
     #expect(build.contains("--target") && build.contains("runtime"))
     #expect(build.contains("--label") && build.contains("com.docker.compose.project=myproj"))
     #expect(build.contains("--no-cache"))
     // The context directory is the trailing positional argument.
     #expect(build.last == "/tmp/myproj/api")
+}
+
+@Test func appleBuildKeepsAnAbsoluteDockerfile() {
+    #expect(AppleContainerTransport.dockerfilePath("/src/Dockerfile", context: "/ctx") == "/src/Dockerfile")
+    #expect(AppleContainerTransport.dockerfilePath("docker/Dockerfile", context: "/ctx") == "/ctx/docker/Dockerfile")
 }
 
 @Test func appleTransportCreateContainerRejectsRestartPolicy() async throws {

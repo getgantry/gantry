@@ -672,7 +672,7 @@ public actor AppleContainerTransport: DockerTransport {
         }
         var arguments = ["build", "--tag", spec.tag]
         if let dockerfile = spec.dockerfile, !dockerfile.isEmpty {
-            arguments += ["--file", dockerfile]
+            arguments += ["--file", Self.dockerfilePath(dockerfile, context: spec.contextPath)]
         }
         for (key, value) in spec.buildArgs.sorted(by: { $0.key < $1.key }) {
             arguments += ["--build-arg", "\(key)=\(value)"]
@@ -688,6 +688,13 @@ public actor AppleContainerTransport: DockerTransport {
 
         let result = try await cli(arguments)
         return Self.ok(Data((result.stdoutText + result.stderrText).utf8))
+    }
+
+    /// `container build --file` resolves a relative path against the working
+    /// directory of the process, not the context, so make it absolute.
+    static func dockerfilePath(_ dockerfile: String, context: String) -> String {
+        guard !dockerfile.hasPrefix("/") else { return dockerfile }
+        return URL(fileURLWithPath: context, isDirectory: true).appendingPathComponent(dockerfile).path
     }
 
     private func waitContainer(id: String) async throws -> DockerResponse {
