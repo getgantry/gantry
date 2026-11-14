@@ -33,7 +33,7 @@ description: "Task list for the Apple container mounts fix"
 - [x] T005 [P] [US1] Tests in `Packages/DockerKit/Tests/DockerKitTests/AppleContainerMountsTests.swift`: the fixture through the inspect body and the list row; old `readOnly` bool; string type; volume `options: ["ro"]`; unknown type passes through; `displaySource` for Apple and Docker mounts
 - [x] T006 [US1] Docker side: `docker inspect` of a test container with a named volume and a read-only bind on `nettop.local`; decode its `Mounts` in a fixture test of `displaySource` and `rw`
 - [x] T007 [US1] Build the app (`xcodebuild -jobs 3`, DerivedData on the external disk)
-- [ ] T008 [US1] GUI live check: start the Debug build with a test host list, open the fixture container and read the Overview mounts with `scripts/gantry-ctl` (needs "GUI is yours"). Open: the screen is shared and GUI control was not given.
+- [x] T008 [US1] GUI live check: start the Debug build with a test host list, open the fixture container and read the Overview mounts with `scripts/gantry-ctl`. Result (2026-11-14): Debug build started with `GANTRY_HOSTS_PATH` set to a test `hosts.json` (Apple Container and `nettop.local`). The container was opened with `open/containers?host=...&item=gaom-mounts` and checked with `snapshot`. Apple host: `tmpfs -> /scratch rw`, `.../bindro -> /ro ro`, `.../bindrw -> /rw rw`, `gaom-data -> /data rw`. Docker host (29.6.2): `/tmp/gaom-ro -> /ro ro`, `gaom-data -> /data rw` (Docker does not list `--tmpfs` in `Mounts`). No defects found.
 
 ## Phase 4: User Story 2 - Other features read the correct mounts (P2)
 

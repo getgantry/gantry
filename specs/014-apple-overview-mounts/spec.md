@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented; the GUI live check (T008) is open
+**Status**: Implemented and checked live
 
 **Input**: User description: "Fix: on Apple container hosts the DockerKit translation of `container inspect`/`list` mounts ignores options [\"ro\"] so read-only binds show rw; maps type {\"virtiofs\":{}} to \"virtiofs\" not \"bind\"; never sets Name for named volumes so Overview shows the volume.img path. Fix the translation so Mounts gets Docker-shaped Type, Name, RW, Source, Destination; Overview shows the volume name for volumes. Consumers keep working. Fixture tests from real container 1.7.1 inspect output."
 
