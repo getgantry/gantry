@@ -30,12 +30,19 @@ extension HostSession {
                 status = .cancelled
             } else {
                 status = .failed
-                message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                message = Self.buildErrorText(error)
             }
         } else {
             status = .succeeded
         }
         buildHistory.finish(id: id, status: status, log: recorder.log, imageID: recorder.imageID, errorMessage: message)
+    }
+
+    /// The build output of an API error without the "Docker API error (500):"
+    /// prefix. A failed Apple build sends its full log only in the error.
+    static func buildErrorText(_ error: Error) -> String {
+        if case DockerError.apiError(_, let message) = error, !message.isEmpty { return message }
+        return (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
 
     private static func isCancelled(_ error: Error) -> Bool {

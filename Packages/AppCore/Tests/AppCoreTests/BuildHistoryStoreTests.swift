@@ -163,6 +163,24 @@ private final class MemoryPersistence: BuildHistoryPersistence, @unchecked Senda
         #expect(record.endedAt != nil)
     }
 
+    @Test func anAppleBuildErrorBecomesTheLogWithoutThePrefix() throws {
+        let session = HostSession(host: DockerHost(name: "Apple", kind: .appleContainer))
+        session.buildHistory = BuildHistoryStore(persistence: nil)
+        let id = session.buildHistory?.begin(ImageBuildSpec(contextPath: "/tmp/x", tag: "demo:fail"), hostID: session.host.id)
+        let output = """
+        #1 [resolver] fetching image...docker.io/library/alpine:3.20
+        #1 DONE 0.0s
+
+        #2 [linux/arm64 1/2] RUN exit 3
+        #2 ERROR: process "/bin/sh -c exit 3" did not complete successfully: exit code: 3
+        """
+        session.finishBuildRecord(id, recorder: BuildLogRecorder(), error: DockerError.apiError(status: 500, message: output))
+        let record = try #require(session.buildHistory?.records(for: session.host.id).first)
+        #expect(record.log.hasPrefix("#1 [resolver]"))
+        #expect(record.steps.map(\.state) == [.run, .failed])
+        #expect(record.summary.run == 1)
+    }
+
     @Test func aFailedBuildIsRecordedWithTheError() async throws {
         let context = try makeContext()
         defer { try? FileManager.default.removeItem(at: context) }
