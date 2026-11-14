@@ -14,6 +14,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case deleteCluster
         case deleteDomain
         case forgetCredential
+        /// Delete Keychain secrets that environment variables refer to.
+        case deleteSecret
         case removeHost
         case stopGroup
         case restartGroup

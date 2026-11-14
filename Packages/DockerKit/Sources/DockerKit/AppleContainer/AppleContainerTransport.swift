@@ -75,8 +75,10 @@ public actor AppleContainerTransport: DockerTransport {
 
     /// Runs the CLI, mapping a non-zero exit to a Docker-style `apiError`.
     @discardableResult
-    private func cli(_ arguments: [String]) async throws -> AppleCLIResult {
-        let result = try await runner.run(arguments)
+    private func cli(_ arguments: [String], environment: [String: String] = [:]) async throws -> AppleCLIResult {
+        let result = environment.isEmpty
+            ? try await runner.run(arguments)
+            : try await runner.run(arguments, environment: environment)
         guard result.exitCode == 0 else {
             throw AppleContainerCLIError.fromStderr(result.stderrText, exitCode: result.exitCode)
         }
@@ -539,9 +541,12 @@ public actor AppleContainerTransport: DockerTransport {
         if let name = Self.query(request, "name") {
             arguments += ["--name", name]
         }
-        for env in (json["Env"] as? [String]) ?? [] {
-            arguments += ["--env", env]
-        }
+        let appleOptions = AppleContainerJSON.object(json["GantryAppleOptions"])
+        let secretKeys = Set((appleOptions["SecretEnvKeys"] as? [String]) ?? [])
+        let (envArguments, secretEnvironment) = try Self.envArguments(
+            (json["Env"] as? [String]) ?? [], secretKeys: secretKeys
+        )
+        arguments += envArguments
         let labels = AppleLabelEscaping.encodeForCreate((json["Labels"] as? [String: String]) ?? [:])
         for (key, value) in labels.sorted(by: { $0.key < $1.key }) {
             arguments += ["--label", "\(key)=\(value)"]
@@ -606,7 +611,6 @@ public actor AppleContainerTransport: DockerTransport {
         // place for. `--kernel` works on every supported CLI; `--kernel-arg`
         // arrived in 1.2, and the create sheet only offers it when the detected
         // CLI is new enough, so an older CLI never sees it here.
-        let appleOptions = AppleContainerJSON.object(json["GantryAppleOptions"])
         let kernel = AppleContainerJSON.string(appleOptions["Kernel"])
         if !kernel.isEmpty {
             arguments += ["--kernel", kernel]
@@ -648,7 +652,7 @@ public actor AppleContainerTransport: DockerTransport {
         arguments.append(image)
         arguments += trailing
 
-        let output = try await cli(arguments).stdoutText
+        let output = try await cli(arguments, environment: secretEnvironment).stdoutText
         // The CLI prints the new container's ID on the last non-empty line
         // (progress lines may precede it when the image needs fetching).
         let id = output.split(separator: "\n")
@@ -656,6 +660,38 @@ public actor AppleContainerTransport: DockerTransport {
             .last { !$0.isEmpty } ?? Self.query(request, "name") ?? ""
         let responseBody = try AppleContainerJSON.encode(["Id": id, "Warnings": []])
         return Self.ok(responseBody, status: 201)
+    }
+
+    /// `--env` arguments for a create. A plain variable is `--env KEY=value`.
+    /// A secret variable is `--env KEY` and its value goes into the returned
+    /// environment of the CLI process: the CLI reads a bare KEY from its own
+    /// environment (since 1.0.0), so the value is never in the arguments,
+    /// which every user on the Mac can read. Errors name the key only.
+    static func envArguments(
+        _ env: [String], secretKeys: Set<String>
+    ) throws -> (arguments: [String], environment: [String: String]) {
+        var arguments: [String] = []
+        var environment: [String: String] = [:]
+        for entry in env {
+            let eq = entry.firstIndex(of: "=")
+            let key = eq.map { String(entry[..<$0]) } ?? entry
+            guard secretKeys.contains(key) else {
+                arguments += ["--env", entry]
+                continue
+            }
+            guard let eq else {
+                throw DockerError.apiError(status: 400, message: "The secret variable \(key) has no value")
+            }
+            guard !SecretEnvRedaction.isReservedForCLI(key) else {
+                throw DockerError.apiError(
+                    status: 400,
+                    message: "The variable \(key) cannot hold a Keychain secret on apple/container hosts"
+                )
+            }
+            environment[key] = String(entry[entry.index(after: eq)...])
+            arguments += ["--env", key]
+        }
+        return (arguments, environment)
     }
 
     /// Builds an image from a local directory via `container build`. Returns

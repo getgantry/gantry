@@ -59,15 +59,16 @@ enum ExplainFactory {
             makeExplainer: { kind in
                 FoundationModelsExplainer(responder: SystemModelResponder(kind: kind), answerLanguage: language)
             },
-            gather: gather
+            gather: gather,
+            imageSupport: { FoundationModelsAvailability.supportsImages(for: $0) }
         )
     }
 
     private static func containerSubject(session: HostSession, container: ContainerSummary) -> ExplainSubject {
-        let controller = controller { kind in
+        let controller = controller { kind, images in
             try await session.explainContext(
                 for: container,
-                limit: { await FoundationModelsBudget.promptLimit(for: kind, data: $0) },
+                limit: { await FoundationModelsBudget.promptLimit(for: kind, data: $0, images: images) },
                 count: { try await FoundationModelsBudget.count($0) }
             )
         }
@@ -89,9 +90,9 @@ enum ExplainFactory {
         let kind = operation.kind.rawValue
         let log = operation.log
         let failure = if case .failed(let message) = operation.state { message } else { "" }
-        let controller = controller { modelKind in
+        let controller = controller { modelKind, images in
             let data = ExplainDataSource(logs: { tail in Array(log.suffix(tail)) })
-            let limit = await FoundationModelsBudget.promptLimit(for: modelKind, data: data)
+            let limit = await FoundationModelsBudget.promptLimit(for: modelKind, data: data, images: images)
             let context = await FailureContextBuilder.fitted(
                 limit: limit, count: { try await FoundationModelsBudget.count($0) }
             ) { budget in

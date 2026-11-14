@@ -67924,6 +67924,2538 @@
           }
         }
       }
+    },
+    "The image is larger than %lld MB.": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображението е по-голямо от %lld MB."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrázek je větší než %lld MB."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Billedet er større end %lld MB."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Bild ist größer als %lld MB."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η εικόνα είναι μεγαλύτερη από %lld MB."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image is larger than %lld MB."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La imagen supera los %lld MB."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilt on suurem kui %lld MB."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuva on suurempi kuin %lld Mt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'image dépasse %lld Mo."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je veća od %lld MB."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A kép nagyobb, mint %lld MB."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'immagine supera %lld MB."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaizdas didesnis nei %lld MB."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attēls ir lielāks par %lld MB."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildet er større enn %lld MB."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De afbeelding is groter dan %lld MB."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazek jest większy niż %lld MB."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A imagem tem mais de %lld MB."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaginea depășește %lld MB."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображение больше %lld МБ."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrázok je väčší ako %lld MB."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je večja od %lld MB."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слика је већа од %lld MB."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je veća od %lld MB."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilden är större än %lld MB."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зображення більше за %lld МБ."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片大于 %lld MB。"
+          }
+        }
+      }
+    },
+    "This file is not an image.": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Този файл не е изображение."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento soubor není obrázek."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen er ikke et billede."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Datei ist kein Bild."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτό το αρχείο δεν είναι εικόνα."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file is not an image."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este archivo no es una imagen."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See fail ei ole pilt."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiedosto ei ole kuva."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier n'est pas une image."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova datoteka nije slika."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a fájl nem kép."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo file non è un'immagine."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis failas nėra vaizdas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Šis fails nav attēls."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen er ikke et bilde."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit bestand is geen afbeelding."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten plik nie jest obrazkiem."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este ficheiro não é uma imagem."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest fișier nu este o imagine."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот файл не является изображением."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento súbor nie je obrázok."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta datoteka ni slika."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ова датотека није слика."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ova datoteka nije slika."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen är ingen bild."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей файл не є зображенням."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件不是图片。"
+          }
+        }
+      }
+    },
+    "Pasted Image": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поставено изображение"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vložený obrázek"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indsat billede"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingefügtes Bild"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επικολλημένη εικόνα"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasted Image"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagen pegada"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleebitud pilt"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liitetty kuva"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image collée"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zalijepljena slika"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beillesztett kép"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Immagine incollata"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įklijuotas vaizdas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ielīmēts attēls"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Innlimt bilde"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplakte afbeelding"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wklejony obrazek"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagem colada"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagine lipită"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставленное изображение"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vložený obrázok"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prilepljena slika"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налепљена слика"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nalepljena slika"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inklistrad bild"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставлене зображення"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴的图片"
+          }
+        }
+      }
+    },
+    "You can attach up to %lld images.": {
+      "localizations": {
+        "bg": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можете да прикачите до %lld изображение."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можете да прикачите до %lld изображения."
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Můžete připojit nejvýše %lld obrázek."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Můžete připojit nejvýše %lld obrázky."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Můžete připojit nejvýše %lld obrázku."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Můžete připojit nejvýše %lld obrázků."
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan højst vedhæfte %lld billede."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan højst vedhæfte %lld billeder."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Es kann höchstens %lld Bild angehängt werden."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Es können höchstens %lld Bilder angehängt werden."
+                }
+              }
+            }
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Μπορείτε να επισυνάψετε έως %lld εικόνα."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Μπορείτε να επισυνάψετε έως %lld εικόνες."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You can attach up to %lld image."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "You can attach up to %lld images."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puedes adjuntar hasta %lld imagen."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puedes adjuntar hasta %lld imágenes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puedes adjuntar hasta %lld imágenes."
+                }
+              }
+            }
+          }
+        },
+        "et": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Lisada saab kuni %lld pildi."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Lisada saab kuni %lld pilti."
+                }
+              }
+            }
+          }
+        },
+        "fi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Voit liittää enintään %lld kuvan."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Voit liittää enintään %lld kuvaa."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vous pouvez joindre jusqu'à %lld image."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vous pouvez joindre jusqu'à %lld images."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Vous pouvez joindre jusqu'à %lld images."
+                }
+              }
+            }
+          }
+        },
+        "hr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete priložiti najviše %lld sliku."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete priložiti najviše %lld slike."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete priložiti najviše %lld slika."
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Legfeljebb %lld képet csatolhat."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Legfeljebb %lld képet csatolhat."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puoi allegare fino a %lld immagine."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puoi allegare fino a %lld immagini."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Puoi allegare fino a %lld immagini."
+                }
+              }
+            }
+          }
+        },
+        "lt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Galite pridėti ne daugiau kaip %lld vaizdą."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Galite pridėti ne daugiau kaip %lld vaizdus."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Galite pridėti ne daugiau kaip %lld vaizdo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Galite pridėti ne daugiau kaip %lld vaizdų."
+                }
+              }
+            }
+          }
+        },
+        "lv": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Maksimālais attēlu skaits ir %lld."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Maksimālais attēlu skaits ir %lld."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Maksimālais attēlu skaits ir %lld."
+                }
+              }
+            }
+          }
+        },
+        "nb": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan legge ved opptil %lld bilde."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan legge ved opptil %lld bilder."
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Je kunt maximaal %lld afbeelding toevoegen."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Je kunt maximaal %lld afbeeldingen toevoegen."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Możesz dołączyć maksymalnie %lld obrazek."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Możesz dołączyć maksymalnie %lld obrazki."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Możesz dołączyć maksymalnie %lld obrazków."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Możesz dołączyć maksymalnie %lld obrazka."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pode anexar até %lld imagem."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pode anexar até %lld imagens."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Pode anexar até %lld imagens."
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poți atașa cel mult %lld imagine."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poți atașa cel mult %lld imagini."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Poți atașa cel mult %lld de imagini."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можно прикрепить не более %lld изображения."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можно прикрепить не более %lld изображений."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можно прикрепить не более %lld изображений."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можно прикрепить не более %lld изображения."
+                }
+              }
+            }
+          }
+        },
+        "sk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Môžete pripojiť najviac %lld obrázok."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Môžete pripojiť najviac %lld obrázky."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Môžete pripojiť najviac %lld obrázka."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Môžete pripojiť najviac %lld obrázkov."
+                }
+              }
+            }
+          }
+        },
+        "sl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Priložite lahko največ %lld sliko."
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Priložite lahko največ %lld sliki."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Priložite lahko največ %lld slike."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Priložite lahko največ %lld slik."
+                }
+              }
+            }
+          }
+        },
+        "sr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можете да приложите највише %lld слику."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можете да приложите највише %lld слике."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можете да приложите највише %lld слика."
+                }
+              }
+            }
+          }
+        },
+        "sr-Latn": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete da priložite najviše %lld sliku."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete da priložite najviše %lld slike."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Možete da priložite najviše %lld slika."
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan bifoga högst %lld bild."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Du kan bifoga högst %lld bilder."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можна прикріпити не більше %lld зображення."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можна прикріпити не більше %lld зображень."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можна прикріпити не більше %lld зображень."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Можна прикріпити не більше %lld зображення."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "最多可以附加 %lld 张图片。"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "The Keychain secret “%@” does not exist.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Keychain secret “%@” does not exist."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тайната „%@“ не съществува в Ключодържателя."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajný údaj „%@“ v Klíčence neexistuje."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hemmeligheden “%@” findes ikke i nøgleringen."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Schlüsselbund-Geheimnis „%@“ existiert nicht."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το μυστικό «%@» δεν υπάρχει στην Κλειδοθήκη."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El secreto del llavero “%@” no existe."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Võtmerõnga saladust „%@“ pole olemas."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avainnipun salaisuutta ”%@” ei ole olemassa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le secret du trousseau « %@ » n'existe pas."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajna „%@” ne postoji u Privjesku ključeva."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” Kulcskarika-titok nem létezik."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il segreto del portachiavi “%@” non esiste."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raktinėje nėra slaptosios reikšmės „%@“."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atslēgu piekariņa noslēpums „%@” nepastāv."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hemmeligheten «%@» finnes ikke i nøkkelringen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het sleutelhangergeheim “%@” bestaat niet."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekret „%@” nie istnieje w pęku kluczy."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O segredo do porta-chaves “%@” não existe."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secretul „%@” nu există în portchei."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В Связке ключей нет секрета «%@»."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajný údaj „%@“ v Kľúčenke neexistuje."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrivnost „%@“ v obesku za ključe ne obstaja."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тајна „%@“ не постоји у привеску за кључеве."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajna „%@“ ne postoji u privesku za ključeve."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hemligheten ”%@” finns inte i nyckelringen."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У В’язці ключів немає секрету «%@»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "钥匙串密钥“%@”不存在。"
+          }
+        }
+      }
+    },
+    "A secret named “%@” already exists.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A secret named “%@” already exists."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вече съществува тайна с име „%@“."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajný údaj s názvem „%@“ již existuje."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der findes allerede en hemmelighed med navnet “%@”."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Geheimnis namens „%@“ existiert bereits."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Υπάρχει ήδη μυστικό με όνομα «%@»."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya existe un secreto llamado “%@”."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saladus nimega „%@“ on juba olemas."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salaisuus nimeltä ”%@” on jo olemassa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un secret nommé « %@ » existe déjà."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajna s nazivom „%@” već postoji."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Már létezik „%@” nevű titok."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esiste già un segreto chiamato “%@”."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slaptoji reikšmė „%@“ jau yra."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noslēpums ar nosaukumu „%@” jau pastāv."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det finnes allerede en hemmelighet med navnet «%@»."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er bestaat al een geheim met de naam “%@”."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekret o nazwie „%@” już istnieje."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Já existe um segredo com o nome “%@”."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Există deja un secret numit „%@”."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секрет «%@» уже существует."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajný údaj s názvom „%@“ už existuje."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrivnost z imenom „%@“ že obstaja."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тајна са именом „%@“ већ постоји."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tajna sa imenom „%@“ već postoji."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det finns redan en hemlighet med namnet ”%@”."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секрет «%@» уже існує."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名为“%@”的密钥已存在。"
+          }
+        }
+      }
+    },
+    "Enter a value for the secret.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a value for the secret."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Въведете стойност за тайната."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadejte hodnotu tajného údaje."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indtast en værdi for hemmeligheden."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib einen Wert für das Geheimnis ein."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Εισαγάγετε μια τιμή για το μυστικό."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce un valor para el secreto."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sisestage saladuse väärtus."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anna salaisuudelle arvo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez une valeur pour le secret."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite vrijednost tajne."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adja meg a titok értékét."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inserisci un valore per il segreto."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įveskite slaptosios reikšmės turinį."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ievadiet noslēpuma vērtību."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skriv inn en verdi for hemmeligheten."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voer een waarde in voor het geheim."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wprowadź wartość sekretu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduza um valor para o segredo."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduceți o valoare pentru secret."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите значение секрета."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadajte hodnotu tajného údaja."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vnesite vrednost skrivnosti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Унесите вредност тајне."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unesite vrednost tajne."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ange ett värde för hemligheten."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть значення секрету."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入密钥的值。"
+          }
+        }
+      }
+    },
+    "Gantry could not read the Keychain secrets: authentication was cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry could not read the Keychain secrets: authentication was cancelled."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не можа да прочете тайните от Ключодържателя: удостоверяването беше отменено."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohl přečíst tajné údaje z Klíčenky: ověření bylo zrušeno."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke læse hemmelighederne i nøgleringen: godkendelsen blev annulleret."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry konnte die Schlüsselbund-Geheimnisse nicht lesen: Die Authentifizierung wurde abgebrochen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν μπόρεσε να διαβάσει τα μυστικά της Κλειδοθήκης: ο έλεγχος ταυτότητας ακυρώθηκε."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no ha podido leer los secretos del llavero: se ha cancelado la autenticación."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei saanud võtmerõnga saladusi lugeda: autentimine tühistati."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei voinut lukea Avainnipun salaisuuksia: todennus kumottiin."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry n'a pas pu lire les secrets du trousseau : l'authentification a été annulée."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao pročitati tajne iz Privjeska ključeva: autentifikacija je otkazana."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem tudta beolvasni a Kulcskarika titkait: a hitelesítés megszakítva."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non è riuscito a leggere i segreti del portachiavi: autenticazione annullata."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nepavyko perskaityti raktinės slaptųjų reikšmių: tapatybės nustatymas atšauktas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nevarēja nolasīt atslēgu piekariņa noslēpumus: autentifikācija tika atcelta."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke lese hemmelighetene i nøkkelringen: autentiseringen ble avbrutt."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kan de sleutelhangergeheimen niet lezen: de authenticatie is geannuleerd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie może odczytać sekretów z pęku kluczy: uwierzytelnianie zostało anulowane."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não conseguiu ler os segredos do porta-chaves: a autenticação foi cancelada."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu a putut citi secretele din portchei: autentificarea a fost anulată."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не удалось прочитать секреты из Связки ключей: аутентификация отменена."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohol prečítať tajné údaje z Kľúčenky: overenie bolo zrušené."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ni mogel prebrati skrivnosti v obesku za ključe: preverjanje pristnosti je bilo preklicano."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry није могао да прочита тајне из привеска за кључеве: потврда идентитета је отказана."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao da pročita tajne iz priveska za ključeve: potvrda identiteta je otkazana."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunde inte läsa hemligheterna i nyckelringen: autentiseringen avbröts."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не вдалося прочитати секрети з В’язки ключів: автентифікацію скасовано."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 无法读取钥匙串密钥：认证已取消。"
+          }
+        }
+      }
+    },
+    "The Keychain returned error %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Keychain returned error %lld."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключодържателят върна грешка %lld."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klíčenka vrátila chybu %lld."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nøgleringen returnerede fejl %lld."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Schlüsselbund hat den Fehler %lld zurückgegeben."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η Κλειδοθήκη επέστρεψε σφάλμα %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El llavero ha devuelto el error %lld."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Võtmerõngas tagastas vea %lld."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avainnippu palautti virheen %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le trousseau a renvoyé l'erreur %lld."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privjesak ključeva vratio je pogrešku %lld."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Kulcskarika hibát jelzett: %lld."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il portachiavi ha restituito l'errore %lld."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raktinė grąžino klaidą %lld."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atslēgu piekariņš atgrieza kļūdu %lld."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nøkkelringen returnerte feil %lld."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De sleutelhanger gaf foutcode %lld."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pęk kluczy zwrócił błąd %lld."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O porta-chaves devolveu o erro %lld."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portcheiul a returnat eroarea %lld."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связка ключей вернула ошибку %lld."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kľúčenka vrátila chybu %lld."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obesek za ključe je vrnil napako %lld."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Привезак за кључеве је вратио грешку %lld."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privezak za ključeve je vratio grešku %lld."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyckelringen returnerade felet %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В’язка ключів повернула помилку %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "钥匙串返回了错误 %lld。"
+          }
+        }
+      }
+    },
+    "The variable “%@” cannot hold a secret. Use letters, digits and “_”, starting with a letter or “_”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The variable “%@” cannot hold a secret. Use letters, digits and “_”, starting with a letter or “_”."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Променливата „%@“ не може да съдържа тайна. Използвайте букви, цифри и „_“, като името започва с буква или „_“."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proměnná „%@“ nemůže obsahovat tajný údaj. Použijte písmena, číslice a „_“, na začátku písmeno nebo „_“."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variablen “%@” kan ikke indeholde en hemmelighed. Brug bogstaver, cifre og “_”, og start med et bogstav eller “_”."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Variable „%@“ kann kein Geheimnis enthalten. Verwende Buchstaben, Ziffern und „_“, beginnend mit einem Buchstaben oder „_“."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η μεταβλητή «%@» δεν μπορεί να περιέχει μυστικό. Χρησιμοποιήστε γράμματα, ψηφία και «_», με πρώτο χαρακτήρα γράμμα ή «_»."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variable “%@” no puede contener un secreto. Usa letras, dígitos y “_”, empezando por una letra o “_”."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muutuja „%@“ ei saa saladust sisaldada. Kasutage tähti, numbreid ja „_“, alguses täht või „_“."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muuttuja ”%@” ei voi sisältää salaisuutta. Käytä kirjaimia, numeroita ja ”_”. Alussa on oltava kirjain tai ”_”."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variable « %@ » ne peut pas contenir de secret. Utilisez des lettres, des chiffres et « _ », en commençant par une lettre ou « _ »."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varijabla „%@” ne može sadržavati tajnu. Koristite slova, znamenke i „_”, s početnim slovom ili „_”."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” változó nem tárolhat titkot. Használjon betűket, számjegyeket és „_” karaktert, betűvel vagy „_” karakterrel kezdve."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variabile “%@” non può contenere un segreto. Usa lettere, cifre e “_”, iniziando con una lettera o “_”."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kintamajame „%@“ negali būti slaptosios reikšmės. Naudokite raides, skaitmenis ir „_“, pradedant raide arba „_“."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mainīgajā „%@” nevar glabāt noslēpumu. Izmantojiet burtus, ciparus un „_”, sākot ar burtu vai „_”."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabelen «%@» kan ikke inneholde en hemmelighet. Bruk bokstaver, sifre og «_», og begynn med en bokstav eller «_»."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De variabele “%@” kan geen geheim bevatten. Gebruik letters, cijfers en “_”, beginnend met een letter of “_”."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmienna „%@” nie może przechowywać sekretu. Użyj liter, cyfr i „_”, zaczynając od litery lub „_”."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A variável “%@” não pode conter um segredo. Utilize letras, algarismos e “_”, a começar por uma letra ou “_”."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabila „%@” nu poate conține un secret. Folosiți litere, cifre și „_”, începând cu o literă sau „_”."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переменная «%@» не может содержать секрет. Используйте буквы, цифры и «_», первый символ — буква или «_»."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premenná „%@“ nemôže obsahovať tajný údaj. Použite písmená, číslice a „_“, na začiatku písmeno alebo „_“."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spremenljivka „%@“ ne more vsebovati skrivnosti. Uporabite črke, števke in „_“, na začetku črko ali „_“."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Променљива „%@“ не може да садржи тајну. Користите слова, цифре и „_“, почевши словом или знаком „_“."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Promenljiva „%@“ ne može da sadrži tajnu. Koristite slova, cifre i „_“, počevši slovom ili znakom „_“."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabeln ”%@” kan inte innehålla en hemlighet. Använd bokstäver, siffror och ”_”, och börja med en bokstav eller ”_”."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінна «%@» не може містити секрет. Використовуйте літери, цифри та «_»; першим символом має бути літера чи «_»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "变量“%@”不能存放密钥。请使用字母、数字和“_”，并以字母或“_”开头。"
+          }
+        }
+      }
+    },
+    "The variable “%@” cannot hold a secret on apple/container hosts, because the container tool uses this name itself.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The variable “%@” cannot hold a secret on apple/container hosts, because the container tool uses this name itself."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Променливата „%@“ не може да съдържа тайна на хостове с apple/container, защото инструментът container сам използва това име."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proměnná „%@“ nemůže na hostitelích apple/container obsahovat tajný údaj, protože tento název používá sám nástroj container."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variablen “%@” kan ikke indeholde en hemmelighed på apple/container-værter, fordi container-værktøjet selv bruger dette navn."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Variable „%@“ kann auf apple/container-Hosts kein Geheimnis enthalten, da das container-Tool diesen Namen selbst verwendet."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η μεταβλητή «%@» δεν μπορεί να περιέχει μυστικό σε host apple/container, επειδή το εργαλείο container χρησιμοποιεί το ίδιο αυτό το όνομα."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variable “%@” no puede contener un secreto en hosts de apple/container, porque la propia herramienta container usa este nombre."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muutuja „%@“ ei saa apple/containeri hostides saladust sisaldada, sest tööriist container kasutab seda nime ise."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muuttuja ”%@” ei voi sisältää salaisuutta apple/container-isännillä, koska container-työkalu käyttää tätä nimeä itse."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variable « %@ » ne peut pas contenir de secret sur les hôtes apple/container, car l'outil container utilise lui-même ce nom."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varijabla „%@” ne može sadržavati tajnu na hostovima apple/container jer alat container sam koristi taj naziv."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%@” változó nem tárolhat titkot apple/container-gazdagépeken, mert ezt a nevet maga a container eszköz használja."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La variabile “%@” non può contenere un segreto sugli host apple/container, perché lo strumento container usa già questo nome."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container serveriuose kintamajame „%@“ negali būti slaptosios reikšmės, nes šį pavadinimą naudoja pats įrankis container."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apple/container resursdatoros mainīgajā „%@” nevar glabāt noslēpumu, jo rīks container pats izmanto šo nosaukumu."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabelen «%@» kan ikke inneholde en hemmelighet på apple/container-verter, fordi container-verktøyet selv bruker dette navnet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De variabele “%@” kan op apple/container-hosts geen geheim bevatten, omdat de container-tool deze naam zelf gebruikt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmienna „%@” nie może przechowywać sekretu na hostach apple/container, ponieważ narzędzie container samo używa tej nazwy."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A variável “%@” não pode conter um segredo em hosts apple/container, porque a própria ferramenta container utiliza este nome."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabila „%@” nu poate conține un secret pe gazdele apple/container, deoarece instrumentul container folosește el însuși acest nume."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На хостах apple/container переменная «%@» не может содержать секрет: утилита container сама использует это имя."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premenná „%@“ nemôže na hostiteľoch apple/container obsahovať tajný údaj, pretože tento názov používa samotný nástroj container."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spremenljivka „%@“ na gostiteljih apple/container ne more vsebovati skrivnosti, ker orodje container samo uporablja to ime."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Променљива „%@“ не може да садржи тајну на apple/container хостовима, јер алатка container сама користи ово име."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Promenljiva „%@“ ne može da sadrži tajnu na apple/container hostovima, jer alatka container sama koristi ovo ime."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variabeln ”%@” kan inte innehålla en hemlighet på apple/container-värdar, eftersom container-verktyget själv använder det här namnet."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На хостах apple/container змінна «%@» не може містити секрет, бо утиліта container сама використовує цю назву."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 apple/container 主机上，变量“%@”不能存放密钥，因为 container 工具自身会使用此名称。"
+          }
+        }
+      }
+    },
+    "Use up to 64 letters, digits, “_”, “.” and “-”, starting with a letter or digit.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use up to 64 letters, digits, “_”, “.” and “-”, starting with a letter or digit."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Използвайте до 64 букви, цифри, „_“, „.“ и „-“, като името започва с буква или цифра."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Použijte nejvýše 64 písmen, číslic, „_“, „.“ a „-“, na začátku písmeno nebo číslici."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brug op til 64 bogstaver, cifre, “_”, “.” og “-”, og start med et bogstav eller et ciffer."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwende bis zu 64 Buchstaben, Ziffern, „_“, „.“ und „-“, beginnend mit einem Buchstaben oder einer Ziffer."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Χρησιμοποιήστε έως 64 γράμματα, ψηφία, «_», «.» και «-», με πρώτο χαρακτήρα γράμμα ή ψηφίο."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa hasta 64 letras, dígitos, “_”, “.” y “-”, empezando por una letra o un dígito."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasutage kuni 64 tähte, numbrit, „_“, „.“ ja „-“, alguses täht või number."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käytä enintään 64:ää kirjainta, numeroa, ”_”, ”.” ja ”-”. Alussa on oltava kirjain tai numero."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisez jusqu'à 64 lettres, chiffres, « _ », « . » et « - », en commençant par une lettre ou un chiffre."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koristite najviše 64 slova, znamenke, „_”, „.” i „-”, s početnim slovom ili znamenkom."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legfeljebb 64 betűt, számjegyet, „_”, „.” és „-” karaktert használjon, betűvel vagy számjeggyel kezdve."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa fino a 64 lettere, cifre, “_”, “.” e “-”, iniziando con una lettera o una cifra."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naudokite iki 64 raidžių, skaitmenų, „_“, „.“ ir „-“, pradedant raide arba skaitmeniu."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izmantojiet līdz 64 burtiem, cipariem, „_”, „.” un „-”, sākot ar burtu vai ciparu."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruk opptil 64 bokstaver, sifre, «_», «.» og «-», og begynn med en bokstav eller et siffer."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebruik maximaal 64 letters, cijfers, “_”, “.” en “-”, beginnend met een letter of cijfer."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Użyj maksymalnie 64 liter, cyfr, „_”, „.” i „-”, zaczynając od litery lub cyfry."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilize até 64 letras, algarismos, “_”, “.” e “-”, a começar por uma letra ou algarismo."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folosiți cel mult 64 de litere, cifre, „_”, „.” și „-”, începând cu o literă sau o cifră."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Используйте до 64 символов: буквы, цифры, «_», «.» и «-», первый символ — буква или цифра."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Použite najviac 64 písmen, číslic, „_“, „.“ a „-“, na začiatku písmeno alebo číslica."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uporabite največ 64 črk, števk, „_“, „.“ in „-“, na začetku črko ali števko."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Користите до 64 слова, цифре, „_“, „.“ и „-“, почевши словом или цифром."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koristite do 64 slova, cifre, „_“, „.“ i „-“, počevši slovom ili cifrom."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Använd upp till 64 bokstäver, siffror, ”_”, ”.” och ”-”, och börja med en bokstav eller siffra."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Використовуйте до 64 символів: літери, цифри, «_», «.» і «-»; першим символом має бути літера чи цифра."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最多使用 64 个字母、数字、“_”、“.”和“-”，并以字母或数字开头。"
+          }
+        }
+      }
     }
   }
 }

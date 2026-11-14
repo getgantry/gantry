@@ -31,7 +31,7 @@ extension ContainerRecipe {
     /// Labels Gantry stamps itself; they map back to recipe fields.
     static var internalLabelKeys: Set<String> {
         [dnsDomainLabelKey, ContainerCreateRequest.AppleOptions.kernelLabelKey,
-         ContainerCreateRequest.AppleOptions.kernelArgsLabelKey]
+         ContainerCreateRequest.AppleOptions.kernelArgsLabelKey, SecretEnvLabel.key]
     }
 
     /// A recipe that creates the same container again, from inspect data.
@@ -41,11 +41,16 @@ extension ContainerRecipe {
         image = [config.image, summary?.image, details.image].compactMap { $0 }.first { !$0.isEmpty } ?? ""
         name = details.displayName
         setProcess(config: config, defaults: defaults)
+        // Variables filled from Keychain secrets come back as references, so
+        // a saved recipe or a copied command never holds their values.
+        let secrets = SecretEnvLabel.references(in: config.labels)
         env = (config.env ?? [])
             .filter { !(defaults?.env.contains($0) ?? false) }
             .map { entry in
                 guard let eq = entry.firstIndex(of: "=") else { return EnvVar(key: entry, value: "") }
-                return EnvVar(key: String(entry[..<eq]), value: String(entry[entry.index(after: eq)...]))
+                let key = String(entry[..<eq])
+                if let name = secrets[key] { return EnvVar(key: key, value: "", secret: name) }
+                return EnvVar(key: key, value: String(entry[entry.index(after: eq)...]))
             }
         setLabels(config.labels ?? [:], defaults: defaults)
         ports = Self.ports(details: details, summary: summary)

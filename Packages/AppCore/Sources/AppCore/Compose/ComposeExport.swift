@@ -1,5 +1,6 @@
 import Foundation
 import Yams
+import DockerKit
 
 // MARK: - Public types
 
@@ -123,6 +124,12 @@ public enum ComposeExporter {
             var fields = draft.fields
             var environment: [(String, YValue)] = []
             for (key, value) in draft.environment {
+                // A variable that Gantry filled from a Keychain secret: the
+                // file holds the reference, never the value.
+                if let name = draft.keychainSecrets[key] {
+                    environment.append((key, .str(EnvSecrets.referenceText(name))))
+                    continue
+                }
                 guard SecretDetector.isSecret(name: key, value: value) else {
                     environment.append((key, .str(value)))
                     continue
@@ -249,6 +256,8 @@ struct ServiceDraft {
     /// Service keys except `environment`, `network_mode` and `depends_on`.
     var fields: [String: YValue] = [:]
     var environment: [(String, String)] = []
+    /// Variable → Keychain secret name, from Gantry's secret label.
+    var keychainSecrets: [String: String] = [:]
     var networkMode: String?
     var networkNames: [String] = []
     var volumeNames: [String] = []
@@ -269,6 +278,7 @@ struct ServiceDraft {
 
     /// Records the Compose labels and removes them, with Gantry's own labels.
     mutating func setLabels(_ all: [String: String], image: [String: String]) {
+        keychainSecrets = SecretEnvLabel.references(in: all)
         composeProject = all["com.docker.compose.project"]?.nonEmptyValue
         composeService = all["com.docker.compose.service"]?.nonEmptyValue
         composeDependsOn = (all["com.docker.compose.depends_on"] ?? "")

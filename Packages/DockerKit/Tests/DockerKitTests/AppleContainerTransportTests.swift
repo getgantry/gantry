@@ -15,6 +15,7 @@ private final class ScriptedCLIRunner: AppleContainerCLIRunning, @unchecked Send
     private let lock = NSLock()
     private var stubs: [Stub] = []
     private(set) var calls: [[String]] = []
+    private(set) var environments: [[String: String]] = []
     var streamChunks: [Data] = []
     var streamError: Error?
     var interactiveFactory: (@Sendable ([String], Bool) -> any AppleCLIInteractiveProcess)?
@@ -44,6 +45,16 @@ private final class ScriptedCLIRunner: AppleContainerCLIRunning, @unchecked Send
                 stderr: Data("Error: unstubbed invocation: \(arguments.joined(separator: " "))".utf8)
             )
         }
+    }
+
+    func run(_ arguments: [String], environment: [String: String]) async throws -> AppleCLIResult {
+        lock.withLock { environments.append(environment) }
+        return try await run(arguments)
+    }
+
+    func recordedEnvironments() -> [[String: String]] {
+        lock.lock(); defer { lock.unlock() }
+        return environments
     }
 
     func stream(_ arguments: [String]) -> AsyncThrowingStream<Data, Error> {
@@ -305,6 +316,38 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     // image followed by the command
     let imageIndex = try #require(create.firstIndex(of: "nginx:latest"))
     #expect(Array(create[(imageIndex + 1)...]) == ["nginx", "-g", "daemon off;"])
+}
+
+@Test func appleTransportCreateContainerKeepsSecretValuesOutOfArgv() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "db-1\n")
+    let secret = "s3cr3t-Value with space"
+    var config = ContainerCreateRequest(
+        image: "postgres",
+        env: ["MODE=prod", "POSTGRES_PASSWORD=\(secret)"],
+        labels: [SecretEnvLabel.key: "POSTGRES_PASSWORD:db-password"],
+        name: "db-1"
+    )
+    config.appleOptions = .init(secretEnvKeys: ["POSTGRES_PASSWORD"])
+    _ = try await client.createContainer(config: config, name: "db-1")
+
+    let create = try #require(runner.recordedCalls().first { $0.first == "create" })
+    #expect(!create.joined(separator: " ").contains(secret))
+    let envIndex = try #require(create.lastIndex(of: "--env"))
+    #expect(create[envIndex + 1] == "POSTGRES_PASSWORD")
+    #expect(create.contains("MODE=prod"))
+    #expect(runner.recordedEnvironments() == [["POSTGRES_PASSWORD": secret]])
+}
+
+@Test func appleTransportRejectsSecretInReservedVariable() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.stub(["create"], stdout: "x\n")
+    var config = ContainerCreateRequest(image: "alpine", env: ["HOME=hidden-value"], name: "x")
+    config.appleOptions = .init(secretEnvKeys: ["HOME"])
+    await #expect(throws: DockerError.self) {
+        _ = try await client.createContainer(config: config, name: "x")
+    }
+    #expect(runner.recordedCalls().allSatisfy { $0.first != "create" })
 }
 
 @Test func appleTransportCreateContainerPassesUserAndInteractive() async throws {

@@ -18,6 +18,7 @@ enum DestructiveActionText {
         case .deleteCluster: return String(localized: "Delete cluster “\(name)”?")
         case .deleteDomain: return String(localized: "Delete local domain “\(name)”?")
         case .forgetCredential: return String(localized: "Forget the saved secret for “\(name)”?")
+        case .deleteSecret: return String(localized: "Delete the Keychain secret “\(name)”?")
         case .removeHost: return String(localized: "Remove host “\(name)”?")
         case .stopGroup: return String(localized: "Stop all containers in “\(name)”?")
         case .restartGroup: return String(localized: "Restart all containers in “\(name)”?")
@@ -85,6 +86,7 @@ enum DestructiveActionText {
         case .removeContainer, .removeImage, .removeVolume, .removeNetwork: String(localized: "Remove")
         case .deleteMachine, .deleteCluster, .deleteDomain, .deleteKubeResource: String(localized: "Delete")
         case .forgetCredential: String(localized: "Forget")
+        case .deleteSecret: String(localized: "Delete")
         case .removeHost: String(localized: "Remove Host")
         case .stopGroup: String(localized: "Stop All")
         case .restartGroup: String(localized: "Restart All")
@@ -118,6 +120,8 @@ enum DestructiveActionText {
         case .deleteMachine: String(localized: "The machine and its disk are deleted.")
         case .deleteCluster: String(localized: "All nodes of the cluster and its kubeconfig context are deleted.")
         case .deleteDomain: String(localized: "Containers can no longer use this local domain.")
+        case .deleteSecret:
+            String(localized: "The value is deleted from the Keychain. Recipes and containers that refer to this secret can no longer use it.")
         case .forgetCredential:
             String(localized: "The password or passphrase is deleted from the Keychain. Gantry asks for it on the next connection.")
         case .removeHost:
