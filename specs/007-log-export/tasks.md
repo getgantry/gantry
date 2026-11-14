@@ -71,14 +71,14 @@
 - [x] T019 Run the AppCore tests that this feature touches (`LogExport`, `CommandPalette`)
 - [ ] T020 Live check on the Apple host as `quickstart.md` tells: filter, export (file content), copy, disabled timestamp items, palette action, Shift-Command-E. Remove the test containers `gle-*`
 - [ ] T021 Live check of timestamps and the time range on a Docker host
-- [ ] T022 Rebase on `origin/main`, push `feat/log-export` and open the pull request "feat: export container logs with the current filter"
+- [x] T022 Rebase on `origin/main`, push `feat/log-export` and open the pull request "feat: export container logs with the current filter"
 
 ## Status (2026-11-14)
 
 - T001 to T019 are done. The code builds (Debug, `xcodebuild`), 54 AppCore tests pass (`LogExport`, `CommandPalette`), and `scripts/check-localization.py` reports 0 problems.
 - T020 is open. The screen was locked during the work. A Debug build ran and `gantry-ctl` selected the test container `gle-logs`, but no GUI action was possible: no click on the Logs tab, no save panel and no key press. The test container is removed.
 - T021 is open. This Mac has no Docker host. Apple `container` hosts send no timestamps.
-- T022 is open until the pull request exists.
+- T022 is done: pull request #66.
 
 ## Dependencies
 
