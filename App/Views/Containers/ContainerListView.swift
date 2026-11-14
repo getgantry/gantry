@@ -27,6 +27,7 @@ struct ContainerListView: View {
     @State private var pruneResult: PruneResult?
     @State private var showPruneResult = false
     @State private var stackLogsTarget: StackLogsTarget?
+    @State private var composeExportTarget: ComposeExportTarget?
 
     enum StateFilter: String, CaseIterable, Identifiable {
         case all = "All"
@@ -180,6 +181,7 @@ struct ContainerListView: View {
         .sheet(item: $stackLogsTarget) { target in
             StackLogsView(session: session, project: target.project, containers: target.containers)
         }
+        .composeExportSheet($composeExportTarget, session: session)
         .modifier(RenameAlert(
             target: $renameTarget,
             text: $renameText,
@@ -225,6 +227,8 @@ struct ContainerListView: View {
     private func contextMenu(_ ids: Set<String>) -> some View {
         if ids.count > 1 {
             BulkActionsMenu(session: session, resource: .containers, ids: ids, removeAction: $removeAction)
+            Divider()
+            ComposeExportMenuItem(containerIDs: orderedIDs(ids), target: $composeExportTarget)
         } else if let id = ids.first, let container = session.containers.first(where: { $0.id == id }) {
             ContainerActionsMenu(
                 container: container,
@@ -232,9 +236,15 @@ struct ContainerListView: View {
                 removeAction: $removeAction,
                 renameTarget: $renameTarget,
                 renameText: $renameText,
-                commitTarget: $commitTarget
+                commitTarget: $commitTarget,
+                composeExportTarget: $composeExportTarget
             )
         }
+    }
+
+    /// The selected ids in list order, so the services keep that order.
+    private func orderedIDs(_ ids: Set<String>) -> [String] {
+        session.containers.map(\.id).filter { ids.contains($0) }
     }
 
     private func removeContainers(_ action: DestructiveAction, force: Bool) async {
@@ -610,6 +620,7 @@ struct ContainerActionsMenu: View {
     @Binding var renameTarget: ContainerSummary?
     @Binding var renameText: String
     @Binding var commitTarget: ContainerSummary?
+    @Binding var composeExportTarget: ComposeExportTarget?
 
     private var isRunning: Bool { container.state.isRunning }
     private var isPaused: Bool { container.state == .paused }
@@ -688,6 +699,7 @@ struct ContainerActionsMenu: View {
         }
         ExplainMenuItem(session: session, container: container)
         ContainerRunCopyItems(session: session, container: container)
+        ComposeExportMenuItem(containerIDs: [container.id], target: $composeExportTarget)
 
         if session.supportsDebugShell, container.state.isRunning {
             Button {
