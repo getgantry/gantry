@@ -100,6 +100,8 @@ struct SidebarSelection: Hashable {
 /// Top-level sidebar item: the cross-host dashboard or a section of a host.
 enum SidebarItem: Hashable {
     case dashboard
+    /// Resource Usage: the running containers of every host in one table.
+    case usage
     /// The Kubernetes browser; it reads kubeconfig contexts, not a host.
     case kubernetes
     case host(SidebarSelection)
@@ -415,6 +417,7 @@ struct ContentView: View {
             model: model,
             navigate: navigate,
             showDashboard: { selection = .dashboard },
+            showUsage: { selection = .usage },
             showKubernetes: { context in
                 if let context { model.kubernetes.selectedContext = context }
                 selection = .kubernetes
@@ -459,7 +462,7 @@ struct ContentView: View {
     /// third column would only say "Nothing Selected".
     private var usesFullWidth: Bool {
         switch selection {
-        case .dashboard, .kubernetes, nil: true
+        case .dashboard, .usage, .kubernetes, nil: true
         case .host(let hostSelection): hostSelection.section.isFullWidth
         }
     }
@@ -497,7 +500,7 @@ struct ContentView: View {
     /// The section that the menu commands (⌘N, ⌘R) act on.
     private var focusedSection: FocusedSection? {
         switch selection {
-        case .dashboard: FocusedSection(section: nil)
+        case .dashboard, .usage: FocusedSection(section: nil)
         case .host(let hostSelection): FocusedSection(section: hostSelection.section)
         case .kubernetes, nil: nil
         }
@@ -652,6 +655,8 @@ struct ContentView: View {
         List(selection: $selection) {
             Label("Dashboard", systemImage: "square.grid.2x2")
                 .tag(SidebarItem.dashboard)
+            Label("Resource Usage", systemImage: "chart.bar.xaxis")
+                .tag(SidebarItem.usage)
             Label("Kubernetes", systemImage: "helm")
                 .tag(SidebarItem.kubernetes)
 
@@ -733,6 +738,8 @@ struct ContentView: View {
         switch selection {
         case .dashboard:
             FleetDashboardView(navigate: navigate)
+        case .usage:
+            FleetActivityView(navigate: navigate)
         case .kubernetes:
             KubernetesView()
         case .host(let hostSelection):
@@ -768,6 +775,7 @@ struct ContentView: View {
         case .open(let target, let hostName, let item):
             if target == "dashboard" { selection = .dashboard; return }
             if target == "kubernetes" { selection = .kubernetes; return }
+            if target == "usage" { selection = .usage; return }
             guard let section = HostSection(rawValue: target),
                   let hostID = AppLink.resolveHost(hostName, in: model.sessions.map { ($0.id, $0.host.name) }),
                   let session = model.session(id: hostID) else { return }

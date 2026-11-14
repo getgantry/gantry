@@ -31,7 +31,9 @@ private let dfFixture = Data("""
 // MARK: - Containers
 
 @Test func appleContainersListTranslatesToDockerShape() throws {
-    let body = try AppleContainerJSON.containersListBody(fromAppleList: containersListFixture, all: true)
+    // Three hours after the startedDate of the fixture (1780757314).
+    let now = Date(timeIntervalSince1970: 1_780_757_314 + 3 * 3600)
+    let body = try AppleContainerJSON.containersListBody(fromAppleList: containersListFixture, all: true, now: now)
     let summaries = try JSONDecoder().decode([ContainerSummary].self, from: body)
     #expect(summaries.count == 2)
 
@@ -39,7 +41,7 @@ private let dfFixture = Data("""
     #expect(running.displayName == "gantry-smoke")
     #expect(running.image == "docker.io/library/alpine:latest")
     #expect(running.state == .running)
-    #expect(running.status == "Up")
+    #expect(running.status == "Up 3 hours")
     #expect(running.command == "sleep 600")
     #expect(running.labels["com.example.role"] == "smoke")
     // startedDate is apple-epoch; 802450114 + 978307200 = 1780757314.
@@ -53,6 +55,7 @@ private let dfFixture = Data("""
 
     let stopped = try #require(summaries.first { $0.id == "gantry-stopped" })
     #expect(stopped.state == .exited)
+    #expect(stopped.status == "Exited")
     #expect(stopped.created == 0)
 }
 
@@ -423,4 +426,9 @@ let liveStats171JSON = #"[{"blockReadBytes":788164608,"blockWriteBytes":55979212
     #expect(try AppleContainerJSON.statsEntry(forID: "web", inAppleStats: data) == nil)
     #expect(try AppleContainerJSON.statsEntry(forID: "gtest", inAppleStats: data).map { AppleContainerJSON.string($0["id"]) } == "gtest")
     #expect(try AppleContainerJSON.statsEntry(forID: "gtest-worker", inAppleStats: data) == nil)
+}
+
+@Test func appleRunningStatusWithoutStartDateStaysUp() {
+    #expect(AppleContainerJSON.dockerStatusText(forDockerState: "running", startedDate: nil, now: .now) == "Up")
+    #expect(AppleContainerJSON.dockerStatusText(forDockerState: "exited", startedDate: 802450114.0, now: .now) == "Exited")
 }

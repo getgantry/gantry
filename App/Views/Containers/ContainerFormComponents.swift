@@ -75,6 +75,7 @@ extension View {
 enum ContainerTabRequest {
     enum Tab: Equatable {
         case logs
+        case stats
         case terminal
         case debugShell
     }
