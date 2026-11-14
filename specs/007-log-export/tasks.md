@@ -1,0 +1,90 @@
+<!-- STE deviation: spec-kit template headings, task IDs, type names, menu titles and paths stay verbatim. A task is one checklist line, and the tasks generator quotes the constraints of data-model.md in it, so a task line can be longer than 25 words. -->
+# Tasks: Export Container Logs with the Current Filter
+
+**Input**: Design documents from `/specs/007-log-export/`
+
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/ui.md, quickstart.md
+
+**Tests**: The constitution (principle II) requires Swift Testing tests for all AppCore logic.
+
+## Phase 1: Setup <!-- slop: spec-kit template heading -->
+
+- [ ] T001 Set `.specify/feature.json` to `specs/007-log-export` and check that `/Volumes/SanDisk2Tb/builds/gantry/log-export/` is the build folder
+
+## Phase 2: Foundational (AppCore logic, blocks all stories)
+
+- [ ] T002 Add `LogExportLine`, `LogTimeRange`, `LogLineFilter`, `LogExportFormat`, `LogExportSink`, `FileHandleSink`, `LogExportWriter` and `LogExportFileName` in `Packages/AppCore/Sources/AppCore/LogExport.swift` as `data-model.md` tells. Rules to keep: "a line with no level fails when `minLevel` is set"; "`contains` is true for nil dates and for `all`"; query only filters when `matchesOnly` is true; timestamp format RFC 3339 UTC with milliseconds; source prefix `<source> | `; chunk size 65 536 bytes; file name `<safe base>-yyyy-MM-dd-HHmm.<ext>` with `/ \ : * ? " < > |` and control characters replaced by `-`, `logs` for an empty base
+- [ ] T003 Add the time range titles to `Packages/AppCore/Sources/AppCore/Resources/Localizable.xcstrings` with 28 languages
+- [ ] T004 [P] Add tests in `Packages/AppCore/Tests/AppCoreTests/LogExportTests.swift`: filter rules and order, invalid regex, time range with nil dates, format with and without timestamps and sources, writer chunking (more than one flush, no line split, exact bytes), line count, empty input, file name sanitizing, 50 000-line write with a counting sink
+- [ ] T005 Run the AppCore tests with `--filter LogExport` and the scratch path `/Volumes/SanDisk2Tb/builds/gantry/log-export/appcore`
+
+## Phase 3: User Story 1 - Export the visible log lines to a file (P1)
+
+**Goal**: The Logs tab exports its visible lines through the save panel.
+
+**Independent Test**: Filter the Logs tab, export, compare the file with the view.
+
+- [ ] T006 [US1] Add `LogExportItem` (`Transferable`, representations `.log` and `.plainText`) and `LogExportButton` in `App/Views/Containers/LogExportControls.swift`
+- [ ] T007 [US1] Make `LogsView` keep `timestamp` in `DisplayLine`, compute `visibleLines` with `LogLineFilter`, and add the Export button, the `fileExporter` and the error banner for a failed export in `App/Views/Containers/LogsView.swift`
+
+## Phase 4: User Story 2 - Copy the visible lines (P1)
+
+**Goal**: Copy Visible Lines puts the export text on the pasteboard.
+
+**Independent Test**: Filter, copy, paste, compare.
+
+- [ ] T008 [US2] Replace Copy all with Copy Visible Lines (`LogExportFormat.text`) and disable it with 0 visible lines in `App/Views/Containers/LogsView.swift`
+
+## Phase 5: User Story 3 - Timestamps and time range (P2)
+
+**Goal**: The display menu turns timestamps on and sets the time range. Apple hosts get disabled items with a reason.
+
+**Independent Test**: On a Docker host, turn on timestamps, export, check prefixes. On an Apple host, check the disabled items and the help text.
+
+- [ ] T009 [US3] Add `LogDisplayMenu` (Show Timestamps toggle, Time Range picker, disabled with help "This host does not report log times" when no line has a timestamp) in `App/Views/Containers/LogExportControls.swift`
+- [ ] T010 [US3] Add the display menu and the timestamp column (local `HH:mm:ss.SSS`) to `App/Views/Containers/LogsView.swift`
+
+## Phase 6: User Story 4 - Export the logs of a Compose project (P2)
+
+**Goal**: Stack logs export with the service prefix and the hidden services left out.
+
+**Independent Test**: Hide a service, export, check the file.
+
+- [ ] T011 [US4] Make `StackLogsView` keep `timestamp`, use `LogLineFilter` (with `matchesOnly: true` and `hiddenSources`), add the display menu, Copy Visible Lines, the Export button and the `fileExporter` with `sources: true` in `App/Views/Containers/StackLogsView.swift`
+
+## Phase 7: User Story 5 - Menu, shortcut and command palette (P3)
+
+**Goal**: File > Export Logs… (Shift-Command-E), Edit > Copy Visible Log Lines and the palette action.
+
+**Independent Test**: Press Shift-Command-E in a Logs tab. Run Export Logs… from the palette.
+
+- [ ] T012 [US5] Add `LogExportTarget`, the `FocusedValues` entry `logExportTarget` and `LogCommands` (File after `.importExport`, Edit after `.pasteboard`) in `App/Views/Containers/LogExportControls.swift`, and add `LogCommands()` in `App/GantryApp.swift`
+- [ ] T013 [US5] Publish `logExportTarget` with `focusedSceneValue` from `LogsView` and `StackLogsView`
+- [ ] T014 [US5] Add `PaletteAction.exportLogs` ("Export Logs…", `square.and.arrow.up`) after `.logs` in `containerActions` in `Packages/AppCore/Sources/AppCore/Palette/PaletteItem.swift` and `PaletteCatalog.swift`, with the string in the AppCore catalog
+- [ ] T015 [P] [US5] Update the palette tests for the new action order in `Packages/AppCore/Tests/AppCoreTests/CommandPaletteTests.swift`
+- [ ] T016 [US5] Add `ContainerTabRequest.Tab.exportLogs` in `App/Views/Containers/ContainerFormComponents.swift`, open the Logs tab for it in `App/Views/Containers/ContainerDetailView.swift`, take it in `LogsView` and open the save panel, and route `.exportLogs` in `App/Views/Palette/PaletteRunner.swift`
+
+## Phase 8: Polish and cross-cutting
+
+- [ ] T017 Add all new app strings with 28 languages to `App/Localizable.xcstrings` and run `scripts/check-localization.py` (0 problems)
+- [ ] T018 Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/log-export/DerivedData`
+- [ ] T019 Run the AppCore tests that this feature touches (`LogExport`, `CommandPalette`)
+- [ ] T020 Live check on the Apple host as `quickstart.md` tells: filter, export (file content), copy, disabled timestamp items, palette action, Shift-Command-E. Remove the test containers `gle-*`
+- [ ] T021 Live check of timestamps and the time range on a Docker host
+- [ ] T022 Rebase on `origin/main`, push `feat/log-export` and open the pull request "feat: export container logs with the current filter"
+
+## Dependencies
+
+- Phase 2 blocks all stories.
+- US1 (T006, T007) comes before US2, US3, US4 and US5, because they use `LogExportControls.swift` and the changed `LogsView`.
+- US5 T013 needs T011 for `StackLogsView`.
+- T017 to T022 come last.
+
+## Parallel Opportunities
+
+- T004 can run with T003.
+- T015 can run with T012 and T013.
+
+## Implementation Strategy
+
+MVP is Phase 2 plus US1 and US2: filter, export and copy in the Logs tab. Then US3 and US4, then the menus and the palette.
