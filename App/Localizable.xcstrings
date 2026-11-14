@@ -261839,6 +261839,522 @@
           }
         }
       }
+    },
+    "Add Image…": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добави изображение…"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přidat obrázek…"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj billede…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild hinzufügen…"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Προσθήκη εικόνας…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Image…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir imagen…"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisa pilt…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisää kuva…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une image…"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj sliku…"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kép hozzáadása…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi immagine…"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pridėti vaizdą…"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pievienot attēlu…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til bilde…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afbeelding toevoegen…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj obrazek…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar imagem…"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaugă imagine…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить изображение…"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pridať obrázok…"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj sliko…"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додај слику…"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj sliku…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till bild…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати зображення…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加图片…"
+          }
+        }
+      }
+    },
+    "Attach a screenshot, for example of a browser error. You can also drop or paste images here.": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикачете екранна снимка, например на грешка в браузъра. Можете също да пуснете или поставите изображения тук."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Připojte snímek obrazovky, například s chybou prohlížeče. Obrázky můžete také přetáhnout nebo vložit sem."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vedhæft et skærmbillede, for eksempel af en fejl i browseren. Du kan også trække eller indsætte billeder her."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Bildschirmfoto anhängen, zum Beispiel von einem Browserfehler. Bilder können auch hierher gezogen oder eingefügt werden."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επισυνάψτε ένα στιγμιότυπο οθόνης, για παράδειγμα ενός σφάλματος του προγράμματος περιήγησης. Μπορείτε επίσης να σύρετε ή να επικολλήσετε εικόνες εδώ."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attach a screenshot, for example of a browser error. You can also drop or paste images here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjunta una captura de pantalla, por ejemplo de un error del navegador. También puedes soltar o pegar imágenes aquí."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisa ekraanipilt, näiteks brauseri veast. Pilte saab ka siia lohistada või kleepida."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liitä kuvakaappaus, esimerkiksi selaimen virheestä. Voit myös vetää tai liittää kuvia tähän."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joignez une capture d'écran, par exemple d'une erreur du navigateur. Vous pouvez aussi déposer ou coller des images ici."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Priložite snimku zaslona, na primjer pogreške u pregledniku. Slike možete i povući ili zalijepiti ovdje."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csatoljon képernyőképet, például egy böngészőhibáról. Képeket ide is húzhat vagy beilleszthet."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allega uno screenshot, ad esempio di un errore del browser. Puoi anche trascinare o incollare le immagini qui."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pridėkite ekrano kopiją, pavyzdžiui, naršyklės klaidos. Vaizdus taip pat galite nuvilkti arba įklijuoti čia."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pievienojiet ekrānuzņēmumu, piemēram, ar pārlūka kļūdu. Attēlus var arī ievilkt vai ielīmēt šeit."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg ved et skjermbilde, for eksempel av en feil i nettleseren. Du kan også dra eller lime inn bilder her."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voeg een schermafbeelding toe, bijvoorbeeld van een browserfout. Je kunt afbeeldingen ook hierheen slepen of plakken."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz zrzut ekranu, na przykład z błędem przeglądarki. Obrazki możesz też przeciągnąć lub wkleić tutaj."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anexe uma captura de ecrã, por exemplo de um erro do navegador. Também pode largar ou colar imagens aqui."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atașează o captură de ecran, de exemplu a unei erori din browser. Poți și să tragi sau să lipești imagini aici."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикрепите снимок экрана, например с ошибкой в браузере. Изображения также можно перетащить или вставить сюда."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pripojte snímku obrazovky, napríklad s chybou prehliadača. Obrázky môžete aj presunúť alebo vložiť sem."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Priložite posnetek zaslona, na primer napake v brskalniku. Slike lahko tudi povlečete ali prilepite sem."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложите снимак екрана, на пример грешке у прегледачу. Слике можете и да превучете или налепите овде."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Priložite snimak ekrana, na primer greške u pregledaču. Slike možete i da prevučete ili nalepite ovde."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bifoga en skärmbild, till exempel av ett fel i webbläsaren. Du kan också dra eller klistra in bilder här."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикріпіть знімок екрана, наприклад з помилкою в браузері. Зображення також можна перетягнути або вставити сюди."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附加截图，例如浏览器错误的截图。你也可以把图片拖放或粘贴到这里。"
+          }
+        }
+      }
+    },
+    "Images stay on this Mac. Gantry does not hide secrets in images.": {
+      "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображенията остават на този Mac. Gantry не скрива тайни в изображенията."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrázky zůstávají na tomto Macu. Gantry neskrývá tajné údaje v obrázcích."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Billederne bliver på denne Mac. Gantry skjuler ikke hemmeligheder i billeder."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder bleiben auf diesem Mac. Gantry verbirgt keine Geheimnisse in Bildern."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι εικόνες μένουν σε αυτό το Mac. Το Gantry δεν κρύβει μυστικά στις εικόνες."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images stay on this Mac. Gantry does not hide secrets in images."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las imágenes se quedan en este Mac. Gantry no oculta secretos en las imágenes."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pildid jäävad sellesse Maci. Gantry ei peida piltidel nähtavaid saladusi."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuvat pysyvät tällä Macilla. Gantry ei piilota kuvissa näkyviä salaisuuksia."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les images restent sur ce Mac. Gantry ne masque pas les secrets dans les images."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike ostaju na ovom Macu. Gantry ne skriva tajne na slikama."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A képek ezen a Macen maradnak. A Gantry nem rejti el a képeken látható titkokat."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le immagini restano su questo Mac. Gantry non nasconde i segreti nelle immagini."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaizdai lieka šiame Mac. Gantry neslepia vaizduose matomų paslapčių."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attēli paliek šajā Mac datorā. Gantry neslēpj attēlos redzamos noslēpumus."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildene blir på denne Macen. Gantry skjuler ikke hemmeligheter i bilder."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afbeeldingen blijven op deze Mac. Gantry verbergt geen geheimen in afbeeldingen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrazki pozostają na tym Macu. Gantry nie ukrywa sekretów widocznych na obrazkach."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As imagens ficam neste Mac. O Gantry não oculta segredos nas imagens."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaginile rămân pe acest Mac. Gantry nu ascunde secretele din imagini."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображения остаются на этом Mac. Gantry не скрывает секреты на изображениях."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrázky zostávajú na tomto Macu. Gantry neskrýva tajné údaje v obrázkoch."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike ostanejo na tem Macu. Gantry ne skrije skrivnosti na slikah."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слике остају на овом Mac-у. Gantry не скрива тајне на сликама."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slike ostaju na ovom Mac-u. Gantry ne skriva tajne na slikama."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilderna stannar på den här Macen. Gantry döljer inte hemligheter i bilder."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зображення залишаються на цьому Mac. Gantry не приховує секрети на зображеннях."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片只保留在这台 Mac 上。Gantry 不会隐藏图片中的密钥。"
+          }
+        }
+      }
     }
   }
 }
