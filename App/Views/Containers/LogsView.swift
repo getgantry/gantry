@@ -85,6 +85,11 @@ struct LogsView: View {
 
     private var isSearching: Bool { !search.isEmpty }
 
+    /// Changes when the level or the time range changes.
+    private var scrollIdentity: String {
+        "\(minLevel.map { String(describing: $0) } ?? "all")-\(timeRange.rawValue)"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerBar
@@ -164,6 +169,9 @@ struct LogsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
+                .lineLimit(1)
+                // Gives way first when the column is narrow.
+                .layoutPriority(-1)
 
             HeldLinesLabel(count: paused ? held.count : 0)
 
@@ -241,7 +249,7 @@ struct LogsView: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
             .background(.quaternary, in: .rect(cornerRadius: 6))
-            .frame(minWidth: 130, idealWidth: 250, maxWidth: 250)
+            .frame(minWidth: 80, idealWidth: 250, maxWidth: 250)
 
             Button { advance(by: -1) } label: {
                 Image(systemName: "chevron.up")
@@ -314,6 +322,14 @@ struct LogsView: View {
                     guard autoScroll, !isSearching else { return }
                     proxy.scrollTo(bottomAnchor, anchor: .bottom)
                 }
+                // A narrower level or time filter leaves the old offset past
+                // the end of the shorter list, and the lazy stack draws no
+                // rows. A new scroll view starts at a valid offset.
+                .onAppear {
+                    guard autoScroll else { return }
+                    proxy.scrollTo(bottomAnchor, anchor: .bottom)
+                }
+                .id(scrollIdentity)
                 .onChange(of: autoScroll) {
                     guard autoScroll else { return }
                     proxy.scrollTo(bottomAnchor, anchor: .bottom)

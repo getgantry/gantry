@@ -24,12 +24,16 @@ struct LogExportItem: Transferable {
     let snapshot: @MainActor @Sendable () -> LogExportSnapshot
 
     static var transferRepresentation: some TransferRepresentation {
+        // The save panel names its file wrapper from `suggestedFileName`.
+        // Without it, NSFileWrapper raises on Save and the app stops.
         FileRepresentation(exportedContentType: .log) { item in
             try await item.file(extension: "log")
         }
+        .suggestedFileName { $0.fileName + ".log" }
         FileRepresentation(exportedContentType: .plainText) { item in
             try await item.file(extension: "txt")
         }
+        .suggestedFileName { $0.fileName + ".txt" }
     }
 
     private func file(extension ext: String) async throws -> SentTransferredFile {
@@ -50,7 +54,9 @@ extension View {
             isPresented: isPresented,
             item: item,
             contentTypes: [.log, .plainText],
-            defaultFilename: item?.fileName,
+            // With the extension, the panel saves `name.log` and swaps the
+            // extension when the user picks Plain Text.
+            defaultFilename: item.map { $0.fileName + ".log" },
             onCompletion: { result in
                 guard case .failure(let failure) = result else { return }
                 if (failure as? CocoaError)?.code == .userCancelled { return }

@@ -69,14 +69,29 @@
 - [x] T017 Add all new app strings with 28 languages to `App/Localizable.xcstrings` and run `scripts/check-localization.py` (0 problems)
 - [x] T018 Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/log-export/DerivedData`
 - [x] T019 Run the AppCore tests that this feature touches (`LogExport`, `CommandPalette`)
-- [ ] T020 Live check on the Apple host as `quickstart.md` tells: filter, export (file content), copy, disabled timestamp items, palette action, Shift-Command-E. Remove the test containers `gle-*`
+- [x] T020 Live check on the Apple host as `quickstart.md` tells: filter, export (file content), copy, disabled timestamp items, palette action, Shift-Command-E. Remove the test containers `gle-*`
 - [ ] T021 Live check of timestamps and the time range on a Docker host
+- [x] T023 Fix the defects of the live check in `App/Views/Containers/LogExportControls.swift` and `App/Views/Containers/LogsView.swift` (see Status)
 - [x] T022 Rebase on `origin/main`, push `feat/log-export` and open the pull request "feat: export container logs with the current filter"
 
 ## Status (2026-11-14)
 
-- T001 to T019 are done. The code builds (Debug, `xcodebuild`), 54 AppCore tests pass (`LogExport`, `CommandPalette`), and `scripts/check-localization.py` reports 0 problems.
-- T020 is open. The screen was locked during the work. A Debug build ran and `gantry-ctl` selected the test container `gle-logs`, but no GUI action was possible: no click on the Logs tab, no save panel and no key press. The test container is removed.
+- T001 to T019 are done. The code builds (Debug, `xcodebuild`). 54 AppCore tests pass (`LogExport`, `CommandPalette`). `scripts/check-localization.py` reports 0 problems.
+- T020 is done on the Apple host with the test container `gle-logs`. The container wrote 300 lines, and the view held the last 100.
+  - Error and up shows 4 lines (`ERROR fail 225`, `250`, `275`, `300`). The count label shows "4 lines".
+  - Copy Visible Lines puts the same 4 lines on the pasteboard.
+  - Shift-Command-E and the Export button open the save panel with `gle-logs-2026-11-14-HHmm` and Log File.
+  - Save writes `gle-logs-2026-11-14-1731.log` with the 4 lines.
+  - The palette shows Export Logs… after Show Logs on `gle-logs`. It opens the Logs tab and the save panel.
+  - The File menu has Export Logs… (enabled). The Edit menu has Copy Visible Log Lines.
+  - The display menu (clock) is disabled on the Apple host.
+  - The test container and the exported files are removed.
+- T023 is done. The live check found four defects. The fixes passed the same live check:
+  - Save stopped the app with an `NSFileWrapper` exception. Each `FileRepresentation` now sets `suggestedFileName`.
+  - The saved file had no extension. `defaultFilename` now ends with `.log`.
+  - After Error and up, the list was empty: the old scroll offset was past the end. The scroll view now starts again when the level or the time range changes.
+  - In a window of 1180 points, the header was wider than the detail column, and the pane was cut on the two sides. The search field can now shrink to 80 points, and the line count gets less space first.
+- These items were not checked live: the Plain Text format in the save panel, and the stack logs sheet of a Compose project.
 - T021 is open. This Mac has no Docker host. Apple `container` hosts send no timestamps.
 - T022 is done: pull request #66.
 
