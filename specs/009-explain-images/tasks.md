@@ -47,8 +47,8 @@
 
 - [x] T016 Translations of all new strings for 28 languages in App/Localizable.xcstrings and Packages/AppCore/Sources/AppCore/Resources/Localizable.xcstrings; `scripts/check-localization.py` reports 0 problems
 - [x] T017 Debug build with `xcodebuild -jobs 3` to /Volumes/SanDisk2Tb/builds/gantry/explain-images/DerivedData and the AppCore tests pass
-- [ ] T018 Live check of the Debug build with `scripts/gantry-ctl` and a failed Apple `container` container named `gei-fail` (quickstart.md); remove the container after the check
-- [ ] T019 Rebase on `origin/main`, open the pull request "feat: attach screenshots to explain this failure"
+- [x] T018 Live check of the Debug build with `scripts/gantry-ctl` and a failed Apple `container` container named `gei-fail` (quickstart.md); remove the container after the check
+- [x] T019 Rebase on `origin/main`, open the pull request "feat: attach screenshots to explain this failure"
 
 ## Dependencies
 
@@ -67,4 +67,15 @@ MVP: Phases 1–4 (US1 and US2 together, because the gate is part of a safe rele
 
 - T011: the `GANTRY_FM_LIVE=1` run passed on macOS 27.2. The on-device model read "upstream api:8000 connection refused" from the rendered screenshot. The cause names port 8000. One image took 191 tokens of the prompt limit (4314 without the image, 4123 with it).
 - T017: the Debug build succeeded. All 740 AppCore tests pass.
-- T018 is open. The screen of the Mac was locked (`IOConsoleLocked` is true), so a GUI check of drop, paste and "Add Image…" was not possible. `scripts/gantry-ctl` cannot open the Explain window: only a click opens it.
+- T018 (live check, 2026-11-14, macOS 27.2, own Debug build): done. The Explain button of `gei-fail` opened the window with "Add Image…".
+  - Paste (Command-V) did nothing at first. The panel held no focused view, so Edit > Paste was off. Fix: `ExplainImageDropTarget` makes the panel focusable for edit commands and focuses it on appear. After the fix, Paste is on. A pasted PNG gave a thumbnail "Pasted Image", the privacy note and a new analysis.
+  - Drop of a PNG from a Finder window added a second thumbnail and started a new analysis.
+  - "Add Image…" opened the file panel with images only. A third image was added and the button went away at 3 images.
+  - The model quoted text from the two screenshots as evidence ("502 Bad Gateway - upstream api:8000", "nginx: connect() failed (111)").
+  - A fourth pasted image showed "You can attach up to 3 images." No new analysis started.
+  - The remove button (accessibility label "Remove <name>") removed an image. The analysis started again and "Add Image…" came back.
+  - With `explainUsePrivateCloud` on, the window showed no attach control. The setting was then deleted again.
+  - The container `gei-fail` was removed after the check.
+- Not checked live: macOS 26, because this Mac runs macOS 27. The code there is behind `#if compiler(>=6.4)` and `#available(macOS 27.0, *)`.
+- Follow-up idea: evidence that the model reads from a screenshot shows "Not found in the logs Gantry sent". The label is true, but a label that names the images can be clearer.
+- T019: pull request #67.
