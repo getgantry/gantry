@@ -48,8 +48,17 @@ struct QuickRunSheet: View {
         ContainerForm.nameIssue(name, taken: ContainerForm.takenNames(session.containers))
     }
 
+    private var envVars: [ContainerRecipe.EnvVar] {
+        env.map { .init(key: $0.key, value: $0.value, secret: $0.secret) }
+    }
+
+    /// Secret rows that cannot be used on this host, by row index.
+    private var secretIssues: [Int: SecretError] {
+        EnvSecrets.issues(envVars, isAppleHost: session.host.isAppleContainer)
+    }
+
     private var canRun: Bool {
-        !trimmedImage.isEmpty && !isWorking && portIssues.isEmpty && nameIssue == nil
+        !trimmedImage.isEmpty && !isWorking && portIssues.isEmpty && nameIssue == nil && secretIssues.isEmpty
     }
 
     /// The Name field: typing marks the name as the user's own, and clearing
@@ -208,12 +217,16 @@ struct QuickRunSheet: View {
     }
 
     private var environmentSection: some View {
-        Section("Environment") {
+        Section {
             editorRows($env, addLabel: "Add Variable", empty: { EnvRow() }) { $row in
                 TextField("KEY", text: $row.key)
                 Text(verbatim: "=").foregroundStyle(.secondary)
-                TextField("VALUE", text: $row.value)
+                EnvSecretField(value: $row.value, secret: $row.secret, issue: secretIssue(for: row.id))
             }
+        } header: {
+            Text("Environment")
+        } footer: {
+            FieldError(message: secretIssues.values.first?.errorDescription)
         }
     }
 
@@ -335,10 +348,18 @@ struct QuickRunSheet: View {
 
     // MARK: - Run
 
-    private func buildRequest() -> ContainerCreateRequest {
-        let envList = env
-            .filter { !$0.key.trimmingCharacters(in: .whitespaces).isEmpty }
-            .map { "\($0.key)=\($0.value)" }
+    private func secretIssue(for id: UUID) -> String? {
+        guard let index = env.firstIndex(where: { $0.id == id }) else { return nil }
+        return secretIssues[index]?.errorDescription
+    }
+
+    /// The run request, with Keychain secrets read just before the create
+    /// (after Touch ID when it is on). The values live only in this request.
+    private func buildRequest() async throws -> ContainerCreateRequest {
+        let isApple = session.host.isAppleContainer
+        let secretValues = try await EnvSecrets.resolve(
+            envVars, isAppleHost: isApple, store: SecretsLibrary.shared.store, authorize: SecretGate.authorize
+        )
 
         let portMap = ContainerForm.portMap(portEntries, requireHost: true)
 
@@ -360,9 +381,9 @@ struct QuickRunSheet: View {
         // the resolvable hostname reliably later.
         let labels = trimmedDomain.isEmpty ? [:] : [AppleAddressSection.domainLabelKey: trimmedDomain]
 
-        return ContainerCreateRequest(
+        var request = ContainerCreateRequest(
             image: trimmedImage,
-            env: envList,
+            env: [],
             ports: portMap,
             binds: binds,
             tty: false,
@@ -370,6 +391,8 @@ struct QuickRunSheet: View {
             domainname: trimmedDomain.isEmpty ? nil : trimmedDomain,
             name: resolvedName
         )
+        EnvSecrets.apply(envVars, values: secretValues, to: &request, isAppleHost: isApple)
+        return request
     }
 
     private func run(pullFirst: Bool = false) async {
@@ -385,7 +408,7 @@ struct QuickRunSheet: View {
                 for try await _ in stream {}
             }
             statusText = String(localized: "Creating…")
-            let request = buildRequest()
+            let request = try await buildRequest()
             let id = try await session.createAndRun(request)
             statusText = String(localized: "Starting…")
             if let exit = await session.earlyExit(containerID: id) {
@@ -458,4 +481,6 @@ private struct EnvRow: Identifiable {
     let id = UUID()
     var key = ""
     var value = ""
+    /// A Keychain secret name in place of `value`.
+    var secret: String?
 }
