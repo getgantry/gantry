@@ -11,6 +11,16 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.28.0](https://github.com/getgantry/gantry/compare/v0.27.1...v0.28.0) (2026-11-14)
+
+
+### Features
+
+* attach screenshots to explain this failure ([#67](https://github.com/getgantry/gantry/issues/67)) ([cbafc82](https://github.com/getgantry/gantry/commit/cbafc8219bd558fb99ddd250aca5ab08df0c0205))
+* export a running container as a compose file ([#68](https://github.com/getgantry/gantry/issues/68)) ([5cb0fa5](https://github.com/getgantry/gantry/commit/5cb0fa57778729e64814c26e6fb74f7bf93d3b4a))
+* inject keychain secrets into container environment ([#71](https://github.com/getgantry/gantry/issues/71)) ([513feda](https://github.com/getgantry/gantry/commit/513feda83595a312b326b57263cab55e20279439))
+* show a sortable activity table for all containers ([#69](https://github.com/getgantry/gantry/issues/69)) ([634b35d](https://github.com/getgantry/gantry/commit/634b35d2f41e99684553e0789d62b423b434fa4f))
+
 ## [0.27.1](https://github.com/getgantry/gantry/compare/v0.27.0...v0.27.1) (2026-11-12)
 
 
