@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented; the GUI live check is open
+**Status**: Implemented and checked live
 
 **Input**: User description: "A Builds view: past image builds with status, start, duration, steps, cached vs run steps, and the log of each. Docker hosts: `docker buildx history ls/inspect` (check availability and version; gate when missing). Apple hosts: research what `container build` and the builder expose; if there is no history, record builds started from Gantry itself. Parsing logic in AppCore/DockerKit with fixture tests."
 
