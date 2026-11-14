@@ -29,6 +29,19 @@ GANTRY_SCAN_LIVE=1 TMPDIR=/Volumes/SanDisk2Tb/builds/gantry/image-scan/tmp/ \
 
 Expected: the real export, unpack, scan and SBOM export pass for both scanners, and a cancel leaves no `gantry-scan-` folder.
 
+## Live Docker test over SSH (no GUI)
+
+Put two images on the Docker engine: a local tag (for example `gis-scan-test:alpine`) and a registry tag (for example `alpine:3.20`). Use the scanner variables from the step above and add:
+
+```sh
+GANTRY_SCAN_DOCKER_SSH=user@host GANTRY_SCAN_DOCKER_IMAGE=gis-scan-test:alpine \
+  GANTRY_SCAN_DOCKER_REGISTRY_IMAGE=alpine:3.20 \
+  swift test --package-path Packages/AppCore \
+  --scratch-path /Volumes/SanDisk2Tb/builds/gantry/image-scan/AppCore --filter LiveDockerImageScanTests
+```
+
+Expected: `saveImages` writes the archive and both scanners read it. The SSH plan is the registry copy with the platform of the engine. Both scanners scan that copy. Remove the test images after the run.
+
 ## Live check
 
 1. Build the Debug app into `/Volumes/SanDisk2Tb/builds/gantry/image-scan/DerivedData` with `-jobs 3`.

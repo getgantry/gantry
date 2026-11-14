@@ -81,10 +81,11 @@ description: "Task list for image scan and SBOM"
 ## Phase 8: Polish and cross-cutting
 
 - [x] T021 Add the new strings with 28 languages to App/Localizable.xcstrings and Packages/AppCore/Sources/AppCore/Resources/Localizable.xcstrings; `scripts/check-localization.py` reports 0 problems
-- [ ] T022 Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/image-scan/DerivedData` and run the AppCore tests with `--filter "ScannerDetectionTests|ImageScanPlanTests|ScanReportParserTests|ImageScanModelTests"`
+- [x] T022 Build the Debug app with `xcodebuild -jobs 3 -derivedDataPath /Volumes/SanDisk2Tb/builds/gantry/image-scan/DerivedData` and run the AppCore tests with `--filter "ScannerDetectionTests|ImageScanPlanTests|ScanReportParserTests|ImageScanModelTests"`
 - [x] T025 Add the gated live test (real `container image save`, Trivy 0.76.2 and Grype 0.121.3 on `alpine:latest`, CycloneDX and SPDX export, cancel) in Packages/AppCore/Tests/AppCoreTests/LiveImageScanTests.swift
+- [x] T026 Add the gated live Docker test over SSH (`saveImages` archive with both scanners, the registry plan of an SSH host with both scanners) in Packages/AppCore/Tests/AppCoreTests/LiveImageScanTests.swift
 - [ ] T023 Live check of quickstart.md steps 2 to 6 with `scripts/gantry-ctl` and `GANTRY_APP` set to this build
-- [ ] T024 Rebase on `origin/main`, open the pull request "feat: scan images for vulnerabilities with trivy or grype"
+- [x] T024 Rebase on `origin/main`, open the pull request "feat: scan images for vulnerabilities with trivy or grype"
 
 ## Dependencies
 

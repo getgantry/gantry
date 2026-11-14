@@ -80,3 +80,85 @@ struct LiveImageScanTests {
         #expect(leftovers.isEmpty)
     }
 }
+
+// Live, with a real Docker engine over SSH. Gated:
+//   GANTRY_SCAN_DOCKER_SSH=user@host GANTRY_SCAN_DOCKER_IMAGE=gis-scan-test:alpine \
+//   GANTRY_SCAN_DOCKER_REGISTRY_IMAGE=alpine:3.20 (plus the scanner variables above) \
+//   swift test --filter LiveDockerImageScan
+// Both images must be on the engine. The second one must also be in a registry.
+
+private let dockerTarget = ProcessInfo.processInfo.environment["GANTRY_SCAN_DOCKER_SSH"] ?? ""
+private let dockerImage = ProcessInfo.processInfo.environment["GANTRY_SCAN_DOCKER_IMAGE"] ?? ""
+private let registryImage = ProcessInfo.processInfo.environment["GANTRY_SCAN_DOCKER_REGISTRY_IMAGE"] ?? ""
+
+@MainActor
+@Suite(.serialized, .enabled(if: !dockerTarget.isEmpty && !dockerImage.isEmpty))
+struct LiveDockerImageScanTests {
+    private func session() async throws -> HostSession {
+        let parts = dockerTarget.split(separator: "@", maxSplits: 1).map(String.init)
+        let endpoint = parts.count == 2
+            ? SSHEndpoint(host: parts[1], username: parts[0])
+            : SSHEndpoint(host: dockerTarget)
+        let session = HostSession(host: DockerHost(name: "gis-scan", kind: .ssh(endpoint)))
+        await session.connect()
+        await session.refreshImages()
+        try #require(!session.images.isEmpty, "no images on \(dockerTarget)")
+        return session
+    }
+
+    private func image(_ reference: String, in session: HostSession) throws -> ImageSummary {
+        try #require(session.images.first { $0.repoTags.contains(reference) }, "\(reference) is missing")
+    }
+
+    @Test(arguments: ScannerKind.allCases)
+    func scansADockerArchive(_ kind: ScannerKind) async throws {
+        let session = try await session()
+        defer { Task { await session.disconnect() } }
+        _ = try image(dockerImage, in: session)
+        let plan = ImageScanPlan.dockerArchive(reference: dockerImage)
+        let model = ImageScanModel(plan: plan, export: session.imageScanExport(for: plan))
+        await model.detect()
+        try #require(model.scanners.contains { $0.kind == kind })
+        model.selectedKind = kind
+        model.scan()
+        await model.waitUntilIdle()
+        guard case .finished(let report) = model.state else {
+            Issue.record("state is \(model.state)")
+            return
+        }
+        #expect(report.scanner == kind)
+
+        let sbom = FileManager.default.temporaryDirectory.appendingPathComponent("gantry-live-\(UUID().uuidString).cdx.json").path
+        defer { try? FileManager.default.removeItem(atPath: sbom) }
+        model.exportSBOM(.cycloneDX, to: sbom)
+        await model.waitUntilIdle()
+        #expect(model.sbomState == .saved(sbom))
+        model.close()
+    }
+
+    @Test(.enabled(if: !registryImage.isEmpty), arguments: ScannerKind.allCases)
+    func scansTheRegistryCopyForAnSSHHost(_ kind: ScannerKind) async throws {
+        let session = try await session()
+        defer { Task { await session.disconnect() } }
+        let summary = try image(registryImage, in: session)
+        let plan = try #require(session.imageScanPlan(for: summary))
+        #expect(plan.scansRegistryCopy)
+        guard case .registry(_, let platform) = plan else {
+            Issue.record("plan is \(plan)")
+            return
+        }
+        #expect(platform == "linux/amd64" || platform == "linux/arm64")
+        let model = try #require(session.makeImageScanModel(for: summary))
+        await model.detect()
+        try #require(model.scanners.contains { $0.kind == kind })
+        model.selectedKind = kind
+        model.scan()
+        await model.waitUntilIdle()
+        guard case .finished(let report) = model.state else {
+            Issue.record("state is \(model.state)")
+            return
+        }
+        #expect(report.scanner == kind)
+        model.close()
+    }
+}
