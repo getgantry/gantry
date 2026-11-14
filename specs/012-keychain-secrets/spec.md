@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented (GUI live check open)
+**Status**: Implemented
 
 **Input**: User description: "In the create/run flow (and Quick Run / pasted docker run), let an env var value reference a secret stored in the macOS Keychain (Gantry's own items, service prefix for the app) instead of a plain value: add, choose, rename, delete secrets in a Settings pane; values are entered in a SecureField and never shown, logged, written to recipes, compose exports, MCP output or crash logs. At run time the value is resolved and passed to the CLI without putting it on the command line where possible (env file with 0600 in a temp dir, removed after start, or stdin) — research what Docker and Apple container support and choose the safest path. Saved recipes store only references. Optional Touch ID (LocalAuthentication) before use. Constitution principle on secret safety is binding; add tests that values never appear in generated commands or logs. Do NOT use or touch the user's own `secret` CLI or its vault."
 
