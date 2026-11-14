@@ -141,7 +141,7 @@ The user turns on "Require Touch ID to use secrets" in Settings ▸ Secrets. Whe
 ## Assumptions
 
 - The runtime stores the resolved value in the container configuration; `docker inspect` and `container inspect` outside Gantry can show it. This is the same as for every container environment variable and is out of scope.
-- Docker Compose files and compose export: Gantry has no compose export today. The reference format `keychain:NAME` is the format a future export must use. Compose up keeps its current behaviour.
+- Compose export (spec 008): for a variable that Gantry filled from a Keychain secret, the file holds `keychain:NAME`, never the value. Such a variable is not offered as a secret to include. Compose up keeps its current behaviour. Compose itself does not resolve `keychain:NAME`, so the user sets the value before a run.
 - The Docker Engine API takes the body over a local socket or an SSH channel. No `docker` CLI process is used, so no argument or env-file path applies there.
 - apple/container reads `--env KEY` (no `=`) from its own environment since 1.0.0 (checked in the 1.0.0 source and live on 1.7.1). An env file is not necessary.
 - The Keychain items use the login keychain with "accessible when unlocked". After an update of an ad-hoc signed build, macOS can ask once to allow access, as it does for SSH passwords today.
