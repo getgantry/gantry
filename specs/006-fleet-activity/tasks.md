@@ -76,7 +76,7 @@ description: "Task list for the fleet activity table"
 - [x] T023 Add all new strings with 28 languages to App/Localizable.xcstrings and run `python3 scripts/check-localization.py` (0 problems)
 - [x] T024 Run the AppCore, DockerKit and GantryMCP tests on the external disk and build the app with `xcodebuild -jobs 3`
 - [ ] T025 Live check of a Debug build with `scripts/gantry-ctl` as quickstart.md says (rows, sort, link, snapshot in light and dark); remove the `gfa-` test containers
-- [ ] T026 Rebase on `origin/main`, re-add catalog keys with a script on conflict, and open the pull request "feat: show a sortable activity table for all containers"
+- [x] T026 Rebase on `origin/main`, re-add catalog keys with a script on conflict, and open the pull request "feat: show a sortable activity table for all containers"
 
 ## Status (2026-11-14)
 
