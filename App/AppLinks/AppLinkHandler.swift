@@ -37,6 +37,24 @@ enum AppLinkHandler {
             default: nil
             }
             #endif
+        case .activity(let path):
+            #if DEBUG
+            DebugActivity.writeSummary(to: URL(fileURLWithPath: path))
+            #endif
+        case .menuBarSnapshot(let path):
+            #if DEBUG
+            DebugActivity.snapshotMenuBar(to: URL(fileURLWithPath: path))
+            #endif
+        case .debugPull(let reference, let host):
+            #if DEBUG
+            DebugActivity.startPull(reference, host: host)
+            #endif
+        case .cancelNewestOperation:
+            #if DEBUG
+            if let model = LiveFleet.model, let newest = MenuBarActivity(center: model.operations).running.first {
+                model.operations.cancel(newest)
+            }
+            #endif
         }
     }
 
@@ -130,3 +148,87 @@ struct WindowReader: NSViewRepresentable {
         }
     }
 }
+
+#if DEBUG
+/// Debug links for checks of the menu bar activity without clicks.
+@MainActor
+enum DebugActivity {
+    /// The menu bar summary as JSON: the running count and one object per row.
+    static func writeSummary(to url: URL) {
+        guard let model = LiveFleet.model else { return }
+        let activity = MenuBarActivity(center: model.operations)
+        func row(_ operation: LongOperation) -> [String: Any] {
+            var row: [String: Any] = [
+                "kind": operation.kind.rawValue,
+                "title": operation.title,
+                "state": stateName(operation.state),
+                "canCancel": operation.canCancel,
+            ]
+            row["host"] = operation.hostName
+            row["fraction"] = operation.fraction
+            row["detail"] = OperationRowText.detail(operation)
+            if case .failed(let message) = operation.state { row["error"] = message }
+            return row
+        }
+        let body: [String: Any] = [
+            "runningCount": activity.runningCount,
+            "hiddenRunning": activity.hiddenRunning,
+            "menuBarLabel": MenuBarActivity.menuBarLabel(runningCount: activity.runningCount),
+            "running": activity.running.map(row),
+            "recent": activity.recent.map(row),
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted, .sortedKeys]) else { return }
+        try? data.write(to: url)
+    }
+
+    private static func stateName(_ state: OperationState) -> String {
+        switch state {
+        case .running: "running"
+        case .succeeded: "succeeded"
+        case .failed: "failed"
+        case .cancelled: "cancelled"
+        }
+    }
+
+    /// Draws the menu bar panel in a window off screen into a PNG, so the
+    /// check needs no click on the menu bar.
+    static func snapshotMenuBar(to url: URL) {
+        guard let model = LiveFleet.model else { return }
+        let hosting = NSHostingView(rootView: MenuBarView().environment(model))
+        let size = hosting.fittingSize
+        let window = NSWindow(
+            contentRect: NSRect(x: -10_000, y: -10_000, width: size.width, height: size.height),
+            styleMask: [.borderless], backing: .buffered, defer: false
+        )
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        // Let SwiftUI lay out and draw once before the capture.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            hosting.layoutSubtreeIfNeeded()
+            window.display()
+            if let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
+                hosting.cacheDisplay(in: hosting.bounds, to: rep)
+                try? rep.representation(using: .png, properties: [:])?.write(to: url)
+            }
+            window.orderOut(nil)
+        }
+    }
+
+    /// Starts a pull operation as the pull sheet does, without the sheet.
+    static func startPull(_ reference: String, host: String?) {
+        guard let model = LiveFleet.model,
+              let hostID = AppLink.resolveHost(host, in: model.sessions.map { ($0.id, $0.host.name) }),
+              let session = model.session(id: hostID) else { return }
+        LongOperationRunner.run(.pull, title: String(localized: "Pull \(reference)"), session: session) { op in
+            var tracker = PullProgressTracker()
+            for try await update in try await session.pullImage(reference: reference, auth: nil) {
+                tracker.apply(update)
+                op.report(tracker.progress, status: update.status, fraction: tracker.fraction)
+            }
+            try Task.checkCancellation()
+            await session.refreshImages()
+            return nil
+        }
+    }
+}
+#endif
