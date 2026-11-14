@@ -218,6 +218,13 @@ public final class HostSession: Identifiable {
     /// file browsing). Set while an SSH host is connected; nil for local.
     var sshClientFactory: (@Sendable () async throws -> SSHClient)?
 
+    /// Where Gantry records the builds it starts on this host (nil: no record).
+    public var buildHistory: BuildHistoryStore?
+    /// The socket of a connected local host, for the `docker` CLI.
+    var connectedSocketPath: String?
+    /// The result of the last buildx check, kept until the host reconnects.
+    var buildxAvailabilityCache: BuildxAvailability?
+
     /// Lazy SFTP browser for the host filesystem; one per session.
     private var hostFileSystemStorage: SSHHostFileSystem?
 
@@ -287,6 +294,8 @@ public final class HostSession: Identifiable {
             }
 
             let transport = UnixSocketTransport(socketPath: socketPath)
+            connectedSocketPath = socketPath
+            buildxAvailabilityCache = nil
             await finishConnect(with: transport, generation: generation)
 
         case .ssh(let endpoint):
@@ -419,6 +428,7 @@ public final class HostSession: Identifiable {
         }
         let transport = SSHDialStdioTransport(makeClient: makeClient)
 
+        buildxAvailabilityCache = nil
         await finishConnect(with: transport, generation: generation)
         if status.isConnected {
             sshClientFactory = makeClient
@@ -1805,28 +1815,36 @@ extension HostSession {
     /// over SSH) via the daemon `/build` tar upload. Refreshes images on success.
     @discardableResult
     public func buildImage(_ spec: ImageBuildSpec) async throws -> String {
-        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
-        let log = try await client.buildImage(spec)
-        await refreshImages()
+        var log = ""
+        for try await line in try buildImageStream(spec) {
+            log += line.text
+        }
         return log
     }
 
     /// Builds an image, streaming the build log line by line. Refreshes the
     /// image list once the stream completes (the caller awaits the final yield).
+    /// Records the build in `buildHistory`.
     public func buildImageStream(
         _ spec: ImageBuildSpec
     ) throws -> AsyncThrowingStream<BuildLogLine, Error> {
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         let upstream = client.buildImageStream(spec)
+        let recordID = buildHistory?.begin(spec, hostID: host.id)
         return AsyncThrowingStream { continuation in
             let task = Task {
+                var recorder = BuildLogRecorder()
                 do {
                     for try await line in upstream {
+                        recorder.append(line)
                         continuation.yield(line)
                     }
+                    try Task.checkCancellation()
+                    self.finishBuildRecord(recordID, recorder: recorder, error: nil)
                     await self.refreshImages()
                     continuation.finish()
                 } catch {
+                    self.finishBuildRecord(recordID, recorder: recorder, error: error)
                     await self.refreshImages()
                     continuation.finish(throwing: error)
                 }

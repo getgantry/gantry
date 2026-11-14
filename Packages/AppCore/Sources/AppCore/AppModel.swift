@@ -8,11 +8,19 @@ import os
 public final class AppModel {
     private static let log = Logger(subsystem: "com.andrewkomkov.Gantry", category: "AppModel")
     public private(set) var sessions: [HostSession] {
-        didSet { for session in sessions { session.operations = operations } }
+        didSet {
+            for session in sessions {
+                session.operations = operations
+                session.buildHistory = buildHistory
+            }
+        }
     }
 
     /// Long operations of every host, for the activity button.
     public let operations = OperationCenter()
+
+    /// The builds that Gantry started, on every host.
+    public let buildHistory: BuildHistoryStore
 
     /// The Kubernetes section; it is not bound to a host.
     public let kubernetes = KubernetesBrowser()
@@ -34,9 +42,15 @@ public final class AppModel {
     /// Where the Local-host choice is stored.
     @ObservationIgnored private let defaults: UserDefaults
 
-    public init(detection: LocalDockerDetection = .live, defaults: UserDefaults = .standard) {
+    /// `buildHistory` nil keeps the build records in memory (tests); the app
+    /// passes `BuildHistoryStore.live()`.
+    public init(
+        detection: LocalDockerDetection = .live, defaults: UserDefaults = .standard,
+        buildHistory: BuildHistoryStore? = nil
+    ) {
         self.detection = detection
         self.defaults = defaults
+        self.buildHistory = buildHistory ?? BuildHistoryStore(persistence: nil)
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--gantry-test-in-memory-containers") {
             let host = DockerHost(name: "Gantry Fixture Host", kind: .local)
@@ -48,7 +62,10 @@ public final class AppModel {
 #endif
         let hosts = Self.loadHosts(detection: detection, defaults: defaults)
         sessions = hosts.map(HostSession.init)
-        for session in sessions { session.operations = operations }
+        for session in sessions {
+            session.operations = operations
+            session.buildHistory = self.buildHistory
+        }
         applyLocalDockerPolicy()
     }
 
@@ -105,6 +122,7 @@ public final class AppModel {
         // Removing the Local host is an explicit choice: never add it back.
         if session(id: id)?.host.isLocal == true { localDockerChoice = .removed }
         sessions.removeAll { $0.id == id }
+        buildHistory.removeHost(id)
         persist()
     }
 
