@@ -54,12 +54,12 @@ description: "Task list for the fleet activity table"
 
 ## Phase 5: User Story 3 - Open a container (P2)
 
-- [ ] T016 [US3] Add `contextMenu(forSelectionType:)` with primary action (double-click, Return) to the Containers section, and the items Show in Containers, Show Stats and Copy Name in App/Views/Usage/FleetActivityView.swift; route through `navigate` in App/Views/ContentView.swift
+- [x] T016 [US3] Add `contextMenu(forSelectionType:)` with primary action (double-click, Return) to the Containers section, and the items Show in Containers, Show Stats and Copy Name in App/Views/Usage/FleetActivityView.swift; route through `navigate` in App/Views/ContentView.swift
 
 ## Phase 6: User Story 4 - Hosts that are not connected (P2)
 
 - [x] T017 [US4] Add tests for `unavailableHosts` (failed with reason, connecting, disconnected, sidebar order) in Packages/AppCore/Tests/AppCoreTests/FleetActivityTests.swift
-- [ ] T018 [US4] Show one line for each unavailable host (status symbol and text, reason, Retry for failed and disconnected) and the empty states "no host connected" and "no container runs" in App/Views/Usage/FleetActivityView.swift
+- [x] T018 [US4] Show one line for each unavailable host (status symbol and text, reason, Retry for failed and disconnected) and the empty states "no host connected" and "no container runs" in App/Views/Usage/FleetActivityView.swift
 
 ## Phase 7: User Story 5 - Palette and link (P3)
 
@@ -75,7 +75,7 @@ description: "Task list for the fleet activity table"
 
 - [x] T023 Add all new strings with 28 languages to App/Localizable.xcstrings and run `python3 scripts/check-localization.py` (0 problems)
 - [x] T024 Run the AppCore, DockerKit and GantryMCP tests on the external disk and build the app with `xcodebuild -jobs 3`
-- [ ] T025 Live check of a Debug build with `scripts/gantry-ctl` as quickstart.md says (rows, sort, link, snapshot in light and dark); remove the `gfa-` test containers
+- [x] T025 Live check of a Debug build with `scripts/gantry-ctl` as quickstart.md says (rows, sort, link, snapshot in light and dark); remove the `gfa-` test containers
 - [x] T026 Rebase on `origin/main`, re-add catalog keys with a script on conflict, and open the pull request "feat: show a sortable activity table for all containers"
 
 ## Status (2026-11-14)
@@ -83,8 +83,16 @@ description: "Task list for the fleet activity table"
 - Full suites pass: DockerKit 326 tests, AppCore 736, GantryMCP 96 (live tests skipped without a Docker socket).
 - Checked by tests: DockerKit (`DockerHumanDurationTests`, apple JSON tests), AppCore (`FleetActivityTests`, `ContainerUptimeTests`, `AppLinkTests`), GantryMCP (`FleetActivityToolTests`). `scripts/check-localization.py`: 0 problems.
 - Checked live on a Debug build with the automation socket: `open/usage` selects the table and closes the palette; rows of the apple/container host with CPU, memory, rates and uptime; default sort CPU, highest first; light and dark snapshots; all 8 columns fit the default window. `fleet_activity` checked live over stdio (about 5 s with apple/container, sorted rows, no errors).
-- The screen was locked during the live check, so no clicks or typing were possible. Not checked live: header clicks, the search field and the host menu (T015 is ticked for the code and the unit tests only), double-click, Return and the row menu (T016), the unavailable-host lines (T018, no failed host was available without a change to the user's host list), the palette search (T020 is ticked for the link and the code).
-- T016 and T018: the code exists and builds. They stay open until a live check with an unlocked screen.
+- Second live check (2026-11-14, screen unlocked, GUI driven with `orca computer`, System Events and CGEvent). The Debug build ran with `GANTRY_HOSTS_PATH` set to a test host list: the Apple `container` host and an SSH host that cannot connect. The user's host list did not change. Results:
+  - Header clicks: CPU, Memory, Name and Host sort, and a second click reverses the order. Ties sort by name.
+  - Search field: real typing of "redis" leaves one row. A text that matches nothing shows "No Matching Containers", and Clear Filters clears the field and brings the rows back. An accessibility `set-value` on the field does not reach the SwiftUI binding. This is a limit of the test tool, not of the app.
+  - Host menu: one host, the unreachable host (empty state) and All Hosts.
+  - Row: Return and double-click open Containers with the container selected. The row menu: Show in Containers, Show Stats (opens the Stats tab) and Copy Name (the clipboard gets the name).
+  - Unavailable host: "Connecting…" without Retry, "Connection failed" with the reason and Retry. Retry changes the line to "Connecting…" at once. The rows of the other host stay.
+  - Palette: ⌘K, "activity" finds Resource Usage, and Return opens it.
+  - The Containers list of the Apple `container` host shows "Up 7 minutes".
+- Fix from this check: the line of an unavailable host was one combined accessibility element that held the Retry button. Now the texts are one element and Retry is a separate button. No unit test: the change is in the view structure only. Checked in the accessibility tree.
+- Not a defect of this spec, still open: the sort and the filter go back to the default when the user leaves the table.
 
 ## Dependencies
 
