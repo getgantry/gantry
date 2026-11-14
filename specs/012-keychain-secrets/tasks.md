@@ -63,6 +63,7 @@
 - [x] T027 Translations for every new string in all 28 languages in `App/Localizable.xcstrings` and `Packages/AppCore/Sources/AppCore/Resources/Localizable.xcstrings`; `scripts/check-localization.py` reports 0 problems
 - [x] T028 Run DockerKit, AppCore and GantryMCP tests; build the app with `xcodebuild -jobs 3`
 - [x] T029 Live check of the apple/container path without the GUI: a create through `AppleContainerTransport` and the real CLI 1.7.1 had `--env GKS_TOKEN` only in argv, the container got the exact value and the `com.gantry.secret-env` label; `gks-live` removed
+- [x] T031 Live check of the Docker path without the GUI: Docker 29.6.2 on an SSH host, through an SSH socket tunnel and `UnixSocketTransport`. A recipe with a secret row went through `resolvedCreateRequest`. The value was only in the create body, and in none of the path, the query, the recipe JSON or the copied command. The container saw the exact value. Inspect-to-recipe gave a secret row with an empty value. `redactInspectJSON` printed `GKS_TOKEN=[REDACTED]`. `gks-docker` removed
 - [ ] T030 GUI live check per `quickstart.md` (Settings ▸ Secrets, key menu in New Container and Quick Run, inspector, Touch ID prompt) with the Debug build and `scripts/gantry-ctl`. Open: the shared GUI was not handed to this agent
 
 ## Dependencies
