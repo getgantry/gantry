@@ -6,7 +6,7 @@ import Foundation
 ///     gantry://open/containers?host=Apple%20Container&item=web
 ///     gantry://open/kubernetes        gantry://palette        gantry://settings
 public enum AppLink: Equatable, Sendable {
-    /// A top-level place: `dashboard`, `kubernetes`, or a host section name.
+    /// A top-level place: `dashboard`, `kubernetes`, `usage`, or a host section name.
     case open(target: String, host: String?, item: String?)
     case palette
     case settings
@@ -26,7 +26,7 @@ public enum AppLink: Equatable, Sendable {
     }
 
     /// Targets that do not belong to a host.
-    public static let globalTargets: Set<String> = ["dashboard", "kubernetes"]
+    public static let globalTargets: Set<String> = ["dashboard", "kubernetes", "usage"]
     /// Host section names, the same as `HostSection.rawValue` in the app.
     public static let sectionTargets: Set<String> = [
         "overview", "containers", "images", "volumes", "networks",

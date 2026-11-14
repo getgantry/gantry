@@ -10,6 +10,8 @@ struct AppLinkTests {
     @Test func opensGlobalPlaces() {
         #expect(parse("gantry://open/dashboard") == .open(target: "dashboard", host: nil, item: nil))
         #expect(parse("gantry://open/Kubernetes") == .open(target: "kubernetes", host: nil, item: nil))
+        #expect(parse("gantry://open/usage") == .open(target: "usage", host: nil, item: nil))
+        #expect(parse("gantry://open/usage")?.closesPalette == true)
     }
 
     @Test func opensHostSectionsWithHostAndItem() {
