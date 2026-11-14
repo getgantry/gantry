@@ -28,7 +28,9 @@ The menu bar panel gets an Activity section that reads the existing `OperationCe
 4. Debug automation for the live check: `gantry://debug/activity?path=` (the menu bar
    summary as JSON), `gantry://debug/menubar?path=` (PNG of the panel drawn off screen),
    `gantry://debug/pull?ref=&host=` (start a pull operation without the sheet) and
-   `gantry://debug/cancel` (cancel the newest running operation).
+   `gantry://debug/cancel` (cancel the newest running operation) and
+   `gantry://debug/compose?action=down|pull&project=&host=` (Compose down or pull without
+   the button and the confirmation).
 
 Notifications need no new code path: `OperationCenter.onFinish` already posts
 "Done: …" or "Failed: …" with the Show action for every kind, and posts nothing for a cancel.

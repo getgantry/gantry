@@ -5,7 +5,7 @@
 
 **Created**: 2026-11-14
 
-**Status**: Implemented. The live check is open.
+**Status**: Implemented. The live check without GUI control is done; the GUI check is open.
 
 **Input**: User description: "Show running long operations (image pull, build, compose up/down/pull) in the MenuBarExtra with progress (bytes/layers or steps), elapsed time, Cancel, and a notification on finish or failure using the existing notification actions. The menu bar icon shows activity while something runs. Reuse the existing OperationCenter/LongOperation activity model. Logic in AppCore with tests. Live Activities out of scope: ActivityKit in the macOS 27.2 SDK is @available(macOS, unavailable)."
 

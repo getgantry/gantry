@@ -55,17 +55,18 @@
 
 ## Phase 8: Polish and cross-cutting
 
-- [x] T022 Debug links `debug/activity`, `debug/menubar`, `debug/pull`, `debug/cancel` in `Packages/AppCore/Sources/AppCore/AppLink.swift` (tests in `AppLinkTests.swift`) and `App/AppLinks/AppLinkHandler.swift`; document in `docs/automation.md` and `scripts/gantry-ctl`
+- [x] T022 Debug links `debug/activity`, `debug/menubar`, `debug/pull`, `debug/cancel`, `debug/compose` in `Packages/AppCore/Sources/AppCore/AppLink.swift` (tests in `AppLinkTests.swift`) and `App/AppLinks/AppLinkHandler.swift`; document in `docs/automation.md` and `scripts/gantry-ctl`
 - [x] T023 All new strings in 28 languages in `App/Localizable.xcstrings` and `Packages/AppCore/Sources/AppCore/Resources/Localizable.xcstrings`; `scripts/check-localization.py` reports 0 problems
 - [x] T024 AppCore tests pass (`swift test` with the scratch path on the external disk)
 - [x] T025 Debug build of the app succeeds (`xcodebuild -jobs 3`)
-- [ ] T026 Open. The shared GUI was not given to this agent. Live check per `quickstart.md` with `scripts/gantry-ctl` on a Docker-free apple/container host; remove test containers `gmbp-*`
+- [x] T026 Live check per `quickstart.md` with `scripts/gantry-ctl`, without GUI control, on a Docker host over SSH (`nettop`, Docker 29.6.2) and on the apple/container host, from a test host list (`GANTRY_HOSTS_PATH`). Pull: layers and bytes go up, the panel PNG shows the row, Cancel gives `cancelled`. Compose pull and Compose down (`debug/compose`) succeed on both hosts; down removes the containers and the project network, the volume and the images stay. Test containers `gmbp-*`, their images and the volume are removed
+- [ ] T027 Open. The shared GUI was not given to this agent. GUI check: a click on Cancel in the real menu bar panel and the in-row Stop or Keep Running question, the Compose Down confirmation from the group header, the count next to the icon in the menu bar, and the notification while Gantry is in the background
 
 ## Dependencies
 
 - T002 and T003 block all stories. T005 to T007 can run in parallel.
 - US2 and US3 need T012. US5 needs T011.
-- T022 to T026 come last.
+- T022 to T027 come last.
 
 ## Implementation Strategy
 

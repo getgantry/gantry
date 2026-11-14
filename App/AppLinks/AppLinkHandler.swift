@@ -55,6 +55,10 @@ enum AppLinkHandler {
                 model.operations.cancel(newest)
             }
             #endif
+        case .debugCompose(let action, let project, let host):
+            #if DEBUG
+            DebugActivity.runCompose(action, project: project, host: host)
+            #endif
         }
     }
 
@@ -194,7 +198,11 @@ enum DebugActivity {
     /// check needs no click on the menu bar.
     static func snapshotMenuBar(to url: URL) {
         guard let model = LiveFleet.model else { return }
-        let hosting = NSHostingView(rootView: MenuBarView().environment(model))
+        // The cached display has no window background: without one, the
+        // light text of dark mode lands on a clear PNG and cannot be read.
+        let hosting = NSHostingView(
+            rootView: MenuBarView().environment(model).background(Color(nsColor: .windowBackgroundColor))
+        )
         let size = hosting.fittingSize
         let window = NSWindow(
             contentRect: NSRect(x: -10_000, y: -10_000, width: size.width, height: size.height),
@@ -211,6 +219,18 @@ enum DebugActivity {
                 try? rep.representation(using: .png, properties: [:])?.write(to: url)
             }
             window.orderOut(nil)
+        }
+    }
+
+    /// Runs Compose down or Compose pull as the group header buttons do,
+    /// without the confirmation.
+    static func runCompose(_ action: AppLink.ComposeDebugAction, project: String, host: String?) {
+        guard let model = LiveFleet.model,
+              let hostID = AppLink.resolveHost(host, in: model.sessions.map { ($0.id, $0.host.name) }),
+              let session = model.session(id: hostID) else { return }
+        switch action {
+        case .down: session.composeDown(project: project)
+        case .pull: session.composePull(project: project)
         }
     }
 

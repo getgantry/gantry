@@ -24,13 +24,20 @@ public enum AppLink: Equatable, Sendable {
     case debugPull(reference: String, host: String?)
     /// Debug builds only: cancel the newest running operation.
     case cancelNewestOperation
+    /// Debug builds only: run Compose down or Compose pull on a project
+    /// without the button and without the confirmation.
+    case debugCompose(action: ComposeDebugAction, project: String, host: String?)
+
+    public enum ComposeDebugAction: String, Sendable, Hashable {
+        case down, pull
+    }
 
     /// Debug links keep the palette, so a script can take a snapshot of it.
     public var closesPalette: Bool {
         switch self {
         case .open, .settings: true
         case .palette, .snapshot, .state, .appearance, .activity, .menuBarSnapshot, .debugPull,
-             .cancelNewestOperation: false
+             .cancelNewestOperation, .debugCompose: false
         }
     }
 
@@ -83,6 +90,10 @@ public enum AppLink: Equatable, Sendable {
                 return .debugPull(reference: reference, host: nonEmpty(query["host"]))
             case "cancel":
                 return .cancelNewestOperation
+            case "compose":
+                guard let action = query["action"].flatMap(ComposeDebugAction.init(rawValue:)),
+                      let project = nonEmpty(query["project"]) else { return nil }
+                return .debugCompose(action: action, project: project, host: nonEmpty(query["host"]))
             default:
                 return nil
             }
