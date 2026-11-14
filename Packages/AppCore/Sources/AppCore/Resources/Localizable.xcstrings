@@ -10112,6 +10112,178 @@
         }
       }
     },
+    "Apple container sets CPUs and memory for every container. Check that the limits in the file are the ones you want.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container sets CPUs and memory for every container. Check that the limits in the file are the ones you want."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container задава процесори и памет за всеки контейнер. Проверете дали ограниченията във файла са тези, които искате."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container nastavuje procesory a paměť pro každý kontejner. Zkontrolujte, zda limity v souboru odpovídají vašim požadavkům."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container angiver CPU'er og hukommelse for hver container. Kontrollér, at grænserne i filen er dem, du ønsker."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container legt CPUs und Arbeitsspeicher für jeden Container fest. Prüfe, ob die Limits in der Datei die gewünschten sind."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Apple container ορίζει CPU και μνήμη για κάθε κοντέινερ. Ελέγξτε ότι τα όρια στο αρχείο είναι αυτά που θέλετε."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container asigna CPU y memoria a cada contenedor. Comprueba que los límites del archivo son los que quieres."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container määrab igale konteinerile protsessorid ja mälu. Kontrolli, kas faili piirangud on soovitud."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container määrittää suorittimet ja muistin jokaiselle kontille. Tarkista, että tiedoston rajat ovat haluamasi."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container définit des CPU et de la mémoire pour chaque conteneur. Vérifiez que les limites du fichier sont celles que vous voulez."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container postavlja procesore i memoriju za svaki kontejner. Provjerite jesu li ograničenja u datoteci ona koja želite."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az Apple container minden konténerhez beállítja a processzorokat és a memóriát. Ellenőrizze, hogy a fájlban lévő korlátok megfelelnek-e."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container imposta CPU e memoria per ogni container. Controlla che i limiti nel file siano quelli che vuoi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container kiekvienam konteineriui nustato procesorius ir atmintį. Patikrinkite, ar faile esantys apribojimai yra tokie, kokių norite."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container katram konteineram iestata procesorus un atmiņu. Pārbaudiet, vai faila ierobežojumi ir tādi, kādus vēlaties."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container angir CPU-er og minne for hver container. Kontroller at grensene i filen er de du vil ha."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container stelt cpu's en geheugen in voor elke container. Controleer of de limieten in het bestand de gewenste zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container ustawia procesory i pamięć dla każdego kontenera. Sprawdź, czy limity w pliku są takie, jakich chcesz."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Apple container define CPU e memória para cada contentor. Verifique se os limites no ficheiro são os pretendidos."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container setează procesoare și memorie pentru fiecare container. Verificați dacă limitele din fișier sunt cele dorite."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container задаёт процессоры и память для каждого контейнера. Проверьте, что ограничения в файле те, которые вам нужны."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container nastavuje procesory a pamäť pre každý kontajner. Skontrolujte, či limity v súbore zodpovedajú vašim požiadavkám."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container nastavi procesorje in pomnilnik za vsak vsebnik. Preverite, ali so omejitve v datoteki takšne, kot jih želite."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container поставља процесоре и меморију за сваки контејнер. Проверите да ли су ограничења у датотеци она која желите."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container postavlja procesore i memoriju za svaki kontejner. Proverite da li su ograničenja u datoteci ona koja želite."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container anger processorer och minne för varje container. Kontrollera att gränserna i filen är de du vill ha."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container задає процесори і пам’ять для кожного контейнера. Перевірте, чи обмеження у файлі такі, як вам потрібно."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple container 会为每个容器设定 CPU 和内存。请确认文件中的限制符合你的需要。"
+          }
+        }
+      }
+    },
     "Attaching…": {
       "localizations": {
         "en": {
@@ -10452,6 +10624,178 @@
           "stringUnit": {
             "state": "translated",
             "value": "Авторизация отменена."
+          }
+        }
+      }
+    },
+    "Bind sources are paths on the remote host.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bind sources are paths on the remote host."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Източниците на bind монтиранията са пътища на отдалечения хост."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zdroje připojení bind jsou cesty na vzdáleném hostiteli."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kilderne til bind-monteringer er stier på den eksterne vært."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Quellen der Bind-Mounts sind Pfade auf dem entfernten Host."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Οι πηγές των προσαρτήσεων bind είναι διαδρομές στον απομακρυσμένο κεντρικό υπολογιστή."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los orígenes de los montajes bind son rutas del host remoto."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bind-haakepunktide allikad on kaughosti teed."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bind-liitosten lähteet ovat polkuja etäisännässä."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les sources des montages bind sont des chemins sur l'hôte distant."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izvori bind montiranja su putanje na udaljenom hostu."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A bind csatolások forrásai a távoli gazdagép útvonalai."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le origini dei mount bind sono percorsi sull'host remoto."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bind prijungimų šaltiniai yra nuotolinio pagrindinio kompiuterio keliai."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bind montējumu avoti ir attālā resursdatora ceļi."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kildene til bind-monteringer er stier på den eksterne verten."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De bronnen van bind-mounts zijn paden op de externe host."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Źródła montowań bind to ścieżki na zdalnym hoście."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As origens das montagens bind são caminhos no anfitrião remoto."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sursele montărilor bind sunt căi de pe gazda la distanță."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Источники bind-монтирований — это пути на удалённом хосте."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zdroje pripojení bind sú cesty na vzdialenom hostiteľovi."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viri priklopov bind so poti na oddaljenem gostitelju."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Извори bind монтирања су путање на удаљеном хосту."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izvori bind montiranja su putanje na udaljenom hostu."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Källorna för bind-monteringar är sökvägar på fjärrvärden."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Джерела bind-монтувань — це шляхи на віддаленому хості."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "绑定挂载的来源是远程主机上的路径。"
           }
         }
       }
@@ -10968,6 +11312,1554 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выберите файл ядра на этом Mac."
+          }
+        }
+      }
+    },
+    "Compose has no setting for %@. The file leaves it out.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose has no setting for %@. The file leaves it out."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose няма настройка за %@. Файлът я пропуска."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nemá nastavení pro %@. Soubor ho vynechává."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose har ingen indstilling for %@. Filen udelader den."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose hat keine Einstellung für %@. Die Datei lässt sie weg."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Compose δεν έχει ρύθμιση για το %@. Το αρχείο την παραλείπει."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose no tiene ningún ajuste para %@. El archivo lo omite."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose'il pole %@ jaoks seadet. Fail jätab selle välja."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composessa ei ole asetusta kohteelle %@. Tiedosto jättää sen pois."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose n'a aucun réglage pour %@. Le fichier l'omet."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nema postavku za %@. Datoteka je izostavlja."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Compose-ban nincs beállítás ehhez: %@. A fájl kihagyja."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose non ha un'impostazione per %@. Il file la omette."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose neturi %@ nustatymo. Failas jį praleidžia."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nav iestatījuma %@. Fails to izlaiž."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose har ingen innstilling for %@. Filen utelater den."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose heeft geen instelling voor %@. Het bestand laat die weg."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nie ma ustawienia dla %@. Plik je pomija."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Compose não tem nenhuma definição para %@. O ficheiro omite-a."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nu are nicio setare pentru %@. Fișierul o omite."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В Compose нет настройки для %@. Файл её не включает."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nemá nastavenie pre %@. Súbor ho vynecháva."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nima nastavitve za %@. Datoteka jo izpusti."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose нема подешавање за %@. Датотека га изоставља."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose nema podešavanje za %@. Datoteka ga izostavlja."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose har ingen inställning för %@. Filen utelämnar den."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У Compose немає налаштування для %@. Файл його не містить."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose 没有对应 %@ 的设置。文件已将其省略。"
+          }
+        }
+      }
+    },
+    "Gantry could not inspect the image, so the file also repeats the image defaults.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry could not inspect the image, so the file also repeats the image defaults."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не можа да инспектира образа, затова файлът повтаря и стандартните му стойности."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohl provést inspekci image, proto soubor opakuje i jeho výchozí hodnoty."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke inspicere imaget, så filen gentager også imagets standardværdier."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry konnte das Image nicht untersuchen, daher wiederholt die Datei auch die Standardwerte des Images."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν μπόρεσε να επιθεωρήσει την εικόνα, οπότε το αρχείο επαναλαμβάνει και τις προεπιλογές της."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no ha podido inspeccionar la imagen, así que el archivo también repite los valores predeterminados de la imagen."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei saanud tõmmist uurida, seega kordab fail ka tõmmise vaikeväärtusi."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei voinut tarkastella levykuvaa, joten tiedosto toistaa myös levykuvan oletusarvot."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry n'a pas pu inspecter l'image : le fichier répète donc aussi les valeurs par défaut de l'image."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao pregledati sliku pa datoteka ponavlja i zadane vrijednosti slike."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem tudta megvizsgálni az image-et, ezért a fájl az image alapértékeit is megismétli."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non è riuscito a ispezionare l'immagine, quindi il file ripete anche i valori predefiniti dell'immagine."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nepavyko patikrinti atvaizdo, todėl faile kartojamos ir numatytosios atvaizdo reikšmės."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nevarēja pārbaudīt attēlu, tāpēc fails atkārto arī attēla noklusējuma vērtības."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke inspisere imaget, så filen gjentar også standardverdiene til imaget."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kon de image niet inspecteren, dus het bestand herhaalt ook de standaardwaarden van de image."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie może przeprowadzić inspekcji obrazu, więc plik powtarza też jego wartości domyślne."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não conseguiu inspecionar a imagem, por isso o ficheiro também repete as predefinições da imagem."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu a putut inspecta imaginea, așa că fișierul repetă și valorile implicite ale imaginii."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не удалось проверить образ, поэтому файл повторяет и значения образа по умолчанию."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohol preskúmať obraz, preto súbor opakuje aj jeho predvolené hodnoty."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ni mogel pregledati slike, zato datoteka ponovi tudi privzete vrednosti slike."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry није могао да прегледа слику, па датотека понавља и подразумеване вредности слике."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao da pregleda sliku, pa datoteka ponavlja i podrazumevane vrednosti slike."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunde inte granska imagen, så filen upprepar även imagens standardvärden."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не вдалося перевірити образ, тому файл повторює і типові значення образу."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 无法检查该镜像，因此文件中也包含镜像的默认值。"
+          }
+        }
+      }
+    },
+    "Gantry could not read the inspect data of the container.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry could not read the inspect data of the container."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не можа да прочете данните от инспекцията на контейнера."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohl přečíst data inspekce kontejneru."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke læse containerens inspektionsdata."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry konnte die Inspect-Daten des Containers nicht lesen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry δεν μπόρεσε να διαβάσει τα δεδομένα επιθεώρησης του κοντέινερ."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry no ha podido leer los datos de inspección del contenedor."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei saanud konteineri uurimisandmeid lugeda."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ei voinut lukea kontin tarkasteluaineistoa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry n'a pas pu lire les données d'inspection du conteneur."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao pročitati podatke pregleda kontejnera."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry nem tudta beolvasni a konténer vizsgálati adatait."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry non è riuscito a leggere i dati di ispezione del container."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nepavyko nuskaityti konteinerio tikrinimo duomenų."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nevarēja nolasīt konteinera pārbaudes datus."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunne ikke lese inspeksjonsdataene til containeren."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kon de inspectiegegevens van de container niet lezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nie może odczytać danych inspekcji kontenera."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry não conseguiu ler os dados de inspeção do contentor."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nu a putut citi datele de inspecție ale containerului."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не удалось прочитать данные инспекции контейнера."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nemohol prečítať údaje preskúmania kontajnera."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry ni mogel prebrati podatkov pregleda vsebnika."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry није могао да прочита податке инспекције контејнера."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry nije mogao da pročita podatke inspekcije kontejnera."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry kunde inte läsa containerns granskningsdata."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry не вдалося прочитати дані перевірки контейнера."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 无法读取容器的检查数据。"
+          }
+        }
+      }
+    },
+    "Select one or more containers to export.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select one or more containers to export."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изберете един или повече контейнери за експортиране."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyberte jeden nebo více kontejnerů k exportu."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en eller flere containere, der skal eksporteres."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle einen oder mehrere Container zum Exportieren aus."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επιλέξτε ένα ή περισσότερα κοντέινερ για εξαγωγή."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecciona uno o varios contenedores para exportar."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vali eksportimiseks üks või mitu konteinerit."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitse yksi tai useampi vietävä kontti."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélectionnez un ou plusieurs conteneurs à exporter."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odaberite jedan ili više kontejnera za izvoz."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jelöljön ki egy vagy több exportálandó konténert."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleziona uno o più container da esportare."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasirinkite vieną ar kelis eksportuojamus konteinerius."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atlasiet vienu vai vairākus eksportējamos konteinerus."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velg én eller flere containere som skal eksporteres."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecteer een of meer containers om te exporteren."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz co najmniej jeden kontener do eksportu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione um ou mais contentores para exportar."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selectați unul sau mai multe containere de exportat."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите один или несколько контейнеров для экспорта."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyberte jeden alebo viac kontajnerov na export."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izberite enega ali več vsebnikov za izvoz."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изаберите један или више контејнера за извоз."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izaberite jedan ili više kontejnera za izvoz."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj en eller flera containrar att exportera."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть один або кілька контейнерів для експорту."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择一个或多个要导出的容器。"
+          }
+        }
+      }
+    },
+    "The anonymous volume at %@ becomes a new, empty volume. Its data is not copied.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The anonymous volume at %@ becomes a new, empty volume. Its data is not copied."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимният том в %@ става нов, празен том. Данните му не се копират."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymní svazek v %@ se stane novým prázdným svazkem. Jeho data se nekopírují."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det anonyme volume i %@ bliver et nyt, tomt volume. Dets data kopieres ikke."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das anonyme Volume unter %@ wird ein neues, leeres Volume. Seine Daten werden nicht kopiert."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ο ανώνυμος τόμος στο %@ γίνεται νέος, κενός τόμος. Τα δεδομένα του δεν αντιγράφονται."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El volumen anónimo en %@ pasa a ser un volumen nuevo y vacío. Sus datos no se copian."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonüümne köide asukohas %@ muutub uueks tühjaks köiteks. Selle andmeid ei kopeerita."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimetön taltio kohteessa %@ muuttuu uudeksi tyhjäksi taltioksi. Sen tietoja ei kopioida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le volume anonyme sur %@ devient un nouveau volume vide. Ses données ne sont pas copiées."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni volumen na %@ postaje novi, prazan volumen. Njegovi se podaci ne kopiraju."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) %@ helyen lévő névtelen kötet új, üres kötet lesz. Az adatai nem másolódnak."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il volume anonimo in %@ diventa un volume nuovo e vuoto. I suoi dati non vengono copiati."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anoniminis tomas %@ tampa nauju tuščiu tomu. Jo duomenys nekopijuojami."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonīmais sējums %@ kļūst par jaunu, tukšu sējumu. Tā dati netiek kopēti."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det anonyme volumet på %@ blir et nytt, tomt volum. Dataene kopieres ikke."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het anonieme volume op %@ wordt een nieuw, leeg volume. De gegevens worden niet gekopieerd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimowy wolumin w %@ staje się nowym, pustym woluminem. Jego dane nie są kopiowane."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O volume anónimo em %@ passa a ser um volume novo e vazio. Os seus dados não são copiados."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumul anonim din %@ devine un volum nou, gol. Datele lui nu sunt copiate."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимный том в %@ станет новым пустым томом. Его данные не копируются."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymný zväzok v %@ sa stane novým prázdnym zväzkom. Jeho údaje sa nekopírujú."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni nosilec na %@ postane nov, prazen nosilec. Njegovi podatki se ne kopirajo."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонимни волумен на %@ постаје нови, празан волумен. Његови подаци се не копирају."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonimni volumen na %@ postaje novi, prazan volumen. Njegovi podaci se ne kopiraju."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den anonyma volymen på %@ blir en ny, tom volym. Dess data kopieras inte."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Анонімний том у %@ стане новим порожнім томом. Його дані не копіюються."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 处的匿名卷会成为一个新的空卷。其数据不会被复制。"
+          }
+        }
+      }
+    },
+    "The container uses the network of the container %@, which is not in the export.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container uses the network of the container %@, which is not in the export."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнерът използва мрежата на контейнера %@, който не е в експорта."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner používá síť kontejneru %@, který v exportu není."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containeren bruger netværket fra containeren %@, som ikke er med i eksporten."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Container nutzt das Netzwerk des Containers %@, der nicht im Export ist."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το κοντέινερ χρησιμοποιεί το δίκτυο του κοντέινερ %@, το οποίο δεν περιλαμβάνεται στην εξαγωγή."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenedor usa la red del contenedor %@, que no está en la exportación."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konteiner kasutab konteineri %@ võrku, mis ei ole ekspordis."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontti käyttää kontin %@ verkkoa, joka ei ole mukana viennissä."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le conteneur utilise le réseau du conteneur %@, qui n'est pas dans l'exportation."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner koristi mrežu kontejnera %@, koji nije u izvozu."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A konténer a(z) %@ konténer hálózatát használja, amely nincs az exportban."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il container usa la rete del container %@, che non è nell'esportazione."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konteineris naudoja konteinerio %@ tinklą, kurio nėra eksporte."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konteiners izmanto konteinera %@ tīklu, kas nav eksportā."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containeren bruker nettverket til containeren %@, som ikke er med i eksporten."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De container gebruikt het netwerk van de container %@, die niet in de export zit."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontener używa sieci kontenera %@, którego nie ma w eksporcie."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O contentor usa a rede do contentor %@, que não está na exportação."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containerul folosește rețeaua containerului %@, care nu este în export."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнер использует сеть контейнера %@, которого нет в экспорте."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontajner používa sieť kontajnera %@, ktorý v exporte nie je."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vsebnik uporablja omrežje vsebnika %@, ki ni v izvozu."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контејнер користи мрежу контејнера %@, који није у извозу."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontejner koristi mrežu kontejnera %@, koji nije u izvozu."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containern använder nätverket för containern %@, som inte finns i exporten."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контейнер використовує мережу контейнера %@, якого немає в експорті."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该容器使用容器 %@ 的网络，但该容器不在导出范围内。"
+          }
+        }
+      }
+    },
+    "The file leaves out the mount at %@ (type %@).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file leaves out the mount at %@ (type %@)."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлът пропуска монтирането в %1$@ (тип %2$@)."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soubor vynechává připojení v %1$@ (typ %2$@)."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen udelader monteringen i %1$@ (type %2$@)."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei lässt den Mount unter %1$@ weg (Typ %2$@)."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το αρχείο παραλείπει την προσάρτηση στο %1$@ (τύπος %2$@)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo omite el montaje en %1$@ (tipo %2$@)."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fail jätab välja haakepunkti %1$@ (tüüp %2$@)."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiedosto jättää pois liitoksen kohteessa %1$@ (tyyppi %2$@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier omet le montage sur %1$@ (type %2$@)."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izostavlja montiranje na %1$@ (vrsta %2$@)."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A fájl kihagyja a(z) %1$@ csatolást (típus: %2$@)."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il file omette il mount in %1$@ (tipo %2$@)."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failas praleidžia prijungimą %1$@ (tipas %2$@)."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fails izlaiž montējumu %1$@ (tips %2$@)."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen utelater monteringen på %1$@ (type %2$@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het bestand laat de mount op %1$@ weg (type %2$@)."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plik pomija montowanie w %1$@ (typ %2$@)."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O ficheiro omite a montagem em %1$@ (tipo %2$@)."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fișierul omite montarea din %1$@ (tip %2$@)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл не включает монтирование в %1$@ (тип %2$@)."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Súbor vynecháva pripojenie v %1$@ (typ %2$@)."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izpusti priklop na %1$@ (vrsta %2$@)."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Датотека изоставља монтирање на %1$@ (тип %2$@)."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izostavlja montiranje na %1$@ (tip %2$@)."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen utelämnar monteringen på %1$@ (typ %2$@)."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл не містить монтування в %1$@ (тип %2$@)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件省略了 %1$@ 处的挂载（类型 %2$@）。"
+          }
+        }
+      }
+    },
+    "The file leaves out the secret variable %@. Compose cannot read a variable with this name.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file leaves out the secret variable %@. Compose cannot read a variable with this name."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлът пропуска тайната променлива %@. Compose не може да чете променлива с това име."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soubor vynechává tajnou proměnnou %@. Compose nedokáže načíst proměnnou s tímto názvem."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen udelader den hemmelige variabel %@. Compose kan ikke læse en variabel med dette navn."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei lässt die geheime Variable %@ weg. Compose kann keine Variable mit diesem Namen lesen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το αρχείο παραλείπει τη μυστική μεταβλητή %@. Το Compose δεν μπορεί να διαβάσει μεταβλητή με αυτό το όνομα."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo omite la variable secreta %@. Compose no puede leer una variable con ese nombre."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fail jätab salajase muutuja %@ välja. Compose ei saa sellise nimega muutujat lugeda."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiedosto jättää pois salaisen muuttujan %@. Compose ei voi lukea tämännimistä muuttujaa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier omet la variable secrète %@. Compose ne peut pas lire une variable portant ce nom."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izostavlja tajnu varijablu %@. Compose ne može čitati varijablu s tim imenom."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A fájl kihagyja a(z) %@ titkos változót. A Compose nem tud ilyen nevű változót olvasni."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il file omette la variabile segreta %@. Compose non può leggere una variabile con questo nome."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failas praleidžia slaptą kintamąjį %@. Compose negali nuskaityti tokio pavadinimo kintamojo."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fails izlaiž slepeno mainīgo %@. Compose nevar nolasīt mainīgo ar šādu nosaukumu."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen utelater den hemmelige variabelen %@. Compose kan ikke lese en variabel med dette navnet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het bestand laat de geheime variabele %@ weg. Compose kan geen variabele met deze naam lezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plik pomija poufną zmienną %@. Compose nie może odczytać zmiennej o tej nazwie."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O ficheiro omite a variável secreta %@. O Compose não consegue ler uma variável com este nome."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fișierul omite variabila secretă %@. Compose nu poate citi o variabilă cu acest nume."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл не включает секретную переменную %@. Compose не может прочитать переменную с таким именем."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Súbor vynecháva tajnú premennú %@. Compose nedokáže načítať premennú s týmto názvom."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izpusti skrivno spremenljivko %@. Compose ne more prebrati spremenljivke s tem imenom."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Датотека изоставља тајну променљиву %@. Compose не може да чита променљиву са тим именом."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoteka izostavlja tajnu promenljivu %@. Compose ne može da čita promenljivu sa tim imenom."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen utelämnar den hemliga variabeln %@. Compose kan inte läsa en variabel med det namnet."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл не містить секретної змінної %@. Compose не може прочитати змінну з такою назвою."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件省略了机密变量 %@。Compose 无法读取此名称的变量。"
+          }
+        }
+      }
+    },
+    "The image is known only by its ID. Replace it with a name and tag that a registry has.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image is known only by its ID. Replace it with a name and tag that a registry has."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образът е известен само по ID. Заменете го с име и таг от регистър."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image je známý jen podle ID. Nahraďte ho názvem a tagem z registru."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaget kendes kun ved sit id. Erstat det med et navn og et tag fra et registry."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Image ist nur über seine ID bekannt. Ersetze sie durch einen Namen und ein Tag aus einer Registry."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η εικόνα είναι γνωστή μόνο από το ID της. Αντικαταστήστε το με όνομα και ετικέτα από ένα μητρώο."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La imagen solo se conoce por su ID. Sustitúyelo por un nombre y una etiqueta de un registro."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tõmmis on teada ainult ID järgi. Asenda see registris oleva nime ja sildiga."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Levykuva tunnetaan vain tunnisteella. Korvaa se rekisterissä olevalla nimellä ja tagilla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'image n'est connue que par son ID. Remplacez-le par un nom et un tag présents dans un registre."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je poznata samo po ID-u. Zamijenite ga imenom i oznakom iz registra."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az image csak az azonosítójáról ismert. Cserélje le egy regisztrációs adatbázisban lévő névre és címkére."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'immagine è nota solo tramite il suo ID. Sostituiscilo con un nome e un tag presenti in un registro."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atvaizdas žinomas tik pagal ID. Pakeiskite jį pavadinimu ir žyme iš registro."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attēls ir zināms tikai pēc ID. Aizstājiet to ar nosaukumu un tagu no reģistra."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaget er bare kjent ved ID-en. Erstatt den med et navn og en tag fra et register."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De image is alleen bekend via zijn ID. Vervang die door een naam en tag uit een registry."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obraz jest znany tylko po ID. Zastąp je nazwą i tagiem z rejestru."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A imagem só é conhecida pelo ID. Substitua-o por um nome e uma etiqueta de um registo."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imaginea este cunoscută doar după ID. Înlocuiți-l cu un nume și o etichetă dintr-un registru."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образ известен только по ID. Замените его именем и тегом из реестра."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obraz je známy iba podľa ID. Nahraďte ho názvom a tagom z registra."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je znana samo po ID-ju. Zamenjajte ga z imenom in oznako iz registra."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слика је позната само по ID-у. Замените га именом и ознаком из регистра."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slika je poznata samo po ID-u. Zamenite ga imenom i oznakom iz registra."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagen är bara känd via sitt id. Ersätt det med ett namn och en tagg från ett register."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Образ відомий лише за ID. Замініть його назвою і тегом із реєстру."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像只能通过 ID 识别。请将其替换为镜像仓库中的名称和标签。"
           }
         }
       }
