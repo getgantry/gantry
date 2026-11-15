@@ -25,6 +25,7 @@ A maintainer opens a pull request. The AppCore tests pass on the CI runner when 
 
 - **FR-001**: The tests in `ExecSessionTests` MUST NOT use a fixed sleep as the only wait before an assertion.
 - **FR-002**: Each wait MUST end at the event, with a time limit of 3 s.
+- **FR-003**: A test that proves that a call does not wait for a slow probe MUST keep a margin of at least 2 s between the limit and the probe time.
 
 ## Success Criteria
 

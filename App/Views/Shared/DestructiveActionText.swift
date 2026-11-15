@@ -30,6 +30,7 @@ enum DestructiveActionText {
         case .deleteOldDataRoot: return String(localized: "Delete the old copy of the container data?")
         case .switchVolume: return String(localized: "Use the new location of “\(name)”?")
         case .forgetFolderVolume: return String(localized: "Remove folder volume “\(name)” from Gantry?")
+        case .clearBuildHistory: return String(localized: "Clear the build history of “\(name)”?")
         }
     }
 
@@ -96,6 +97,7 @@ enum DestructiveActionText {
         case .deleteOldDataRoot: String(localized: "Delete Old Copy")
         case .switchVolume: String(localized: "Recreate Containers")
         case .forgetFolderVolume: String(localized: "Remove from Gantry")
+        case .clearBuildHistory: String(localized: "Clear History")
         }
     }
 
@@ -136,6 +138,8 @@ enum DestructiveActionText {
             String(localized: "Gantry removes these containers and makes them again with the new location. Data that is not in a volume is lost.")
         case .forgetFolderVolume:
             String(localized: "The folder and its files stay on the disk.")
+        case .clearBuildHistory:
+            String(localized: "Gantry deletes the records and logs of the builds that it started on this host. Images and BuildKit records do not change.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }
