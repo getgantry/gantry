@@ -33,6 +33,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case forgetFolderVolume
         /// Remove the containers and networks of a Compose project.
         case composeDown
+        /// Remove the build records that Gantry keeps for a host.
+        case clearBuildHistory
     }
 
     /// What else happens when the action runs.
@@ -204,6 +206,11 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
             names: [volume] + containers.map(\.displayName),
             impact: running > 0 ? .runningContainersStop(running) : .none
         )
+    }
+
+    /// Removes the Gantry build records of a host; `targets` holds the host id.
+    public static func clearBuildHistory(hostID: UUID, hostName: String) -> DestructiveAction {
+        DestructiveAction(kind: .clearBuildHistory, targets: [hostID.uuidString], names: [hostName])
     }
 
     public static func forgetFolderVolume(_ name: String) -> DestructiveAction {

@@ -7,6 +7,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     case overview
     case containers
     case images
+    case builds
     case volumes
     case networks
     case machines
@@ -21,6 +22,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .overview: String(localized: "Overview")
         case .containers: String(localized: "Containers")
         case .images: String(localized: "Images")
+        case .builds: String(localized: "Builds")
         case .volumes: String(localized: "Volumes")
         case .networks: String(localized: "Networks")
         case .machines: String(localized: "Machines")
@@ -35,6 +37,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
         case .overview: "gauge.with.dots.needle.50percent"
         case .containers: "shippingbox"
         case .images: "square.stack.3d.up"
+        case .builds: "hammer"
         case .volumes: "externaldrive"
         case .networks: "network"
         case .machines: "cube.transparent"
@@ -48,7 +51,7 @@ enum HostSection: String, Hashable, CaseIterable, Identifiable {
     /// sidebar instead of leaving an empty detail column.
     var isFullWidth: Bool {
         switch self {
-        case .overview, .hostFiles, .system: true
+        case .overview, .builds, .hostFiles, .system: true
         default: false
         }
     }
@@ -851,6 +854,8 @@ struct ContentView: View {
             ContainerListView(session: session, selection: containerSelectionBinding)
         case .images:
             ImageListView(session: session, selection: imageSelectionBinding)
+        case .builds:
+            BuildHistoryView(session: session)
         case .volumes:
             VolumeListView(session: session, selection: volumeSelectionBinding)
         case .networks:

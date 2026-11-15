@@ -31,6 +31,7 @@ enum DestructiveActionText {
         case .switchVolume: return String(localized: "Use the new location of “\(name)”?")
         case .forgetFolderVolume: return String(localized: "Remove folder volume “\(name)” from Gantry?")
         case .composeDown: return String(localized: "Compose down “\(name)”?")
+        case .clearBuildHistory: return String(localized: "Clear the build history of “\(name)”?")
         }
     }
 
@@ -98,6 +99,7 @@ enum DestructiveActionText {
         case .switchVolume: String(localized: "Recreate Containers")
         case .forgetFolderVolume: String(localized: "Remove from Gantry")
         case .composeDown: String(localized: "Compose Down")
+        case .clearBuildHistory: String(localized: "Clear History")
         }
     }
 
@@ -140,6 +142,8 @@ enum DestructiveActionText {
             String(localized: "The folder and its files stay on the disk.")
         case .composeDown:
             String(localized: "Gantry removes the containers and networks of the project. Volumes and images stay.")
+        case .clearBuildHistory:
+            String(localized: "Gantry deletes the records and logs of the builds that it started on this host. Images and BuildKit records do not change.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }
