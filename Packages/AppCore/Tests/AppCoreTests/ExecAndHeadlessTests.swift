@@ -61,8 +61,9 @@ import Testing
         let (session, writes, _) = await makeSession()
         session.send(Data("abc".utf8))
         session.send(Data("def".utf8))
-        // Let the ordered pump drain.
-        try? await Task.sleep(for: .milliseconds(100))
+        for _ in 0..<300 where await writes.count < 2 {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
         let count = await writes.count
         #expect(count == 2)
         let combined = await writes.combinedString
@@ -77,7 +78,9 @@ import Testing
             Task { await errorBox.recordError(message) }
         }
         session.send(Data("x".utf8))
-        try? await Task.sleep(for: .milliseconds(100))
+        for _ in 0..<300 where await errorBox.errorMessage == nil {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
         let got = await errorBox.errorMessage
         #expect(got != nil)
         session.terminate()
@@ -93,7 +96,9 @@ import Testing
     @Test func terminateClosesConnection() async {
         let (session, _, closed) = await makeSession()
         session.terminate()
-        try? await Task.sleep(for: .milliseconds(50))
+        for _ in 0..<300 where await !closed.wasClosed {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
         #expect(await closed.wasClosed)
     }
 
