@@ -19,6 +19,7 @@ struct AppLinkTests {
             == .open(target: "containers", host: "Apple Container", item: "web"))
         #expect(parse("gantry://open/files") == .open(target: "hostFiles", host: nil, item: nil))
         #expect(parse("gantry://open/clusters?host=&item=") == .open(target: "clusters", host: nil, item: nil))
+        #expect(parse("gantry://open/Builds?host=Apple") == .open(target: "builds", host: "Apple", item: nil))
     }
 
     @Test func rejectsUnknownPlacesAndOtherSchemes() {

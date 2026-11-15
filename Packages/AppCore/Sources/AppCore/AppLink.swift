@@ -29,7 +29,7 @@ public enum AppLink: Equatable, Sendable {
     public static let globalTargets: Set<String> = ["dashboard", "kubernetes", "usage"]
     /// Host section names, the same as `HostSection.rawValue` in the app.
     public static let sectionTargets: Set<String> = [
-        "overview", "containers", "images", "volumes", "networks",
+        "overview", "containers", "images", "builds", "volumes", "networks",
         "machines", "clusters", "hostFiles", "system",
     ]
 

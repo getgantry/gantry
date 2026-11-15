@@ -12,7 +12,7 @@ enum MainWindowID: String, Codable, Hashable {
 
 @main
 struct GantryApp: App {
-    @State private var model = AppModel()
+    @State private var model = AppModel(buildHistory: .live())
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     /// Sparkle auto-updater; starts checking per Info.plist (SUFeedURL,

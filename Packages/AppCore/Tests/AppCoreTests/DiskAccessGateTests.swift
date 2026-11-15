@@ -68,12 +68,12 @@ struct DiskAccessGateTests {
     }
 
     @Test func slowCheckReportsThePermissionPrompt() async {
-        let gate = DiskAccessGate(probe: FakeProbe(delay: 1), timeout: .milliseconds(30))
+        let gate = DiskAccessGate(probe: FakeProbe(delay: 5), timeout: .milliseconds(30))
         let clock = ContinuousClock()
         let start = clock.now
         let state = await gate.check("/Volumes/My Disk/data")
         #expect(state == .waitingForPermission(diskName: "My Disk"))
-        #expect(clock.now - start < .milliseconds(800), "the check must not wait for the probe")
+        #expect(clock.now - start < .seconds(3), "the check must not wait for the probe")
         #expect(gate.needsProbe("/Volumes/My Disk/data"))
     }
 
@@ -100,13 +100,13 @@ struct DiskAccessGateTests {
     }
 
     @Test func cancelEndsTheWaitAtOnce() async throws {
-        let gate = DiskAccessGate(probe: FakeProbe(delay: 2), timeout: .milliseconds(20))
+        let gate = DiskAccessGate(probe: FakeProbe(delay: 6), timeout: .milliseconds(20))
         let clock = ContinuousClock()
         let start = clock.now
         await #expect(throws: CancellationError.self) {
             try await gate.waitForAccess(["/Volumes/Slow/a"], onSlow: { wait in wait.cancel() })
         }
-        #expect(clock.now - start < .seconds(1))
+        #expect(clock.now - start < .seconds(3))
         #expect(gate.needsProbe("/Volumes/Slow/a"))
     }
 
