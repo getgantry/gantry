@@ -346,14 +346,16 @@ struct BuildImageSheet: View {
         }
         do {
             let stream = try session.buildImageStream(spec)
+            var steps = BuildStepParser()
             for try await line in stream {
                 if let id = line.imageID { builtImageID = id }
                 if !line.text.isEmpty {
                     append(line.text)
                     let text = line.text.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !text.isEmpty {
+                        steps.consume(text)
                         operation.append(log: text)
-                        operation.update(progress: text)
+                        operation.report(steps.progress, status: steps.lastLine ?? text)
                     }
                 }
             }

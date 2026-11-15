@@ -44,16 +44,30 @@ extension HostSession {
     public func runBulk(_ action: BulkAction, on resource: BulkResource, ids: Set<String>) -> LongOperation? {
         let plan = bulkPlan(action, on: resource, ids: ids)
         guard !plan.eligible.isEmpty else { return nil }
-        let center = operations ?? OperationCenter()
         let title = String(
             localized: "\(action.displayName): \(resource.countText(plan.eligible.count))", bundle: .module
         )
-        return center.run(.bulk, title: title, host: host.name) { [weak self] operation in
+        return runPlan(action, on: resource, plan: plan, kind: .bulk, title: title)
+    }
+
+    /// Runs a ready plan as one long operation of `kind`. `after` runs when
+    /// all items ended and the user did not cancel; its error text joins the
+    /// failure report.
+    func runPlan(
+        _ action: BulkAction, on resource: BulkResource, plan: BulkPlan, kind: OperationKind, title: String,
+        cancelConfirmation: String? = nil,
+        after: (@MainActor (HostSession, LongOperation) async -> [String])? = nil
+    ) -> LongOperation {
+        let center = operations ?? OperationCenter()
+        return center.run(kind, title: title, host: host.name, cancelConfirmation: cancelConfirmation) { [weak self] operation in
             guard let self else { return nil }
             let outcome = await self.performBulk(action, on: resource, plan: plan, operation: operation)
-            if let report = outcome.failureReport {
-                self.report(report)
-                throw OperationFailure(report)
+            var extra: [String] = []
+            if let after, !Task.isCancelled { extra = await after(self, operation) }
+            if let report = outcome.failureReport ?? (extra.isEmpty ? nil : outcome.summary) {
+                let text = ([report] + extra).joined(separator: "\n")
+                self.report(text)
+                throw OperationFailure(text)
             }
             return outcome.summary
         }
@@ -67,7 +81,8 @@ extension HostSession {
         let items = plan.eligible
         var results = [BulkStepResult?](repeating: nil, count: items.count)
         var finished = 0
-        operation?.update(progress: progressText(0, items.count), fraction: 0)
+        operation?.report(Self.itemProgress(0, items.count),
+                          status: progressText(0, items.count))
         await withTaskGroup(of: (Int, BulkStepResult).self) { group in
             var next = 0
             while next < items.count || !group.isEmpty {
@@ -82,9 +97,9 @@ extension HostSession {
                 results[index] = result
                 finished += 1
                 log(result, for: items[index], to: operation)
-                operation?.update(
-                    progress: progressText(finished, items.count),
-                    fraction: Double(finished) / Double(items.count)
+                operation?.report(
+                    Self.itemProgress(finished, items.count),
+                    status: progressText(finished, items.count)
                 )
             }
         }
@@ -99,6 +114,10 @@ extension HostSession {
         if outcome.failed.isEmpty, !outcome.succeeded.isEmpty { clearStaleError() }
         await refresh(resource)
         return outcome
+    }
+
+    static func itemProgress(_ done: Int, _ total: Int) -> OperationProgress {
+        OperationProgress(items: .init(done: done, total: total, unit: .items))
     }
 
     private func progressText(_ done: Int, _ total: Int) -> String {
@@ -126,7 +145,7 @@ extension HostSession {
     private func bulkStep(_ action: BulkAction, _ resource: BulkResource, _ item: BulkItem) async -> BulkStepResult {
         guard let client else { return .failed(String(localized: "Not connected", bundle: .module)) }
         if Task.isCancelled { return .cancelled }
-        if resource == .containers, [.stop, .restart].contains(action) || action.isRemove {
+        if resource == .containers, [.stop, .restart, .down].contains(action) || action.isRemove {
             markExpectedExit(item.id)
         }
         do {
@@ -146,6 +165,12 @@ extension HostSession {
         case (.containers, .pause): try await client.pauseContainer(id: id)
         case (.containers, .unpause): try await client.unpauseContainer(id: id)
         case (.containers, .remove(let force)): try await client.removeContainer(id: id, force: force, removeVolumes: false)
+        case (.containers, .down):
+            // A graceful stop first, as `compose down` does; a stopped
+            // container makes the stop fail, and the remove still runs.
+            try? await client.stopContainer(id: id, timeout: nil)
+            try Task.checkCancellation()
+            try await client.removeContainer(id: id, force: false, removeVolumes: false)
         case (.images, .remove(let force)): try await client.removeImage(id: id, force: force)
         case (.images, .pull):
             // `id` is the tag here (see BulkPlan.images); drain the progress.

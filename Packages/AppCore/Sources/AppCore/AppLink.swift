@@ -16,12 +16,28 @@ public enum AppLink: Equatable, Sendable {
     case state(path: String)
     /// Debug builds only: `light`, `dark` or `system`.
     case appearance(String)
+    /// Debug builds only: write the menu bar activity summary as JSON.
+    case activity(path: String)
+    /// Debug builds only: write a PNG of the menu bar panel, drawn off screen.
+    case menuBarSnapshot(path: String)
+    /// Debug builds only: start a pull operation without the sheet.
+    case debugPull(reference: String, host: String?)
+    /// Debug builds only: cancel the newest running operation.
+    case cancelNewestOperation
+    /// Debug builds only: run Compose down or Compose pull on a project
+    /// without the button and without the confirmation.
+    case debugCompose(action: ComposeDebugAction, project: String, host: String?)
+
+    public enum ComposeDebugAction: String, Sendable, Hashable {
+        case down, pull
+    }
 
     /// Debug links keep the palette, so a script can take a snapshot of it.
     public var closesPalette: Bool {
         switch self {
         case .open, .settings: true
-        case .palette, .snapshot, .state, .appearance: false
+        case .palette, .snapshot, .state, .appearance, .activity, .menuBarSnapshot, .debugPull,
+             .cancelNewestOperation, .debugCompose: false
         }
     }
 
@@ -63,6 +79,21 @@ public enum AppLink: Equatable, Sendable {
             case "appearance":
                 guard let mode = query["mode"], ["light", "dark", "system"].contains(mode) else { return nil }
                 return .appearance(mode)
+            case "activity":
+                guard let file = query["path"], file.hasPrefix("/") else { return nil }
+                return .activity(path: file)
+            case "menubar":
+                guard let file = query["path"], file.hasPrefix("/") else { return nil }
+                return .menuBarSnapshot(path: file)
+            case "pull":
+                guard let reference = nonEmpty(query["ref"]) else { return nil }
+                return .debugPull(reference: reference, host: nonEmpty(query["host"]))
+            case "cancel":
+                return .cancelNewestOperation
+            case "compose":
+                guard let action = query["action"].flatMap(ComposeDebugAction.init(rawValue:)),
+                      let project = nonEmpty(query["project"]) else { return nil }
+                return .debugCompose(action: action, project: project, host: nonEmpty(query["host"]))
             default:
                 return nil
             }

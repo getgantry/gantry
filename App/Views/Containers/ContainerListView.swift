@@ -278,6 +278,10 @@ struct ContainerListView: View {
                 groupButton("square.stack.3d.up", "Stack Logs") {
                     stackLogsTarget = StackLogsTarget(project: name, containers: group.containers)
                 }
+                groupButton("arrow.down.circle", "Pull Images") { _ = session.composePull(project: name) }
+                groupButton("square.stack.3d.down.right", "Compose Down") {
+                    groupAction = .composeDown(project: name, containers: session.containers)
+                }
             }
             groupButton("play.fill", "Start All") { Task { await runOnGroup(group.containers, .start) } }
             groupButton("stop.fill", "Stop All") { confirmGroup(group, .stopGroup) }
@@ -309,6 +313,11 @@ struct ContainerListView: View {
     }
 
     private func runOnGroup(_ action: DestructiveAction) async {
+        if action.kind == .composeDown, let project = action.names.first {
+            // Runs in the activity list and the menu bar; no wait here.
+            session.composeDown(project: project)
+            return
+        }
         let containers = session.containers.filter { action.targets.contains($0.id) }
         await runOnGroup(containers, action.kind == .stopGroup ? .stop : .restart)
     }

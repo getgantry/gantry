@@ -38,6 +38,8 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             header
 
+            MenuBarActivitySection(center: model.operations, showAll: showActivity)
+
             if showsAppleServices {
                 Divider()
                 AppleServicesMenuSection(cliOverride: appleCLIOverride)
@@ -153,6 +155,13 @@ struct MenuBarView: View {
     private func openMainWindow() {
         openWindow(id: "main", value: MainWindowID.main)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    /// Opens the main window with its Activity list, as the Show action of
+    /// an operation notification does.
+    private func showActivity() {
+        openMainWindow()
+        NotificationActions.handle(.showActivity)
     }
 
     private var countsSummary: String {

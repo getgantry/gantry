@@ -64,6 +64,6 @@ struct ExplainOperationButton: View {
 
     static func applies(to operation: LongOperation) -> Bool {
         guard case .failed = operation.state else { return false }
-        return [.build, .composeUp, .pull].contains(operation.kind)
+        return [.build, .composeUp, .composeDown, .composePull, .pull].contains(operation.kind)
     }
 }

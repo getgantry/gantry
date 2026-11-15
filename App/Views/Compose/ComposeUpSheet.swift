@@ -330,6 +330,10 @@ struct ComposeUpSheet: View {
         }
     }
 
+    private static func servicesProgress(_ started: Int, _ total: Int) -> OperationProgress {
+        total > 0 ? OperationProgress(items: .init(done: started, total: total, unit: .services)) : .none
+    }
+
     private func runUp(
         project: ComposeProject, hostID: UUID, session: HostSession, operation: LongOperation
     ) async throws -> String? {
@@ -357,10 +361,14 @@ struct ComposeUpSheet: View {
             // this sheet's log instead of the banner behind it.
             let (outcome, _) = await session.attempt { () async -> Result<Int, Error> in
                 do {
+                    var started = 0
+                    let services = project.services.count
+                    operation.report(Self.servicesProgress(0, services))
                     return .success(try await runner.up { event in
                         record(event)
+                        if case .startedService = event { started += 1 }
                         operation.append(log: log.last?.text ?? "")
-                        operation.update(progress: log.last?.text)
+                        operation.report(Self.servicesProgress(started, services), status: log.last?.text)
                     })
                 } catch {
                     return .failure(error)

@@ -24,12 +24,9 @@ struct PullImageSheet: View {
     }
 
     @State private var phase: Phase = .idle
-    /// Ordered layer ids as first seen, so the progress list stays stable.
-    @State private var layerOrder: [String] = []
-    /// Latest progress per layer id.
-    @State private var layers: [String: PullProgress] = [:]
-    /// Non-layer status lines (e.g. "Pulling from library/nginx").
-    @State private var statusLine = ""
+    /// Layers in the order first seen, their latest line, and the status
+    /// line without a layer (e.g. "Pulling from library/nginx").
+    @State private var tracker = PullProgressTracker()
     /// The pull in the operation center; it keeps running when the sheet
     /// closes with Continue in Background.
     @State private var operation: LongOperation?
@@ -111,7 +108,7 @@ struct PullImageSheet: View {
                         HStack(spacing: 8) {
                             ProgressView()
                                 .controlSize(.small)
-                            Text(statusLine.isEmpty ? String(localized: "Starting…") : statusLine)
+                            Text(tracker.statusLine.isEmpty ? String(localized: "Starting…") : tracker.statusLine)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -121,8 +118,8 @@ struct PullImageSheet: View {
                             .foregroundStyle(.green)
                     }
 
-                    ForEach(layerOrder, id: \.self) { layerID in
-                        if let progress = layers[layerID] {
+                    ForEach(tracker.layerOrder, id: \.self) { layerID in
+                        if let progress = tracker.layers[layerID] {
                             LayerProgressRow(layerID: layerID, progress: progress)
                         }
                     }
@@ -137,9 +134,7 @@ struct PullImageSheet: View {
         let ref = reference.trimmingCharacters(in: .whitespaces)
         guard !ref.isEmpty, !isBusy else { return }
 
-        layerOrder = []
-        layers = [:]
-        statusLine = ""
+        tracker = PullProgressTracker()
         phase = .pulling
 
         let auth: RegistryAuth?
@@ -152,9 +147,13 @@ struct PullImageSheet: View {
         operation = LongOperationRunner.run(.pull, title: String(localized: "Pull \(ref)"), session: session) { op in
             do {
                 let stream = try await session.pullImage(reference: ref, auth: auth)
+                // A local copy keeps counting after the sheet closes
+                // (Continue in Background); the sheet shows the latest one.
+                var progress = PullProgressTracker()
                 for try await update in stream {
-                    apply(update)
-                    op.update(progress: update.status, fraction: overallFraction)
+                    progress.apply(update)
+                    op.report(progress.progress, status: update.status, fraction: progress.fraction)
+                    tracker = progress
                 }
                 try Task.checkCancellation()
                 phase = .done
@@ -166,27 +165,6 @@ struct PullImageSheet: View {
                 phase = .failed(error.localizedDescription)
                 throw error
             }
-        }
-    }
-
-    /// Bytes done over bytes known, across the layers that report them.
-    private var overallFraction: Double? {
-        let sized = layers.values.compactMap { p -> (Int64, Int64)? in
-            guard let current = p.current, let total = p.total, total > 0 else { return nil }
-            return (Int64(current), Int64(total))
-        }
-        guard !sized.isEmpty else { return nil }
-        let total = sized.reduce(0) { $0 + $1.1 }
-        return Double(sized.reduce(0) { $0 + $1.0 }) / Double(total)
-    }
-
-    /// Folds one progress line into the per-layer state.
-    private func apply(_ update: PullProgress) {
-        if let id = update.id, !id.isEmpty {
-            if layers[id] == nil { layerOrder.append(id) }
-            layers[id] = update
-        } else if !update.status.isEmpty {
-            statusLine = update.status
         }
     }
 }
