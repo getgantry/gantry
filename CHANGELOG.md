@@ -11,6 +11,22 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.29.0](https://github.com/getgantry/gantry/compare/v0.28.0...v0.29.0) (2026-11-15)
+
+
+### Features
+
+* export container logs with the current filter ([#66](https://github.com/getgantry/gantry/issues/66)) ([f579c86](https://github.com/getgantry/gantry/commit/f579c86ff74378928fc303054819e3e8bb08d503))
+* scan images for vulnerabilities with trivy or grype ([#72](https://github.com/getgantry/gantry/issues/72)) ([da16fd5](https://github.com/getgantry/gantry/commit/da16fd5a87908ebe2f094fd07d32a73b2f86fc56))
+* show pull, build and compose progress in the menu bar ([#70](https://github.com/getgantry/gantry/issues/70)) ([b908201](https://github.com/getgantry/gantry/commit/b908201d0e7be72a1c06c37089c3cba969281d66))
+* show the build history with steps and cache use ([#73](https://github.com/getgantry/gantry/issues/73)) ([7de595c](https://github.com/getgantry/gantry/commit/7de595ca15ce821cdb8c4800c19a02c43c45fe70))
+
+
+### Fixes
+
+* **apple:** show read-only binds and named volumes correctly in overview ([#74](https://github.com/getgantry/gantry/issues/74)) ([81dad88](https://github.com/getgantry/gantry/commit/81dad880e42380da6fe60415101f83a59f1462c4))
+* **storage:** pass the image platform when saving an image archive on apple hosts ([#80](https://github.com/getgantry/gantry/issues/80)) ([9d8dc69](https://github.com/getgantry/gantry/commit/9d8dc69bc5809b204e588683d21829363c6d8050))
+
 ## [0.28.0](https://github.com/getgantry/gantry/compare/v0.27.1...v0.28.0) (2026-11-14)
 
 
