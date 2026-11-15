@@ -19,6 +19,7 @@ struct ImageListView: View {
     @State private var clusterLoad: ClusterImageLoad?
     @State private var buildRequest: DockerfileBuildRequest?
     @State private var rejectedDockerfile: RejectedDockerfile?
+    @State private var scanRequest: ImageScanRequest?
     @Environment(AppModel.self) private var model
 
     /// An image being copied into a cluster, and then the outcome.
@@ -96,6 +97,13 @@ struct ImageListView: View {
                 ImageArchiveActions.save(session: session, reference: reference)
             } label: {
                 Label("Save to Archive…", systemImage: "square.and.arrow.down.on.square")
+            }
+        }
+        if session.imageScanPlan(for: image) != nil {
+            Button {
+                scanRequest = ImageScanRequest(image: image, session: session)
+            } label: {
+                Label("Scan for Vulnerabilities…", systemImage: "checkmark.shield")
             }
         }
         Divider()
@@ -194,6 +202,7 @@ struct ImageListView: View {
                 .environment(model)
         }
         .rejectedDockerfileAlert($rejectedDockerfile)
+        .imageScanSheet($scanRequest)
         .onSectionCommand(.refresh, .images) { Task { await refresh() } }
         .sheet(isPresented: $showingPull) {
             PullImageSheet(session: session)
@@ -362,6 +371,7 @@ struct ImageDetailView: View {
     @State private var history: [ImageHistoryEntry] = []
     @State private var historyLoaded = false
     @State private var showingTag = false
+    @State private var scanRequest: ImageScanRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -409,9 +419,25 @@ struct ImageDetailView: View {
                     Label("Tag…", systemImage: "tag")
                 }
             }
+            if session.imageScanPlan(for: image) != nil {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        scanRequest = ImageScanRequest(image: image, session: session)
+                    } label: {
+                        Label("Scan for Vulnerabilities…", systemImage: "checkmark.shield")
+                    }
+                    .help("Scan this image with Trivy or Grype")
+                }
+            }
         }
         .sheet(isPresented: $showingTag) {
             TagImageSheet(image: image, session: session)
+        }
+        .imageScanSheet($scanRequest)
+        .onChange(of: image.id) {
+            // A link can select another image while the sheet is open.
+            scanRequest?.model.close()
+            scanRequest = nil
         }
     }
 
