@@ -105,9 +105,11 @@ struct GantryApp: App {
         }
         .defaultSize(width: 760, height: 460)
 
-        MenuBarExtra("Gantry", image: "MenuBarIcon", isInserted: $showMenuBarExtra) {
+        MenuBarExtra(isInserted: $showMenuBarExtra) {
             MenuBarView()
                 .environment(model)
+        } label: {
+            MenuBarLabel(center: model.operations)
         }
         .menuBarExtraStyle(.window)
 

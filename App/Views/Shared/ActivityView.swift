@@ -201,7 +201,7 @@ struct ActivityRow: View {
     }
 
     private var progressLabel: some View {
-        Text(operation.progressText ?? String(localized: "Working…"))
+        Text(OperationRowText.detail(operation) ?? String(localized: "Working…"))
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(1)
@@ -218,7 +218,8 @@ struct ActivityRow: View {
     }
 }
 
-private struct ActivityStateIcon: View {
+/// The state symbol of an operation row (also in the menu bar).
+struct ActivityStateIcon: View {
     let state: OperationState
 
     var body: some View {

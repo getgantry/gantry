@@ -788,7 +788,8 @@ struct ContentView: View {
             showingPalette = true
         case .settings:
             openSettings()
-        case .snapshot, .appearance, .state:
+        case .snapshot, .appearance, .state, .activity, .menuBarSnapshot, .debugPull, .cancelNewestOperation,
+             .debugCompose:
             break
         }
     }

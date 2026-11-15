@@ -28,6 +28,16 @@ scripts/gantry-ctl state /path/state.json      # current selection as JSON
 scripts/gantry-ctl appearance light            # light, dark or system
 ```
 
+Debug links for the menu bar activity:
+
+```
+scripts/gantry-ctl 'debug/pull?ref=alpine:3.20&host=Apple%20Container'   # start a pull without the sheet
+scripts/gantry-ctl 'debug/activity?path=/path/activity.json'              # menu bar rows and running count as JSON
+scripts/gantry-ctl 'debug/menubar?path=/path/menubar.png'                 # PNG of the menu bar panel, drawn off screen
+scripts/gantry-ctl debug/cancel                                           # cancel the newest running operation
+scripts/gantry-ctl 'debug/compose?action=pull&project=web&host=nettop'    # Compose pull (or action=down) without the confirmation
+```
+
 `GANTRY_APP` selects the copy when more than one runs. Its value is a part of the path to the `.app`.
 
 The snapshot needs no screen recording permission. It cannot draw the Liquid Glass material of the sidebar, so the sidebar can look blank.
