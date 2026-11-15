@@ -1478,8 +1478,12 @@ public final class HostSession: Identifiable {
 
     // MARK: - Raw inspection
 
+    /// The inspect JSON with the values of Keychain secret variables hidden.
+    /// The Inspect tab and Explain read it.
     public func rawInspectContainer(id: String) async -> String {
-        await rawInspect { client in try await client.rawInspectContainer(id: id) }
+        await rawInspect { client in
+            SecretEnvRedaction.redactInspectJSON(try await client.rawInspectContainer(id: id))
+        }
     }
 
     public func rawInspectImage(id: String) async -> String {

@@ -71,5 +71,13 @@ public struct ExplainDataSource: Sendable {
 /// Explains a failure. The Foundation Models version is the real one; tests
 /// use a fake.
 public protocol FailureExplaining: Sendable {
-    func explain(_ context: FailureContext, data: ExplainDataSource) async throws -> FailureExplanation
+    /// `images` are screenshots from the user. They are empty unless the
+    /// model takes images and runs on this Mac.
+    func explain(_ context: FailureContext, data: ExplainDataSource, images: [ExplainImage]) async throws -> FailureExplanation
+}
+
+extension FailureExplaining {
+    public func explain(_ context: FailureContext, data: ExplainDataSource) async throws -> FailureExplanation {
+        try await explain(context, data: data, images: [])
+    }
 }

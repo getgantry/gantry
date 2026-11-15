@@ -249,9 +249,19 @@ import FoundationModels
 
 private struct FakeExplainer: FailureExplaining {
     var result: Result<FailureExplanation, Error>
-    func explain(_ context: FailureContext, data: ExplainDataSource) async throws -> FailureExplanation {
-        try result.get()
+    var seen: ImageLog? = nil
+    func explain(_ context: FailureContext, data: ExplainDataSource, images: [ExplainImage]) async throws -> FailureExplanation {
+        seen?.record(images.count)
+        return try result.get()
     }
+}
+
+/// The image counts each explainer call and each gather got.
+final class ImageLog: @unchecked Sendable {
+    private let lock = NSLock()
+    private var counts: [Int] = []
+    func record(_ count: Int) { lock.withLock { counts.append(count) } }
+    var all: [Int] { lock.withLock { counts } }
 }
 
 private struct FakeError: LocalizedError {
@@ -266,7 +276,7 @@ private struct FakeError: LocalizedError {
         ExplainController(
             availability: { availability },
             makeExplainer: { _ in FakeExplainer(result: result) },
-            gather: { _ in
+            gather: { _, _ in
                 (FailureContext(subject: .container, title: "x", hostName: "h", engine: "Docker"), ExplainDataSource(logs: { _ in [] }))
             }
         )
@@ -321,9 +331,12 @@ private final class FakeResponder: ExplainModelResponder, @unchecked Sendable {
         self.replies = replies
     }
 
-    func respond(instructions: String, prompt: String, tools: [any Tool]) async throws -> GeneratedContent {
+    var imageCounts: [Int] = []
+
+    func respond(instructions: String, prompt: String, images: [ExplainImage], tools: [any Tool]) async throws -> GeneratedContent {
         prompts.append(prompt)
         toolCounts.append(tools.count)
+        imageCounts.append(images.count)
         return try GeneratedContent(json: try replies.removeFirst().get())
     }
 }
@@ -362,6 +375,26 @@ private final class FakeResponder: ExplainModelResponder, @unchecked Sendable {
         #expect(explanation.evidence.first?.isQuoted == true)
         #expect(responder.toolCounts == [2, 0])
         #expect(responder.prompts[0].contains("KeyError: 'DATABASE_URL'"))
+    }
+
+    @Test func explainerSendsImagesAndKeepsThemOnRetry() async throws {
+        let overflow = LanguageModelSession.GenerationError.exceededContextWindowSize(.init(debugDescription: "full"))
+        let responder = FakeResponder([.failure(overflow), .success(json)])
+        let explainer = FoundationModelsExplainer(responder: responder)
+        let images = [try TestImages.explainImage(width: 64, height: 48), try TestImages.explainImage(width: 32, height: 32)]
+        _ = try await explainer.explain(context(), data: ExplainDataSource(logs: { _ in [] }), images: images)
+        #expect(responder.imageCounts == [2, 2])
+        #expect(responder.prompts.allSatisfy { $0.contains("The user attached 2 screenshots") })
+    }
+
+    @Test func promptWithoutImagesHasNoScreenshotNote() {
+        let text = FoundationModelsExplainer.prompt(context(), imageCount: 0)
+        #expect(text == context().render())
+        #expect(FoundationModelsExplainer.prompt(context(), imageCount: 1).contains("one screenshot"))
+    }
+
+    @Test func privateCloudNeverTakesImages() {
+        #expect(!FoundationModelsAvailability.supportsImages(for: .privateCloud))
     }
 
     @Test func malformedOutputThrows() async {

@@ -45,11 +45,18 @@ struct ExplainPanel: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            if subject.controller.supportsImages {
+                Divider()
+                ExplainAttachmentsBar(controller: subject.controller)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+            }
             Divider()
             ExplainFooter(subject: subject)
                 .padding(.horizontal)
                 .padding(.vertical, 10)
         }
+        .modifier(ExplainImageDropTarget(controller: subject.controller))
     }
 }
 

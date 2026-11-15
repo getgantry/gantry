@@ -90,9 +90,14 @@ struct CreateContainerSheet: View {
         ContainerForm.nameIssue(name, taken: ContainerForm.takenNames(session.containers))
     }
 
+    /// Secret rows that cannot be used on this host, by row index.
+    private var secretIssues: [Int: SecretError] {
+        EnvSecrets.issues(currentRecipe.env, isAppleHost: session.host.isAppleContainer)
+    }
+
     private var canCreate: Bool {
         !image.trimmingCharacters(in: .whitespaces).isEmpty && !isWorking
-            && commandError == nil && portIssues.isEmpty && nameIssue == nil
+            && commandError == nil && portIssues.isEmpty && nameIssue == nil && secretIssues.isEmpty
             && currentRecipe.cpusIssue == nil && currentRecipe.memoryIssue == nil
     }
 
@@ -148,7 +153,7 @@ struct CreateContainerSheet: View {
                     FieldError(message: portIssues.values.first?.message)
                 }
 
-                Section("Environment") {
+                Section {
                     editorRows(
                         $env,
                         addLabel: "Add Variable",
@@ -156,9 +161,13 @@ struct CreateContainerSheet: View {
                     ) { $row in
                         TextField("KEY", text: $row.key)
                         Text(verbatim: "=").foregroundStyle(.secondary)
-                        TextField("VALUE", text: $row.value)
+                        EnvSecretField(value: $row.value, secret: $row.secret, issue: secretIssue(for: row.id))
                     }
                     envFileRows
+                } header: {
+                    Text("Environment")
+                } footer: {
+                    FieldError(message: secretIssues.values.first?.errorDescription)
                 }
 
                 Section("Volumes") {
@@ -554,7 +563,7 @@ struct CreateContainerSheet: View {
         recipe.command = (try? parsedCommand.get()) ?? []
         recipe.entrypoint = entrypoint.trimmingCharacters(in: .whitespaces)
         recipe.ports = ports.map { .init(hostIP: $0.hostIP, host: $0.host, container: $0.container, proto: $0.proto) }
-        recipe.env = env.map { .init(key: $0.key, value: $0.value) }
+        recipe.env = env.map { .init(key: $0.key, value: $0.value, secret: $0.secret) }
         recipe.envFiles = envFiles
         recipe.volumes = binds.map { .init(source: $0.host, target: $0.container, readOnly: $0.readOnly) }
         recipe.labels = labels.map { .init(key: $0.key, value: $0.value) }
@@ -584,7 +593,7 @@ struct CreateContainerSheet: View {
         command = ShellQuoting.join(recipe.command)
         entrypoint = recipe.entrypoint
         ports = recipe.ports.map { PortRow(hostIP: $0.hostIP, host: $0.host, container: $0.container, proto: $0.proto) }
-        env = recipe.env.map { EnvRow(key: $0.key, value: $0.value) }
+        env = recipe.env.map { EnvRow(key: $0.key, value: $0.value, secret: $0.secret) }
         envFiles = recipe.envFiles
         binds = recipe.volumes.map { BindRow(host: $0.source, container: $0.target, readOnly: $0.readOnly) }
         labels = recipe.labels.map { EnvRow(key: $0.key, value: $0.value) }
@@ -682,7 +691,14 @@ struct CreateContainerSheet: View {
         kernelPath = url.path
     }
 
-    private func buildRequest() -> ContainerCreateRequest {
+    private func secretIssue(for id: UUID) -> String? {
+        guard let index = env.firstIndex(where: { $0.id == id }) else { return nil }
+        return secretIssues[index]?.errorDescription
+    }
+
+    /// The create request, with Keychain secrets read just before the create
+    /// (after Touch ID when it is on). The values live only in this request.
+    private func buildRequest() async throws -> ContainerCreateRequest {
         let recipe = currentRecipe
         // A DNS name needs a container name; auto-derive a unique one from the
         // image when a domain is assigned and the user left the name blank.
@@ -695,10 +711,12 @@ struct CreateContainerSheet: View {
             resolvedName = nil
         }
         // Boot arguments only exist from apple/container 1.2 on.
-        return recipe.createRequest(
+        return try await recipe.resolvedCreateRequest(
             name: resolvedName,
             isAppleHost: session.host.isAppleContainer,
-            kernelArgsSupported: appleFeatures?.kernelArguments ?? true
+            kernelArgsSupported: appleFeatures?.kernelArguments ?? true,
+            store: SecretsLibrary.shared.store,
+            authorize: SecretGate.authorize
         )
     }
 
@@ -722,7 +740,7 @@ struct CreateContainerSheet: View {
         if startAfterCreate {
             try await runAndWatch()
         } else {
-            _ = try await session.createContainer(buildRequest())
+            _ = try await session.createContainer(try await buildRequest())
             dismiss()
         }
     }
@@ -730,7 +748,7 @@ struct CreateContainerSheet: View {
     /// Creates and starts the container, then watches it for a few seconds:
     /// a container that stops at once gets the exit alert, not a silent close.
     private func runAndWatch() async throws {
-        let request = buildRequest()
+        let request = try await buildRequest()
         let id = try await session.createAndRun(request)
         pullStatus = String(localized: "Starting…")
         defer { pullStatus = nil }
@@ -807,6 +825,8 @@ private struct EnvRow: Identifiable {
     let id = UUID()
     var key = ""
     var value = ""
+    /// A Keychain secret name in place of `value` (environment rows only).
+    var secret: String?
 }
 
 private struct BindRow: Identifiable {

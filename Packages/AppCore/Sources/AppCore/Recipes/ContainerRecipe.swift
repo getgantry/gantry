@@ -21,11 +21,36 @@ public struct ContainerRecipe: Codable, Equatable, Sendable {
 
     public struct EnvVar: Codable, Equatable, Sendable {
         public var key: String
+        /// The plain value; always empty when ``secret`` is set.
         public var value: String
+        /// The name of a Keychain secret that gives the value at create time.
+        /// A recipe stores only this name, never the value.
+        public var secret: String?
 
-        public init(key: String, value: String) {
+        public init(key: String, value: String, secret: String? = nil) {
             self.key = key
-            self.value = value
+            self.value = secret == nil ? value : ""
+            self.secret = secret
+        }
+
+        enum CodingKeys: String, CodingKey { case key, value, secret }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            let secret = try c.decodeIfPresent(String.self, forKey: .secret)
+            self.init(
+                key: try c.decodeIfPresent(String.self, forKey: .key) ?? "",
+                value: try c.decodeIfPresent(String.self, forKey: .value) ?? "",
+                secret: (secret?.isEmpty ?? true) ? nil : secret
+            )
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(key, forKey: .key)
+            // A secret row never writes a value, whatever the field holds.
+            try c.encode(secret == nil ? value : "", forKey: .value)
+            try c.encodeIfPresent(secret, forKey: .secret)
         }
     }
 
