@@ -340,7 +340,7 @@ private struct ContainerOverview: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(d.mounts, id: \.self) { mount in
                         HStack(spacing: 6) {
-                            Text(mount.source.isEmpty ? (mount.name ?? "—") : mount.source)
+                            Text(mount.displaySource ?? "—")
                             Image(systemName: "arrow.right")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
@@ -409,14 +409,36 @@ private struct ContainerOverview: View {
         if let env = d.config.env, !env.isEmpty {
             DetailSection("Environment") {
                 VStack(alignment: .leading, spacing: 2) {
-                    ForEach(env, id: \.self) { line in
-                        Text(line)
-                            .font(.system(.caption, design: .monospaced))
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    // Variables filled from Keychain secrets show the secret
+                    // name, never the value.
+                    ForEach(Array(EnvSecrets.displayLines(env: env, labels: d.config.labels).enumerated()), id: \.offset) { _, line in
+                        EnvironmentLine(line: line)
                     }
                 }
             }
         }
+    }
+}
+
+/// One `KEY=value` line of the inspector; a secret shows its name only.
+private struct EnvironmentLine: View {
+    let line: EnvSecrets.DisplayLine
+
+    var body: some View {
+        Group {
+            if let secret = line.secret {
+                Label {
+                    Text(verbatim: "\(line.key)=\(EnvSecrets.referenceText(secret))")
+                } icon: {
+                    Image(systemName: "lock.fill").foregroundStyle(.secondary)
+                }
+                .help(String(localized: "The value comes from the Keychain secret “\(secret)”."))
+            } else {
+                Text(verbatim: "\(line.key)=\(line.value ?? "")")
+                    .textSelection(.enabled)
+            }
+        }
+        .font(.system(.caption, design: .monospaced))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

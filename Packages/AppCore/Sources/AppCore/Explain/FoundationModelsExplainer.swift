@@ -1,5 +1,6 @@
 #if canImport(FoundationModels)
 import Foundation
+import CoreGraphics
 import FoundationModels
 
 // MARK: - Output schema
@@ -54,7 +55,8 @@ extension FailureExplanation {
 /// content. The live version wraps `LanguageModelSession`; tests return
 /// fixed JSON, so they do not need Apple Intelligence.
 public protocol ExplainModelResponder: Sendable {
-    func respond(instructions: String, prompt: String, tools: [any Tool]) async throws -> GeneratedContent
+    /// `images` go after the text of the prompt, one attachment each.
+    func respond(instructions: String, prompt: String, images: [ExplainImage], tools: [any Tool]) async throws -> GeneratedContent
 }
 
 /// The `LanguageModelSession` responder for the on-device or PCC model.
@@ -65,8 +67,24 @@ public struct SystemModelResponder: ExplainModelResponder {
         self.kind = kind
     }
 
-    public func respond(instructions: String, prompt: String, tools: [any Tool]) async throws -> GeneratedContent {
+    public func respond(instructions: String, prompt: String, images: [ExplainImage], tools: [any Tool]) async throws -> GeneratedContent {
         let session = Self.session(kind: kind, tools: tools, instructions: instructions)
+#if compiler(>=6.4)
+        // Images stay on this Mac: only the on-device model gets them.
+        if !images.isEmpty, kind == .onDevice, #available(macOS 27.0, *) {
+            let attachments = images.enumerated().map { index, image in
+                Attachment(image.cgImage).label("screenshot\(index + 1)")
+            }
+            let response = try await session.respond(
+                schema: GeneratedExplanation.generationSchema,
+                options: GenerationOptions(temperature: 0.2)
+            ) {
+                prompt
+                for attachment in attachments { attachment }
+            }
+            return response.content
+        }
+#endif
         let response = try await session.respond(
             to: prompt,
             schema: GeneratedExplanation.generationSchema,
@@ -100,21 +118,40 @@ public struct FoundationModelsExplainer: FailureExplaining {
         self.answerLanguage = answerLanguage
     }
 
-    public func explain(_ context: FailureContext, data: ExplainDataSource) async throws -> FailureExplanation {
+    public func explain(_ context: FailureContext, data: ExplainDataSource, images: [ExplainImage]) async throws -> FailureExplanation {
         let transcript = ToolTranscript()
         let tools = Self.tools(for: data, transcript: transcript)
         let instructions = Self.instructions(language: answerLanguage, engine: context.engine)
         let content: GeneratedContent
         do {
-            content = try await responder.respond(instructions: instructions, prompt: context.render(), tools: tools)
+            content = try await responder.respond(
+                instructions: instructions, prompt: Self.prompt(context, imageCount: images.count), images: images, tools: tools
+            )
         } catch where Self.isContextOverflow(error) {
             // Tool output filled the window: ask once more, smaller and without tools.
+            // The images stay: the user attached them for this failure.
             var smaller = context
             smaller.logLines = Array(context.logLines.suffix(max(10, context.logLines.count / 3)))
-            content = try await responder.respond(instructions: instructions, prompt: smaller.render(), tools: [])
+            content = try await responder.respond(
+                instructions: instructions, prompt: Self.prompt(smaller, imageCount: images.count), images: images, tools: []
+            )
         }
         let generated = try GeneratedExplanation(content)
         return FailureExplanation(generated, context: context.searchableText + "\n" + transcript.text)
+    }
+
+    /// The rendered context, and a note about the attached screenshots.
+    public static func prompt(_ context: FailureContext, imageCount: Int) -> String {
+        let text = context.render()
+        guard imageCount > 0 else { return text }
+        let what = imageCount == 1 ? "one screenshot" : "\(imageCount) screenshots"
+        return text + """
+
+
+        The user attached \(what) of the failure, for example a browser page or an error in a client app. \
+        Use what the screenshots show as facts. Copy evidence lines only from the logs and facts above. \
+        A screenshot can show secrets; do not repeat them.
+        """
     }
 
     /// macOS 26 throws `GenerationError`; macOS 27 can also throw `LanguageModelError`.
@@ -164,11 +201,12 @@ public enum FoundationModelsBudget {
 
     /// The prompt size limit for the context, after instructions, tool
     /// definitions, the schema, the answer and tool results.
-    public static func promptLimit(for kind: ExplainModelKind, data: ExplainDataSource) async -> Int {
+    public static func promptLimit(for kind: ExplainModelKind, data: ExplainDataSource, images: [ExplainImage] = []) async -> Int {
         let window = await contextSize(for: kind)
         let tools = FoundationModelsExplainer.tools(for: data, transcript: ToolTranscript())
         let fixed = await overhead(tools: tools)
-        let limit = window - fixed - answerReserve - toolReserve
+        let pictures = images.isEmpty ? 0 : await imageTokens(images)
+        let limit = window - fixed - pictures - answerReserve - toolReserve
         // A bigger window gives more logs, but past this the answer gets slower, not better.
         return min(max(limit, 1000), 12_000)
     }
@@ -181,6 +219,27 @@ public enum FoundationModelsBudget {
         }
 #endif
         return SystemLanguageModel.default.contextSize
+    }
+
+    /// A fallback cost of one image: a 1024×768 screenshot measured 195
+    /// tokens on macOS 27.2, and the note about images adds some more.
+    static let imageFallbackTokens = 260
+
+    /// Tokens of the attached images and the note about them.
+    static func imageTokens(_ images: [ExplainImage]) async -> Int {
+#if compiler(>=6.4)
+        if #available(macOS 27.0, *) {
+            var total = 60
+            for image in images {
+                guard let count = try? await SystemLanguageModel.default.tokenCount(for: Attachment(image.cgImage)) else {
+                    return images.count * imageFallbackTokens
+                }
+                total += count
+            }
+            return total
+        }
+#endif
+        return images.count * imageFallbackTokens
     }
 
     /// Tokens of the instructions, tool definitions and schema.
@@ -235,6 +294,19 @@ public enum FoundationModelsAvailability {
         case .unavailable(let other):
             return .unavailable(.other(String(describing: other)))
         }
+    }
+
+    /// Whether the model of `kind` takes images. Only the on-device model
+    /// qualifies, so images never leave this Mac; it needs macOS 27 and
+    /// the vision capability.
+    public static func supportsImages(for kind: ExplainModelKind) -> Bool {
+        guard kind == .onDevice else { return false }
+#if compiler(>=6.4)
+        if #available(macOS 27.0, *) {
+            return SystemLanguageModel.default.capabilities.contains(.vision)
+        }
+#endif
+        return false
     }
 
     /// Whether this SDK and OS have the Private Cloud Compute model.

@@ -17,6 +17,9 @@ struct SettingsView: View {
             Tab("Apple", systemImage: "apple.logo", value: SettingsTab.apple.rawValue) {
                 AppleSettingsView()
             }
+            Tab("Secrets", systemImage: "key", value: SettingsTab.secrets.rawValue) {
+                SecretsSettingsView()
+            }
             Tab("Agents", systemImage: "sparkles", value: SettingsTab.agents.rawValue) {
                 AgentSettingsView()
             }

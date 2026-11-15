@@ -28,7 +28,11 @@ public enum RunCommandFormatter {
         for port in recipe.ports where !port.container.isEmpty {
             add(docker ? "-p" : "--publish", portSpec(port))
         }
-        for env in recipe.env where !env.key.isEmpty { add(docker ? "-e" : "--env", "\(env.key)=\(env.value)") }
+        for env in recipe.env where !env.key.isEmpty {
+            // A secret prints as its reference; the value never leaves the Keychain.
+            let value = env.secret.map(EnvSecrets.referenceText) ?? env.value
+            add(docker ? "-e" : "--env", "\(env.key)=\(value)")
+        }
         for file in recipe.envFiles { add("--env-file", file) }
         for volume in recipe.volumes where !volume.source.isEmpty && !volume.target.isEmpty {
             add(docker ? "-v" : "--volume", volume.bind)
