@@ -129,12 +129,9 @@ enum ExplainImageDrop {
     }
 }
 
-/// Drop target, paste command and a highlight while a drop hovers. It does
-/// nothing when the model does not take images.
-///
-/// The panel holds only text and buttons, so nothing in the window gets the
-/// focus. Without a focused view, Edit > Paste stays off and Command-V does
-/// nothing. The panel thus takes the focus for edit commands when it opens.
+/// Drop target, paste command and drop highlight. Does nothing when the model
+/// does not take images. The panel has only text and buttons, so no view gets
+/// the focus and Edit > Paste stays off: the panel takes the focus on open.
 struct ExplainImageDropTarget: ViewModifier {
     let controller: ExplainController
     @State private var targeted = false
