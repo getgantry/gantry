@@ -48,6 +48,11 @@ public protocol AppleContainerCLIRunning: Sendable {
     /// Runs the CLI to completion, buffering stdout/stderr.
     func run(_ arguments: [String]) async throws -> AppleCLIResult
 
+    /// Runs the CLI with `environment` added to its process environment.
+    /// Secrets go this way (`--env KEY` reads KEY from the environment), so
+    /// they are never in the process arguments.
+    func run(_ arguments: [String], environment: [String: String]) async throws -> AppleCLIResult
+
     /// Runs the CLI and streams its stdout as raw bytes (logs, export, pull).
     /// A non-zero exit surfaces as a thrown error at the end of the stream.
     func stream(_ arguments: [String]) -> AsyncThrowingStream<Data, Error>
@@ -55,6 +60,17 @@ public protocol AppleContainerCLIRunning: Sendable {
     /// Spawns an interactive CLI process (exec). `tty` allocates a PTY so the
     /// child sees a terminal; otherwise plain pipes keep stdout/stderr apart.
     func interactive(_ arguments: [String], tty: Bool) throws -> any AppleCLIInteractiveProcess
+}
+
+extension AppleContainerCLIRunning {
+    /// A runner that cannot pass an environment fails closed: dropping the
+    /// environment would make the CLI skip the secret variables silently.
+    public func run(_ arguments: [String], environment: [String: String]) async throws -> AppleCLIResult {
+        guard environment.isEmpty else {
+            throw DockerError.apiError(status: 501, message: "This CLI runner cannot pass environment variables")
+        }
+        return try await run(arguments)
+    }
 }
 
 /// Locates the `container` binary across common installations.
@@ -110,9 +126,14 @@ public struct AppleContainerProcessRunner: AppleContainerCLIRunning {
     }
 
     public func run(_ arguments: [String]) async throws -> AppleCLIResult {
+        try await run(arguments, environment: [:])
+    }
+
+    public func run(_ arguments: [String], environment extra: [String: String]) async throws -> AppleCLIResult {
         let result: ChildProcessResult
+        let environment = Self.environment.merging(extra) { _, new in new }
         do {
-            result = try await ChildProcess.run(executablePath, arguments, environment: Self.environment)
+            result = try await ChildProcess.run(executablePath, arguments, environment: environment)
         } catch is CancellationError {
             throw CancellationError()
         } catch {

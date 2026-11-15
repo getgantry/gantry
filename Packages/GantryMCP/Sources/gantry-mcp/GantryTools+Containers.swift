@@ -189,7 +189,9 @@ extension GantryTools {
         let host = try requiredHost(args)
         let id = try args.requiredString("container_id")
         let client = try await docker.connect(to: host)
-        let data = try await client.rawInspectContainer(id: id)
+        // Variables that Gantry filled from Keychain secrets show as
+        // KEY=[REDACTED]: the value must not reach a model.
+        let data = SecretEnvRedaction.redactInspectJSON(try await client.rawInspectContainer(id: id))
         return .text(cap(String(decoding: data, as: UTF8.self), bytes: 200 * 1024))
     }
 

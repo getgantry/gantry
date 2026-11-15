@@ -75,7 +75,14 @@ enum RunCommandValues {
 
     static func addEnv(_ value: String, state: inout State) {
         if let eq = value.firstIndex(of: "=") {
-            state.recipe.env.append(.init(key: String(value[..<eq]), value: String(value[value.index(after: eq)...])))
+            let key = String(value[..<eq])
+            let text = String(value[value.index(after: eq)...])
+            // `KEY=keychain:NAME` refers to a Gantry Keychain secret.
+            if let name = EnvSecrets.secretName(inValue: text) {
+                state.recipe.env.append(.init(key: key, value: "", secret: name))
+            } else {
+                state.recipe.env.append(.init(key: key, value: text))
+            }
         } else {
             state.recipe.env.append(.init(key: value, value: ""))
             state.note(String(localized: "\(value) takes its value from your shell. Enter the value in the form.", bundle: .module))
