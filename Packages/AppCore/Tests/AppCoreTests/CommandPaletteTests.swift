@@ -161,8 +161,8 @@ import DockerKit
     }
 
     @Test func containerActionsFollowState() {
-        #expect(PaletteCatalog.containerActions(.running) == [.open, .logs, .shell, .stop, .restart, .remove])
-        #expect(PaletteCatalog.containerActions(.exited) == [.open, .start, .logs, .remove])
+        #expect(PaletteCatalog.containerActions(.running) == [.open, .logs, .exportLogs, .shell, .stop, .restart, .remove])
+        #expect(PaletteCatalog.containerActions(.exited) == [.open, .start, .logs, .exportLogs, .remove])
         #expect(PaletteCatalog.containerActions(.paused).contains(.shell) == false)
         #expect(PaletteCatalog.containerActions(.removing) == [.open])
     }

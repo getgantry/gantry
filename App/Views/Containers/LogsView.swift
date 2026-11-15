@@ -20,6 +20,10 @@ struct LogsView: View {
     @State private var regexSearch = false
     @State private var minLevel: LogLevel?
     @State private var streamError: String?
+    @State private var showTimestamps = false
+    @State private var timeRange: LogTimeRange = .all
+    @State private var exporting = false
+    @State private var exportError: String?
 
     /// When true, only lines matching the query are shown; otherwise every line
     /// is shown with matches highlighted in place.
@@ -37,34 +41,54 @@ struct LogsView: View {
     private struct DisplayLine: Identifiable {
         let id: UInt64
         let stream: LogStreamType
+        let timestamp: Date?
         let plain: String
         let level: LogLevel?
         let spans: [ANSISpan]
         var hasColor: Bool { spans.contains { $0.color != nil } }
+        var exportLine: LogExportLine { LogExportLine(text: plain, timestamp: timestamp, level: level) }
 
         init(entry: LogEntry) {
             id = entry.id
             stream = entry.stream
+            timestamp = entry.timestamp
             spans = ANSIParser.parse(entry.text)
             plain = spans.map(\.text).joined()
             level = LogLevel.detect(plain)
         }
     }
 
-    /// Lines to render: all lines, narrowed by the level filter, and — in filter
-    /// mode — to only those matching the query.
+    /// The rules of the visible lines. The view, Copy Visible Lines and
+    /// Export Logs all use this one filter.
+    private var filter: LogLineFilter {
+        LogLineFilter(
+            minLevel: minLevel,
+            query: search,
+            regex: regexSearch,
+            matchesOnly: filterOnly,
+            timeRange: hasTimestamps ? timeRange : .all
+        )
+    }
+
+    /// Lines to render: all lines, narrowed by the level filter, the time
+    /// range and — in filter mode — to only those matching the query.
     private var visibleLines: [DisplayLine] {
-        var result = lines
-        if let minLevel {
-            result = result.filter { ($0.level?.severity ?? -1) >= minLevel.severity }
-        }
-        if filterOnly, isSearching {
-            result = result.filter { LogSearch.matches($0.plain, query: search, regex: regexSearch) }
-        }
-        return result
+        filter.apply(lines, now: .now) { $0.exportLine }
+    }
+
+    /// Docker hosts send a time with each line; Apple `container` does not.
+    private var hasTimestamps: Bool { lines.contains { $0.timestamp != nil } }
+
+    private var exportFormat: LogExportFormat {
+        LogExportFormat(timestamps: showTimestamps && hasTimestamps)
     }
 
     private var isSearching: Bool { !search.isEmpty }
+
+    /// Changes when the level or the time range changes.
+    private var scrollIdentity: String {
+        "\(minLevel.map { String(describing: $0) } ?? "all")-\(timeRange.rawValue)"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -72,6 +96,10 @@ struct LogsView: View {
             Divider()
             if let streamError {
                 errorBanner(streamError)
+                Divider()
+            }
+            if let exportError {
+                errorBanner(exportError)
                 Divider()
             }
             content
@@ -83,6 +111,17 @@ struct LogsView: View {
         .onChange(of: regexSearch) { recomputeMatches() }
         .onChange(of: minLevel) { recomputeMatches() }
         .onChange(of: lines.count) { recomputeMatches() }
+        .onChange(of: timeRange) { recomputeMatches() }
+        .logExporter(isPresented: $exporting, item: exportItem, error: $exportError)
+        .focusedSceneValue(\.logExportTarget, LogExportTarget(
+            visibleCount: visibleLines.count,
+            export: startExport,
+            copy: copyVisible
+        ))
+        .task(id: container.id) { takeExportRequest() }
+        .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { _ in
+            takeExportRequest()
+        }
         .background {
             // Invisible button gives Cmd+F a target that focuses the field.
             Button("Find") { searchFocused = true }
@@ -120,20 +159,19 @@ struct LogsView: View {
             .help("Clear")
             .accessibilityLabel("Clear")
 
-            Button {
-                copyAll()
-            } label: {
-                Image(systemName: "doc.on.doc")
-            }
-            .help("Copy all")
-            .accessibilityLabel("Copy all")
+            LogExportButtons(visibleCount: visibleLines.count, copy: copyVisible, export: startExport)
 
             levelMenu
+
+            LogDisplayMenu(showTimestamps: $showTimestamps, timeRange: $timeRange, hasTimestamps: hasTimestamps)
 
             Text("\(visibleLines.count) lines")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
+                .lineLimit(1)
+                // Gives way first when the column is narrow.
+                .layoutPriority(-1)
 
             HeldLinesLabel(count: paused ? held.count : 0)
 
@@ -211,7 +249,7 @@ struct LogsView: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
             .background(.quaternary, in: .rect(cornerRadius: 6))
-            .frame(minWidth: 130, idealWidth: 250, maxWidth: 250)
+            .frame(minWidth: 80, idealWidth: 250, maxWidth: 250)
 
             Button { advance(by: -1) } label: {
                 Image(systemName: "chevron.up")
@@ -284,6 +322,14 @@ struct LogsView: View {
                     guard autoScroll, !isSearching else { return }
                     proxy.scrollTo(bottomAnchor, anchor: .bottom)
                 }
+                // A narrower level or time filter leaves the old offset past
+                // the end of the shorter list, and the lazy stack draws no
+                // rows. A new scroll view starts at a valid offset.
+                .onAppear {
+                    guard autoScroll else { return }
+                    proxy.scrollTo(bottomAnchor, anchor: .bottom)
+                }
+                .id(scrollIdentity)
                 .onChange(of: autoScroll) {
                     guard autoScroll else { return }
                     proxy.scrollTo(bottomAnchor, anchor: .bottom)
@@ -299,10 +345,17 @@ struct LogsView: View {
     /// The line holding the focused match gets a stronger highlight.
     @ViewBuilder
     private func row(for entry: DisplayLine) -> some View {
-        Text(attributed(for: entry, strong: currentMatchLineID == entry.id))
-            .font(.system(size: 11.5, design: .monospaced))
-            .textSelection(.enabled)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            if exportFormat.timestamps, let timestamp = entry.timestamp {
+                Text(LogTimeLabel.text(timestamp))
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+            Text(attributed(for: entry, strong: currentMatchLineID == entry.id))
+                .font(.system(size: 11.5, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     /// Builds the styled line via the shared renderer. stderr is deliberately
@@ -397,7 +450,29 @@ struct LogsView: View {
 
     // MARK: - Actions
 
-    private func copyAll() {
-        copyToPasteboard(visibleLines.map(\.plain).joined(separator: "\n"))
+    private func copyVisible() {
+        copyToPasteboard(exportFormat.text(visibleLines.map(\.exportLine)))
+    }
+
+    private func startExport() {
+        exportError = nil
+        exporting = true
+    }
+
+    /// Reads the visible lines when the save panel asks for the file.
+    private var exportItem: LogExportItem {
+        LogExportItem(
+            fileName: LogExportFileName.make(base: container.displayName, date: .now),
+            snapshot: { [self] in
+                LogExportSnapshot(lines: visibleLines.map(\.exportLine), format: exportFormat)
+            }
+        )
+    }
+
+    /// The palette's Export Logs… opens this tab, then the save panel.
+    private func takeExportRequest() {
+        guard ContainerTabRequest.peek(container.id) == .exportLogs else { return }
+        _ = ContainerTabRequest.take(container.id)
+        startExport()
     }
 }

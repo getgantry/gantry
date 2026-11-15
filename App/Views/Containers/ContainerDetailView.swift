@@ -101,7 +101,8 @@ struct ContainerDetailView: View {
     }
 
     /// Switches to the tab that a pending request asks for. The Terminal pane
-    /// takes the debug-shell request itself, to pick its mode.
+    /// takes the debug-shell request itself, to pick its mode, and the Logs
+    /// tab takes the export request.
     private func applyPendingTab() {
         switch ContainerTabRequest.peek(container.id) {
         case .logs:
@@ -115,6 +116,9 @@ struct ContainerDetailView: View {
             tab = .terminal
         case .debugShell:
             tab = .terminal
+        case .exportLogs:
+            // LogsView takes this request and opens the save panel.
+            tab = .logs
         case nil:
             break
         }

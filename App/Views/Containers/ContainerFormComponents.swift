@@ -76,6 +76,8 @@ enum ContainerTabRequest {
     enum Tab: Equatable {
         case logs
         case stats
+        /// The Logs tab, then the save panel for its visible lines.
+        case exportLogs
         case terminal
         case debugShell
     }

@@ -82,6 +82,7 @@ struct GantryApp: App {
             }
 
             SectionCommands(openComposeFile: openComposeFile, openDockerfile: openDockerfile)
+            LogCommands()
         }
 
         // Standalone host shell windows (one per open request).
