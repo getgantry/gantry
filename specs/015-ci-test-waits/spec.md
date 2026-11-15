@@ -19,6 +19,7 @@ A maintainer opens a pull request. The AppCore tests pass on the CI runner when 
 
 1. **Given** a slow CI runner, **When** `terminateClosesConnection` runs, **Then** the test waits for the close. The wait is 3 s at most.
 2. **Given** a slow CI runner, **When** `writeFailureSurfacesViaOnError` runs, **Then** the test waits for the error. The wait is 3 s at most.
+3. **Given** a slow CI runner, **When** `sendPumpsToConnection` runs, **Then** the test waits for the two writes. The wait is 3 s at most.
 
 ## Requirements
 

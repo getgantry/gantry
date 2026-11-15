@@ -5,7 +5,7 @@
 
 ## Summary
 
-Two tests in `Packages/AppCore/Tests/AppCoreTests/ExecAndHeadlessTests.swift` slept 50 ms or 100 ms and then checked the result. On a loaded CI runner, the event can come later. Replace each sleep with a loop that checks the condition every 10 ms, at most 300 times.
+Three tests in `Packages/AppCore/Tests/AppCoreTests/ExecAndHeadlessTests.swift` slept 50 ms or 100 ms and then checked the result. On a loaded CI runner, the event can come later. Replace each sleep with a loop that checks the condition every 10 ms, at most 300 times.
 
 ## Constitution Check
 

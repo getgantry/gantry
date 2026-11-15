@@ -61,8 +61,9 @@ import Testing
         let (session, writes, _) = await makeSession()
         session.send(Data("abc".utf8))
         session.send(Data("def".utf8))
-        // Let the ordered pump drain.
-        try? await Task.sleep(for: .milliseconds(100))
+        for _ in 0..<300 where await writes.count < 2 {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
         let count = await writes.count
         #expect(count == 2)
         let combined = await writes.combinedString
