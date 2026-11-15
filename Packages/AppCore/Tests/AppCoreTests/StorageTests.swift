@@ -520,8 +520,26 @@ struct VolumeTransferTests {
         #expect(ImageArchive.archiveName(for: ":") == "image.tar")
         #expect(ImageArchive.appleSaveArguments(references: ["nginx:1"], to: "/Volumes/F/n.tar")
             == ["image", "save", "--output", "/Volumes/F/n.tar", "nginx:1"])
+        #expect(ImageArchive.appleSaveArguments(references: ["alpine:3.22"], platform: "linux/arm64", to: "/Volumes/F/a.tar")
+            == ["image", "save", "--platform", "linux/arm64", "--output", "/Volumes/F/a.tar", "alpine:3.22"])
         #expect(ImageArchive.appleLoadArguments(from: "/Volumes/F/n.tar") == ["image", "load", "--input", "/Volumes/F/n.tar"])
         #expect(HelperJob.containerName("copy").hasPrefix("gantry-copy-"))
+    }
+
+    private func image(_ tag: String, os: String, arch: String) throws -> ImageSummary {
+        let platform = arch.isEmpty ? "" : #","Descriptor":{"platform":{"os":"\#(os)","architecture":"\#(arch)"}}"#
+        let json = #"{"Id":"sha256:\#(tag)","ParentId":"","RepoTags":["\#(tag)"],"RepoDigests":[],"Created":0,"Size":0,"SharedSize":0,"Containers":0,"Labels":{}\#(platform)}"#
+        return try JSONDecoder().decode(ImageSummary.self, from: Data(json.utf8))
+    }
+
+    @Test func applePlatformComesFromTheImageThenTheHost() throws {
+        let arm = try image("alpine:3.22", os: "linux", arch: "arm64")
+        let amd = try image("web:1", os: "linux", arch: "amd64")
+        let bare = try image("old:1", os: "", arch: "")
+        #expect(ImageArchive.applePlatform(for: ["web:1"], images: [arm, amd], hostArchitecture: "aarch64") == "linux/amd64")
+        #expect(ImageArchive.applePlatform(for: ["alpine:3.22", "web:1"], images: [arm, amd], hostArchitecture: "aarch64") == "linux/arm64")
+        #expect(ImageArchive.applePlatform(for: ["old:1"], images: [bare], hostArchitecture: "arm64") == "linux/arm64")
+        #expect(ImageArchive.applePlatform(for: ["missing:1"], images: [], hostArchitecture: "") == nil)
     }
 
     @Test func refusesAnExportLargerThanTheFreeSpace() {
