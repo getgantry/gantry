@@ -200,8 +200,12 @@ extension HostSession {
     /// Saves images to a tar archive at `path`.
     public func saveImages(_ references: [String], to path: String) async throws {
         if host.isAppleContainer {
+            let platform = ImageArchive.applePlatform(
+                for: references, images: images, hostArchitecture: info?.architecture ?? ""
+            )
             _ = try await AppleContainerControl.runContainer(
-                ImageArchive.appleSaveArguments(references: references, to: path), cliOverride: storageCLIOverride
+                ImageArchive.appleSaveArguments(references: references, platform: platform, to: path),
+                cliOverride: storageCLIOverride
             )
             return
         }

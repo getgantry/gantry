@@ -153,9 +153,23 @@ public enum VolumeTransferPlan {
 
 /// Image archives on a disk.
 public enum ImageArchive {
-    /// `container image save -o <path> <refs>`.
-    public static func appleSaveArguments(references: [String], to path: String) -> [String] {
-        ["image", "save", "--output", StoragePaths.normalized(path)] + references
+    /// `container image save [--platform os/arch] -o <path> <refs>`.
+    public static func appleSaveArguments(references: [String], platform: String? = nil, to path: String) -> [String] {
+        var args = ["image", "save"]
+        if let platform { args += ["--platform", platform] }
+        return args + ["--output", StoragePaths.normalized(path)] + references
+    }
+
+    /// The `--platform` of an Apple save. apple/container 1.7.1 cannot save a
+    /// multi-platform image without it. One platform shared by all the images,
+    /// else `linux/` and the host architecture; nil when neither is known.
+    public static func applePlatform(for references: [String], images: [ImageSummary], hostArchitecture: String) -> String? {
+        let platforms = Set(references.map { reference -> String? in
+            guard let image = images.first(where: { $0.repoTags.contains(reference) }) else { return nil }
+            return ImageScanPlan.platformString(os: image.os, architecture: image.architecture)
+        })
+        if platforms.count == 1, let shared = platforms.first, let shared { return shared }
+        return ImageScanPlan.platformString(os: "", architecture: hostArchitecture)
     }
 
     /// `container image load -i <path>`.
