@@ -11,6 +11,13 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.29.1](https://github.com/getgantry/gantry/compare/v0.29.0...v0.29.1) (2026-11-15)
+
+
+### Documentation
+
+* **specs:** close the ci check task of spec 015 ([#81](https://github.com/getgantry/gantry/issues/81)) ([550bfb7](https://github.com/getgantry/gantry/commit/550bfb78a9d8e1350ca11f1ae1a01b8a9c82e62a))
+
 ## [0.29.0](https://github.com/getgantry/gantry/compare/v0.28.0...v0.29.0) (2026-11-15)
 
 
