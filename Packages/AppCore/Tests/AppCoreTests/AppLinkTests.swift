@@ -51,6 +51,9 @@ struct AppLinkTests {
         #expect(parse("gantry://debug/compose?action=pull&project=web") == .debugCompose(action: .pull, project: "web", host: nil))
         #expect(parse("gantry://debug/compose?action=up&project=web") == nil)
         #expect(parse("gantry://debug/compose?action=down") == nil)
+        #expect(parse("gantry://debug/tab?name=Changes") == .containerTab("changes"))
+        #expect(parse("gantry://debug/tab?name=changes")?.closesPalette == false)
+        #expect(parse("gantry://debug/tab") == nil)
     }
 
     @Test func placesClosePaletteButPaletteAndDebugLinksKeepIt() {

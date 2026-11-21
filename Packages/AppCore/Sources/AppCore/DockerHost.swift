@@ -71,6 +71,10 @@ public struct HostCapabilities: Hashable, Sendable {
     public var renameContainer: Bool
     /// Committing a container to a new image.
     public var commitContainer: Bool
+    /// The message, author and pause options of a commit.
+    public var commitOptions: Bool
+    /// The file changes of a container compared to its image (`docker diff`).
+    public var containerChanges: Bool
     /// Changing a container's restart policy (incl. setting one at creation).
     public var restartPolicy: Bool
     /// Attaching/detaching running containers to networks.
@@ -97,6 +101,8 @@ public struct HostCapabilities: Hashable, Sendable {
         pauseResume: true,
         renameContainer: true,
         commitContainer: true,
+        commitOptions: true,
+        containerChanges: true,
         restartPolicy: true,
         networkAttach: true,
         buildCachePrune: true,
@@ -114,6 +120,10 @@ public struct HostCapabilities: Hashable, Sendable {
         // `container commit` arrived in CLI 1.6; an older CLI answers the
         // request with a clear "needs 1.6 or newer" error from the transport.
         commitContainer: true,
+        // `container commit <id> <reference>` (1.7.1) takes no message,
+        // author or pause, and the CLI has no diff command.
+        commitOptions: false,
+        containerChanges: false,
         restartPolicy: false,
         networkAttach: false,
         buildCachePrune: false,
