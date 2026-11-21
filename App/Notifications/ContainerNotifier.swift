@@ -50,6 +50,17 @@ final class ContainerNotifier: NSObject, UNUserNotificationCenterDelegate {
         center.add(request, withCompletionHandler: nil)
     }
 
+    /// Posts a notification for a failed scheduled backup. It does not
+    /// depend on the container alert toggle: a lost backup must not go unseen.
+    func presentBackupFailure(_ alert: BackupAlert) {
+        let content = UNMutableNotificationContent()
+        content.title = alert.title
+        content.body = alert.body
+        content.sound = .default
+        content.threadIdentifier = "backup-" + alert.scheduleID.uuidString
+        center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+    }
+
     /// Posts a notification when a long operation finishes while Gantry is
     /// not the frontmost app. A cancel by the user posts nothing.
     func presentOperation(_ operation: LongOperation) {
