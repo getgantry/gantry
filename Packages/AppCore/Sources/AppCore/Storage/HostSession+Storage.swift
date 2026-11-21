@@ -188,7 +188,14 @@ extension HostSession {
             throw OperationFailure(String(localized: "Could not read the container settings.", bundle: .module))
         }
         let binds = VolumeTransferPlan.replacingSource(in: details.hostConfig.binds ?? [], old: old, new: new)
-        let request = recreationRequest(container: container, details: details, binds: binds)
+        return try await recreate(container, request: recreationRequest(container: container, details: details, binds: binds))
+    }
+
+    /// Removes `container` and creates `request` in its place. A running
+    /// container starts again; a stopped one stays stopped. Shared by the
+    /// volume switch and the image update (spec 017).
+    @discardableResult
+    public func recreate(_ container: ContainerSummary, request: ContainerCreateRequest) async throws -> String {
         let wasRunning = container.state.isRunning
         _ = await perform(.remove(force: true), on: container.id)
         if wasRunning { return try await createAndRun(request) }
