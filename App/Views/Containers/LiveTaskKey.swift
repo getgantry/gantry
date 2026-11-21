@@ -13,3 +13,10 @@ extension ContainerSummary {
         LiveTaskKey(containerID: id, isRunning: state.isRunning)
     }
 }
+
+/// `.task(id:)` of the Stats tab: a resource change starts a new stream, so
+/// the memory chart shows the new limit.
+struct StatsTaskKey: Hashable {
+    let live: LiveTaskKey
+    let revision: Int
+}
