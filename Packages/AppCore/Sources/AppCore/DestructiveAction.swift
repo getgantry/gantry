@@ -35,6 +35,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case composeDown
         /// Remove the build records that Gantry keeps for a host.
         case clearBuildHistory
+        /// Pull the new image and make the container again (spec 017).
+        case updateContainer
     }
 
     /// What else happens when the action runs.
@@ -209,6 +211,11 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
     }
 
     /// Removes the Gantry build records of a host; `targets` holds the host id.
+    /// Updates a container to the new image of its tag; `targets` holds its id.
+    public static func updateContainer(_ container: ContainerSummary) -> DestructiveAction {
+        DestructiveAction(kind: .updateContainer, targets: [container.id], names: [container.displayName])
+    }
+
     public static func clearBuildHistory(hostID: UUID, hostName: String) -> DestructiveAction {
         DestructiveAction(kind: .clearBuildHistory, targets: [hostID.uuidString], names: [hostName])
     }
