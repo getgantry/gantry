@@ -39,6 +39,7 @@ struct VolumeListView: View {
     @State private var pruneConfirm = false
     @State private var pruneOutcome: PruneOutcome?
     @State private var volumeMove: VolumeMove?
+    @State private var backupDraft: BackupSchedule?
     @AppStorage("volumeSort") private var sort: VolumeSort = .name
     @AppStorage("volumeSortAscending") private var ascending = true
 
@@ -99,6 +100,13 @@ struct VolumeListView: View {
                 Label("Copy Name", systemImage: "doc.on.doc")
             }
             if session.usesLocalPaths { storageItems(name) }
+            Button {
+                backupDraft = BackupSchedule(
+                    hostID: session.host.id, hostName: session.host.name, volume: name, folder: ""
+                )
+            } label: {
+                Label("Back Up on a Schedule…", systemImage: "clock.arrow.circlepath")
+            }
             Divider()
             Button(role: .destructive) {
                 removeAction = .removeVolume(name: name, containers: session.containers, engine: .init(session.host))
@@ -169,6 +177,7 @@ struct VolumeListView: View {
         .sheet(item: $volumeMove) { move in
             VolumeTransferSheet(session: session, move: move)
         }
+        .sheet(item: $backupDraft) { BackupScheduleSheet(initial: $0) }
         .confirmationDialog(
             "Prune Unused Volumes?",
             isPresented: $pruneConfirm,

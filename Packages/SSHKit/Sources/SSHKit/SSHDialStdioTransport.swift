@@ -121,28 +121,14 @@ public actor SSHDialStdioTransport: DockerTransport {
         }
 
         // Parse until the response head arrives, buffering any early body bytes
-        // that came in the same chunk.
+        // that came in the same chunk. A small response can also end there.
         var parser = HTTP1ResponseParser()
-        var head: (status: Int, headers: [String: String])?
-        var earlyBodies: [Data] = []
+        var start = StreamHead()
         let inbound = tunnel.inbound
 
         do {
-            outer: for try await chunk in inbound {
-                let events = try parser.ingest(chunk)
-                for event in events {
-                    switch event {
-                    case .head(let status, let headers):
-                        head = (status, headers)
-                    case .body(let data):
-                        earlyBodies.append(data)
-                    case .end:
-                        // Response completed before we returned: still hand back
-                        // a stream that yields the buffered bodies then finishes.
-                        break outer
-                    }
-                }
-                if head != nil { break }
+            for try await chunk in inbound {
+                if start.consume(try parser.ingest(chunk)) { break }
             }
         } catch {
             streamTunnels[id] = nil
@@ -151,13 +137,25 @@ public actor SSHDialStdioTransport: DockerTransport {
             throw mapped
         }
 
-        guard let head else {
+        guard let head = start.head else {
             streamTunnels[id] = nil
             let detail = await tunnel.stderrTail()
             await tunnel.close()
             throw DockerError.connectionFailed(
                 "stream closed before response headers" + (detail.isEmpty ? "" : ": \(detail)")
             )
+        }
+
+        let earlyBodies = start.bodies
+        if start.ended {
+            // Nothing more comes on this tunnel: finish now, or the pump waits forever.
+            streamTunnels[id] = nil
+            await tunnel.close()
+            let bytes = AsyncThrowingStream<Data, Error> { continuation in
+                for body in earlyBodies where !body.isEmpty { continuation.yield(body) }
+                continuation.finish()
+            }
+            return DockerByteStream(status: head.status, headers: head.headers, bytes: bytes)
         }
 
         let bytes = AsyncThrowingStream<Data, Error> { continuation in
@@ -698,5 +696,27 @@ private actor Shutdown {
         released = true
         continuation?.resume()
         continuation = nil
+    }
+}
+
+/// The start of a streamed response: the head, the body bytes that came with
+/// it, and whether the response already ended in those first chunks.
+struct StreamHead: Sendable {
+    var head: (status: Int, headers: [String: String])?
+    var bodies: [Data] = []
+    var ended = false
+
+    /// Takes the events of one chunk. True when the caller can stop reading.
+    mutating func consume(_ events: [HTTP1ResponseParser.Event]) -> Bool {
+        for event in events {
+            switch event {
+            case .head(let status, let headers): head = (status, headers)
+            case .body(let data): bodies.append(data)
+            case .end:
+                ended = true
+                return true
+            }
+        }
+        return head != nil
     }
 }
