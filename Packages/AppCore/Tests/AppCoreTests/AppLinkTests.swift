@@ -49,6 +49,12 @@ struct AppLinkTests {
         #expect(parse("gantry://debug/compose?action=down&project=web&host=nettop")
             == .debugCompose(action: .down, project: "web", host: "nettop"))
         #expect(parse("gantry://debug/compose?action=pull&project=web") == .debugCompose(action: .pull, project: "web", host: nil))
+        #expect(parse("gantry://debug/imagesearch?query=nginx&path=/tmp/s.png&host=nettop")
+            == .debugImageSearch(query: "nginx", source: "hub", host: "nettop", path: "/tmp/s.png"))
+        #expect(parse("gantry://debug/imagesearch?query=ghcr.io/a/b&source=registry&path=/tmp/s.png")
+            == .debugImageSearch(query: "ghcr.io/a/b", source: "registry", host: nil, path: "/tmp/s.png"))
+        #expect(parse("gantry://debug/imagesearch?query=nginx&source=web&path=/tmp/s.png") == nil)
+        #expect(parse("gantry://debug/imagesearch?query=nginx&path=relative.png") == nil)
         #expect(parse("gantry://debug/compose?action=up&project=web") == nil)
         #expect(parse("gantry://debug/compose?action=down") == nil)
     }

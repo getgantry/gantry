@@ -10,6 +10,7 @@ struct ImageListView: View {
     @State private var searchText = ""
     @State private var removeAction: DestructiveAction?
     @State private var showingPull = false
+    @State private var showingSearch = false
     @State private var pruneConfirm: PruneScope?
     @State private var pruneOutcome: PruneOutcome?
     @State private var diskUsage: SystemDiskUsage?
@@ -141,7 +142,10 @@ struct ImageListView: View {
                 description: "Pull an image from a registry or build one from a Dockerfile.",
                 actionTitle: "Pull Image…",
                 action: { showingPull = true },
-                secondaryActions: [ListEmptyAction(title: "Build Image…") { chooseDockerfile() }]
+                secondaryActions: [
+                    ListEmptyAction(title: "Search Images…") { showingSearch = true },
+                    ListEmptyAction(title: "Build Image…") { chooseDockerfile() }
+                ]
             ),
             total: session.images.count,
             filtered: filtered.count,
@@ -166,6 +170,14 @@ struct ImageListView: View {
                 } label: {
                     Label("Pull Image…", systemImage: "arrow.down.circle")
                 }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingSearch = true
+                } label: {
+                    Label("Search Images…", systemImage: "magnifyingglass.circle")
+                }
+                .help("Search Docker Hub or list the tags of a repository on a registry")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -206,6 +218,9 @@ struct ImageListView: View {
         .onSectionCommand(.refresh, .images) { Task { await refresh() } }
         .sheet(isPresented: $showingPull) {
             PullImageSheet(session: session)
+        }
+        .sheet(isPresented: $showingSearch) {
+            ImageSearchSheet(session: session)
         }
         .confirmationDialog(
             pruneConfirm?.title ?? "",

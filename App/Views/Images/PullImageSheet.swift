@@ -144,28 +144,19 @@ struct PullImageSheet: View {
             auth = nil
         }
 
-        operation = LongOperationRunner.run(.pull, title: String(localized: "Pull \(ref)"), session: session) { op in
-            do {
-                let stream = try await session.pullImage(reference: ref, auth: auth)
-                // A local copy keeps counting after the sheet closes
-                // (Continue in Background); the sheet shows the latest one.
-                var progress = PullProgressTracker()
-                for try await update in stream {
-                    progress.apply(update)
-                    op.report(progress.progress, status: update.status, fraction: progress.fraction)
-                    tracker = progress
+        operation = ImagePullOperation.start(
+            reference: ref,
+            auth: auth,
+            session: session,
+            onProgress: { tracker = $0 },
+            onFinish: { error in
+                if let error {
+                    phase = .failed(error.localizedDescription)
+                } else {
+                    phase = .done
                 }
-                try Task.checkCancellation()
-                phase = .done
-                await session.refreshImages()
-                return nil
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                phase = .failed(error.localizedDescription)
-                throw error
             }
-        }
+        )
     }
 }
 
