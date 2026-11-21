@@ -35,4 +35,4 @@
 - [ ] T015b Live check on Docker (`nettop.local`, `GANTRY_UPD_LIVE_DOCKER_SOCKET`). Open: the host had no default route and no DNS during the work. Only the `/distribution` answer shape was checked live, before the outage
 - [x] T016 Live check of the GUI with `scripts/gantry-ctl` snapshots in light and dark: icon in the list row, badge in the detail (Debug build with `GANTRY_HOSTS_PATH` and `GANTRY_IMAGE_UPDATES_PATH` in the build folder)
 - [ ] T016b The filter "Update Available", the confirmation and the Compose alert in the GUI. Open: no link reaches them, and clicks were not permitted
-- [ ] T017 Open the pull request "feat: show when a newer image is available"
+- [x] T017 Open the pull request "feat: show when a newer image is available" (#84)
