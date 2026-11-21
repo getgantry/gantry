@@ -23,6 +23,9 @@ struct FilesView: View {
     @State private var transferError: String?
     /// Uploads that would replace items, waiting for the user to confirm.
     @State private var pendingUpload: PendingUpload?
+    /// Added and changed paths of the container (`docker diff`), for badges.
+    /// Empty on hosts without file changes.
+    @State private var changedPaths: [String: ContainerChange.Kind] = [:]
 
     private struct PendingUpload: Identifiable {
         let id = UUID()
@@ -55,6 +58,7 @@ struct FilesView: View {
             path = "/"
             pathField = "/"
             await load()
+            await loadChanges()
         }
     }
 
@@ -68,7 +72,10 @@ struct FilesView: View {
                 .onSubmit { go(to: pathField) }
             Button("Go") { go(to: pathField) }
             Button {
-                Task { await load() }
+                Task {
+                    await load()
+                    await loadChanges()
+                }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
@@ -169,6 +176,7 @@ struct FilesView: View {
                             onError: { transferError = $0 }
                         ),
                         fullPath: join(path, entry.name),
+                        change: changedPaths[join(path, entry.name)],
                         canTransfer: session.host.capabilities.containerFileTransfer,
                         onOpen: {
                             if entry.isDirectory {
@@ -255,6 +263,19 @@ struct FilesView: View {
             entries = []
             errorText = error.localizedDescription
         }
+    }
+
+    /// Loads the file changes for the badges. The map is built off the main
+    /// actor; a failure only hides the badges.
+    private func loadChanges() async {
+        guard session.host.capabilities.containerChanges,
+              let changes = try? await session.containerChanges(containerID: container.id) else {
+            changedPaths = [:]
+            return
+        }
+        changedPaths = await Task.detached {
+            ContainerChanges.kindsByPath(changes.filter { $0.kind != .deleted })
+        }.value
     }
 
     // MARK: - Download
@@ -377,6 +398,8 @@ private struct FileRow: View {
     let entry: ContainerFileEntry
     let transfer: ContainerFileTransfer
     let fullPath: String
+    /// The kind of change of this item compared to the image, if any.
+    let change: ContainerChange.Kind?
     /// False when the host's engine has no archive endpoints (apple/container):
     /// the download/upload affordances are hidden.
     let canTransfer: Bool
@@ -395,6 +418,9 @@ private struct FileRow: View {
                 .frame(width: 18)
             Text(entry.name)
                 .lineLimit(1)
+            if let change {
+                ChangeBadge(kind: change)
+            }
             Spacer()
             if entry.isDirectory {
                 // Affordance: directories open (double-click / Return).
@@ -549,4 +575,20 @@ struct ContainerFileTransfer: Transferable {
         }
     }
 
+}
+
+/// A small text badge for an added or changed item; the text says the kind,
+/// so the color is not the only signal.
+private struct ChangeBadge: View {
+    let kind: ContainerChange.Kind
+
+    var body: some View {
+        Text(kind.title)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(kind.tint)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 1)
+            .background(kind.tint.opacity(0.15), in: Capsule())
+            .help(kind.title)
+    }
 }
