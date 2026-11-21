@@ -422,6 +422,49 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     }
 }
 
+// MARK: - Image search (spec 020)
+
+// The body is a live `GET /images/search?term=nginx&limit=2` reply of
+// Docker 1.55 on nettop (2026-11-21).
+private let liveSearch = #"[{"star_count":21425,"is_official":true,"name":"nginx","is_automated":false,"description":"Official build of Nginx."},{"star_count":124,"is_official":false,"name":"nginx/nginx-ingress","is_automated":false,"description":"NGINX and  NGINX Plus Ingress Controllers for Kubernetes"}]"#
+
+@Test func searchImagesDecodesLiveReply() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(liveSearch) })
+    let client = DockerClient(transport: transport)
+    let results = try await client.searchImages(term: "nginx", limit: 2)
+    #expect(results.count == 2)
+    #expect(results[0] == ImageSearchResult(
+        name: "nginx", description: "Official build of Nginx.", starCount: 21425, isOfficial: true
+    ))
+    #expect(results[1].isOfficial == false)
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/images/search")
+    #expect(request?.query.contains(URLQueryItem(name: "term", value: "nginx")) == true)
+    #expect(request?.query.contains(URLQueryItem(name: "limit", value: "2")) == true)
+}
+
+@Test func searchImagesToleratesMissingFields() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"[{"name":"x"}]"#) })
+    let results = try await DockerClient(transport: transport).searchImages(term: "x")
+    #expect(results == [ImageSearchResult(name: "x", description: "", starCount: 0, isOfficial: false)])
+}
+
+@Test func pullImageSendsPlatform() async throws {
+    let transport = MockTransport(streamFactory: { _ in makeByteStream([]) })
+    let client = DockerClient(transport: transport)
+    for try await _ in try await client.pullImage(reference: "alpine:3.22", platform: "linux/amd64") {}
+    let request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "platform", value: "linux/amd64")) == true)
+}
+
+@Test func pullImageWithoutPlatformSendsNoPlatform() async throws {
+    let transport = MockTransport(streamFactory: { _ in makeByteStream([]) })
+    let client = DockerClient(transport: transport)
+    for try await _ in try await client.pullImage(reference: "alpine:3.22") {}
+    let request = await transport.last
+    #expect(request?.query.contains { $0.name == "platform" } == false)
+}
+
 // MARK: - System endpoints
 
 @Test func systemInfoDecodes() async throws {

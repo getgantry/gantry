@@ -1,20 +1,19 @@
 import Foundation
 
 extension DockerClient {
-    /// `POST /images/create?fromImage=&tag=` — pulls an image, streaming progress.
-    ///
-    /// The `reference` is split into `fromImage` and `tag` on the last `:`,
-    /// unless the part after the colon looks like a digest (`@sha256:` is kept
-    /// whole on `fromImage`). When `auth` is supplied its base64url JSON is sent
-    /// in the `X-Registry-Auth` header. An `error` progress line is surfaced as
-    /// a thrown `DockerError.apiError`.
+    /// `POST /images/create?fromImage=&tag=[&platform=]`: pulls an image, streaming progress.
+    /// `splitPullReference` splits the reference (a digest stays on `fromImage`).
+    /// `auth` goes as base64url JSON in `X-Registry-Auth`. A `platform` (`os/arch`)
+    /// limits the pull. An `error` progress line throws `DockerError.apiError`.
     public func pullImage(
         reference: String,
-        auth: RegistryAuth? = nil
+        auth: RegistryAuth? = nil,
+        platform: String? = nil
     ) async throws -> AsyncThrowingStream<PullProgress, Error> {
         let (fromImage, tag) = Self.splitPullReference(reference)
         var query = [URLQueryItem(name: "fromImage", value: fromImage)]
         if let tag { query.append(URLQueryItem(name: "tag", value: tag)) }
+        if let platform, !platform.isEmpty { query.append(URLQueryItem(name: "platform", value: platform)) }
 
         var headers: [String: String] = [:]
         if let auth {
