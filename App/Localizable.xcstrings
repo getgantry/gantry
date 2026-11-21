@@ -20420,6 +20420,178 @@
         }
       }
     },
+    "Check for Image Updates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Image Updates"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провери за актуализации на образи"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyhledat aktualizace obrazů"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter image-opdateringer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Image-Updates suchen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Έλεγχος για ενημερώσεις εικόνων"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar actualizaciones de imágenes"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otsi tõmmiste uuendusi"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarkista levykuvien päivitykset"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des mises à jour d'images"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provjeri ažuriranja slika"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image-frissítések keresése"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca aggiornamenti delle immagini"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tikrinti atvaizdų naujinius"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pārbaudīt attēlu atjauninājumus"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se etter image-oppdateringer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek naar image-updates"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź aktualizacje obrazów"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Procurar atualizações de imagens"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caută actualizări pentru imagini"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить обновления образов"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyhľadať aktualizácie obrazov"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preveri posodobitve slik"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провери ажурирања слика"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proveri ažuriranja slika"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sök efter uppdateringar av avbilder"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити оновлення образів"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查镜像更新"
+          }
+        }
+      }
+    },
     "Export Failed": {
       "localizations": {
         "en": {
@@ -20932,6 +21104,178 @@
           "stringUnit": {
             "state": "translated",
             "value": "导出为 Compose…"
+          }
+        }
+      }
+    },
+    "Gantry pulls the new image, removes the container and makes it again with the same settings. A running container restarts. Data that is not in a volume is lost.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry pulls the new image, removes the container and makes it again with the same settings. A running container restarts. Data that is not in a volume is lost."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry изтегля новия образ, премахва контейнера и го създава отново със същите настройки. Работещ контейнер се рестартира. Данните, които не са в том, се губят."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry stáhne nový obraz, odstraní kontejner a znovu ho vytvoří se stejným nastavením. Spuštěný kontejner se restartuje. Data, která nejsou ve svazku, budou ztracena."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry henter det nye image, fjerner containeren og opretter den igen med de samme indstillinger. En kørende container genstarter. Data, der ikke ligger i et volume, går tabt."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry pullt das neue Image, entfernt den Container und erstellt ihn mit denselben Einstellungen neu. Ein laufender Container startet neu. Daten, die nicht in einem Volume liegen, gehen verloren."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Gantry κάνει λήψη της νέας εικόνας, αφαιρεί το κοντέινερ και το δημιουργεί ξανά με τις ίδιες ρυθμίσεις. Ένα κοντέινερ που εκτελείται επανεκκινείται. Τα δεδομένα που δεν βρίσκονται σε τόμο χάνονται."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry descarga la nueva imagen, elimina el contenedor y lo vuelve a crear con los mismos ajustes. Un contenedor en ejecución se reinicia. Los datos que no están en un volumen se pierden."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry tõmbab uue tõmmise, eemaldab konteineri ja loob selle samade sätetega uuesti. Töötav konteiner taaskäivitub. Andmed, mis pole köites, lähevad kaotsi."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry noutaa uuden levykuvan, poistaa kontin ja luo sen uudelleen samoilla asetuksilla. Käynnissä oleva kontti käynnistyy uudelleen. Tiedot, jotka eivät ole taltiossa, menetetään."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry télécharge la nouvelle image, supprime le conteneur et le recrée avec les mêmes réglages. Un conteneur en cours d'exécution redémarre. Les données qui ne sont pas dans un volume sont perdues."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry povlači novu sliku, uklanja kontejner i ponovno ga stvara s istim postavkama. Pokrenuti kontejner ponovno se pokreće. Podaci koji nisu u volumenu bit će izgubljeni."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Gantry letölti az új image-et, eltávolítja a konténert, és ugyanazokkal a beállításokkal újra létrehozza. A futó konténer újraindul. A köteten kívüli adatok elvesznek."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry scarica la nuova immagine, rimuove il container e lo ricrea con le stesse impostazioni. Un container in esecuzione si riavvia. I dati che non sono in un volume vanno persi."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry atsisiunčia naują atvaizdą, pašalina konteinerį ir sukuria jį iš naujo su tais pačiais nustatymais. Veikiantis konteineris paleidžiamas iš naujo. Duomenys, kurie nėra tome, prarandami."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry lejupielādē jauno attēlu, noņem konteineru un izveido to no jauna ar tiem pašiem iestatījumiem. Darbojošs konteiners tiek restartēts. Dati, kas nav sējumā, tiek zaudēti."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry henter det nye imaget, fjerner containeren og oppretter den på nytt med de samme innstillingene. En kjørende container starter på nytt. Data som ikke ligger i et volum, går tapt."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry pullt de nieuwe image, verwijdert de container en maakt hem opnieuw aan met dezelfde instellingen. Een actieve container start opnieuw. Gegevens die niet in een volume staan, gaan verloren."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry pobierze nowy obraz, usunie kontener i utworzy go od nowa z tymi samymi ustawieniami. Uruchomiony kontener zostanie zrestartowany. Dane, które nie znajdują się w woluminie, zostaną utracone."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Gantry descarrega a nova imagem, remove o contentor e cria-o novamente com as mesmas definições. Um contentor em execução reinicia. Os dados que não estão num volume perdem-se."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry descarcă noua imagine, elimină containerul și îl creează din nou cu aceleași setări. Un container care rulează repornește. Datele care nu sunt într-un volum se pierd."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry скачает новый образ, удалит контейнер и создаст его заново с теми же настройками. Запущенный контейнер перезапустится. Данные, которые находятся не в томе, будут потеряны."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry stiahne nový obraz, odstráni kontajner a znova ho vytvorí s rovnakými nastaveniami. Spustený kontajner sa reštartuje. Údaje, ktoré nie sú vo zväzku, sa stratia."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry povleče novo sliko, odstrani vsebnik in ga znova ustvari z enakimi nastavitvami. Zagnan vsebnik se znova zažene. Podatki, ki niso v nosilcu, bodo izgubljeni."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry повлачи нову слику, уклања контејнер и поново га креира са истим подешавањима. Покренути контејнер се поново покреће. Подаци који нису у волумену се губе."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry povlači novu sliku, uklanja kontejner i ponovo ga kreira sa istim podešavanjima. Pokrenuti kontejner se ponovo pokreće. Podaci koji nisu u volumenu se gube."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry hämtar den nya avbilden, tar bort containern och skapar den igen med samma inställningar. En container som körs startas om. Data som inte finns i en volym går förlorad."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry отримає новий образ, вилучить контейнер і створить його знову з тими самими налаштуваннями. Запущений контейнер перезапуститься. Дані, які не зберігаються в томі, буде втрачено."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gantry 会拉取新镜像，移除该容器，并使用相同设置重新创建它。正在运行的容器会重新启动。不在卷中的数据将会丢失。"
           }
         }
       }
@@ -21624,6 +21968,178 @@
         }
       }
     },
+    "The registry has a newer image for this tag.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The registry has a newer image for this tag."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Регистърът има по-нов образ за този таг."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registr má pro tento tag novější obraz."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registryet har et nyere image til dette tag."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Registry hat ein neueres Image für dieses Tag."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το μητρώο έχει νεότερη εικόνα για αυτή την ετικέτα."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El registro tiene una imagen más reciente para esta etiqueta."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registris on selle sildi jaoks uuem tõmmis."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rekisterissä on uudempi levykuva tälle tunnisteelle."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le registre contient une image plus récente pour ce tag."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registar ima noviju sliku za ovu oznaku."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A registryben újabb image van ehhez a címkéhez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il registro ha un'immagine più recente per questo tag."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registre yra naujesnis šios žymės atvaizdas."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reģistrā ir jaunāks attēls šim tagam."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registeret har et nyere image for denne taggen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De registry heeft een nieuwere image voor deze tag."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejestr ma nowszy obraz dla tego tagu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O registo tem uma imagem mais recente para esta etiqueta."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrul are o imagine mai nouă pentru această etichetă."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В реестре есть более новый образ для этого тега."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Register má pre tento tag novší obraz."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Register ima novejšo sliko za to oznako."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Регистар има новију слику за ову ознаку."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registar ima noviju sliku za ovu oznaku."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registret har en nyare avbild för den här taggen."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У реєстрі є новіший образ для цього тегу."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像仓库中有此标签的较新镜像。"
+          }
+        }
+      }
+    },
     "These values look like secrets. The file reads them from the shell or from a .env file. Turn on a value to put it in the file.": {
       "localizations": {
         "en": {
@@ -21792,6 +22308,694 @@
           "stringUnit": {
             "state": "translated",
             "value": "这些值看起来是机密。文件会从 shell 或 .env 文件读取它们。打开某个值即可将其写入文件。"
+          }
+        }
+      }
+    },
+    "Update Available": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Available"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налична актуализация"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostupná aktualizace"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdatering tilgængelig"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update verfügbar"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Διαθέσιμη ενημέρωση"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualización disponible"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uuendus saadaval"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Päivitys saatavilla"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour disponible"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostupno ažuriranje"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frissítés érhető el"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornamento disponibile"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yra naujinys"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pieejams atjauninājums"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdatering tilgjengelig"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update beschikbaar"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostępna aktualizacja"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualização disponível"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizare disponibilă"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступно обновление"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostupná aktualizácia"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na voljo je posodobitev"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступно ажурирање"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostupno ažuriranje"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdatering tillgänglig"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступне оновлення"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有可用更新"
+          }
+        }
+      }
+    },
+    "Update Container…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Container…"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Актуализирай контейнера…"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovat kontejner…"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdater container…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container aktualisieren…"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ενημέρωση κοντέινερ…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar contenedor…"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uuenda konteinerit…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Päivitä kontti…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour le conteneur…"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažuriraj kontejner…"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konténer frissítése…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiorna container…"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atnaujinti konteinerį…"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atjaunināt konteineru…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdater container…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werk container bij…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaktualnij kontener…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar contentor…"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizează containerul…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить контейнер…"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovať kontajner…"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posodobi vsebnik…"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ажурирај контејнер…"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažuriraj kontejner…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdatera container…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити контейнер…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新容器…"
+          }
+        }
+      }
+    },
+    "Update the Compose Project": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update the Compose Project"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Актуализирай проекта на Compose"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovat projekt Compose"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdater Compose-projektet"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose-Projekt aktualisieren"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ενημέρωση του έργου Compose"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar el proyecto de Compose"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uuenda Compose'i projekti"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Päivitä Compose-projekti"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour le projet Compose"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažuriraj Compose projekt"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Compose-projekt frissítése"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiorna il progetto Compose"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atnaujinti Compose projektą"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atjaunināt Compose projektu"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdater Compose-prosjektet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werk het Compose-project bij"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaktualnij projekt Compose"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar o projeto Compose"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizează proiectul Compose"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить проект Compose"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovať projekt Compose"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posodobi projekt Compose"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ажурирај Compose пројекат"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažuriraj Compose projekat"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdatera Compose-projektet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити проєкт Compose"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新 Compose 项目"
+          }
+        }
+      }
+    },
+    "Update “%@” to the new image?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update “%@” to the new image?"
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Да се актуализира ли „%@“ до новия образ?"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovat „%@“ na nový obraz?"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdater “%@” til det nye image?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ auf das neue Image aktualisieren?"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ενημέρωση του «%@» στη νέα εικόνα;"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Actualizar «%@» a la nueva imagen?"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kas uuendada „%@“ uuele tõmmisele?"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Päivitetäänkö ”%@” uuteen levykuvaan?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour « %@ » vers la nouvelle image ?"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažurirati „%@” na novu sliku?"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frissíti a(z) „%@” konténert az új image-re?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornare «%@» alla nuova immagine?"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atnaujinti „%@“ į naują atvaizdą?"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vai atjaunināt “%@” uz jauno attēlu?"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppdatere «%@» til det nye imaget?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‘%@’ bijwerken naar de nieuwe image?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaktualnić „%@” do nowego obrazu?"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar «%@» para a nova imagem?"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizați „%@” la noua imagine?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить «%@» до нового образа?"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizovať „%@“ na nový obraz?"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Želite posodobiti »%@« na novo sliko?"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ажурирати „%@“ на нову слику?"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ažurirati „%@“ na novu sliku?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uppdatera ”%@” till den nya avbilden?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити «%@» до нового образу?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要将“%@”更新到新镜像吗？"
           }
         }
       }
@@ -195378,6 +196582,178 @@
     },
     "—": {
       "shouldTranslate": false
+    },
+    "“%@” is a service of the Compose project “%@”. Pull the images of the project, then run Compose up for the project again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%1$@” is a service of the Compose project “%2$@”. Pull the images of the project, then run Compose up for the project again."
+          }
+        },
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ е услуга от проекта на Compose „%2$@“. Изтеглете образите на проекта и после изпълнете отново Compose up за проекта."
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ je služba projektu Compose „%2$@“. Stáhněte obrazy projektu a potom znovu spusťte Compose up pro projekt."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%1$@” er en tjeneste i Compose-projektet “%2$@”. Hent projektets images, og kør derefter Compose up for projektet igen."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ ist ein Dienst des Compose-Projekts „%2$@“. Pulle die Images des Projekts und führe dann Compose up für das Projekt erneut aus."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το «%1$@» είναι υπηρεσία του έργου Compose «%2$@». Κάντε λήψη των εικόνων του έργου και, στη συνέχεια, εκτελέστε ξανά το Compose up για το έργο."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» es un servicio del proyecto de Compose «%2$@». Descarga las imágenes del proyecto y luego vuelve a ejecutar Compose up para el proyecto."
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ on Compose'i projekti „%2$@“ teenus. Tõmmake projekti tõmmised ja käivitage seejärel projekti jaoks uuesti Compose up."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%1$@” on Compose-projektin ”%2$@” palvelu. Nouda projektin levykuvat ja suorita sitten Compose up projektille uudelleen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %1$@ » est un service du projet Compose « %2$@ ». Téléchargez les images du projet, puis exécutez de nouveau Compose up pour le projet."
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@” je usluga Compose projekta „%2$@”. Povucite slike projekta, a zatim ponovno pokrenite Compose up za projekt."
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A(z) „%1$@” a(z) „%2$@” Compose-projekt egyik szolgáltatása. Töltse le a projekt image-eit, majd futtassa újra a Compose up parancsot a projekthez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» è un servizio del progetto Compose «%2$@». Scarica le immagini del progetto, poi esegui di nuovo Compose up per il progetto."
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ yra Compose projekto „%2$@“ paslauga. Atsisiųskite projekto atvaizdus, tada iš naujo paleiskite Compose up projektui."
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%1$@” ir Compose projekta “%2$@” pakalpojums. Lejupielādējiet projekta attēlus un pēc tam vēlreiz palaidiet Compose up projektam."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» er en tjeneste i Compose-prosjektet «%2$@». Hent prosjektets images, og kjør deretter Compose up for prosjektet på nytt."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‘%1$@’ is een service van het Compose-project ‘%2$@’. Pull de images van het project en voer daarna Compose up opnieuw uit voor het project."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@” to usługa projektu Compose „%2$@”. Pobierz obrazy projektu, a następnie ponownie uruchom Compose up dla projektu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» é um serviço do projeto Compose «%2$@». Descarregue as imagens do projeto e, em seguida, execute novamente o Compose up para o projeto."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@” este un serviciu al proiectului Compose „%2$@”. Descărcați imaginile proiectului, apoi rulați din nou Compose up pentru proiect."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» — сервис проекта Compose «%2$@». Скачайте образы проекта, затем снова запустите Compose up для проекта."
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ je služba projektu Compose „%2$@“. Stiahnite obrazy projektu a potom znova spustite Compose up pre projekt."
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "»%1$@« je storitev projekta Compose »%2$@«. Povlecite slike projekta, nato znova zaženite Compose up za projekt."
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ је сервис Compose пројекта „%2$@“. Повуците слике пројекта, а затим поново покрените Compose up за пројекат."
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ je servis Compose projekta „%2$@“. Povucite slike projekta, a zatim ponovo pokrenite Compose up za projekat."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "”%1$@” är en tjänst i Compose-projektet ”%2$@”. Hämta projektets avbilder och kör sedan Compose up för projektet igen."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» — це сервіс проєкту Compose «%2$@». Отримайте образи проєкту, а потім знову запустіть Compose up для проєкту."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%1$@”是 Compose 项目“%2$@”的服务。请拉取该项目的镜像，然后再次为该项目运行 Compose up。"
+          }
+        }
+      }
     },
     "“%@” is not a Dockerfile and has no Dockerfile in it. Choose a Dockerfile or a folder that contains one.": {
       "localizations": {
