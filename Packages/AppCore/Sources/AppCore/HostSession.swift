@@ -1793,7 +1793,8 @@ extension HostSession {
     /// Callers should `refreshImages()` once the stream finishes.
     public func pullImage(
         reference: String,
-        auth: RegistryAuth? = nil
+        auth: RegistryAuth? = nil,
+        platform: String? = nil
     ) async throws -> AsyncThrowingStream<PullProgress, Error> {
         guard let client else {
             throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module))
@@ -1811,7 +1812,7 @@ extension HostSession {
         } else {
             resolvedAuth = await registryCredentials.auth(forImageReference: reference)
         }
-        return try await client.pullImage(reference: reference, auth: resolvedAuth)
+        return try await client.pullImage(reference: reference, auth: resolvedAuth, platform: platform)
     }
 
     /// Builds an image from a local context directory, returning the build log.
