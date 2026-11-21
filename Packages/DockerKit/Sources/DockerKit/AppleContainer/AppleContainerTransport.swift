@@ -221,6 +221,8 @@ public actor AppleContainerTransport: DockerTransport {
             throw Self.unsupported("Renaming containers")
         case (.post, 3, "containers", "update"):
             throw Self.unsupported("Restart policies")
+        case (.get, 3, "containers", "changes"):
+            throw Self.unsupported("File changes of a container")
         case (.post, 1, "commit", _):
             return try await commitContainer(request)
         case (.put, 3, "containers", "archive"):
