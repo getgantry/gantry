@@ -129,6 +129,37 @@ import Testing
         #expect(count >= 1)
     }
 
+    @Test func pullImagePassesPlatform() async throws {
+        let transport = MockTransport()
+        transport.on(.get, "/version", json: Fixtures.version)
+        transport.onStream("/images/create", lines: [#"{"status":"Pull complete"}"#])
+        let client = DockerClient(transport: transport)
+        let session = HostSession(host: DockerHost(name: "Local", kind: .local))
+        session._setConnectedClientForTesting(client, version: try await client.negotiate())
+        for try await _ in try await session.pullImage(reference: "alpine:3.22", platform: "linux/amd64") {}
+        let pull = transport.executed.last { $0.path.hasSuffix("/images/create") }
+        #expect(pull?.query.contains(URLQueryItem(name: "platform", value: "linux/amd64")) == true)
+        #expect(session.pullPlatform == nil) // no info loaded yet
+    }
+
+    @Test func searchImagesUsesTheEngineOnDockerHosts() async throws {
+        let session = await connected { t in
+            t.on(.get, "/images/search", json: #"[{"name":"nginx","description":"Official build of Nginx.","star_count":21425,"is_official":true}]"#)
+        }
+        let http = NoNetwork()
+        let results = try await session.searchImages("nginx", http: http)
+        #expect(results.map(\.name) == ["nginx"])
+    }
+
+    @Test func searchImagesMapsEngineRateLimit() async throws {
+        let session = await connected { t in
+            t.on(.get, "/images/search", status: 500, json: #"{"message":"toomanyrequests: rate limit"}"#)
+        }
+        await #expect(throws: ImageSearchError.rateLimited(retryAfter: nil)) {
+            _ = try await session.searchImages("nginx", http: NoNetwork())
+        }
+    }
+
     @Test func pullImageNotConnectedThrows() async {
         let session = HostSession(host: DockerHost(name: "Local", kind: .local))
         await #expect(throws: DockerError.self) {
@@ -172,3 +203,11 @@ import Testing
 // NOTE: HostShellSession wraps SSHHostShell which requires a live SSH client,
 // so it is exercised only structurally via HostSession.openHostShell guards in
 // HostSessionTests. No standalone test here to avoid needing a remote host.
+
+/// Fails the test when a Docker host search goes to the network directly.
+private struct NoNetwork: RegistryHTTP {
+    func send(_ request: RegistryHTTPRequest) async throws -> RegistryHTTPResponse {
+        Issue.record("unexpected HTTP request to \(request.url)")
+        throw URLError(.badURL)
+    }
+}

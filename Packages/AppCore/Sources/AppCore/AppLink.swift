@@ -27,6 +27,9 @@ public enum AppLink: Equatable, Sendable {
     /// Debug builds only: run Compose down or Compose pull on a project
     /// without the button and without the confirmation.
     case debugCompose(action: ComposeDebugAction, project: String, host: String?)
+    /// Debug builds only: run an image search and write a PNG of the sheet.
+    /// `source` is `hub` (default) or `registry`.
+    case debugImageSearch(query: String, source: String, host: String?, path: String)
 
     public enum ComposeDebugAction: String, Sendable, Hashable {
         case down, pull
@@ -37,7 +40,7 @@ public enum AppLink: Equatable, Sendable {
         switch self {
         case .open, .settings: true
         case .palette, .snapshot, .state, .appearance, .activity, .menuBarSnapshot, .debugPull,
-             .cancelNewestOperation, .debugCompose: false
+             .cancelNewestOperation, .debugCompose, .debugImageSearch: false
         }
     }
 
@@ -94,6 +97,11 @@ public enum AppLink: Equatable, Sendable {
                 guard let action = query["action"].flatMap(ComposeDebugAction.init(rawValue:)),
                       let project = nonEmpty(query["project"]) else { return nil }
                 return .debugCompose(action: action, project: project, host: nonEmpty(query["host"]))
+            case "imagesearch":
+                guard let text = nonEmpty(query["query"]), let file = query["path"], file.hasPrefix("/") else { return nil }
+                let source = query["source"] ?? "hub"
+                guard ["hub", "registry"].contains(source) else { return nil }
+                return .debugImageSearch(query: text, source: source, host: nonEmpty(query["host"]), path: file)
             default:
                 return nil
             }
