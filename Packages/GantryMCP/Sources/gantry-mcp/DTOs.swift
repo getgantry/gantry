@@ -41,8 +41,12 @@ struct ContainerDTO: Encodable {
     /// container's own inspect `Platform` field is a different thing, hence
     /// the explicit name.
     var imageArchitecture: String
+    /// True when the registry has a newer image for the tag; absent when not
+    /// known. Read from the cache of the app; the server sends no requests.
+    var updateAvailable: Bool?
 
-    init(_ c: ContainerSummary, imageArchitecture: String) {
+    init(_ c: ContainerSummary, imageArchitecture: String, updateStatus: ImageUpdateStatus? = nil) {
+        updateAvailable = updateStatus.map { $0 == .updateAvailable }
         id = c.shortID
         name = c.displayName
         image = c.image
@@ -51,6 +55,16 @@ struct ContainerDTO: Encodable {
         ports = c.ports.map(\.display)
         composeProject = c.composeProject
         self.imageArchitecture = imageArchitecture
+    }
+}
+
+extension ContainerDTO {
+    /// The update status of `c` from the cache file of the app (spec 017).
+    static func updateStatus(
+        of c: ContainerSummary, images: [ImageSummary], isApple: Bool, cache: ImageUpdateCache
+    ) -> ImageUpdateStatus? {
+        let target = ImageUpdatePlan.target(for: c, images: images, isApple: isApple)
+        return ImageUpdatePlan.status(of: target, remoteDigest: target.flatMap { cache.remoteDigest(for: $0.key) })
     }
 }
 
