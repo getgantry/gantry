@@ -23,6 +23,7 @@ struct ContainerListView: View {
     @State private var renameTarget: ContainerSummary?
     @State private var renameText = ""
     @State private var commitTarget: ContainerSummary?
+    @State private var resourcesTarget: ContainerSummary?
     @State private var showPruneConfirm = false
     @State private var pruneResult: PruneResult?
     @State private var showPruneResult = false
@@ -178,6 +179,9 @@ struct ContainerListView: View {
         .sheet(item: $commitTarget) { target in
             CommitImageSheet(session: session, container: target)
         }
+        .sheet(item: $resourcesTarget) { target in
+            EditResourcesSheet(session: session, container: target)
+        }
         .sheet(item: $stackLogsTarget) { target in
             StackLogsView(session: session, project: target.project, containers: target.containers)
         }
@@ -237,6 +241,7 @@ struct ContainerListView: View {
                 renameTarget: $renameTarget,
                 renameText: $renameText,
                 commitTarget: $commitTarget,
+                resourcesTarget: $resourcesTarget,
                 composeExportTarget: $composeExportTarget
             )
         }
@@ -629,6 +634,7 @@ struct ContainerActionsMenu: View {
     @Binding var renameTarget: ContainerSummary?
     @Binding var renameText: String
     @Binding var commitTarget: ContainerSummary?
+    @Binding var resourcesTarget: ContainerSummary?
     @Binding var composeExportTarget: ComposeExportTarget?
 
     private var isRunning: Bool { container.state.isRunning }
@@ -673,6 +679,14 @@ struct ContainerActionsMenu: View {
                 Label("Trim Disk", systemImage: "internaldrive")
             }
             .disabled(!isRunning)
+        }
+
+        if nodeCluster == nil {
+            Button {
+                resourcesTarget = container
+            } label: {
+                Label("Edit Resources…", systemImage: "slider.horizontal.3")
+            }
         }
 
         if caps.restartPolicy {

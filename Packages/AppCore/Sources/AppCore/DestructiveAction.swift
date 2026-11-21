@@ -35,6 +35,8 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
         case composeDown
         /// Remove the build records that Gantry keeps for a host.
         case clearBuildHistory
+        /// Remove a container and make it again with new limits.
+        case recreateContainer
     }
 
     /// What else happens when the action runs.
@@ -206,6 +208,11 @@ public struct DestructiveAction: Identifiable, Equatable, Sendable {
             names: [volume] + containers.map(\.displayName),
             impact: running > 0 ? .runningContainersStop(running) : .none
         )
+    }
+
+    /// Makes a container again with new CPU and memory limits.
+    public static func recreateContainer(_ container: ContainerSummary) -> DestructiveAction {
+        DestructiveAction(kind: .recreateContainer, targets: [container.id], names: [container.displayName])
     }
 
     /// Removes the Gantry build records of a host; `targets` holds the host id.

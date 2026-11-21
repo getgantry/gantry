@@ -32,6 +32,7 @@ enum DestructiveActionText {
         case .forgetFolderVolume: return String(localized: "Remove folder volume “\(name)” from Gantry?")
         case .composeDown: return String(localized: "Compose down “\(name)”?")
         case .clearBuildHistory: return String(localized: "Clear the build history of “\(name)”?")
+        case .recreateContainer: return String(localized: "Recreate “\(name)” with the new resources?")
         }
     }
 
@@ -100,6 +101,7 @@ enum DestructiveActionText {
         case .forgetFolderVolume: String(localized: "Remove from Gantry")
         case .composeDown: String(localized: "Compose Down")
         case .clearBuildHistory: String(localized: "Clear History")
+        case .recreateContainer: String(localized: "Recreate")
         }
     }
 
@@ -144,6 +146,8 @@ enum DestructiveActionText {
             String(localized: "Gantry removes the containers and networks of the project. Volumes and images stay.")
         case .clearBuildHistory:
             String(localized: "Gantry deletes the records and logs of the builds that it started on this host. Images and BuildKit records do not change.")
+        case .recreateContainer:
+            String(localized: "apple/container cannot change a container that exists. Gantry removes the container and makes it again with the new values. The container restarts. Data that is not in a volume is lost.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }
