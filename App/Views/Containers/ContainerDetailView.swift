@@ -11,9 +11,11 @@ struct ContainerDetailView: View {
 
     // Overflow-menu sheets / alerts.
     @State private var showCommitSheet = false
+    @State private var showResourcesSheet = false
     @State private var showRename = false
     @State private var renameText = ""
     @State private var composeExportTarget: ComposeExportTarget?
+    @State private var updateTarget: ContainerSummary?
 
     enum DetailTab: String, CaseIterable, Identifiable {
         case overview = "Overview"
@@ -21,6 +23,7 @@ struct ContainerDetailView: View {
         case stats = "Stats"
         case terminal = "Terminal"
         case files = "Files"
+        case changes = "Changes"
         case processes = "Processes"
         case inspect = "Inspect"
         var id: String { rawValue }
@@ -32,6 +35,7 @@ struct ContainerDetailView: View {
             case .stats: String(localized: "Stats")
             case .terminal: String(localized: "Terminal")
             case .files: String(localized: "Files")
+            case .changes: String(localized: "Changes")
             case .processes: String(localized: "Processes")
             case .inspect: String(localized: "Inspect")
             }
@@ -40,6 +44,20 @@ struct ContainerDetailView: View {
 
     private var isRunning: Bool { container.state.isRunning }
 
+    /// The tabs that the host supports: Apple hosts have no file changes.
+    private var visibleTabs: [DetailTab] {
+        DetailTab.allCases.filter { $0 != .changes || session.host.capabilities.containerChanges }
+    }
+
+    /// The selected tab, or Overview when this host does not have it: the
+    /// selection stays when the user moves to a container of another host.
+    private var shownTab: Binding<DetailTab> {
+        Binding(
+            get: { visibleTabs.contains(tab) ? tab : .overview },
+            set: { tab = $0 }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -47,8 +65,8 @@ struct ContainerDetailView: View {
             ContainerStorageBanner(session: session, container: container)
                 .padding([.horizontal, .top])
 
-            Picker("Section", selection: $tab) {
-                ForEach(DetailTab.allCases) { Text($0.title).tag($0) }
+            Picker("Section", selection: shownTab) {
+                ForEach(visibleTabs) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -70,6 +88,12 @@ struct ContainerDetailView: View {
         // A tab request (Show Logs, Open Debug Shell) can come before this view
         // exists, so it is read on appear too, not only from a notification.
         .task(id: container.id) { applyPendingTab() }
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: .gantryDebugContainerTab)) { note in
+            let name = note.object as? String
+            if let match = visibleTabs.first(where: { $0.rawValue.lowercased() == name }) { tab = match }
+        }
+        #endif
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { _ in
             applyPendingTab()
         }
@@ -86,7 +110,11 @@ struct ContainerDetailView: View {
         .sheet(isPresented: $showCommitSheet) {
             CommitImageSheet(session: session, container: container)
         }
+        .sheet(isPresented: $showResourcesSheet) {
+            EditResourcesSheet(session: session, container: container)
+        }
         .composeExportSheet($composeExportTarget, session: session)
+        .containerUpdateConfirmation($updateTarget, session: session)
         .alert("Rename Container", isPresented: $showRename) {
             TextField("Name", text: $renameText)
             Button("Rename") {
@@ -129,6 +157,7 @@ struct ContainerDetailView: View {
     private var overflowMenu: some View {
         let caps = session.host.capabilities
         return Menu {
+            ContainerUpdateMenuItem(container: container, session: session, target: $updateTarget)
             if caps.renameContainer, session.clusterNodeCluster(container.id) == nil {
                 Button {
                     renameText = container.displayName
@@ -148,6 +177,13 @@ struct ContainerDetailView: View {
                 ContainerExport.run(session: session, container: container)
             } label: {
                 Label("Export Filesystem…", systemImage: "square.and.arrow.up")
+            }
+            if session.clusterNodeCluster(container.id) == nil {
+                Button {
+                    showResourcesSheet = true
+                } label: {
+                    Label("Edit Resources…", systemImage: "slider.horizontal.3")
+                }
             }
             if caps.restartPolicy {
                 Menu {
@@ -206,6 +242,10 @@ struct ContainerDetailView: View {
             }
             Spacer()
             ExplainFailureButton(session: session, container: container)
+            if session.imageUpdateStatus(for: container) == .updateAvailable {
+                ImageUpdateBadge()
+                    .padding(.top, 4)
+            }
             stateBadge
         }
     }
@@ -237,7 +277,7 @@ struct ContainerDetailView: View {
 
     @ViewBuilder
     private var tabContent: some View {
-        switch tab {
+        switch shownTab.wrappedValue {
         case .overview:
             ContainerOverview(container: container, session: session)
         case .logs:
@@ -248,6 +288,8 @@ struct ContainerDetailView: View {
             ContainerTerminalView(session: session, container: container)
         case .files:
             FilesView(session: session, container: container)
+        case .changes:
+            ContainerChangesView(session: session, container: container)
         case .processes:
             ProcessesView(session: session, container: container)
         case .inspect:
@@ -285,6 +327,7 @@ private struct ContainerOverview: View {
                     mountsSection(details)
                     networksSection(details)
                     configSection(details)
+                    ResourcesSection(resources: ContainerResources(details: details))
                     environmentSection(details)
                 } else {
                     ContentUnavailableView(
@@ -297,7 +340,7 @@ private struct ContainerOverview: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .task(id: container.id) {
+        .task(id: OverviewTaskKey(containerID: container.id, revision: session.resourceRevision(container.id))) {
             // Show the cached inspect immediately (no spinner) and refresh in
             // the background; only spin when there is nothing cached yet.
             if let cached = session.cachedDetails(for: container.id) {
@@ -445,4 +488,33 @@ private struct EnvironmentLine: View {
         .font(.system(.caption, design: .monospaced))
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
+
+/// `.task(id:)` of the Overview: a resource change loads the inspect again.
+private struct OverviewTaskKey: Hashable {
+    let containerID: String
+    let revision: Int
+}
+
+/// The CPU and memory limits of the container; "No limit" when not set.
+private struct ResourcesSection: View {
+    let resources: ContainerResources
+
+    var body: some View {
+        DetailSection("Resources") {
+            FactGrid {
+                Fact("CPUs", resources.nanoCPUs > 0 ? ContainerResources.coresText(resources.nanoCPUs) : noLimit)
+                Fact("Memory Limit", bytes(resources.memory))
+                if resources.memoryReservation > 0 {
+                    Fact("Memory Reservation", Formatters.bytes(resources.memoryReservation))
+                }
+                if resources.memorySwap != 0 {
+                    Fact("Memory + Swap", resources.memorySwap < 0 ? noLimit : Formatters.bytes(resources.memorySwap))
+                }
+            }
+        }
+    }
+
+    private var noLimit: String { String(localized: "No limit") }
+    private func bytes(_ value: Int64) -> String { value > 0 ? Formatters.bytes(value) : noLimit }
 }

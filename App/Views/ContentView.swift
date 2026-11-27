@@ -789,7 +789,7 @@ struct ContentView: View {
         case .settings:
             openSettings()
         case .snapshot, .appearance, .state, .activity, .menuBarSnapshot, .debugPull, .cancelNewestOperation,
-             .debugCompose:
+             .debugCompose, .debugImageSearch, .containerTab:
             break
         }
     }

@@ -36,6 +36,9 @@ scripts/gantry-ctl 'debug/activity?path=/path/activity.json'              # menu
 scripts/gantry-ctl 'debug/menubar?path=/path/menubar.png'                 # PNG of the menu bar panel, drawn off screen
 scripts/gantry-ctl debug/cancel                                           # cancel the newest running operation
 scripts/gantry-ctl 'debug/compose?action=pull&project=web&host=nettop'    # Compose pull (or action=down) without the confirmation
+scripts/gantry-ctl 'debug/imagesearch?query=nginx&host=nettop&path=/path/search.png'   # search, select the first result, PNG of the sheet
+scripts/gantry-ctl 'debug/imagesearch?query=ghcr.io/o/i&source=registry&path=/path/tags.png'   # tags of a repository on a registry
+scripts/gantry-ctl 'debug/tab?name=changes'                               # select a tab of the open container (overview, logs, files, changes, …)
 ```
 
 `GANTRY_APP` selects the copy when more than one runs. Its value is a part of the path to the `.app`.

@@ -8,6 +8,8 @@ extension Notification.Name {
     static let gantryOpenLink = Notification.Name("gantryOpenLink")
     /// Debug builds only: ContentView writes its state as JSON. Object: the file path.
     static let gantryDumpState = Notification.Name("gantryDumpState")
+    /// Debug builds only: the container detail selects a tab. Object: its name.
+    static let gantryDebugContainerTab = Notification.Name("gantryDebugContainerTab")
 }
 
 /// Runs `gantry://` links (see ``AppLink``). Window changes go to ContentView;
@@ -58,6 +60,14 @@ enum AppLinkHandler {
         case .debugCompose(let action, let project, let host):
             #if DEBUG
             DebugActivity.runCompose(action, project: project, host: host)
+            #endif
+        case .debugImageSearch(let query, let source, let host, let path):
+            #if DEBUG
+            DebugActivity.snapshotImageSearch(query, source: source, host: host, to: URL(fileURLWithPath: path))
+            #endif
+        case .containerTab(let name):
+            #if DEBUG
+            NotificationCenter.default.post(name: .gantryDebugContainerTab, object: name)
             #endif
         }
     }
@@ -222,6 +232,41 @@ enum DebugActivity {
         }
     }
 
+    /// Runs a search in a new sheet model, selects the first result, and
+    /// draws the sheet off screen into a PNG when the tags are in.
+    static func snapshotImageSearch(_ query: String, source: String, host: String?, to url: URL) {
+        guard let model = LiveFleet.model,
+              let hostID = AppLink.resolveHost(host, in: model.sessions.map { ($0.id, $0.host.name) }),
+              let session = model.session(id: hostID) else { return }
+        let search = session.makeImageSearchModel()
+        search.setSource(source == "registry" ? .registry : .dockerHub)
+        search.setQuery(query)
+        Task {
+            await search.settle()
+            if let first = search.results.first { search.select(first) }
+            await search.settle()
+            let hosting = NSHostingView(
+                rootView: ImageSearchSheet(session: session, model: search)
+                    .background(Color(nsColor: .windowBackgroundColor))
+            )
+            let size = hosting.fittingSize
+            let window = NSWindow(
+                contentRect: NSRect(x: -10_000, y: -10_000, width: size.width, height: size.height),
+                styleMask: [.borderless], backing: .buffered, defer: false
+            )
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            try? await Task.sleep(for: .milliseconds(500))
+            hosting.layoutSubtreeIfNeeded()
+            window.display()
+            if let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
+                hosting.cacheDisplay(in: hosting.bounds, to: rep)
+                try? rep.representation(using: .png, properties: [:])?.write(to: url)
+            }
+            window.orderOut(nil)
+        }
+    }
+
     /// Runs Compose down or Compose pull as the group header buttons do,
     /// without the confirmation.
     static func runCompose(_ action: AppLink.ComposeDebugAction, project: String, host: String?) {
@@ -239,16 +284,8 @@ enum DebugActivity {
         guard let model = LiveFleet.model,
               let hostID = AppLink.resolveHost(host, in: model.sessions.map { ($0.id, $0.host.name) }),
               let session = model.session(id: hostID) else { return }
-        LongOperationRunner.run(.pull, title: String(localized: "Pull \(reference)"), session: session) { op in
-            var tracker = PullProgressTracker()
-            for try await update in try await session.pullImage(reference: reference, auth: nil) {
-                tracker.apply(update)
-                op.report(tracker.progress, status: update.status, fraction: tracker.fraction)
-            }
-            try Task.checkCancellation()
-            await session.refreshImages()
-            return nil
-        }
+        // The same path as Pull in the Search Images sheet: host platform, Activity, menu bar.
+        ImagePullOperation.start(reference: reference, platform: session.pullPlatform, session: session)
     }
 }
 #endif

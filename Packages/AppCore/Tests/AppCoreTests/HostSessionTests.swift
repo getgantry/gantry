@@ -275,6 +275,28 @@ import Testing
         #expect(await session.commit(containerID: "c1", repo: "r", tag: "t", comment: "c"))
     }
 
+    @Test func commitSendsAuthorPauseAndRefreshesImages() async {
+        let (session, transport) = await connectedSession { t in
+            t.on(.post, "/commit", status: 201, json: #"{"Id":"img"}"#)
+            t.on(.get, "/images/json", json: Fixtures.images)
+        }
+        #expect(await session.commit(containerID: "c1", repo: "r", tag: "t", comment: "m", author: "Ann", pause: false))
+        let commit = transport.executed.first { $0.path.hasSuffix("/commit") }
+        #expect(commit?.query.contains(URLQueryItem(name: "comment", value: "m")) == true)
+        #expect(commit?.query.contains(URLQueryItem(name: "author", value: "Ann")) == true)
+        #expect(commit?.query.contains(URLQueryItem(name: "pause", value: "false")) == true)
+        #expect(transport.executed.contains { $0.path.hasSuffix("/images/json") })
+        #expect(session.images.count == 1)
+    }
+
+    @Test func containerChangesComeFromTheClient() async throws {
+        let (session, _) = await connectedSession { t in
+            t.on(.get, "/containers/c1/changes", json: #"[{"Path":"/tmp/a","Kind":1}]"#)
+        }
+        let changes = try await session.containerChanges(containerID: "c1")
+        #expect(changes == [ContainerChange(path: "/tmp/a", kind: .added)])
+    }
+
     @Test func connectDisconnectContainerNetwork() async {
         let (session, _) = await connectedSession { t in
             t.on(.post, "/networks/n1/connect", json: "")

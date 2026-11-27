@@ -422,6 +422,49 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     }
 }
 
+// MARK: - Image search (spec 020)
+
+// The body is a live `GET /images/search?term=nginx&limit=2` reply of
+// Docker 1.55 on nettop (2026-11-21).
+private let liveSearch = #"[{"star_count":21425,"is_official":true,"name":"nginx","is_automated":false,"description":"Official build of Nginx."},{"star_count":124,"is_official":false,"name":"nginx/nginx-ingress","is_automated":false,"description":"NGINX and  NGINX Plus Ingress Controllers for Kubernetes"}]"#
+
+@Test func searchImagesDecodesLiveReply() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(liveSearch) })
+    let client = DockerClient(transport: transport)
+    let results = try await client.searchImages(term: "nginx", limit: 2)
+    #expect(results.count == 2)
+    #expect(results[0] == ImageSearchResult(
+        name: "nginx", description: "Official build of Nginx.", starCount: 21425, isOfficial: true
+    ))
+    #expect(results[1].isOfficial == false)
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/images/search")
+    #expect(request?.query.contains(URLQueryItem(name: "term", value: "nginx")) == true)
+    #expect(request?.query.contains(URLQueryItem(name: "limit", value: "2")) == true)
+}
+
+@Test func searchImagesToleratesMissingFields() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"[{"name":"x"}]"#) })
+    let results = try await DockerClient(transport: transport).searchImages(term: "x")
+    #expect(results == [ImageSearchResult(name: "x", description: "", starCount: 0, isOfficial: false)])
+}
+
+@Test func pullImageSendsPlatform() async throws {
+    let transport = MockTransport(streamFactory: { _ in makeByteStream([]) })
+    let client = DockerClient(transport: transport)
+    for try await _ in try await client.pullImage(reference: "alpine:3.22", platform: "linux/amd64") {}
+    let request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "platform", value: "linux/amd64")) == true)
+}
+
+@Test func pullImageWithoutPlatformSendsNoPlatform() async throws {
+    let transport = MockTransport(streamFactory: { _ in makeByteStream([]) })
+    let client = DockerClient(transport: transport)
+    for try await _ in try await client.pullImage(reference: "alpine:3.22") {}
+    let request = await transport.last
+    #expect(request?.query.contains { $0.name == "platform" } == false)
+}
+
 // MARK: - System endpoints
 
 @Test func systemInfoDecodes() async throws {
@@ -793,6 +836,50 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     #expect(request?.query.contains { $0.name == "comment" } == false)
 }
 
+@Test func commitContainerSendsAuthorAndPause() async throws {
+    let transport = MockTransport(responder: { _ in
+        jsonResponse(#"{"Id":"i"}"#, status: 201)
+    })
+    let client = DockerClient(transport: transport)
+    _ = try await client.commitContainer(id: "c", repo: "r", tag: "t", author: "Ann <a@b.c>", pause: false)
+    var request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "author", value: "Ann <a@b.c>")) == true)
+    #expect(request?.query.contains(URLQueryItem(name: "pause", value: "false")) == true)
+
+    _ = try await client.commitContainer(id: "c", repo: "r", tag: "t", comment: "", author: "")
+    request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "pause", value: "true")) == true)
+    #expect(request?.query.contains { $0.name == "author" || $0.name == "comment" } == false)
+}
+
+/// Captured from Docker 29.6.2 (API 1.55) on nettop for an alpine container
+/// with `/tmp/a` added, `/etc/profile` changed and `/etc/motd` deleted.
+private let dockerChangesFixture = #"[{"Path":"/etc","Kind":0},{"Path":"/etc/profile","Kind":0},{"Path":"/etc/motd","Kind":2},{"Path":"/opt","Kind":0},{"Path":"/opt/new","Kind":1},{"Path":"/opt/new/sub","Kind":1},{"Path":"/opt/new/sub/f","Kind":1},{"Path":"/tmp","Kind":0},{"Path":"/tmp/a","Kind":1}]"#
+
+@Test func containerChangesDecodesDockerFixture() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(dockerChangesFixture) })
+    let client = DockerClient(transport: transport)
+    let changes = try await client.containerChanges(id: "c1")
+    #expect(await transport.last?.path == "/v1.47/containers/c1/changes")
+    #expect(changes.count == 9)
+    #expect(changes[0] == ContainerChange(path: "/etc", kind: .changed))
+    #expect(changes[2] == ContainerChange(path: "/etc/motd", kind: .deleted))
+    #expect(changes[8] == ContainerChange(path: "/tmp/a", kind: .added))
+}
+
+@Test func containerChangesNullBodyIsEmpty() async throws {
+    // Docker sends `null` for a container with no changes.
+    let transport = MockTransport(responder: { _ in jsonResponse("null\n") })
+    let client = DockerClient(transport: transport)
+    #expect(try await client.containerChanges(id: "c1").isEmpty)
+}
+
+@Test func containerChangeUnknownKindIsChanged() throws {
+    let data = Data(#"[{"Path":"/x","Kind":7}]"#.utf8)
+    let changes = try JSONDecoder().decode([ContainerChange].self, from: data)
+    #expect(changes == [ContainerChange(path: "/x", kind: .changed)])
+}
+
 @Test func exportContainerReturnsStream() async throws {
     let transport = MockTransport(streamFactory: { _ in makeByteStream(["tarbytes"]) })
     let client = DockerClient(transport: transport)
@@ -1153,4 +1240,73 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     let progress = try JSONDecoder().decode(PullProgress.self, from: Data(#"{"error":"bad"}"#.utf8))
     #expect(progress.error == "bad")
     #expect(progress.current == nil)
+}
+
+// MARK: - Distribution
+
+@Test func distributionDigestSendsAuthAndReadsDescriptor() async throws {
+    // Body shape from Engine API 1.55 on a live host (alpine:3.22).
+    let json = """
+    {"Descriptor":{"mediaType":"application/vnd.oci.image.index.v1+json",
+      "digest":"sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f","size":9218},
+     "Platforms":[{"architecture":"amd64","os":"linux"}]}
+    """
+    let transport = MockTransport(responder: { _ in jsonResponse(json) })
+    let client = DockerClient(transport: transport)
+    let auth = RegistryAuth(username: "u", password: "p", serverAddress: "ghcr.io")
+
+    let digest = try await client.distributionDigest(reference: "docker.io/library/alpine:3.22", auth: auth)
+    #expect(digest == "sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f")
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/distribution/docker.io/library/alpine:3.22/json")
+    let header = try #require(request?.headers["X-Registry-Auth"])
+    let padded = header.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+    let sent = try JSONSerialization.jsonObject(with: try #require(Data(base64Encoded: padded))) as? [String: String]
+    #expect(sent?["username"] == "u")
+    #expect(sent?["serveraddress"] == "ghcr.io")
+}
+
+@Test func distributionDigestThrowsOnRegistryError() async {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"message":"denied"}"#, status: 403) })
+    let client = DockerClient(transport: transport)
+    await #expect(throws: DockerError.self) {
+        _ = try await client.distributionDigest(reference: "ghcr.io/x/y:1")
+    }
+}
+@Test func updateContainerSendsOnlyTheSetLimits() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"Warnings":["no swap"]}"#) })
+    let client = DockerClient(transport: transport)
+    let warnings = try await client.updateContainer(
+        id: "c", update: ContainerResourceUpdate(memory: 268_435_456, memorySwap: -1)
+    )
+    #expect(warnings == ["no swap"])
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/containers/c/update")
+    let body = try #require(request?.body)
+    let object = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+    #expect(Set(object.keys) == ["Memory", "MemorySwap"])
+    #expect(object["Memory"] as? Int64 == 268_435_456)
+    #expect(object["MemorySwap"] as? Int64 == -1)
+}
+
+@Test func updateContainerThrowsTheDaemonMessage() async throws {
+    let message = "Minimum memoryswap limit should be larger than memory limit, see usage"
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"message":"\#(message)"}"#, status: 400) })
+    let client = DockerClient(transport: transport)
+    do {
+        try await client.updateContainer(id: "c", update: ContainerResourceUpdate(memory: 1))
+        Issue.record("expected an error")
+    } catch let DockerError.apiError(status, text) {
+        #expect(status == 400)
+        #expect(text.contains(message))
+    }
+}
+
+@Test func hostConfigDecodesReservationAndSwap() throws {
+    let json = #"{"Memory":67108864,"MemoryReservation":33554432,"MemorySwap":-1,"NanoCpus":500000000}"#
+    let config = try JSONDecoder().decode(ContainerDetails.HostConfig.self, from: Data(json.utf8))
+    #expect(config.memoryReservation == 33_554_432)
+    #expect(config.memorySwap == -1)
+    #expect(config.nanoCpus == 500_000_000)
+    #expect(ContainerResourceUpdate().isEmpty)
 }

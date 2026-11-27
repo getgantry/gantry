@@ -221,6 +221,8 @@ public actor AppleContainerTransport: DockerTransport {
             throw Self.unsupported("Renaming containers")
         case (.post, 3, "containers", "update"):
             throw Self.unsupported("Restart policies")
+        case (.get, 3, "containers", "changes"):
+            throw Self.unsupported("File changes of a container")
         case (.post, 1, "commit", _):
             return try await commitContainer(request)
         case (.put, 3, "containers", "archive"):
@@ -1118,7 +1120,11 @@ public actor AppleContainerTransport: DockerTransport {
             reference = fromImage
         }
 
-        let raw = runner.stream(["image", "pull", reference, "--progress", "plain"])
+        var arguments = ["image", "pull", reference, "--progress", "plain"]
+        if let platform = Self.query(request, "platform"), !platform.isEmpty {
+            arguments += ["--platform", platform]
+        }
+        let raw = runner.stream(arguments)
         let (bytes, continuation) = AsyncThrowingStream<Data, Error>.makeStream()
         let pump = Task {
             var buffer = Data()

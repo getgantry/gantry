@@ -233,7 +233,8 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
         { try await $0.updateRestartPolicy(id: "c", policy: "always") },
         { _ = try await $0.imageHistory(id: "i") },
         { try await $0.connectContainer(networkID: "n", containerID: "c") },
-        { _ = try await $0.pruneBuildCache() }
+        { _ = try await $0.pruneBuildCache() },
+        { _ = try await $0.containerChanges(id: "c") }
     ] {
         do {
             try await operation(client)
@@ -693,6 +694,15 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     #expect(sawPercent)
     #expect(runner.recordedCalls().contains(
         ["image", "pull", "alpine:3.19", "--progress", "plain"]
+    ))
+}
+
+@Test func appleTransportPullPassesPlatform() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.streamChunks = [Data("[1/2] Fetching image [0s]\n".utf8)]
+    for try await _ in try await client.pullImage(reference: "alpine:3.22", platform: "linux/arm64") {}
+    #expect(runner.recordedCalls().contains(
+        ["image", "pull", "alpine:3.22", "--progress", "plain", "--platform", "linux/arm64"]
     ))
 }
 
