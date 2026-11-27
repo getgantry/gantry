@@ -116,6 +116,10 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
         public var networkMode: String?
         public var restartPolicy: RestartPolicy?
         public var memory: Int64?
+        /// Soft memory limit, in bytes. 0 or nil means none.
+        public var memoryReservation: Int64?
+        /// Memory plus swap, in bytes. -1 means no swap limit.
+        public var memorySwap: Int64?
         public var nanoCpus: Int64?
         public var privileged: Bool?
         public var autoRemove: Bool?
@@ -128,6 +132,8 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             case networkMode = "NetworkMode"
             case restartPolicy = "RestartPolicy"
             case memory = "Memory"
+            case memoryReservation = "MemoryReservation"
+            case memorySwap = "MemorySwap"
             case nanoCpus = "NanoCpus"
             case privileged = "Privileged"
             case autoRemove = "AutoRemove"
@@ -142,6 +148,8 @@ public struct ContainerDetails: Hashable, Codable, Sendable {
             networkMode = try c.decodeIfPresent(String.self, forKey: .networkMode)
             restartPolicy = try c.decodeIfPresent(RestartPolicy.self, forKey: .restartPolicy)
             memory = try c.decodeIfPresent(Int64.self, forKey: .memory)
+            memoryReservation = try c.decodeIfPresent(Int64.self, forKey: .memoryReservation)
+            memorySwap = try c.decodeIfPresent(Int64.self, forKey: .memorySwap)
             nanoCpus = try c.decodeIfPresent(Int64.self, forKey: .nanoCpus)
             privileged = try c.decodeIfPresent(Bool.self, forKey: .privileged)
             autoRemove = try c.decodeIfPresent(Bool.self, forKey: .autoRemove)

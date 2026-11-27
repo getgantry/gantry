@@ -12,6 +12,7 @@ enum PaletteCommand: String, CaseIterable {
     case cleanup
     case reconnect
     case hostTerminal
+    case checkImageUpdates
 
     var title: String {
         switch self {
@@ -23,6 +24,7 @@ enum PaletteCommand: String, CaseIterable {
         case .cleanup: String(localized: "Reclaim Space…")
         case .reconnect: String(localized: "Reconnect")
         case .hostTerminal: String(localized: "Open Host Terminal")
+        case .checkImageUpdates: String(localized: "Check for Image Updates")
         }
     }
 
@@ -36,6 +38,7 @@ enum PaletteCommand: String, CaseIterable {
         case .cleanup: "sparkles"
         case .reconnect: "arrow.triangle.2.circlepath"
         case .hostTerminal: "terminal"
+        case .checkImageUpdates: "arrow.triangle.2.circlepath.circle"
         }
     }
 
@@ -46,6 +49,7 @@ enum PaletteCommand: String, CaseIterable {
         case .newContainer: ["run", "create"]
         case .refreshAll: ["reload"]
         case .settings: ["preferences"]
+        case .checkImageUpdates: ["registry", "digest", "newer", "upgrade"]
         default: []
         }
     }
@@ -95,7 +99,7 @@ enum PaletteSource {
                         target: section.rawValue, systemImage: section.systemImage)
         }
         var commands: [PaletteCommand] = [.reconnect]
-        if connected { commands += [.newContainer, .pullImage, .cleanup] }
+        if connected { commands += [.newContainer, .pullImage, .cleanup, .checkImageUpdates] }
         if session.supportsHostAccess { commands.append(.hostTerminal) }
         items += commands.map { $0.item(for: session) }
         items += PaletteCatalog.items(
@@ -187,6 +191,8 @@ struct PaletteRunner {
             }
         case .hostTerminal:
             if let session { openHostTerminal(session.host.id) }
+        case .checkImageUpdates:
+            if let session { Task { await session.checkImageUpdates(force: true) } }
         }
     }
 

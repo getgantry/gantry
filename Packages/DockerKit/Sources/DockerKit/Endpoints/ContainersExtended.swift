@@ -87,6 +87,21 @@ extension DockerClient {
         )
     }
 
+    /// `POST /containers/{id}/update` with new limits. The container does not
+    /// restart. A daemon refusal throws `DockerError.apiError` with its text.
+    /// Returns the warnings of the daemon.
+    @discardableResult
+    public func updateContainer(id: String, update: ContainerResourceUpdate) async throws -> [String] {
+        let response = try await requestData(
+            method: .post,
+            path: "/containers/\(id)/update",
+            headers: ["Content-Type": "application/json"],
+            body: try JSONEncoder().encode(update),
+            expecting: [200]
+        )
+        return (try? JSONDecoder().decode(ContainerUpdateResponse.self, from: response.body))?.warnings ?? []
+    }
+
     /// `POST /containers/prune`.
     public func pruneContainers() async throws -> PruneResult {
         let response = try await requestData(
