@@ -96,14 +96,7 @@ extension HostSession {
             _ = try await AppleContainerControl.runContainer(job.appleArguments(name: name), cliOverride: storageCLIOverride)
             return
         }
-        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
-        let id: String
-        do {
-            id = try await client.createContainer(config: job.dockerRequest(name: name), name: name)
-        } catch DockerError.apiError(status: 404, _) {
-            for try await _ in try await pullImage(reference: job.image) {}
-            id = try await client.createContainer(config: job.dockerRequest(name: name), name: name)
-        }
+        let (client, id) = try await createDockerHelper(job, name: name)
         do {
             try await client.startContainer(id: id)
             let code = try await client.waitContainer(id: id)
@@ -118,6 +111,18 @@ extension HostSession {
             throw error
         }
         try? await client.removeContainer(id: id, force: true)
+    }
+
+    /// Creates (does not start) a helper container on a Docker host. Pulls
+    /// the helper image when the engine does not have it.
+    func createDockerHelper(_ job: HelperJob, name: String) async throws -> (DockerClient, String) {
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        do {
+            return (client, try await client.createContainer(config: job.dockerRequest(name: name), name: name))
+        } catch DockerError.apiError(status: 404, _) {
+            for try await _ in try await pullImage(reference: job.image) {}
+            return (client, try await client.createContainer(config: job.dockerRequest(name: name), name: name))
+        }
     }
 
     // MARK: - Volumes

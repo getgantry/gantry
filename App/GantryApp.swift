@@ -153,6 +153,9 @@ struct GantryApp: App {
         ContainerNotifier.shared.start()
         SystemIntegration.shared.attach(model)
         DiskMountWatcher.shared.start(model: model)
+        BackupSchedulerHost.start(model: model) { alert in
+            ContainerNotifier.shared.presentBackupFailure(alert)
+        }
         model.containerAlertHandler = { alert in
             ContainerNotifier.shared.present(alert)
         }

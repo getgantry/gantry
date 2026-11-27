@@ -17,6 +17,9 @@ struct SettingsView: View {
             Tab("Apple", systemImage: "apple.logo", value: SettingsTab.apple.rawValue) {
                 AppleSettingsView()
             }
+            Tab("Backups", systemImage: "clock.arrow.circlepath", value: SettingsTab.backups.rawValue) {
+                BackupSettingsView()
+            }
             Tab("Secrets", systemImage: "key", value: SettingsTab.secrets.rawValue) {
                 SecretsSettingsView()
             }
