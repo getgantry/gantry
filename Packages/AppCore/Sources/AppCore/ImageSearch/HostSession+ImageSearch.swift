@@ -12,7 +12,7 @@ extension HostSession {
 
     /// Searches Docker Hub: through the Engine (`GET /images/search`) on
     /// Docker hosts, through the Docker Hub HTTP API on Apple hosts.
-    public func searchImages(_ query: String, http: any RegistryHTTP) async throws -> [ImageSearchResult] {
+    public func searchImages(_ query: String, http: any ImageSearchHTTP) async throws -> [ImageSearchResult] {
         if host.isAppleContainer {
             return try await DockerHubAPI(http: http).search(query)
         }
@@ -28,7 +28,7 @@ extension HostSession {
 
     /// A search model wired to this host, Docker Hub and the registries.
     /// Credentials come from `RegistryCredentialStore`, only after a 401.
-    public func makeImageSearchModel(http: any RegistryHTTP = URLSessionRegistryHTTP()) -> ImageSearchModel {
+    public func makeImageSearchModel(http: any ImageSearchHTTP = URLSessionImageSearchHTTP()) -> ImageSearchModel {
         let store = RegistryCredentialStore()
         let registryAPI = RegistryTagsAPI(http: http) { reference in
             await store.auth(forImageReference: reference)

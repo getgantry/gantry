@@ -6,9 +6,9 @@ import DockerKit
 public struct DockerHubAPI: Sendable {
     public static let host = "hub.docker.com"
 
-    private let http: any RegistryHTTP
+    private let http: any ImageSearchHTTP
 
-    public init(http: any RegistryHTTP) {
+    public init(http: any ImageSearchHTTP) {
         self.http = http
     }
 

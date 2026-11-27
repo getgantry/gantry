@@ -205,7 +205,7 @@ import Testing
 // HostSessionTests. No standalone test here to avoid needing a remote host.
 
 /// Fails the test when a Docker host search goes to the network directly.
-private struct NoNetwork: RegistryHTTP {
+private struct NoNetwork: ImageSearchHTTP {
     func send(_ request: RegistryHTTPRequest) async throws -> RegistryHTTPResponse {
         Issue.record("unexpected HTTP request to \(request.url)")
         throw URLError(.badURL)

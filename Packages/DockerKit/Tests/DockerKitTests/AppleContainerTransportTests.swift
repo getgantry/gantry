@@ -233,7 +233,8 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
         { try await $0.updateRestartPolicy(id: "c", policy: "always") },
         { _ = try await $0.imageHistory(id: "i") },
         { try await $0.connectContainer(networkID: "n", containerID: "c") },
-        { _ = try await $0.pruneBuildCache() }
+        { _ = try await $0.pruneBuildCache() },
+        { _ = try await $0.containerChanges(id: "c") }
     ] {
         do {
             try await operation(client)

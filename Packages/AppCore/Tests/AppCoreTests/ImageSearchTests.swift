@@ -14,7 +14,7 @@ private enum Live {
 }
 
 /// Records requests and answers them with a closure.
-private final class FakeHTTP: RegistryHTTP, @unchecked Sendable {
+private final class FakeHTTP: ImageSearchHTTP, @unchecked Sendable {
     private let lock = NSLock()
     private var recorded: [RegistryHTTPRequest] = []
     private let responder: @Sendable (RegistryHTTPRequest) throws -> RegistryHTTPResponse

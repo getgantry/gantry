@@ -8,6 +8,8 @@ extension Notification.Name {
     static let gantryOpenLink = Notification.Name("gantryOpenLink")
     /// Debug builds only: ContentView writes its state as JSON. Object: the file path.
     static let gantryDumpState = Notification.Name("gantryDumpState")
+    /// Debug builds only: the container detail selects a tab. Object: its name.
+    static let gantryDebugContainerTab = Notification.Name("gantryDebugContainerTab")
 }
 
 /// Runs `gantry://` links (see ``AppLink``). Window changes go to ContentView;
@@ -62,6 +64,10 @@ enum AppLinkHandler {
         case .debugImageSearch(let query, let source, let host, let path):
             #if DEBUG
             DebugActivity.snapshotImageSearch(query, source: source, host: host, to: URL(fileURLWithPath: path))
+            #endif
+        case .containerTab(let name):
+            #if DEBUG
+            NotificationCenter.default.post(name: .gantryDebugContainerTab, object: name)
             #endif
         }
     }

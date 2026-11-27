@@ -152,7 +152,13 @@ public final class HostSession: Identifiable {
 
     /// Resolves registry credentials from `~/.docker/config.json` for private
     /// pulls (Docker/SSH hosts only). Stateless; safe to hold for the session.
-    private let registryCredentials = RegistryCredentialStore()
+    let registryCredentials = RegistryCredentialStore()
+
+    /// The shared registry check results (spec 017). Tests give their own.
+    @ObservationIgnored public var imageUpdateMonitor: ImageUpdateMonitor = .shared
+
+    /// The periodic image update check; runs while connected.
+    @ObservationIgnored var imageUpdateTask: Task<Void, Never>?
 
     /// Invoked on the main actor when a notable container event arrives (crash,
     /// OOM, unhealthy). The app layer turns these into user notifications. Set
@@ -249,6 +255,10 @@ public final class HostSession: Identifiable {
     /// background. Keyed by container id; cleared on disconnect.
     private var detailsCache: [String: ContainerDetails] = [:]
 
+    /// Counts the resource changes of each container. The Overview and the
+    /// Stats tab use it in `.task(id:)`, so they load again after a change.
+    public internal(set) var resourceRevisions: [String: Int] = [:]
+
     public init(host: DockerHost) {
         self.host = host
     }
@@ -331,6 +341,7 @@ public final class HostSession: Identifiable {
             startEventMonitoring()
             startLoadSampling()
             startReconcileLoop()
+            startImageUpdateLoop()
         } catch {
             await client.shutdown()
             guard generation == connectionGeneration else { return }
@@ -633,6 +644,8 @@ public final class HostSession: Identifiable {
         loadSamplingTask = nil
         reconcileTask?.cancel()
         reconcileTask = nil
+        imageUpdateTask?.cancel()
+        imageUpdateTask = nil
         loadHistory = []
         loadBaseline = [:]
         containerLoadHistory.removeAll()
@@ -748,6 +761,8 @@ public final class HostSession: Identifiable {
         loadSamplingTask = nil
         reconcileTask?.cancel()
         reconcileTask = nil
+        imageUpdateTask?.cancel()
+        imageUpdateTask = nil
         sshClientFactory = nil
         liveUpdatesActive = false
         if let dead = client {
@@ -1714,11 +1729,21 @@ extension HostSession {
         }
     }
 
-    /// Commits a container to a new image. Returns false on failure.
+    /// Commits a container to a new image and refreshes the image list.
+    /// Returns false on failure. `pause` defaults to true, the same as Docker.
     @discardableResult
-    public func commit(containerID: String, repo: String, tag: String, comment: String) async -> Bool {
+    public func commit(
+        containerID: String,
+        repo: String,
+        tag: String,
+        comment: String,
+        author: String = "",
+        pause: Bool = true
+    ) async -> Bool {
         await mutate(refresh: refreshImages) {
-            _ = try await $0.commitContainer(id: containerID, repo: repo, tag: tag, comment: comment)
+            _ = try await $0.commitContainer(
+                id: containerID, repo: repo, tag: tag, comment: comment, author: author, pause: pause
+            )
         }
     }
 
@@ -1748,6 +1773,15 @@ extension HostSession {
     public func processes(containerID: String) async throws -> ContainerTop {
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         return try await client.containerProcesses(id: containerID)
+    }
+
+    // MARK: Changes
+
+    /// The paths that a container added, changed or deleted compared to its
+    /// image (`docker diff`). The decode runs in the client actor.
+    public func containerChanges(containerID: String) async throws -> [ContainerChange] {
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        return try await client.containerChanges(id: containerID)
     }
 
     // MARK: Files

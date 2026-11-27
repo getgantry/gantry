@@ -11,7 +11,7 @@ optional `platform` for `pullImage`. The Apple transport adds `--platform` to
 
 AppCore gets the folder `ImageSearch/`:
 
-- `RegistryHTTP`: a protocol for HTTP GET, with a `URLSession` implementation. Tests use a fake.
+- `ImageSearchHTTP`: a protocol for HTTP GET, with a `URLSession` implementation. Tests use a fake.
 - `DockerHubAPI`: search and tags of the Docker Hub HTTP API, and their parsers.
 - `RegistryTagsAPI`: `GET /v2/<name>/tags/list` with the bearer token flow and the `Link`
   header for more pages.
@@ -30,7 +30,7 @@ The pull goes through a shared `ImagePullOperation.start`, which `PullImageSheet
   `ContentUnavailableView` for the empty and error states.
 - Principle II: parsers, the token flow, the error mapping and the debounce are in AppCore
   and DockerKit with Swift Testing tests. Fixtures are copied from live responses
-  (2026-11-21). Network is behind `RegistryHTTP`.
+  (2026-11-21). Network is behind `ImageSearchHTTP`.
 - Principle III: no new tool. Apple hosts use HTTP because the CLI has no search.
   `--platform` is in `container image pull` since 1.0.
 - Principle IV: credentials stay in memory. They go only to the realm of the registry that

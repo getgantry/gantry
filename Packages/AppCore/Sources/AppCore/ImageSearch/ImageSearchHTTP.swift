@@ -29,12 +29,12 @@ public struct RegistryHTTPResponse: Sendable, Equatable {
 }
 
 /// The network seam of the image search. Tests use a fake.
-public protocol RegistryHTTP: Sendable {
+public protocol ImageSearchHTTP: Sendable {
     func send(_ request: RegistryHTTPRequest) async throws -> RegistryHTTPResponse
 }
 
 /// `URLSession` with no cookies, no cache and no stored credentials.
-public struct URLSessionRegistryHTTP: RegistryHTTP {
+public struct URLSessionImageSearchHTTP: ImageSearchHTTP {
     private let session: URLSession
 
     public init() {

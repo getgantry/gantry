@@ -16,7 +16,7 @@ private let probeImage = "hello-world:latest"
 
 @Test(.enabled(if: httpLive), .timeLimit(.minutes(1)))
 func liveDockerHubSearchAndTags() async throws {
-    let http = URLSessionRegistryHTTP()
+    let http = URLSessionImageSearchHTTP()
     let results = try await DockerHubAPI(http: http).search("nginx")
     #expect(results.contains { $0.name == "nginx" && $0.isOfficial })
     let tags = try await DockerHubAPI(http: http).tags(repository: "nginx")
@@ -28,7 +28,7 @@ func liveDockerHubSearchAndTags() async throws {
 
 @Test(.enabled(if: httpLive), .timeLimit(.minutes(1)))
 func liveRegistryTagsWithAnonymousToken() async throws {
-    let api = RegistryTagsAPI(http: URLSessionRegistryHTTP()) { _ in nil }
+    let api = RegistryTagsAPI(http: URLSessionImageSearchHTTP()) { _ in nil }
     let ghcr = try #require(RegistryRepository("ghcr.io/home-assistant/home-assistant"))
     let tags = try await api.tags(ghcr)
     #expect(tags.count > 1000)

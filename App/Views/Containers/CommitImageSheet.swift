@@ -11,6 +11,8 @@ struct CommitImageSheet: View {
     @State private var repo = ""
     @State private var tag = "latest"
     @State private var comment = ""
+    @State private var author = ""
+    @State private var pause = true
     @State private var isWorking = false
     @State private var errorText: String?
 
@@ -35,10 +37,24 @@ struct CommitImageSheet: View {
                         .textFieldStyle(.roundedBorder)
                     TextField("Tag", text: $tag, prompt: Text("latest"))
                         .textFieldStyle(.roundedBorder)
-                    TextField("Comment (optional)", text: $comment)
-                        .textFieldStyle(.roundedBorder)
                 } header: {
                     Text("Commit \(container.displayName) to a new image.")
+                }
+
+                // `container commit` takes only a reference: Apple hosts
+                // show no message, author or pause.
+                if session.host.capabilities.commitOptions {
+                    Section {
+                        TextField("Message (optional)", text: $comment)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Author (optional)", text: $author, prompt: Text(verbatim: "Name <email>"))
+                            .textFieldStyle(.roundedBorder)
+                        Toggle("Pause during commit", isOn: $pause)
+                    } footer: {
+                        Text("Docker pauses the container while it writes the image, so that no file changes during the commit.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if let errorText {
@@ -69,19 +85,22 @@ struct CommitImageSheet: View {
             }
             .padding()
         }
-        .frame(width: 460, height: 360)
+        .frame(width: 460, height: session.host.capabilities.commitOptions ? 470 : 320)
     }
 
     private func commit() async {
         errorText = nil
         isWorking = true
         defer { isWorking = false }
+        let options = session.host.capabilities.commitOptions
         let error = await session.attempt(fallback: String(localized: "Commit failed")) {
             await session.commit(
                 containerID: container.id,
                 repo: repo.trimmingCharacters(in: .whitespaces),
                 tag: tag.trimmingCharacters(in: .whitespaces).isEmpty ? "latest" : tag,
-                comment: comment
+                comment: options ? comment.trimmingCharacters(in: .whitespacesAndNewlines) : "",
+                author: options ? author.trimmingCharacters(in: .whitespacesAndNewlines) : "",
+                pause: options ? pause : true
             )
         }
         if let error {

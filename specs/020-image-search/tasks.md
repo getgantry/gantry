@@ -10,7 +10,7 @@
 
 ## AppCore
 
-- [x] T003 [US1] `RegistryHTTP` protocol and the `URLSession` implementation (ephemeral, no cookies, no cache)
+- [x] T003 [US1] `ImageSearchHTTP` protocol and the `URLSession` implementation (ephemeral, no cookies, no cache)
 - [x] T004 [US1] `DockerHubAPI` search and tags parsers with live fixtures
 - [x] T005 [US2] `RegistryTagsAPI` with the bearer token flow, credentials and `Link` pages (1000 tags for each page, 10 pages at most; signature tags are hidden)
 - [x] T006 [US4] `ImageSearchError` mapping: 429, `toomanyrequests`, `URLError`, Engine DNS errors, 404

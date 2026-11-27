@@ -51,11 +51,11 @@ public struct RegistryRepository: Sendable, Equatable {
 public struct RegistryTagsAPI: Sendable {
     public typealias Credentials = @Sendable (_ reference: String) async -> RegistryAuth?
 
-    private let http: any RegistryHTTP
+    private let http: any ImageSearchHTTP
     private let credentials: Credentials
     private let maxPages: Int
 
-    public init(http: any RegistryHTTP, maxPages: Int = 10, credentials: @escaping Credentials) {
+    public init(http: any ImageSearchHTTP, maxPages: Int = 10, credentials: @escaping Credentials) {
         self.http = http
         self.maxPages = maxPages
         self.credentials = credentials
