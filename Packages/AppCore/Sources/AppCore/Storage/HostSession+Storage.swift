@@ -184,22 +184,34 @@ extension HostSession {
     /// The container's own files (not in volumes) are lost, like `docker rm`.
     @discardableResult
     public func recreate(_ container: ContainerSummary, replacing old: VolumeEndpoint, with new: VolumeEndpoint) async throws -> String {
+        try await recreate(container) { details, request in
+            let binds = VolumeTransferPlan.replacingSource(in: details.hostConfig.binds ?? [], old: old, new: new)
+            request.hostConfig?.binds = binds.isEmpty ? nil : binds
+        }
+    }
+
+    /// Removes `container` and makes it again from its inspect, changed by
+    /// `adjust`. A running container is started again. When the new create
+    /// fails, Gantry makes the old container again and throws the error.
+    @discardableResult
+    public func recreate(
+        _ container: ContainerSummary,
+        adjust: (ContainerDetails, inout ContainerCreateRequest) -> Void
+    ) async throws -> String {
         guard let details = await details(for: container.id) else {
             throw OperationFailure(String(localized: "Could not read the container settings.", bundle: .module))
         }
-        let binds = VolumeTransferPlan.replacingSource(in: details.hostConfig.binds ?? [], old: old, new: new)
-        return try await recreate(container, request: recreationRequest(container: container, details: details, binds: binds))
-    }
-
-    /// Removes `container` and creates `request` in its place. A running
-    /// container starts again; a stopped one stays stopped. Shared by the
-    /// volume switch and the image update (spec 017).
-    @discardableResult
-    public func recreate(_ container: ContainerSummary, request: ContainerCreateRequest) async throws -> String {
+        let previous = recreationRequest(container: container, details: details)
+        var request = previous
+        adjust(details, &request)
         let wasRunning = container.state.isRunning
         _ = await perform(.remove(force: true), on: container.id)
-        if wasRunning { return try await createAndRun(request) }
-        return try await createContainer(request)
+        do {
+            return wasRunning ? try await createAndRun(request) : try await createContainer(request)
+        } catch {
+            _ = try? await (wasRunning ? createAndRun(previous) : createContainer(previous))
+            throw error
+        }
     }
 
     // MARK: - Images

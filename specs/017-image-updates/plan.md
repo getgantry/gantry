@@ -30,7 +30,7 @@ DockerKit gets an image reference parser, the `/distribution` endpoint and a sma
 - `AppCore/ImageUpdates/ImageUpdateCache.swift`: Codable cache, freshness, file load and save.
 - `AppCore/ImageUpdates/ImageUpdateMonitor.swift`: `@MainActor @Observable` shared monitor. It checks one reference once when several containers use it.
 - `AppCore/ImageUpdates/HostSession+ImageUpdates.swift`: `imageUpdateStatus(for:)`, `checkImageUpdates(force:)`, the periodic loop, `updateContainer(_:)`.
-- `HostSession.recreate(_:request:)` becomes the shared recreate step for the volume switch and the update.
+- `HostSession.recreate(_:adjust:)` (from spec 021) is the shared recreate step for the volume switch, the limits change and the update. When the new create fails, it makes the old container again.
 - App: badge in `ContainerRow` and the detail header, filter case `updates`, context menu item, and "Check for Image Updates" in the More menu and the palette.
 - App: `containerUpdateConfirmation` shows the confirmation and the Compose alert.
 - GantryMCP: `ContainerDTO.updateAvailable`.

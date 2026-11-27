@@ -33,6 +33,7 @@ enum DestructiveActionText {
         case .composeDown: return String(localized: "Compose down “\(name)”?")
         case .clearBuildHistory: return String(localized: "Clear the build history of “\(name)”?")
         case .updateContainer: return String(localized: "Update “\(name)” to the new image?")
+        case .recreateContainer: return String(localized: "Recreate “\(name)” with the new resources?")
         }
     }
 
@@ -102,6 +103,7 @@ enum DestructiveActionText {
         case .composeDown: String(localized: "Compose Down")
         case .clearBuildHistory: String(localized: "Clear History")
         case .updateContainer: String(localized: "Update")
+        case .recreateContainer: String(localized: "Recreate")
         }
     }
 
@@ -148,6 +150,8 @@ enum DestructiveActionText {
             String(localized: "Gantry deletes the records and logs of the builds that it started on this host. Images and BuildKit records do not change.")
         case .updateContainer:
             String(localized: "Gantry pulls the new image, removes the container and makes it again with the same settings. A running container restarts. Data that is not in a volume is lost.")
+        case .recreateContainer:
+            String(localized: "apple/container cannot change a container that exists. Gantry removes the container and makes it again with the new values. The container restarts. Data that is not in a volume is lost.")
         case .stopGroup, .restartGroup, .cancelClusterCreation: nil
         }
     }

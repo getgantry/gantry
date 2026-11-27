@@ -255,6 +255,10 @@ public final class HostSession: Identifiable {
     /// background. Keyed by container id; cleared on disconnect.
     private var detailsCache: [String: ContainerDetails] = [:]
 
+    /// Counts the resource changes of each container. The Overview and the
+    /// Stats tab use it in `.task(id:)`, so they load again after a change.
+    public internal(set) var resourceRevisions: [String: Int] = [:]
+
     public init(host: DockerHost) {
         self.host = host
     }

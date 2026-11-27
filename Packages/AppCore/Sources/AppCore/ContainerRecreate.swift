@@ -44,7 +44,7 @@ extension HostSession {
     }
 
     /// The create request that makes `container` again: image, command,
-    /// environment, published ports, binds, restart policy and labels.
+    /// environment, published ports, binds, restart policy, labels and limits.
     /// `binds` replaces the binds of the old container when given;
     /// `domainname` is `.none` to keep the old domain, `.some(nil)` to clear it.
     public func recreationRequest(
@@ -72,7 +72,7 @@ extension HostSession {
         // stock kernel.
         let appleOptions = ContainerCreateRequest.AppleOptions(labels: labels)
 
-        return ContainerCreateRequest(
+        var request = ContainerCreateRequest(
             image: image,
             cmd: config.cmd,
             env: config.env ?? [],
@@ -86,6 +86,10 @@ extension HostSession {
             appleOptions: appleOptions,
             name: container.displayName
         )
+        // Keep the CPU and memory limits; the convenience init has no place for them.
+        if let memory = details.hostConfig.memory, memory > 0 { request.hostConfig?.memory = memory }
+        if let nano = details.hostConfig.nanoCpus, nano > 0 { request.hostConfig?.nanoCPUs = nano }
+        return request
     }
 
     /// A friendly, unique container name derived from an image reference — e.g.

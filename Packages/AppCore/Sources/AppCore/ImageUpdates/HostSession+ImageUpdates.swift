@@ -94,7 +94,7 @@ extension HostSession {
         await refreshImages()
         operation?.report(tracker.progress, status: String(localized: "Recreating the container", bundle: .module))
         let request = updateRequest(container: container, details: details, imageDefaults: defaults)
-        try await recreate(container, request: request)
+        try await recreate(container) { _, next in next = request }
     }
 
     /// `recreationRequest` with the user environment and command only, and

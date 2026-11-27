@@ -11,6 +11,7 @@ struct ContainerDetailView: View {
 
     // Overflow-menu sheets / alerts.
     @State private var showCommitSheet = false
+    @State private var showResourcesSheet = false
     @State private var showRename = false
     @State private var renameText = ""
     @State private var composeExportTarget: ComposeExportTarget?
@@ -87,6 +88,9 @@ struct ContainerDetailView: View {
         .sheet(isPresented: $showCommitSheet) {
             CommitImageSheet(session: session, container: container)
         }
+        .sheet(isPresented: $showResourcesSheet) {
+            EditResourcesSheet(session: session, container: container)
+        }
         .composeExportSheet($composeExportTarget, session: session)
         .containerUpdateConfirmation($updateTarget, session: session)
         .alert("Rename Container", isPresented: $showRename) {
@@ -151,6 +155,13 @@ struct ContainerDetailView: View {
                 ContainerExport.run(session: session, container: container)
             } label: {
                 Label("Export Filesystem…", systemImage: "square.and.arrow.up")
+            }
+            if session.clusterNodeCluster(container.id) == nil {
+                Button {
+                    showResourcesSheet = true
+                } label: {
+                    Label("Edit Resources…", systemImage: "slider.horizontal.3")
+                }
             }
             if caps.restartPolicy {
                 Menu {
@@ -292,6 +303,7 @@ private struct ContainerOverview: View {
                     mountsSection(details)
                     networksSection(details)
                     configSection(details)
+                    ResourcesSection(resources: ContainerResources(details: details))
                     environmentSection(details)
                 } else {
                     ContentUnavailableView(
@@ -304,7 +316,7 @@ private struct ContainerOverview: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .task(id: container.id) {
+        .task(id: OverviewTaskKey(containerID: container.id, revision: session.resourceRevision(container.id))) {
             // Show the cached inspect immediately (no spinner) and refresh in
             // the background; only spin when there is nothing cached yet.
             if let cached = session.cachedDetails(for: container.id) {
@@ -452,4 +464,33 @@ private struct EnvironmentLine: View {
         .font(.system(.caption, design: .monospaced))
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
+
+/// `.task(id:)` of the Overview: a resource change loads the inspect again.
+private struct OverviewTaskKey: Hashable {
+    let containerID: String
+    let revision: Int
+}
+
+/// The CPU and memory limits of the container; "No limit" when not set.
+private struct ResourcesSection: View {
+    let resources: ContainerResources
+
+    var body: some View {
+        DetailSection("Resources") {
+            FactGrid {
+                Fact("CPUs", resources.nanoCPUs > 0 ? ContainerResources.coresText(resources.nanoCPUs) : noLimit)
+                Fact("Memory Limit", bytes(resources.memory))
+                if resources.memoryReservation > 0 {
+                    Fact("Memory Reservation", Formatters.bytes(resources.memoryReservation))
+                }
+                if resources.memorySwap != 0 {
+                    Fact("Memory + Swap", resources.memorySwap < 0 ? noLimit : Formatters.bytes(resources.memorySwap))
+                }
+            }
+        }
+    }
+
+    private var noLimit: String { String(localized: "No limit") }
+    private func bytes(_ value: Int64) -> String { value > 0 ? Formatters.bytes(value) : noLimit }
 }

@@ -19,7 +19,7 @@
 
 ## Phase 3: User Story 2 - Update the container (P1)
 
-- [x] T009 Add `HostSession.recreate(_:request:)` as the shared step; use it in the volume switch in Packages/AppCore/Sources/AppCore/Storage/HostSession+Storage.swift
+- [x] T009 Use the shared `HostSession.recreate(_:adjust:)` step (spec 021) for the update in Packages/AppCore/Sources/AppCore/ImageUpdates/HostSession+ImageUpdates.swift
 - [x] T010 Add `HostSession.updateContainer(_:)` (pull with progress as a long operation, then recreate with user env and command, network mode) and `ImageUpdatePlan.userEnvironment` and `userCommand` with tests
 - [x] T011 Add `DestructiveAction.Kind.updateContainer` and its texts; add the context menu item, the item in the More menu of the detail, the confirmation and the Compose alert in the app
 

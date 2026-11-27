@@ -1186,3 +1186,40 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
         _ = try await client.distributionDigest(reference: "ghcr.io/x/y:1")
     }
 }
+@Test func updateContainerSendsOnlyTheSetLimits() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"Warnings":["no swap"]}"#) })
+    let client = DockerClient(transport: transport)
+    let warnings = try await client.updateContainer(
+        id: "c", update: ContainerResourceUpdate(memory: 268_435_456, memorySwap: -1)
+    )
+    #expect(warnings == ["no swap"])
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/containers/c/update")
+    let body = try #require(request?.body)
+    let object = try #require(try JSONSerialization.jsonObject(with: body) as? [String: Any])
+    #expect(Set(object.keys) == ["Memory", "MemorySwap"])
+    #expect(object["Memory"] as? Int64 == 268_435_456)
+    #expect(object["MemorySwap"] as? Int64 == -1)
+}
+
+@Test func updateContainerThrowsTheDaemonMessage() async throws {
+    let message = "Minimum memoryswap limit should be larger than memory limit, see usage"
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"message":"\#(message)"}"#, status: 400) })
+    let client = DockerClient(transport: transport)
+    do {
+        try await client.updateContainer(id: "c", update: ContainerResourceUpdate(memory: 1))
+        Issue.record("expected an error")
+    } catch let DockerError.apiError(status, text) {
+        #expect(status == 400)
+        #expect(text.contains(message))
+    }
+}
+
+@Test func hostConfigDecodesReservationAndSwap() throws {
+    let json = #"{"Memory":67108864,"MemoryReservation":33554432,"MemorySwap":-1,"NanoCpus":500000000}"#
+    let config = try JSONDecoder().decode(ContainerDetails.HostConfig.self, from: Data(json.utf8))
+    #expect(config.memoryReservation == 33_554_432)
+    #expect(config.memorySwap == -1)
+    #expect(config.nanoCpus == 500_000_000)
+    #expect(ContainerResourceUpdate().isEmpty)
+}
