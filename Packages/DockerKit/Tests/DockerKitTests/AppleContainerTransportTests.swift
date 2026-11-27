@@ -697,6 +697,15 @@ private func makeConnectedClient() async throws -> (DockerClient, ScriptedCLIRun
     ))
 }
 
+@Test func appleTransportPullPassesPlatform() async throws {
+    let (client, runner) = try await makeConnectedClient()
+    runner.streamChunks = [Data("[1/2] Fetching image [0s]\n".utf8)]
+    for try await _ in try await client.pullImage(reference: "alpine:3.22", platform: "linux/arm64") {}
+    #expect(runner.recordedCalls().contains(
+        ["image", "pull", "alpine:3.22", "--progress", "plain", "--platform", "linux/arm64"]
+    ))
+}
+
 @Test func appleTransportPullFailureSurfacesAsError() async throws {
     let (client, runner) = try await makeConnectedClient()
     runner.streamError = DockerError.apiError(status: 500, message: "manifest unknown")
