@@ -23,6 +23,7 @@ struct ContainerDetailView: View {
         case stats = "Stats"
         case terminal = "Terminal"
         case files = "Files"
+        case changes = "Changes"
         case processes = "Processes"
         case inspect = "Inspect"
         var id: String { rawValue }
@@ -34,6 +35,7 @@ struct ContainerDetailView: View {
             case .stats: String(localized: "Stats")
             case .terminal: String(localized: "Terminal")
             case .files: String(localized: "Files")
+            case .changes: String(localized: "Changes")
             case .processes: String(localized: "Processes")
             case .inspect: String(localized: "Inspect")
             }
@@ -42,6 +44,20 @@ struct ContainerDetailView: View {
 
     private var isRunning: Bool { container.state.isRunning }
 
+    /// The tabs that the host supports: Apple hosts have no file changes.
+    private var visibleTabs: [DetailTab] {
+        DetailTab.allCases.filter { $0 != .changes || session.host.capabilities.containerChanges }
+    }
+
+    /// The selected tab, or Overview when this host does not have it: the
+    /// selection stays when the user moves to a container of another host.
+    private var shownTab: Binding<DetailTab> {
+        Binding(
+            get: { visibleTabs.contains(tab) ? tab : .overview },
+            set: { tab = $0 }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -49,8 +65,8 @@ struct ContainerDetailView: View {
             ContainerStorageBanner(session: session, container: container)
                 .padding([.horizontal, .top])
 
-            Picker("Section", selection: $tab) {
-                ForEach(DetailTab.allCases) { Text($0.title).tag($0) }
+            Picker("Section", selection: shownTab) {
+                ForEach(visibleTabs) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -72,6 +88,12 @@ struct ContainerDetailView: View {
         // A tab request (Show Logs, Open Debug Shell) can come before this view
         // exists, so it is read on appear too, not only from a notification.
         .task(id: container.id) { applyPendingTab() }
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: .gantryDebugContainerTab)) { note in
+            let name = note.object as? String
+            if let match = visibleTabs.first(where: { $0.rawValue.lowercased() == name }) { tab = match }
+        }
+        #endif
         .onReceive(NotificationCenter.default.publisher(for: .gantrySelectContainer)) { _ in
             applyPendingTab()
         }
@@ -255,7 +277,7 @@ struct ContainerDetailView: View {
 
     @ViewBuilder
     private var tabContent: some View {
-        switch tab {
+        switch shownTab.wrappedValue {
         case .overview:
             ContainerOverview(container: container, session: session)
         case .logs:
@@ -266,6 +288,8 @@ struct ContainerDetailView: View {
             ContainerTerminalView(session: session, container: container)
         case .files:
             FilesView(session: session, container: container)
+        case .changes:
+            ContainerChangesView(session: session, container: container)
         case .processes:
             ProcessesView(session: session, container: container)
         case .inspect:

@@ -793,6 +793,50 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     #expect(request?.query.contains { $0.name == "comment" } == false)
 }
 
+@Test func commitContainerSendsAuthorAndPause() async throws {
+    let transport = MockTransport(responder: { _ in
+        jsonResponse(#"{"Id":"i"}"#, status: 201)
+    })
+    let client = DockerClient(transport: transport)
+    _ = try await client.commitContainer(id: "c", repo: "r", tag: "t", author: "Ann <a@b.c>", pause: false)
+    var request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "author", value: "Ann <a@b.c>")) == true)
+    #expect(request?.query.contains(URLQueryItem(name: "pause", value: "false")) == true)
+
+    _ = try await client.commitContainer(id: "c", repo: "r", tag: "t", comment: "", author: "")
+    request = await transport.last
+    #expect(request?.query.contains(URLQueryItem(name: "pause", value: "true")) == true)
+    #expect(request?.query.contains { $0.name == "author" || $0.name == "comment" } == false)
+}
+
+/// Captured from Docker 29.6.2 (API 1.55) on nettop for an alpine container
+/// with `/tmp/a` added, `/etc/profile` changed and `/etc/motd` deleted.
+private let dockerChangesFixture = #"[{"Path":"/etc","Kind":0},{"Path":"/etc/profile","Kind":0},{"Path":"/etc/motd","Kind":2},{"Path":"/opt","Kind":0},{"Path":"/opt/new","Kind":1},{"Path":"/opt/new/sub","Kind":1},{"Path":"/opt/new/sub/f","Kind":1},{"Path":"/tmp","Kind":0},{"Path":"/tmp/a","Kind":1}]"#
+
+@Test func containerChangesDecodesDockerFixture() async throws {
+    let transport = MockTransport(responder: { _ in jsonResponse(dockerChangesFixture) })
+    let client = DockerClient(transport: transport)
+    let changes = try await client.containerChanges(id: "c1")
+    #expect(await transport.last?.path == "/v1.47/containers/c1/changes")
+    #expect(changes.count == 9)
+    #expect(changes[0] == ContainerChange(path: "/etc", kind: .changed))
+    #expect(changes[2] == ContainerChange(path: "/etc/motd", kind: .deleted))
+    #expect(changes[8] == ContainerChange(path: "/tmp/a", kind: .added))
+}
+
+@Test func containerChangesNullBodyIsEmpty() async throws {
+    // Docker sends `null` for a container with no changes.
+    let transport = MockTransport(responder: { _ in jsonResponse("null\n") })
+    let client = DockerClient(transport: transport)
+    #expect(try await client.containerChanges(id: "c1").isEmpty)
+}
+
+@Test func containerChangeUnknownKindIsChanged() throws {
+    let data = Data(#"[{"Path":"/x","Kind":7}]"#.utf8)
+    let changes = try JSONDecoder().decode([ContainerChange].self, from: data)
+    #expect(changes == [ContainerChange(path: "/x", kind: .changed)])
+}
+
 @Test func exportContainerReturnsStream() async throws {
     let transport = MockTransport(streamFactory: { _ in makeByteStream(["tarbytes"]) })
     let client = DockerClient(transport: transport)

@@ -17,20 +17,25 @@ extension DockerClient {
         return try decode(ContainerCreateResponse.self, from: response.body, path: "/containers/create").id
     }
 
-    /// `POST /commit?container=&repo=&tag=&comment=` — commits a container to a
-    /// new image, returning the image id.
+    /// `POST /commit?container=&repo=&tag=&comment=&author=&pause=` — commits
+    /// a container to a new image, returning the image id. `pause` defaults
+    /// to true, the same as Docker.
     public func commitContainer(
         id: String,
         repo: String,
         tag: String,
-        comment: String? = nil
+        comment: String? = nil,
+        author: String? = nil,
+        pause: Bool = true
     ) async throws -> String {
         var query = [
             URLQueryItem(name: "container", value: id),
             URLQueryItem(name: "repo", value: repo),
             URLQueryItem(name: "tag", value: tag)
         ]
-        if let comment { query.append(URLQueryItem(name: "comment", value: comment)) }
+        if let comment, !comment.isEmpty { query.append(URLQueryItem(name: "comment", value: comment)) }
+        if let author, !author.isEmpty { query.append(URLQueryItem(name: "author", value: author)) }
+        query.append(URLQueryItem(name: "pause", value: pause ? "true" : "false"))
         let response = try await requestData(
             method: .post,
             path: "/commit",
@@ -38,6 +43,15 @@ extension DockerClient {
             expecting: [201]
         )
         return try decode(IDResponse.self, from: response.body, path: "/commit").id
+    }
+
+    /// `GET /containers/{id}/changes` — the paths that the container added,
+    /// changed or deleted compared to its image. Docker sends `null` when
+    /// nothing changed.
+    public func containerChanges(id: String) async throws -> [ContainerChange] {
+        let path = "/containers/\(id)/changes"
+        let response = try await requestData(method: .get, path: path, expecting: [200])
+        return try decode([ContainerChange]?.self, from: response.body, path: path) ?? []
     }
 
     /// `GET /containers/{id}/export` — streams the container filesystem as a tar.

@@ -1729,11 +1729,21 @@ extension HostSession {
         }
     }
 
-    /// Commits a container to a new image. Returns false on failure.
+    /// Commits a container to a new image and refreshes the image list.
+    /// Returns false on failure. `pause` defaults to true, the same as Docker.
     @discardableResult
-    public func commit(containerID: String, repo: String, tag: String, comment: String) async -> Bool {
+    public func commit(
+        containerID: String,
+        repo: String,
+        tag: String,
+        comment: String,
+        author: String = "",
+        pause: Bool = true
+    ) async -> Bool {
         await mutate(refresh: refreshImages) {
-            _ = try await $0.commitContainer(id: containerID, repo: repo, tag: tag, comment: comment)
+            _ = try await $0.commitContainer(
+                id: containerID, repo: repo, tag: tag, comment: comment, author: author, pause: pause
+            )
         }
     }
 
@@ -1763,6 +1773,15 @@ extension HostSession {
     public func processes(containerID: String) async throws -> ContainerTop {
         guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
         return try await client.containerProcesses(id: containerID)
+    }
+
+    // MARK: Changes
+
+    /// The paths that a container added, changed or deleted compared to its
+    /// image (`docker diff`). The decode runs in the client actor.
+    public func containerChanges(containerID: String) async throws -> [ContainerChange] {
+        guard let client else { throw DockerError.connectionFailed(String(localized: "Not connected", bundle: .module)) }
+        return try await client.containerChanges(id: containerID)
     }
 
     // MARK: Files

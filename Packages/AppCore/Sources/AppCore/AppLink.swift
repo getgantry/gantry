@@ -27,6 +27,9 @@ public enum AppLink: Equatable, Sendable {
     /// Debug builds only: run Compose down or Compose pull on a project
     /// without the button and without the confirmation.
     case debugCompose(action: ComposeDebugAction, project: String, host: String?)
+    /// Debug builds only: select a tab of the open container detail by its
+    /// name in lower case, for example `changes`.
+    case containerTab(String)
 
     public enum ComposeDebugAction: String, Sendable, Hashable {
         case down, pull
@@ -37,7 +40,7 @@ public enum AppLink: Equatable, Sendable {
         switch self {
         case .open, .settings: true
         case .palette, .snapshot, .state, .appearance, .activity, .menuBarSnapshot, .debugPull,
-             .cancelNewestOperation, .debugCompose: false
+             .cancelNewestOperation, .debugCompose, .containerTab: false
         }
     }
 
@@ -90,6 +93,9 @@ public enum AppLink: Equatable, Sendable {
                 return .debugPull(reference: reference, host: nonEmpty(query["host"]))
             case "cancel":
                 return .cancelNewestOperation
+            case "tab":
+                guard let name = nonEmpty(query["name"]?.lowercased()) else { return nil }
+                return .containerTab(name)
             case "compose":
                 guard let action = query["action"].flatMap(ComposeDebugAction.init(rawValue:)),
                       let project = nonEmpty(query["project"]) else { return nil }
