@@ -15,6 +15,7 @@ struct ContainerDetailView: View {
     @State private var showRename = false
     @State private var renameText = ""
     @State private var composeExportTarget: ComposeExportTarget?
+    @State private var updateTarget: ContainerSummary?
 
     enum DetailTab: String, CaseIterable, Identifiable {
         case overview = "Overview"
@@ -91,6 +92,7 @@ struct ContainerDetailView: View {
             EditResourcesSheet(session: session, container: container)
         }
         .composeExportSheet($composeExportTarget, session: session)
+        .containerUpdateConfirmation($updateTarget, session: session)
         .alert("Rename Container", isPresented: $showRename) {
             TextField("Name", text: $renameText)
             Button("Rename") {
@@ -133,6 +135,7 @@ struct ContainerDetailView: View {
     private var overflowMenu: some View {
         let caps = session.host.capabilities
         return Menu {
+            ContainerUpdateMenuItem(container: container, session: session, target: $updateTarget)
             if caps.renameContainer, session.clusterNodeCluster(container.id) == nil {
                 Button {
                     renameText = container.displayName
@@ -217,6 +220,10 @@ struct ContainerDetailView: View {
             }
             Spacer()
             ExplainFailureButton(session: session, container: container)
+            if session.imageUpdateStatus(for: container) == .updateAvailable {
+                ImageUpdateBadge()
+                    .padding(.top, 4)
+            }
             stateBadge
         }
     }

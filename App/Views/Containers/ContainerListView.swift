@@ -29,11 +29,14 @@ struct ContainerListView: View {
     @State private var showPruneResult = false
     @State private var stackLogsTarget: StackLogsTarget?
     @State private var composeExportTarget: ComposeExportTarget?
+    /// The container of an "Update Container…", waiting for confirmation.
+    @State private var updateTarget: ContainerSummary?
 
     enum StateFilter: String, CaseIterable, Identifiable {
         case all = "All"
         case running = "Running"
         case stopped = "Stopped"
+        case updates = "Updates"
         var id: String { rawValue }
 
         var title: String {
@@ -41,6 +44,7 @@ struct ContainerListView: View {
             case .all: String(localized: "All")
             case .running: String(localized: "Running")
             case .stopped: String(localized: "Stopped")
+            case .updates: String(localized: "Update Available")
             }
         }
     }
@@ -57,6 +61,7 @@ struct ContainerListView: View {
             case .all: true
             case .running: container.state.isRunning
             case .stopped: !container.state.isRunning
+            case .updates: session.imageUpdateStatus(for: container) == .updateAvailable
             }
             guard matchesFilter else { return false }
             guard !searchText.isEmpty else { return true }
@@ -219,6 +224,7 @@ struct ContainerListView: View {
         .destructiveConfirmation($groupAction) { action, _ in
             await runOnGroup(action)
         }
+        .containerUpdateConfirmation($updateTarget, session: session)
     }
 
     /// The Delete key removes the selected containers.
@@ -242,7 +248,8 @@ struct ContainerListView: View {
                 renameText: $renameText,
                 commitTarget: $commitTarget,
                 resourcesTarget: $resourcesTarget,
-                composeExportTarget: $composeExportTarget
+                composeExportTarget: $composeExportTarget,
+                updateTarget: $updateTarget
             )
         }
     }
@@ -267,7 +274,8 @@ struct ContainerListView: View {
             imageArchitecture: archByImageID[container.imageID] ?? "",
             hostArchitecture: session.info?.architecture ?? "",
             history: container.state.isRunning ? session.containerLoadHistory.history(container.id) : [],
-            cpuCapacity: Double(max(session.info?.ncpu ?? 1, 1)) * 100
+            cpuCapacity: Double(max(session.info?.ncpu ?? 1, 1)) * 100,
+            updateAvailable: session.imageUpdateStatus(for: container) == .updateAvailable
         )
         .tag(container.id)
     }
@@ -407,6 +415,8 @@ struct ContainerListView: View {
         }
         ToolbarItem(placement: .primaryAction) {
             Menu {
+                CheckImageUpdatesButton(session: session)
+                Divider()
                 Button(role: .destructive) {
                     showPruneConfirm = true
                 } label: {
@@ -456,6 +466,7 @@ private struct ContainerRow: View {
     /// Recent load of a running container; empty when stopped or not sampled yet.
     let history: [ContainerLoadPoint]
     let cpuCapacity: Double
+    var updateAvailable = false
 
     /// Published ports, deduplicated, in a stable order.
     private var publishedPorts: [String] {
@@ -493,6 +504,10 @@ private struct ContainerRow: View {
             Spacer(minLength: Spacing.xs)
 
             ArchBadge(architecture: imageArchitecture, hostArchitecture: hostArchitecture)
+
+            if updateAvailable {
+                ImageUpdateBadge(compact: true)
+            }
 
             if let health = container.health {
                 HealthBadge(health: health)
@@ -636,6 +651,7 @@ struct ContainerActionsMenu: View {
     @Binding var commitTarget: ContainerSummary?
     @Binding var resourcesTarget: ContainerSummary?
     @Binding var composeExportTarget: ComposeExportTarget?
+    @Binding var updateTarget: ContainerSummary?
 
     private var isRunning: Bool { container.state.isRunning }
     private var isPaused: Bool { container.state == .paused }
@@ -647,6 +663,8 @@ struct ContainerActionsMenu: View {
         lifecycleButtons
 
         Divider()
+
+        ContainerUpdateMenuItem(container: container, session: session, target: $updateTarget)
 
         if caps.renameContainer, nodeCluster == nil {
             Button {

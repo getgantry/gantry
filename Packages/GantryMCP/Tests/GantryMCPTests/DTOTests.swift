@@ -91,6 +91,23 @@ struct DTOTests {
         #expect(dto.imageArchitecture.isEmpty)
     }
 
+    @Test func containerDTOUpdateAvailableFromCache() throws {
+        let digest = "sha256:" + String(repeating: "1", count: 64)
+        let summary = try decodeJSON(ContainerSummary.self, """
+        {"Id": "deadbeefcafebabe", "Names": ["/web"], "Image": "nginx:alpine", "ImageID": "\(digest)", "State": "running"}
+        """)
+        var cache = ImageUpdateCache()
+        #expect(ContainerDTO.updateStatus(of: summary, images: [], isApple: true, cache: cache) == nil)
+        #expect(try encodedObject(ContainerDTO(summary, imageArchitecture: ""))["updateAvailable"] == nil)
+        cache.record("docker.io/library/nginx:alpine", digest: "sha256:" + String(repeating: "2", count: 64), at: Date())
+        let status = ContainerDTO.updateStatus(of: summary, images: [], isApple: true, cache: cache)
+        #expect(status == .updateAvailable)
+        let obj = try encodedObject(ContainerDTO(summary, imageArchitecture: "", updateStatus: status))
+        #expect(obj["updateAvailable"] as? Bool == true)
+        cache.record("docker.io/library/nginx:alpine", digest: digest, at: Date())
+        #expect(ContainerDTO.updateStatus(of: summary, images: [], isApple: true, cache: cache) == .upToDate)
+    }
+
     @Test func containerListDTOEncodesError() throws {
         let dto = ContainerListDTO(hostID: "h", hostName: "Local", containers: [], error: "boom")
         let obj = try encodedObject(dto)

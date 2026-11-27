@@ -1155,6 +1155,37 @@ private func makeByteStream(_ chunks: [String], status: Int = 200) -> DockerByte
     #expect(progress.current == nil)
 }
 
+// MARK: - Distribution
+
+@Test func distributionDigestSendsAuthAndReadsDescriptor() async throws {
+    // Body shape from Engine API 1.55 on a live host (alpine:3.22).
+    let json = """
+    {"Descriptor":{"mediaType":"application/vnd.oci.image.index.v1+json",
+      "digest":"sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f","size":9218},
+     "Platforms":[{"architecture":"amd64","os":"linux"}]}
+    """
+    let transport = MockTransport(responder: { _ in jsonResponse(json) })
+    let client = DockerClient(transport: transport)
+    let auth = RegistryAuth(username: "u", password: "p", serverAddress: "ghcr.io")
+
+    let digest = try await client.distributionDigest(reference: "docker.io/library/alpine:3.22", auth: auth)
+    #expect(digest == "sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f")
+    let request = await transport.last
+    #expect(request?.path == "/v1.47/distribution/docker.io/library/alpine:3.22/json")
+    let header = try #require(request?.headers["X-Registry-Auth"])
+    let padded = header.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+    let sent = try JSONSerialization.jsonObject(with: try #require(Data(base64Encoded: padded))) as? [String: String]
+    #expect(sent?["username"] == "u")
+    #expect(sent?["serveraddress"] == "ghcr.io")
+}
+
+@Test func distributionDigestThrowsOnRegistryError() async {
+    let transport = MockTransport(responder: { _ in jsonResponse(#"{"message":"denied"}"#, status: 403) })
+    let client = DockerClient(transport: transport)
+    await #expect(throws: DockerError.self) {
+        _ = try await client.distributionDigest(reference: "ghcr.io/x/y:1")
+    }
+}
 @Test func updateContainerSendsOnlyTheSetLimits() async throws {
     let transport = MockTransport(responder: { _ in jsonResponse(#"{"Warnings":["no swap"]}"#) })
     let client = DockerClient(transport: transport)

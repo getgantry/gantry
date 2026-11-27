@@ -152,7 +152,13 @@ public final class HostSession: Identifiable {
 
     /// Resolves registry credentials from `~/.docker/config.json` for private
     /// pulls (Docker/SSH hosts only). Stateless; safe to hold for the session.
-    private let registryCredentials = RegistryCredentialStore()
+    let registryCredentials = RegistryCredentialStore()
+
+    /// The shared registry check results (spec 017). Tests give their own.
+    @ObservationIgnored public var imageUpdateMonitor: ImageUpdateMonitor = .shared
+
+    /// The periodic image update check; runs while connected.
+    @ObservationIgnored var imageUpdateTask: Task<Void, Never>?
 
     /// Invoked on the main actor when a notable container event arrives (crash,
     /// OOM, unhealthy). The app layer turns these into user notifications. Set
@@ -335,6 +341,7 @@ public final class HostSession: Identifiable {
             startEventMonitoring()
             startLoadSampling()
             startReconcileLoop()
+            startImageUpdateLoop()
         } catch {
             await client.shutdown()
             guard generation == connectionGeneration else { return }
@@ -637,6 +644,8 @@ public final class HostSession: Identifiable {
         loadSamplingTask = nil
         reconcileTask?.cancel()
         reconcileTask = nil
+        imageUpdateTask?.cancel()
+        imageUpdateTask = nil
         loadHistory = []
         loadBaseline = [:]
         containerLoadHistory.removeAll()
@@ -752,6 +761,8 @@ public final class HostSession: Identifiable {
         loadSamplingTask = nil
         reconcileTask?.cancel()
         reconcileTask = nil
+        imageUpdateTask?.cancel()
+        imageUpdateTask = nil
         sshClientFactory = nil
         liveUpdatesActive = false
         if let dead = client {

@@ -36,7 +36,7 @@ actor GantryTools {
             ),
             Tool(
                 name: "list_containers",
-                description: "List containers across one or all hosts. Defaults to all hosts and all containers (running and stopped).",
+                description: "List containers across one or all hosts. Defaults to all hosts and all containers (running and stopped). updateAvailable is true when the registry has a newer image for the tag (from the last check of the Gantry app; absent when not known).",
                 inputSchema: Schema.object(properties: [
                     "host_id": hostIDProp,
                     "all": Schema.boolean("Include stopped containers (default true).")
@@ -223,11 +223,17 @@ actor GantryTools {
                     ? []
                     : ((try? await client.listImages(platformsFor: referencedIDs)) ?? [])
                 let archByImageID = images.architectureByImageID
+                let updates = ImageUpdateCache.load()
                 return ContainerListDTO(
                     hostID: host.id.uuidString,
                     hostName: host.name,
                     containers: containers.map { c in
-                        ContainerDTO(c, imageArchitecture: archByImageID[c.imageID] ?? "")
+                        ContainerDTO(
+                            c, imageArchitecture: archByImageID[c.imageID] ?? "",
+                            updateStatus: ContainerDTO.updateStatus(
+                                of: c, images: images, isApple: host.isAppleContainer, cache: updates
+                            )
+                        )
                     },
                     error: nil
                 )
