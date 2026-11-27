@@ -11,6 +11,21 @@ Commit messages — write the commit the way you want the changelog to read.
 Earlier entries were hand-written under **[Unreleased]** and stamped by
 `scripts/release.sh`.
 
+## [0.30.0](https://github.com/getgantry/gantry/compare/v0.29.0...v0.30.0) (2026-11-27)
+
+
+### Features
+
+* edit the cpu, memory and restart policy of a container ([#83](https://github.com/getgantry/gantry/issues/83)) ([673bf85](https://github.com/getgantry/gantry/commit/673bf852ed4d48a074dea115d5f511d0a5340b84))
+* search images in docker hub and registries and pull a tag ([#86](https://github.com/getgantry/gantry/issues/86)) ([423abe6](https://github.com/getgantry/gantry/commit/423abe6b590fcaebcc5609cd5cc7a4a65d0eab00))
+* show the file changes of a container and add commit options ([#85](https://github.com/getgantry/gantry/issues/85)) ([c54d1df](https://github.com/getgantry/gantry/commit/c54d1dfc1ca6c21244d26c77f597dcd621291fce))
+* show when a newer image is available ([#84](https://github.com/getgantry/gantry/issues/84)) ([cf47211](https://github.com/getgantry/gantry/commit/cf472118fa0951c360239971a29fdc05b32ddad5))
+
+
+### Documentation
+
+* **specs:** close the ci check task of spec 015 ([#81](https://github.com/getgantry/gantry/issues/81)) ([550bfb7](https://github.com/getgantry/gantry/commit/550bfb78a9d8e1350ca11f1ae1a01b8a9c82e62a))
+
 ## [0.29.0](https://github.com/getgantry/gantry/compare/v0.28.0...v0.29.0) (2026-11-15)
 
 
